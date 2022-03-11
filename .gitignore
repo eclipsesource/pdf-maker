@@ -1,0 +1,28 @@
+# VSCode
+/.vscode/**/*
+!/.vscode/extensions.json
+!/.vscode/*-template.json
+
+# dependencies
+node_modules/
+
+# build output
+dist/
+out/
+coverage/
+*.tgz
+
+# temp files
+*~
+
+# generated
+generated/
+
+# local files
+.DS_Store
+.env.local
+.env.*.local
+.eslintcache
+
+# log files
+npm-debug.log*
