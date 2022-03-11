@@ -1,17 +1,22 @@
 import { PDFDocument, PDFPage, PDFPageDrawTextOptions } from 'pdf-lib';
 
-import { Pos, Size } from './box.js';
+import { BoxEdges, parseEdges, Pos, Size } from './box.js';
+import { DocumentDefinition } from './content.js';
 import { Frame, TextObject } from './layout.js';
+
+const defaultPageMargin = '2cm';
 
 export type Page = {
   pdfPage: PDFPage;
   size: Size;
+  margin: BoxEdges;
 };
 
-export function createPage(doc: PDFDocument): Page {
+export function createPage(doc: PDFDocument, def: DocumentDefinition): Page {
   const pdfPage = doc.addPage();
   const size = pdfPage.getSize();
-  return { pdfPage, size };
+  const margin = parseEdges(def.margin ?? defaultPageMargin);
+  return { pdfPage, size, margin };
 }
 
 export function renderPage(frame: Frame, page: Page) {
