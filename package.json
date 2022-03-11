@@ -1,0 +1,51 @@
+{
+  "name": "pdf-maker",
+  "version": "0.0.1",
+  "description": "Generate PDF documents and from JavaScript objects",
+  "license": "MIT",
+  "private": false,
+  "keywords": [
+    "pdf-maker",
+    "pdf"
+  ],
+  "type": "module",
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "typings": "dist/index.d.ts",
+  "exports": {
+    "import": "./dist/index.js",
+    "module": "./dist/index.js"
+  },
+  "engines": {
+    "node": "^16.13.0",
+    "npm": "8"
+  },
+  "scripts": {
+    "start": "rm -rf dist/ && tsc && concurrently -k -n build,example npm:watch:build npm:watch:example",
+    "watch:build": "tsc -w",
+    "watch:example": "nodemon -w dist -w scripts -w examples scripts/make-examples.js",
+    "build": "tsc",
+    "lint": "eslint '{src,test}/**/*.{js,ts}' --max-warnings 0 --format visualstudio",
+    "test": "jest"
+  },
+  "dependencies": {
+    "@pdf-lib/fontkit": "^1.1.1",
+    "pdf-lib": "^1.17.1"
+  },
+  "devDependencies": {
+    "@fontsource/dejavu-sans": "^4.5.2",
+    "@types/node": "^17.0.4",
+    "@typescript-eslint/eslint-plugin": "^5.8.0",
+    "concurrently": "^7.0.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-import": "^2.25.4",
+    "eslint-plugin-prettier": "^4.0.0",
+    "eslint-plugin-simple-import-sort": "^7.0.0",
+    "jest": "^28.0.0-alpha.3",
+    "nodemon": "^2.0.15",
+    "prettier": "^2.5.1",
+    "ts-jest": "^27.1.3",
+    "typescript": "^4.5.4",
+    "wawoff2": "^2.0.1"
+  }
+}
