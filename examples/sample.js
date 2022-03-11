@@ -10,6 +10,7 @@ export default {
       { data: fonts.DejaVu_Sans_BoldItalic, italic: true, bold: true },
     ],
   },
+  margin: { x: '2.5cm', top: '2cm', bottom: '1.5cm' },
   content: [
     { text: 'Lorem ipsum', bold: true, fontSize: 24 },
     { text: ['dolor sit amet, consectetur ', { text: 'adipiscing elit,', italic: true }] },
