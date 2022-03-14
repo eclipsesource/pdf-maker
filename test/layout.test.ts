@@ -27,7 +27,7 @@ describe('layout', () => {
         ...{ type: 'page', ...box },
         children: [
           {
-            ...{ type: 'row', x: 0, y: 0, width: 162, height: 18 },
+            ...{ type: 'row', x: 0, y: 0, width: 162, height: 18 * 1.2 },
             objects: [
               { type: 'text', x: 0, y: 0, text: 'Test text', font: normalFont, fontSize: 18 },
             ],

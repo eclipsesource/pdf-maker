@@ -29,13 +29,14 @@ describe('text', () => {
           width: 54, // 3 * 18
           height: 18,
           fontSize: 18,
+          lineHeight: 1.2,
           font: normalFont,
         },
       ]);
     });
 
     it('respects global font attrs', () => {
-      const attrs = { fontSize: 10 };
+      const attrs = { fontSize: 10, lineHeight: 1.5 };
 
       const segments = extractTextSegments('foo', attrs, fonts);
 
@@ -44,26 +45,26 @@ describe('text', () => {
           width: 30, // 3 * 10
           height: 10,
           fontSize: 10,
+          lineHeight: 1.5,
         }),
       ]);
     });
 
     it('respects local font attrs', () => {
-      const attrs = { fontSize: 10 };
+      const attrs = { fontSize: 10, lineHeight: 1.5 };
 
       const segments = extractTextSegments({ text: 'foo', ...attrs }, {}, fonts);
 
       expect(segments).toEqual([
         objectContaining({
           fontSize: 10,
+          lineHeight: 1.5,
         }),
       ]);
     });
 
     it('returns multiple segments for multiple content parts', () => {
-      const attrs = { fontSize: 10 };
-
-      const segments = extractTextSegments(['foo', 'bar'], attrs, fonts);
+      const segments = extractTextSegments(['foo', 'bar'], {}, fonts);
 
       expect(segments).toEqual([
         objectContaining({ text: 'foo' }),
