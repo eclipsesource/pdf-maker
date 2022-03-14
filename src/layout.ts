@@ -56,15 +56,16 @@ function layoutParagraph(content: Paragraph, box: Box, fonts: Font[]): Frame {
 function layoutRow(segments: TextSegment[], box: Box) {
   const pos = { x: 0, y: 0 };
   const size = { width: 0, height: 0 };
+  let maxLineHeight = 0;
   const objects = [];
   segments.forEach((seg) => {
-    const { text, width, height, font, fontSize } = seg;
+    const { text, width, height, lineHeight, font, fontSize } = seg;
     const object: TextObject = { type: 'text', ...pos, text, font, fontSize };
     objects.push(object);
     pos.x += width;
     size.width += width;
     size.height = Math.max(size.height, height);
+    maxLineHeight = Math.max(maxLineHeight, height * lineHeight);
   });
-  const row = { type: 'row', x: box.x, y: box.y, ...size, objects };
-  return row;
+  return { type: 'row', x: box.x, y: box.y, width: size.width, height: maxLineHeight, objects };
 }

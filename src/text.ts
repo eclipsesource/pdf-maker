@@ -4,11 +4,13 @@ import { Text, TextAttrs } from './content.js';
 import { Font, selectFont } from './fonts.js';
 
 const defaultFontSize = 18;
+const defaultLineHeight = 1.2;
 
 export type TextSegment = {
   text: string;
   width: number;
   height: number;
+  lineHeight: number;
   font: PDFFont;
   fontSize: number;
 };
@@ -38,13 +40,14 @@ function normalizeText(text: Text, attrs: TextAttrs): TextSpan[] {
 function measureSpans(spans: TextSpan[], fonts: Font[]): TextSegment[] {
   return spans.map((span) => {
     const { text, attrs } = span;
-    const { fontSize = defaultFontSize } = attrs;
+    const { fontSize = defaultFontSize, lineHeight = defaultLineHeight } = attrs;
     const font = selectFont(fonts, attrs);
     const height = font.heightAtSize(fontSize);
     return {
       text,
       width: font.widthOfTextAtSize(text, fontSize),
       height,
+      lineHeight,
       font,
       fontSize,
     };

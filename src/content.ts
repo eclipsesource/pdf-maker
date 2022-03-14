@@ -66,6 +66,10 @@ export type TextAttrs = {
    */
   fontSize?: number;
   /**
+   * The line height as a multiple of the font size. Defaults to `1.2`.
+   */
+  lineHeight?: number;
+  /**
    * Whether to use a bold variant of the selected font.
    */
   bold?: boolean;

@@ -13,7 +13,7 @@ export default {
   },
   margin: { x: '2.5cm', top: '2cm', bottom: '1.5cm' },
   content: [
-    { text: 'Lorem ipsum', bold: true, fontSizez: 24 },
+    { text: 'Lorem ipsum', bold: true, fontSize: 24, lineHeight: 1.5 },
     { text: ['dolor sit amet, consectetur ', { text: 'adipiscing elit,', italic: true }] },
     { text: 'sed do eiusmod tempor incididunt ut labore' },
     { text: ['et ', { text: 'dolore magna', bold: true, italic: true }, ' aliqua.'] },
