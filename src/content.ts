@@ -15,6 +15,12 @@ export type DocumentDefinition = {
    * must be registered. Not needed for documents that contain only graphics.
    */
   fonts?: FontsDefinition;
+  dev?: {
+    /**
+     * Whether to draw a thin colored rectangle around each rendered frame.
+     */
+    guides?: boolean;
+  };
 };
 
 export type FontsDefinition = { [name: string]: FontDefinition[] };
