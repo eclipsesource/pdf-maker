@@ -50,12 +50,14 @@ async function makeExample(makePdf, path) {
   const name = path.replace(/^.*\/(.*)\.[a-z]+$/, '$1');
   const example = await importExample(join('..', path));
   if (example.default) {
+    const start = Date.now();
     const result = await makePdf(example.default);
+    const duration = Date.now() - start;
     const outfile = join('out', name + '.pdf');
     await mkdir('out', { recursive: true });
     await writeFile(join('out', name + '.pdf'), result);
 
-    console.log(`created ${outfile} with ${result.byteLength} bytes`);
+    console.log(`created ${outfile} with ${result.byteLength} bytes (${duration} ms)`);
   }
 }
 
