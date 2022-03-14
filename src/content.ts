@@ -15,6 +15,39 @@ export type DocumentDefinition = {
    * must be registered. Not needed for documents that contain only graphics.
    */
   fonts?: FontsDefinition;
+  /**
+   * Metadata to include in the document.
+   */
+  info?: {
+    /**
+     * The document’s title.
+     */
+    title?: string;
+    /**
+     * The name of the person who created the document.
+     */
+    author?: string;
+    /**
+     * The subject of the document.
+     */
+    subject?: string;
+    /**
+     * Keywords associated with the document.
+     */
+    keywords?: string[];
+    /**
+     * The date and time the document was created (defaults to current time).
+     */
+    creationDate?: Date;
+    /**
+     * The name of the application that created the original content.
+     */
+    creator?: string;
+    /**
+     * The name of the application that created the PDF.
+     */
+    producer?: string;
+  };
   dev?: {
     /**
      * Whether to draw a thin colored rectangle around each rendered frame.

@@ -2,6 +2,13 @@
 import fonts from './generated/fonts.js';
 
 export default {
+  info: {
+    title: 'PDF Maker sample',
+    author: 'John Doe',
+    subject: 'Lorem ipsum',
+    keywords: ['lorem', 'ipsum'],
+    creator: 'PDF Maker',
+  },
   dev: { guides: true },
   fonts: {
     'DejaVu-Sans': [
