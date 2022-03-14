@@ -15,6 +15,7 @@ export type Frame = {
   y: number;
   width: number;
   height: number;
+  type?: string;
   objects?: TextObject[];
   children?: Frame[];
 };
@@ -41,7 +42,7 @@ export function layoutPage(content: Paragraph[], box: Box, fonts: Font[]): Frame
     pos.y += frame.height;
     remainingHeight = height - pos.y;
   });
-  return { x, y, width, height, children };
+  return { type: 'page', x, y, width, height, children };
 }
 
 function layoutParagraph(content: Paragraph, box: Box, fonts: Font[]): Frame {

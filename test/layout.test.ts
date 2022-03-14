@@ -15,7 +15,7 @@ describe('layout', () => {
     it('returns empty page frame for empty content', () => {
       const frame = layoutPage([], box, fonts);
 
-      expect(frame).toEqual({ ...box, children: [] });
+      expect(frame).toEqual({ type: 'page', ...box, children: [] });
     });
 
     it('returns a page with a single text row for single text content', () => {
@@ -24,7 +24,7 @@ describe('layout', () => {
       const frame = layoutPage(content, box, fonts);
 
       expect(frame).toEqual({
-        ...box,
+        ...{ type: 'page', ...box },
         children: [
           {
             ...{ type: 'row', x: 0, y: 0, width: 162, height: 18 },

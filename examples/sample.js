@@ -2,6 +2,7 @@
 import fonts from './generated/fonts.js';
 
 export default {
+  dev: { guides: true },
   fonts: {
     'DejaVu-Sans': [
       { data: fonts.DejaVu_Sans_Normal },
