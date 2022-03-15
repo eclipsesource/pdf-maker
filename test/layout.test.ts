@@ -18,7 +18,7 @@ describe('layout', () => {
       expect(frame).toEqual({ type: 'page', ...box, children: [] });
     });
 
-    it('returns a page with a single text row for single text content', () => {
+    it('returns a paragraph with a single text row for single text content', () => {
       const content = [{ text: 'Test text' }];
 
       const frame = layoutPage(content, box, fonts);
@@ -27,9 +27,14 @@ describe('layout', () => {
         ...{ type: 'page', ...box },
         children: [
           {
-            ...{ type: 'row', x: 0, y: 0, width: 162, height: 18 * 1.2 },
-            objects: [
-              { type: 'text', x: 0, y: 0, text: 'Test text', font: normalFont, fontSize: 18 },
+            ...{ type: 'paragraph', x: 0, y: 0, width: 162, height: 18 * 1.2 },
+            children: [
+              {
+                ...{ type: 'row', x: 0, y: 0, width: 162, height: 18 * 1.2 },
+                objects: [
+                  { type: 'text', x: 0, y: 0, text: 'Test text', font: normalFont, fontSize: 18 },
+                ],
+              },
             ],
           },
         ],
