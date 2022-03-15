@@ -3,7 +3,13 @@ import { PDFFont } from 'pdf-lib';
 import { Box } from './box.js';
 import { Paragraph } from './content.js';
 import { Font } from './fonts.js';
-import { extractTextSegments, TextSegment } from './text.js';
+import {
+  breakLine,
+  extractTextSegments,
+  flattenTextSegments,
+  parseText,
+  TextSegment,
+} from './text.js';
 
 /**
  * Frames are created during the layout process. They have a position relative to their parent,
@@ -48,17 +54,44 @@ export function layoutPage(content: Paragraph[], box: Box, fonts: Font[]): Frame
 function layoutParagraph(content: Paragraph, box: Box, fonts: Font[]): Frame {
   const maxWidth = box.width;
   const maxHeight = box.height;
+  const innerBox = { x: 0, y: 0, width: maxWidth, height: maxHeight };
+  const rows = content.text && layoutText(content, innerBox, fonts);
+  return {
+    type: 'paragraph',
+    ...box,
+    width: rows?.size?.width ?? 0,
+    height: rows?.size?.height ?? 0,
+    ...(rows?.rows?.length ? { children: rows.rows } : undefined),
+  };
+}
+
+function layoutText(content: Paragraph, box: Box, fonts: Font[]) {
   const { text, ...attrs } = content;
-  const segments = extractTextSegments(text, attrs, fonts);
-  return layoutRow(segments, { ...box, width: maxWidth, height: maxHeight });
+  const textSpans = parseText(text, attrs);
+  const segments = extractTextSegments(textSpans, fonts);
+  const rows = [];
+  let remainingSegments = segments;
+  const remainingSpace = { ...box };
+  const size = { width: 0, height: 0 };
+  while (remainingSegments?.length) {
+    const { row, remainder } = layoutRow(remainingSegments, remainingSpace);
+    rows.push(row);
+    remainingSegments = remainder;
+    remainingSpace.height -= row.height;
+    remainingSpace.y += row.height;
+    size.width = Math.max(size.width, row.width);
+    size.height += row.height;
+  }
+  return { rows, size };
 }
 
 function layoutRow(segments: TextSegment[], box: Box) {
+  const [lineSegments, remainder] = breakLine(segments, box.width);
   const pos = { x: 0, y: 0 };
   const size = { width: 0, height: 0 };
   let maxLineHeight = 0;
   const objects = [];
-  segments.forEach((seg) => {
+  flattenTextSegments(lineSegments).forEach((seg) => {
     const { text, width, height, lineHeight, font, fontSize } = seg;
     const object: TextObject = { type: 'text', ...pos, text, font, fontSize };
     objects.push(object);
@@ -67,5 +100,13 @@ function layoutRow(segments: TextSegment[], box: Box) {
     size.height = Math.max(size.height, height);
     maxLineHeight = Math.max(maxLineHeight, height * lineHeight);
   });
-  return { type: 'row', x: box.x, y: box.y, width: size.width, height: maxLineHeight, objects };
+  const row = {
+    type: 'row',
+    x: box.x,
+    y: box.y,
+    width: size.width,
+    height: maxLineHeight,
+    objects,
+  };
+  return { row, remainder };
 }

@@ -23,6 +23,8 @@ function getColor(type: string) {
   switch (type) {
     case 'page':
       return rgb(1, 0, 0);
+    case 'paragraph':
+      return rgb(0, 0, 1);
     case 'row':
       return rgb(0, 0.5, 0);
     default:
