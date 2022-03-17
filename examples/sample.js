@@ -20,13 +20,15 @@ export default {
   },
   margin: { x: '2.5cm', top: '2cm', bottom: '1.5cm' },
   content: [
-    { text: 'Lorem ipsum', bold: true, fontSize: 24, lineHeight: 1.5 },
+    { text: 'Lorem ipsum', bold: true, fontSize: 24, margin: { bottom: 10 } },
     {
       text: [
         'dolor sit amet, consectetur ',
         { text: 'adipiscing elit,', italic: true },
         ' sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
       ],
+      lineHeight: 1.5,
+      margin: { y: 5 },
     },
     {
       text: [
@@ -42,6 +44,8 @@ export default {
         ' dolor in reprehenderit in voluptate velit esse ',
         'cillum dolore eu fugiat nulla pariatur.',
       ],
+      padding: { left: '5mm' },
+      margin: { y: 5 },
     },
   ],
 };

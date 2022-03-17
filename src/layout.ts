@@ -1,6 +1,6 @@
 import { PDFFont } from 'pdf-lib';
 
-import { Box } from './box.js';
+import { Box, parseEdges } from './box.js';
 import { Paragraph } from './content.js';
 import { Font } from './fonts.js';
 import {
@@ -39,28 +39,32 @@ export function layoutPage(content: Paragraph[], box: Box, fonts: Font[]): Frame
   const { x, y, width, height } = box;
   const children = [];
   const pos = { x: 0, y: 0 };
+  let lastMargin = 0;
   let remainingHeight = height;
-  content.forEach((el) => {
-    const parPos = { x: pos.x, y: pos.y };
-    const parSize = { width, height: remainingHeight };
-    const frame = layoutParagraph(el, { ...parPos, ...parSize }, fonts);
+  content.forEach((paragraph) => {
+    const margin = parseEdges(paragraph.margin ?? 0);
+    const topMargin = Math.max(lastMargin, margin.top);
+    lastMargin = margin.bottom;
+    const nextPos = { x: pos.x + margin.left, y: pos.y + topMargin };
+    const maxSize = { width: width - margin.left - margin.right, height: remainingHeight };
+    const frame = layoutParagraph(paragraph, { ...nextPos, ...maxSize }, fonts);
     children.push(frame);
-    pos.y += frame.height;
-    remainingHeight = height - pos.y;
+    pos.y += topMargin + frame.height;
+    remainingHeight = height - pos.y - margin.bottom;
   });
   return { type: 'page', x, y, width, height, children };
 }
 
 function layoutParagraph(content: Paragraph, box: Box, fonts: Font[]): Frame {
-  const maxWidth = box.width;
-  const maxHeight = box.height;
-  const innerBox = { x: 0, y: 0, width: maxWidth, height: maxHeight };
+  const padding = parseEdges(content.padding ?? 0);
+  const maxWidth = box.width - padding.left - padding.right;
+  const maxHeight = box.height - padding.top - padding.bottom;
+  const innerBox = { x: padding.left, y: padding.top, width: maxWidth, height: maxHeight };
   const rows = content.text && layoutText(content, innerBox, fonts);
   return {
     type: 'paragraph',
     ...box,
-    width: rows?.size?.width ?? 0,
-    height: rows?.size?.height ?? 0,
+    height: (rows?.size?.height ?? 0) + padding.top + padding.bottom,
     ...(rows?.rows?.length ? { children: rows.rows } : undefined),
   };
 }

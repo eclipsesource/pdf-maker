@@ -81,6 +81,16 @@ export type Paragraph = {
    * Text to display in this paragraph.
    */
   text?: Text;
+  /**
+   * Space to leave between the contents of a paragraph and its edges.
+   */
+  padding?: Length | BoxLengths;
+  /**
+   * Space to surround the paragraph.
+   * The `top` and `bottom` margins of adjacent paragraphs are collapsed into a single margin
+   * whose size is the maximum of the two margins.
+   */
+  margin?: Length | BoxLengths;
 } & TextAttrs;
 
 /**
