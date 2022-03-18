@@ -1,4 +1,4 @@
-import { PDFFont } from 'pdf-lib';
+import { Color as PdfColor, PDFFont } from 'pdf-lib';
 
 import { Box, parseEdges } from './box.js';
 import { Paragraph } from './content.js';
@@ -33,6 +33,7 @@ export type TextObject = {
   text: string;
   font: PDFFont;
   fontSize: number;
+  color?: PdfColor;
 };
 
 export function layoutPage(content: Paragraph[], box: Box, fonts: Font[]): Frame {
@@ -96,8 +97,8 @@ function layoutRow(segments: TextSegment[], box: Box) {
   let maxLineHeight = 0;
   const objects = [];
   flattenTextSegments(lineSegments).forEach((seg) => {
-    const { text, width, height, lineHeight, font, fontSize } = seg;
-    const object: TextObject = { type: 'text', ...pos, text, font, fontSize };
+    const { text, width, height, lineHeight, font, fontSize, color } = seg;
+    const object: TextObject = { type: 'text', ...pos, text, font, fontSize, color };
     objects.push(object);
     pos.x += width;
     size.width += width;

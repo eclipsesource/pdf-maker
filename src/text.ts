@@ -1,5 +1,6 @@
-import { PDFFont } from 'pdf-lib';
+import { Color as PdfColor, PDFFont } from 'pdf-lib';
 
+import { parseColor } from './colors.js';
 import { Text, TextAttrs } from './content.js';
 import { Font, selectFont } from './fonts.js';
 
@@ -13,6 +14,7 @@ export type TextSegment = {
   lineHeight: number;
   font: PDFFont;
   fontSize: number;
+  color?: PdfColor;
 };
 
 /**
@@ -38,7 +40,7 @@ export function parseText(text: Text, attrs: TextAttrs): TextSpan[] {
 
 function extractAttrs(object) {
   const result: TextAttrs = {};
-  ['fontFamily', 'fontSize', 'lineHeight', 'bold', 'italic'].forEach((name) => {
+  ['fontFamily', 'fontSize', 'lineHeight', 'bold', 'italic', 'color'].forEach((name) => {
     if (name in object) result[name] = object[name];
   });
   return result;
@@ -47,7 +49,7 @@ function extractAttrs(object) {
 export function extractTextSegments(textSpans: TextSpan[], fonts: Font[]): TextSegment[] {
   return textSpans.flatMap((span) => {
     const { text, attrs } = span;
-    const { fontSize = defaultFontSize, lineHeight = defaultLineHeight } = attrs;
+    const { fontSize = defaultFontSize, lineHeight = defaultLineHeight, color } = attrs;
     const font = selectFont(fonts, attrs);
     const height = font.heightAtSize(fontSize);
     return splitChunks(text).map((text) => ({
@@ -57,6 +59,7 @@ export function extractTextSegments(textSpans: TextSpan[], fonts: Font[]): TextS
       lineHeight,
       font,
       fontSize,
+      ...(color ? { color: parseColor(color) } : undefined),
     }));
   });
 }
@@ -162,7 +165,8 @@ export function flattenTextSegments(segments: TextSegment[]): TextSegment[] {
     if (
       segment.font === prev?.font &&
       segment.fontSize === prev?.fontSize &&
-      segment.lineHeight === prev?.lineHeight
+      segment.lineHeight === prev?.lineHeight &&
+      segment.color === prev?.color
     ) {
       prev.text += segment.text;
       prev.width += segment.width;

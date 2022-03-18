@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, jest } from '@jest/globals';
-import { PDFContext, PDFFont } from 'pdf-lib';
+import { PDFContext, PDFFont, rgb } from 'pdf-lib';
 
 import { parseEdges } from '../src/box.js';
 import { BoxLengths } from '../src/content.js';
@@ -69,6 +69,25 @@ describe('page', () => {
         size: 12,
         font,
       });
+    });
+
+    it('renders text objects with style attrs', () => {
+      const frame: Frame = {
+        ...{ x: 10, y: 20, width: 200, height: 30 },
+        objects: [
+          {
+            ...{ type: 'text', x: 1, y: 2, text: 'Test text', fontSize: 12, font },
+            color: rgb(1, 0, 0),
+          },
+        ],
+      };
+
+      renderFrame(frame, page);
+
+      expect(pdfPage.drawText).toHaveBeenCalledWith(
+        'Test text',
+        objectContaining({ color: rgb(1, 0, 0) })
+      );
     });
 
     it('renders children relative to parent frame', () => {

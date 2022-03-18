@@ -1,5 +1,7 @@
 import { beforeEach, describe, expect, it } from '@jest/globals';
+import { rgb } from 'pdf-lib';
 
+import { TextAttrs } from '../src/content.js';
 import {
   breakLine,
   extractTextSegments,
@@ -83,8 +85,8 @@ describe('text', () => {
       ]);
     });
 
-    it('respects global font attrs', () => {
-      const attrs = { fontSize: 10, lineHeight: 1.5 };
+    it('respects global text attrs', () => {
+      const attrs: TextAttrs = { fontSize: 10, lineHeight: 1.5, color: 'red' };
 
       const segments = extractTextSegments([{ text: 'foo', attrs }], fonts);
 
@@ -94,12 +96,13 @@ describe('text', () => {
           height: 10,
           fontSize: 10,
           lineHeight: 1.5,
+          color: rgb(1, 0, 0),
         }),
       ]);
     });
 
-    it('respects local font attrs', () => {
-      const attrs = { fontSize: 10, lineHeight: 1.5 };
+    it('respects local text attrs', () => {
+      const attrs: TextAttrs = { fontSize: 10, lineHeight: 1.5, color: 'red' };
 
       const segments = extractTextSegments([{ text: 'foo', attrs }], fonts);
 
@@ -107,6 +110,7 @@ describe('text', () => {
         objectContaining({
           fontSize: 10,
           lineHeight: 1.5,
+          color: rgb(1, 0, 0),
         }),
       ]);
     });
@@ -207,13 +211,13 @@ describe('text', () => {
     });
 
     it('does not merge adjacent segments if incompatible', () => {
-      const segments = [seg('foo', { fontSize: 11 }), seg('bar')];
+      const segments = [seg('foo', { color: 'red' }), seg(' '), seg('bar')];
 
-      expect(flattenTextSegments(segments)).toEqual(segments);
+      expect(flattenTextSegments(segments)).toEqual([seg('foo', { color: 'red' }), seg(' bar')]);
     });
 
     it('does not merge compatible segments if not adjacent', () => {
-      const segments = [seg('foo'), seg('-', { fontSize: 11 }), seg('bar')];
+      const segments = [seg('foo'), seg('-', { color: 'red' }), seg('bar')];
 
       expect(flattenTextSegments(segments)).toEqual(segments);
     });
@@ -264,7 +268,7 @@ describe('text', () => {
 });
 
 function seg(text: string, attrs?): TextSegment {
-  const { font, fontSize = 10, height = 12, lineHeight = 14 } = attrs ?? {};
+  const { font, fontSize = 10, height = 12, lineHeight = 14, color } = attrs ?? {};
   const width = text.length * fontSize;
-  return { text, width, height, lineHeight, font, fontSize };
+  return { text, width, height, lineHeight, font, fontSize, color };
 }
