@@ -43,6 +43,7 @@ export function renderFrame(frame: Frame, page: Page, base: Pos = null) {
 function renderText(el: TextObject, page: Page, base: Pos) {
   const { x, y } = tr({ x: el.x + base.x, y: el.y + base.y }, page);
   const options: PDFPageDrawTextOptions = { x, y, size: el.fontSize, font: el.font };
+  if (el.color) options.color = el.color;
   page.pdfPage.drawText(el.text, options);
 }
 

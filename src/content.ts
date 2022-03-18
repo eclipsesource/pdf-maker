@@ -1,3 +1,5 @@
+import { namedColors } from './colors.js';
+
 /**
  * The complete definition of a document to create.
  */
@@ -120,6 +122,10 @@ export type TextAttrs = {
    * Whether to use an italic variant of the selected font.
    */
   italic?: boolean;
+  /**
+   * The text color.
+   */
+  color?: Color;
 };
 
 /**
@@ -150,3 +156,12 @@ export type BoxLengths = {
 export type Length = number | `${number}${LengthUnit}`;
 
 export type LengthUnit = 'pt' | 'in' | 'mm' | 'cm';
+
+export type Color = NamedColor | HTMLColor;
+
+export type NamedColor = keyof typeof namedColors;
+
+/**
+ * A color specified in the hexadecimal format `#xxxxxx` that is usual in HTML.
+ */
+export type HTMLColor = `#${string}`;
