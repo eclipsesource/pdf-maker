@@ -73,6 +73,32 @@ describe('layout', () => {
       ]);
     });
 
+    it('creates link objects', () => {
+      const text = [{ text: 'foo', attrs: { link: 'test-link', fontSize: 10 } }];
+
+      const frame = layoutPage([{ text }], box, fonts);
+
+      expect(frame.children[0].children[0].objects).toEqual([
+        objectContaining({ type: 'text', x: 0, y: 0, text: 'foo' }),
+        objectContaining({ type: 'link', x: 0, y: 0, width: 30, height: 10, url: 'test-link' }),
+      ]);
+    });
+
+    it('merges adjacent link objects', () => {
+      const text = [
+        { text: 'foo ', attrs: { link: 'test-link', fontSize: 10 } },
+        { text: 'bar', attrs: { italic: true, link: 'test-link', fontSize: 10 } },
+      ];
+
+      const frame = layoutPage([{ text }], box, fonts);
+
+      expect(frame.children[0].children[0].objects).toEqual([
+        objectContaining({ type: 'text', x: 0, y: 0, text: 'foo ' }),
+        objectContaining({ type: 'text', x: 40, y: 0, text: 'bar' }),
+        objectContaining({ type: 'link', x: 0, y: 0, width: 70, height: 10, url: 'test-link' }),
+      ]);
+    });
+
     it('includes graphics objects in child frame', () => {
       const graphics = [
         { type: 'line', x1: 1, y1: 2, x2: 3, y2: 4 },

@@ -168,6 +168,11 @@ export type TextAttrs = {
    * The text color.
    */
   color?: Color;
+  /**
+   * A URL to point to. When this property is given, the corresponding text will be rendered
+   * as a link to this URL.
+   */
+  link?: string;
 };
 
 /**

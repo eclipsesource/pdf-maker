@@ -364,7 +364,7 @@ describe('text', () => {
 });
 
 function seg(text: string, attrs?): TextSegment {
-  const { font, fontSize = 10, height = 12, lineHeight = 14, color } = attrs ?? {};
+  const { font, fontSize = 10, height = 12, lineHeight = 14, link, color } = attrs ?? {};
   const width = text.length * fontSize;
-  return { text, width, height, lineHeight, font, fontSize, color };
+  return { text, width, height, lineHeight, font, fontSize, link, color };
 }

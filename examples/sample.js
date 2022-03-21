@@ -40,7 +40,8 @@ export default {
         { text: ' quis nostrud', fontSize: 28 },
         ' exercitation ullamco laboris nisi ',
         {
-          text: ['ut aliquip', { text: ' ex ea commodo', italic: true }],
+          text: ['ut aliquip ', { text: 'ex ea commodo', italic: true }],
+          link: 'https://example.com',
         },
         ' consequat.\n',
         { text: 'Duis aute irure', bold: true },
@@ -48,7 +49,7 @@ export default {
         { text: 'cillum dolore', color: 'red' },
         ' eu fugiat nulla pariatur.',
       ],
-      padding: { left: '5mm' },
+      padding: { left: '18mm' },
       margin: { y: 5 },
     },
     {
