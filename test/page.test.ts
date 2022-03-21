@@ -113,6 +113,27 @@ describe('page', () => {
       });
     });
 
+    it('renders link objects', () => {
+      jest.spyOn(pdfPage.doc.context, 'obj').mockReturnValue('test-obj');
+      jest.spyOn(pdfPage.doc.context, 'register');
+      const frame: Frame = {
+        ...{ x: 10, y: 20, width: 200, height: 30 },
+        objects: [{ type: 'link', x: 1, y: 2, width: 80, height: 20, url: 'test-url' }],
+      };
+
+      renderFrame(frame, page);
+
+      expect(pdfPage.doc.context.obj).toHaveBeenCalledWith({
+        Type: 'Annot',
+        Subtype: 'Link',
+        Rect: [10 + 1, 800 - 20 - 2 - 30, 11 + 80, 748 + 20],
+        A: { Type: 'Action', S: 'URI', URI: { value: 'test-url' } },
+        F: 0,
+      });
+      expect(pdfPage.doc.context.register).toHaveBeenCalledWith('test-obj');
+      expect(page.linkRefs).toEqual([objectContaining({ tag: '1 0 R' })]);
+    });
+
     it('renders rect objects', () => {
       const frame: Frame = {
         ...{ x: 10, y: 20, width: 200, height: 30 },

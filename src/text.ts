@@ -29,6 +29,7 @@ export type TextSegment = {
   font: PDFFont;
   fontSize: number;
   color?: Color;
+  link?: string;
 };
 
 /**
@@ -46,6 +47,7 @@ type TextAttrs = {
   bold?: boolean;
   italic?: boolean;
   color?: Color;
+  link?: string;
 };
 
 export type Paragraph = {
@@ -97,13 +99,14 @@ export function parseTextAttrs(input: Obj): TextAttrs {
     bold: pick(input, 'bold', optional(asBoolean)),
     italic: pick(input, 'italic', optional(asBoolean)),
     color: pick(input, 'color', optional(parseColor)),
+    link: pick(input, 'link', optional(asString)),
   });
 }
 
 export function extractTextSegments(textSpans: TextSpan[], fonts: Font[]): TextSegment[] {
   return textSpans.flatMap((span) => {
     const { text, attrs } = span;
-    const { fontSize = defaultFontSize, lineHeight = defaultLineHeight, color } = attrs;
+    const { fontSize = defaultFontSize, lineHeight = defaultLineHeight, color, link } = attrs;
     const font = selectFont(fonts, attrs);
     const height = font.heightAtSize(fontSize);
     return splitChunks(text).map(
@@ -116,6 +119,7 @@ export function extractTextSegments(textSpans: TextSpan[], fonts: Font[]): TextS
           font,
           fontSize,
           color,
+          link,
         } as TextSegment)
     );
   });
@@ -223,7 +227,8 @@ export function flattenTextSegments(segments: TextSegment[]): TextSegment[] {
       segment.font === prev?.font &&
       segment.fontSize === prev?.fontSize &&
       segment.lineHeight === prev?.lineHeight &&
-      segment.color === prev?.color
+      segment.color === prev?.color &&
+      segment.link === prev?.link
     ) {
       prev.text += segment.text;
       prev.width += segment.width;

@@ -5,12 +5,14 @@ import {
   PDFPageDrawRectangleOptions,
   PDFPageDrawSVGOptions,
   PDFPageDrawTextOptions,
+  PDFRef,
 } from 'pdf-lib';
 
 import { BoxEdges, parseEdges, Pos, Size } from './box.js';
 import { LineObject, PolylineObject, RectObject } from './graphics.js';
 import { renderGuide } from './guides.js';
-import { Frame, TextObject } from './layout.js';
+import { Frame, LinkObject, TextObject } from './layout.js';
+import { addPageAnnotations, createLinkAnnotation } from './pdf-annotations.js';
 import { asObject, Obj, optional, pick, pickDefined } from './types.js';
 
 const defaultPageMargin = '2cm';
@@ -19,6 +21,7 @@ export type Page = {
   pdfPage: PDFPage;
   size: Size;
   margin: BoxEdges;
+  linkRefs?: PDFRef[];
   guides?: boolean;
 };
 
@@ -34,6 +37,9 @@ export function createPage(doc: PDFDocument, def: Obj): Page {
 
 export function renderPage(frame: Frame, page: Page) {
   renderFrame(frame, page);
+  if (page.linkRefs?.length) {
+    addPageAnnotations(page.pdfPage, page.linkRefs);
+  }
 }
 
 export function renderFrame(frame: Frame, page: Page, base: Pos = null) {
@@ -44,6 +50,9 @@ export function renderFrame(frame: Frame, page: Page, base: Pos = null) {
   frame.objects?.forEach((object) => {
     if (object.type === 'text') {
       renderText(object, page, bottomLeft);
+    }
+    if (object.type === 'link') {
+      renderLink(object, page, bottomLeft);
     }
     if (object.type === 'rect') {
       renderRect(object, page, topLeft);
@@ -65,6 +74,13 @@ function renderText(el: TextObject, page: Page, base: Pos) {
   const options: PDFPageDrawTextOptions = { x, y, size: el.fontSize, font: el.font };
   if (el.color) options.color = el.color;
   page.pdfPage.drawText(el.text, options);
+}
+
+function renderLink(el: LinkObject, page: Page, base: Pos) {
+  const { x, y } = tr({ x: el.x + base.x, y: el.y + base.y }, page);
+  const { width, height, url } = el;
+  const ref = createLinkAnnotation(page.pdfPage, { x, y, width, height }, url);
+  page.linkRefs = [...(page.linkRefs ?? []), ref];
 }
 
 function renderRect(rect: RectObject, page: Page, base: Pos) {

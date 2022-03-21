@@ -22,7 +22,7 @@ export type Frame = {
   children?: Frame[];
 };
 
-export type DrawableObject = TextObject | GraphicsObject;
+export type DrawableObject = TextObject | LinkObject | GraphicsObject;
 
 export type TextObject = {
   type: 'text';
@@ -32,6 +32,15 @@ export type TextObject = {
   font: PDFFont;
   fontSize: number;
   color?: Color;
+};
+
+export type LinkObject = {
+  type: 'link';
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  url: string;
 };
 
 export function layoutPage(content: Paragraph[], box: Box, fonts: Font[]): Frame {
@@ -94,16 +103,21 @@ function layoutRow(segments: TextSegment[], box: Box) {
   const pos = { x: 0, y: 0 };
   const size = { width: 0, height: 0 };
   let maxLineHeight = 0;
+  const links = [];
   const objects = [];
   flattenTextSegments(lineSegments).forEach((seg) => {
-    const { text, width, height, lineHeight, font, fontSize, color } = seg;
+    const { text, width, height, lineHeight, font, fontSize, link, color } = seg;
     const object: TextObject = { type: 'text', ...pos, text, font, fontSize, color };
     objects.push(object);
+    if (link) {
+      links.push({ type: 'link', ...pos, width, height, url: link });
+    }
     pos.x += width;
     size.width += width;
     size.height = Math.max(size.height, height);
     maxLineHeight = Math.max(maxLineHeight, height * lineHeight);
   });
+  flattenLinks(links).forEach((link) => objects.push(link));
   const row = {
     type: 'row',
     x: box.x,
@@ -119,4 +133,27 @@ function layoutGraphics(graphics: GraphicsObject[], pos: Pos): GraphicsObject[] 
   return graphics.map((object) => {
     return shiftGraphicsObject(object, pos);
   });
+}
+
+/**
+ * Merge adjacent link objects that point to the same target. Without this step, a link that
+ * consists of multiple text segments, e.g. because it includes normal and italic text, would be
+ * rendered as multiple independent links in the PDF. Example:
+ * ```js
+ * {text: ['foo', {text: 'bar', italic: true}], link: 'https://www.example.com'}
+ * ```
+ */
+function flattenLinks(links: LinkObject[]) {
+  const result = [];
+  let prev;
+  links.forEach((link) => {
+    if (prev?.url === link.url && prev?.x + prev?.width === link.x && prev?.y === link.y) {
+      prev.width += link.width;
+      prev.height = Math.max(prev.height, link.height);
+    } else {
+      prev = link;
+      result.push(prev);
+    }
+  });
+  return result;
 }
