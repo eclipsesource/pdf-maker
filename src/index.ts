@@ -5,6 +5,8 @@ import { embedFonts } from './fonts.js';
 import { layoutPage } from './layout.js';
 import { createPage, renderPage } from './page.js';
 
+export * from './content.js';
+
 export async function makePdf(def: DocumentDefinition) {
   const doc = await createDocument(def);
   const fonts = await embedFonts(def.fonts, doc);
