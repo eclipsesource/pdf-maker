@@ -72,5 +72,53 @@ describe('layout', () => {
         objectContaining({ type: 'paragraph', x: 5, y: 3 + 12 + 7, width: 400 - 5 - 6 }),
       ]);
     });
+
+    it('includes graphics objects in child frame', () => {
+      const graphics = [
+        { type: 'line', x1: 1, y1: 2, x2: 3, y2: 4 },
+        { type: 'rect', x: 1, y: 2, width: 10, height: 20 },
+        { type: 'polyline', points: [p(1, 2), p(3, 4)] },
+      ] as any;
+
+      const frame = layoutPage([{ graphics }], box, fonts);
+
+      expect(frame).toEqual(objectContaining({ type: 'page', ...box }));
+      expect(frame.children).toEqual([
+        objectContaining({
+          ...{ type: 'paragraph', x: 0, y: 0, width: 400, height: 0 },
+          objects: [
+            { type: 'line', x1: 1, y1: 2, x2: 3, y2: 4 },
+            { type: 'rect', x: 1, y: 2, width: 10, height: 20 },
+            { type: 'polyline', points: [p(1, 2), p(3, 4)] },
+          ],
+        }),
+      ]);
+    });
+
+    it('applies padding to graphics objects', () => {
+      const graphics = [
+        { type: 'line', x1: 1, y1: 2, x2: 3, y2: 4 },
+        { type: 'rect', x: 1, y: 2, width: 10, height: 20 },
+        { type: 'polyline', points: [p(1, 2), p(3, 4)] },
+      ] as any;
+
+      const frame = layoutPage([{ graphics, padding: 5 }], box, fonts);
+
+      expect(frame).toEqual(objectContaining({ type: 'page', ...box }));
+      expect(frame.children).toEqual([
+        objectContaining({
+          ...{ type: 'paragraph', x: 0, y: 0, width: 400, height: 10 },
+          objects: [
+            { type: 'line', x1: 6, y1: 7, x2: 8, y2: 9 },
+            { type: 'rect', x: 6, y: 7, width: 10, height: 20 },
+            { type: 'polyline', points: [p(6, 7), p(8, 9)] },
+          ],
+        }),
+      ]);
+    });
   });
 });
+
+function p(x: number, y: number) {
+  return { x, y };
+}
