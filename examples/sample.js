@@ -48,5 +48,39 @@ export default {
       padding: { left: '5mm' },
       margin: { y: 5 },
     },
+    {
+      text: 'Text and graphics',
+      graphics: [
+        {
+          type: 'rect',
+          x: -15,
+          y: 0,
+          width: 10,
+          height: 20,
+          fillColor: 'red',
+        },
+        { type: 'line', x1: 0, y1: 30, x2: 150, y2: 30, strokeWidth: 0.5, strokeColor: '#239842' },
+      ],
+      padding: { left: 15, top: 5, bottom: 15 },
+      margin: { y: 5 },
+    },
+    {
+      graphics: [
+        {
+          type: 'polyline',
+          strokeWidth: 2,
+          fillColor: '#4488cc',
+          strokeColor: 'white',
+          points: [
+            { x: 100, y: 10 },
+            { x: 40, y: 198 },
+            { x: 190, y: 78 },
+            { x: 10, y: 78 },
+            { x: 160, y: 198 },
+          ],
+          closePath: true,
+        },
+      ],
+    },
   ],
 };

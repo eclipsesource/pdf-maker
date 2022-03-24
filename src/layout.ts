@@ -1,9 +1,10 @@
 import { PDFFont } from 'pdf-lib';
 
-import { Box, parseEdges } from './box.js';
+import { Box, parseEdges, Pos } from './box.js';
 import { Color } from './colors.js';
 import { Paragraph } from './content.js';
 import { Font } from './fonts.js';
+import { GraphicsObject, parseGraphicsObject, shiftGraphicsObject } from './graphics.js';
 import {
   breakLine,
   extractTextSegments,
@@ -23,9 +24,11 @@ export type Frame = {
   width: number;
   height: number;
   type?: string;
-  objects?: TextObject[];
+  objects?: DrawableObject[];
   children?: Frame[];
 };
+
+export type DrawableObject = TextObject | GraphicsObject;
 
 export type TextObject = {
   type: 'text';
@@ -62,12 +65,14 @@ function layoutParagraph(content: Paragraph, box: Box, fonts: Font[]): Frame {
   const maxWidth = box.width - padding.left - padding.right;
   const maxHeight = box.height - padding.top - padding.bottom;
   const innerBox = { x: padding.left, y: padding.top, width: maxWidth, height: maxHeight };
-  const rows = content.text && layoutText(content, innerBox, fonts);
+  const text = content.text && layoutText(content, innerBox, fonts);
+  const graphics = content.graphics && layoutGraphics(content.graphics, innerBox);
   return {
     type: 'paragraph',
     ...box,
-    height: (rows?.size?.height ?? 0) + padding.top + padding.bottom,
-    ...(rows?.rows?.length ? { children: rows.rows } : undefined),
+    height: (text?.size?.height ?? 0) + padding.top + padding.bottom,
+    ...(text?.rows?.length ? { children: text.rows } : undefined),
+    ...(graphics?.length ? { objects: graphics } : undefined),
   };
 }
 
@@ -115,4 +120,12 @@ function layoutRow(segments: TextSegment[], box: Box) {
     objects,
   };
   return { row, remainder };
+}
+
+function layoutGraphics(graphics: unknown, pos: Pos): GraphicsObject[] {
+  if (!Array.isArray(graphics)) throw new TypeError(`Invalid type for graphics`);
+  return graphics.map((el) => {
+    const object = parseGraphicsObject(el);
+    return shiftGraphicsObject(object, pos);
+  });
 }

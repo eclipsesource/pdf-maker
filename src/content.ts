@@ -84,6 +84,12 @@ export type Paragraph = {
    */
   text?: Text;
   /**
+   * Graphic elements to draw in the area covered by the paragraph.
+   * The coordinate system for graphics shapes starts at the top left corner of the paragraph's
+   * padding.
+   */
+  graphics?: Shape[];
+  /**
    * Space to leave between the contents of a paragraph and its edges.
    */
   padding?: Length | BoxLengths;
@@ -94,6 +100,38 @@ export type Paragraph = {
    */
   margin?: Length | BoxLengths;
 } & TextAttrs;
+
+export type Shape = Rect | Line | Polyline;
+
+export type Rect = {
+  type: 'rect';
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  strokeWidth?: number;
+  strokeColor?: Color;
+  fillColor?: Color;
+};
+
+export type Line = {
+  type: 'line';
+  x1: number;
+  y1: number;
+  x2: number;
+  y2: number;
+  strokeWidth?: number;
+  strokeColor?: Color;
+};
+
+export type Polyline = {
+  type: 'polyline';
+  points: { x: number; y: number }[];
+  closePath?: boolean;
+  strokeWidth?: number;
+  strokeColor?: Color;
+  fillColor?: Color;
+};
 
 /**
  * A piece of inline text. A list can be used to apply styles to parts of a paragraph.
