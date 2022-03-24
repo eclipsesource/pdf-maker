@@ -1,6 +1,6 @@
-import { Color as PdfColor, PDFFont } from 'pdf-lib';
+import { PDFFont } from 'pdf-lib';
 
-import { parseColor } from './colors.js';
+import { Color, parseColor } from './colors.js';
 import { Text, TextAttrs } from './content.js';
 import { Font, selectFont } from './fonts.js';
 
@@ -14,7 +14,7 @@ export type TextSegment = {
   lineHeight: number;
   font: PDFFont;
   fontSize: number;
-  color?: PdfColor;
+  color?: Color;
 };
 
 /**

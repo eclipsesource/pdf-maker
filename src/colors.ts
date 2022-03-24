@@ -1,6 +1,8 @@
-import { Color as PdfColor, rgb } from 'pdf-lib';
+import { Color, rgb } from 'pdf-lib';
 
-export function parseColor(def?: unknown): PdfColor | undefined {
+export { Color };
+
+export function parseColor(def?: unknown): Color | undefined {
   if (def == null) return undefined;
   if (typeof def === 'string') {
     if (/^#[0-9a-f]{6}$/.test(def)) {

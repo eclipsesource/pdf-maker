@@ -1,6 +1,7 @@
-import { Color as PdfColor, PDFFont } from 'pdf-lib';
+import { PDFFont } from 'pdf-lib';
 
 import { Box, parseEdges } from './box.js';
+import { Color } from './colors.js';
 import { Paragraph } from './content.js';
 import { Font } from './fonts.js';
 import {
@@ -33,7 +34,7 @@ export type TextObject = {
   text: string;
   font: PDFFont;
   fontSize: number;
-  color?: PdfColor;
+  color?: Color;
 };
 
 export function layoutPage(content: Paragraph[], box: Box, fonts: Font[]): Frame {
