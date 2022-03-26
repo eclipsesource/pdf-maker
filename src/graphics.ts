@@ -1,5 +1,17 @@
 import { Pos } from './box.js';
 import { Color, parseColor } from './colors.js';
+import {
+  asArray,
+  asBoolean,
+  asNonNegNumber,
+  asNumber,
+  asObject,
+  Obj,
+  optional,
+  pick,
+  pickDefined,
+  required,
+} from './types.js';
 
 export type GraphicsObject = RectObject | LineObject | PolylineObject;
 
@@ -33,8 +45,6 @@ export type PolylineObject = {
   fillColor?: Color;
 };
 
-type Obj = Record<string, unknown>;
-
 /**
  * Parses a given input as a graphics shape object. Throws if the input cannot be parsed.
  *
@@ -54,45 +64,45 @@ export function parseGraphicsObject(input: unknown): GraphicsObject {
         return parsePolyline(shape);
     }
   } catch (error) {
-    throw new TypeError(`Invalid graphics object of type ${shape.type}: ${error.message}`);
+    throw new TypeError(`Invalid graphics object of type "${shape.type}": ${error.message}`);
   }
-  throw new TypeError(`Unsupported graphics object type: ${shape.type}`);
+  throw new TypeError(`Unsupported graphics object type: "${shape.type}"`);
 }
 
 function parseRect(input: Obj): RectObject {
-  return {
+  return pickDefined({
     type: 'rect',
-    x: pickNumber(input, 'x'),
-    y: pickNumber(input, 'y'),
-    width: pickNumber(input, 'width'),
-    height: pickNumber(input, 'height'),
-    strokeWidth: pickNumber(input, 'strokeWidth', { optional: true, predicate: (n) => n >= 0 }),
-    strokeColor: pickColor(input, 'strokeColor', { optional: true }),
-    fillColor: pickColor(input, 'fillColor', { optional: true }),
-  };
+    x: pick(input, 'x', required(asNumber)),
+    y: pick(input, 'y', required(asNumber)),
+    width: pick(input, 'width', required(asNumber)),
+    height: pick(input, 'height', required(asNumber)),
+    strokeWidth: pick(input, 'strokeWidth', optional(asNonNegNumber)),
+    strokeColor: pick(input, 'strokeColor', optional(parseColor)),
+    fillColor: pick(input, 'fillColor', optional(parseColor)),
+  }) as RectObject;
 }
 
 function parseLine(input: Obj): LineObject {
-  return {
+  return pickDefined({
     type: 'line',
-    x1: pickNumber(input, 'x1'),
-    x2: pickNumber(input, 'x2'),
-    y1: pickNumber(input, 'y1'),
-    y2: pickNumber(input, 'y2'),
-    strokeWidth: pickNumber(input, 'strokeWidth', { optional: true, predicate: (n) => n >= 0 }),
-    strokeColor: pickColor(input, 'strokeColor', { optional: true }),
-  };
+    x1: pick(input, 'x1', required(asNumber)),
+    x2: pick(input, 'x2', required(asNumber)),
+    y1: pick(input, 'y1', required(asNumber)),
+    y2: pick(input, 'y2', required(asNumber)),
+    strokeWidth: pick(input, 'strokeWidth', optional(asNonNegNumber)),
+    strokeColor: pick(input, 'strokeColor', optional(parseColor)),
+  }) as LineObject;
 }
 
 function parsePolyline(input: Obj): PolylineObject {
-  return {
+  return pickDefined({
     type: 'polyline',
-    points: pickPoints(input, 'points'),
-    closePath: pickBoolean(input, 'closePath', { optional: true }),
-    strokeWidth: pickNumber(input, 'strokeWidth', { optional: true, predicate: (n) => n >= 0 }),
-    strokeColor: pickColor(input, 'strokeColor', { optional: true }),
-    fillColor: pickColor(input, 'fillColor', { optional: true }),
-  };
+    points: pick(input, 'points', required(checkPoints)),
+    closePath: pick(input, 'closePath', optional(asBoolean)),
+    strokeWidth: pick(input, 'strokeWidth', optional(asNonNegNumber)),
+    strokeColor: pick(input, 'strokeColor', optional(parseColor)),
+    fillColor: pick(input, 'fillColor', optional(parseColor)),
+  }) as PolylineObject;
 }
 
 /**
@@ -135,53 +145,17 @@ function shiftPolyline(polyline: PolylineObject, pos: Pos): PolylineObject {
   };
 }
 
-function pickNumber(
-  input: Obj,
-  name: string,
-  options?: { optional?: boolean; predicate?: (number) => boolean }
-): number {
-  const { optional, predicate } = options ?? {};
-  const value = input[name];
-  if (value == null) {
-    if (optional) return undefined;
-    throw new TypeError(`Missing value for ${name}`);
-  }
-  if (!Number.isFinite(value)) throw new TypeError(`Invalid value for ${name}: ${value}`);
-  if (predicate && !predicate(value)) throw new TypeError(`Invalid value for ${name}: ${value}`);
-  return value as number;
-}
-
-function pickBoolean(input: Obj, name: string, options?: { optional?: boolean }): boolean {
-  const { optional } = options ?? {};
-  const value = input[name];
-  if (value == null) {
-    if (optional) return undefined;
-    throw new TypeError(`Missing value for ${name}`);
-  }
-  if (typeof value !== 'boolean') throw new TypeError(`Invalid value for ${name}: ${value}`);
-  return value;
-}
-
-function pickColor(input: Obj, name: string, options?: { optional?: boolean }): Color {
-  const { optional } = options ?? {};
-  const value = input[name];
-  if (value == null) {
-    if (optional) return undefined;
-    throw new TypeError(`Missing value for ${name}`);
-  }
-  return parseColor(value);
-}
-
-function pickPoints(input: Obj, name: string): { x: number; y: number }[] {
-  const value = input[name];
-  if (value == null) throw new TypeError(`Missing value for ${name}`);
-  if (!Array.isArray(value)) throw new TypeError(`Invalid value for ${name}: ${value}`);
+function checkPoints(input: unknown): { x: number; y: number }[] {
+  const array = asArray(input);
   try {
-    return value.map((point) => ({
-      x: pickNumber(point, 'x'),
-      y: pickNumber(point, 'y'),
-    })) as { x: number; y: number }[];
+    return array.map((point) => {
+      const obj = asObject(point);
+      return {
+        x: pick(obj, 'x', required(asNumber)),
+        y: pick(obj, 'y', required(asNumber)),
+      };
+    }) as { x: number; y: number }[];
   } catch (error) {
-    throw new TypeError(`Invalid point in ${name}: ${error.message}`);
+    throw new TypeError(`Invalid point: ${error.message}`);
   }
 }

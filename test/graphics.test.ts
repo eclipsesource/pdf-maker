@@ -19,7 +19,7 @@ describe('graphics', () => {
     it('throws for unsupported type attribute', () => {
       const fn = () => parseGraphicsObject({ type: 'foo' });
 
-      expect(fn).toThrowError('Unsupported graphics object type: foo');
+      expect(fn).toThrowError('Unsupported graphics object type: "foo"');
     });
 
     it('parses rect object', () => {
@@ -44,7 +44,9 @@ describe('graphics', () => {
 
         const fn = () => parseGraphicsObject(rect);
 
-        expect(fn).toThrowError(`Invalid graphics object of type rect: Missing value for ${name}`);
+        expect(fn).toThrowError(
+          `Invalid graphics object of type "rect": Missing value for "${name}"`
+        );
       });
     });
 
@@ -68,7 +70,9 @@ describe('graphics', () => {
 
         const fn = () => parseGraphicsObject(line);
 
-        expect(fn).toThrowError(`Invalid graphics object of type line: Missing value for ${name}`);
+        expect(fn).toThrowError(
+          `Invalid graphics object of type "line": Missing value for "${name}"`
+        );
       });
     });
 
@@ -90,7 +94,9 @@ describe('graphics', () => {
     it(`throws for missing polyline attribute points`, () => {
       const fn = () => parseGraphicsObject({ type: 'polyline' });
 
-      expect(fn).toThrowError(`Invalid graphics object of type polyline: Missing value for points`);
+      expect(fn).toThrowError(
+        `Invalid graphics object of type "polyline": Missing value for "points"`
+      );
     });
 
     ['strokeColor', 'fillColor'].forEach((name) => {
@@ -100,7 +106,7 @@ describe('graphics', () => {
         const fn = () => parseGraphicsObject(rect);
 
         expect(fn).toThrowError(
-          `Invalid graphics object of type rect: Unsupported color name: 'foo'`
+          `Invalid graphics object of type "rect": Invalid value for "${name}": Unsupported color name: 'foo'`
         );
       });
     });
@@ -111,7 +117,7 @@ describe('graphics', () => {
       const fn = () => parseGraphicsObject(rect);
 
       expect(fn).toThrowError(
-        `Invalid graphics object of type rect: Invalid value for strokeWidth: -1`
+        'Invalid graphics object of type "rect": Invalid value for "strokeWidth": Expected non-negative number, got: -1'
       );
     });
   });
