@@ -1,7 +1,7 @@
 import { subtractEdges } from './box.js';
 import { DocumentDefinition } from './content.js';
 import { createDocument } from './document.js';
-import { embedFonts } from './fonts.js';
+import { embedFonts, parseFonts } from './fonts.js';
 import { layoutPage } from './layout.js';
 import { createPage, renderPage } from './page.js';
 
@@ -9,7 +9,7 @@ export * from './content.js';
 
 export async function makePdf(def: DocumentDefinition) {
   const doc = await createDocument(def);
-  const fonts = await embedFonts(def.fonts, doc);
+  const fonts = await embedFonts(parseFonts(def.fonts), doc);
   const page = createPage(doc, def);
   const box = subtractEdges({ x: 0, y: 0, ...page.size }, page.margin);
   const frame = layoutPage(def.content, box, fonts);

@@ -24,8 +24,11 @@ export function check<T = unknown>(value: unknown, name: string, fn?: (value: un
   try {
     return fn?.(value) ?? (value as T);
   } catch (error) {
-    const message = error.message === 'Missing value' ? 'Missing value' : 'Invalid value';
-    throw new TypeError(`${message} for "${name}": ${error.message}`);
+    const message =
+      error.message === 'Missing value'
+        ? `Missing value for "${name}"`
+        : `Invalid value for "${name}": ${error.message}`;
+    throw new TypeError(message);
   }
 }
 
@@ -36,10 +39,10 @@ export function optional<T>(fn: (value: unknown) => T): (value: unknown) => T {
   };
 }
 
-export function required<T>(fn: (value: unknown) => T): (value: unknown) => T {
+export function required<T = unknown>(fn?: (value: unknown) => T): (value: unknown) => T {
   return (value: unknown) => {
     if (value === undefined) throw new TypeError(`Missing value`);
-    return fn(value);
+    return fn ? fn(value) : (value as T);
   };
 }
 

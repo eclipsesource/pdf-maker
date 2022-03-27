@@ -67,6 +67,12 @@ describe('types', () => {
 
       expect(fn).toThrowError('Invalid value for "foo": bad value');
     });
+
+    it('throws for missing value', () => {
+      const fn = () => check(undefined, 'foo', required());
+
+      expect(fn).toThrowError('Missing value for "foo"');
+    });
   });
 
   describe('pick', () => {
@@ -123,8 +129,13 @@ describe('types', () => {
       expect(required(fn)(23)).toEqual('23');
     });
 
+    it('returns function that returns value if no function given', () => {
+      expect(required()(23)).toEqual(23);
+    });
+
     it('returns function that throws if input is undefined', () => {
       const wrapped = required(fn);
+
       expect(() => wrapped(undefined)).toThrowError('Missing value');
     });
 
