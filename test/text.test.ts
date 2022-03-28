@@ -1,7 +1,6 @@
 import { beforeEach, describe, expect, it } from '@jest/globals';
 import { rgb } from 'pdf-lib';
 
-import { TextAttrs } from '../src/content.js';
 import {
   breakLine,
   extractTextSegments,
@@ -86,7 +85,7 @@ describe('text', () => {
     });
 
     it('respects global text attrs', () => {
-      const attrs: TextAttrs = { fontSize: 10, lineHeight: 1.5, color: 'red' };
+      const attrs = { fontSize: 10, lineHeight: 1.5, color: rgb(1, 0, 0) };
 
       const segments = extractTextSegments([{ text: 'foo', attrs }], fonts);
 
@@ -102,7 +101,7 @@ describe('text', () => {
     });
 
     it('respects local text attrs', () => {
-      const attrs: TextAttrs = { fontSize: 10, lineHeight: 1.5, color: 'red' };
+      const attrs = { fontSize: 10, lineHeight: 1.5, color: rgb(1, 0, 0) };
 
       const segments = extractTextSegments([{ text: 'foo', attrs }], fonts);
 

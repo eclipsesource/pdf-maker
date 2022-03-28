@@ -1,17 +1,11 @@
 import { PDFFont } from 'pdf-lib';
 
-import { Box, parseEdges, Pos } from './box.js';
+import { Box, Pos, ZERO_EDGES } from './box.js';
 import { Color } from './colors.js';
-import { Paragraph } from './content.js';
 import { Font } from './fonts.js';
-import { GraphicsObject, parseGraphicsObject, shiftGraphicsObject } from './graphics.js';
-import {
-  breakLine,
-  extractTextSegments,
-  flattenTextSegments,
-  parseText,
-  TextSegment,
-} from './text.js';
+import { GraphicsObject, shiftGraphicsObject } from './graphics.js';
+import { Paragraph } from './text.js';
+import { breakLine, extractTextSegments, flattenTextSegments, TextSegment } from './text.js';
 
 /**
  * Frames are created during the layout process. They have a position relative to their parent,
@@ -47,7 +41,7 @@ export function layoutPage(content: Paragraph[], box: Box, fonts: Font[]): Frame
   let lastMargin = 0;
   let remainingHeight = height;
   content.forEach((paragraph) => {
-    const margin = parseEdges(paragraph.margin ?? 0);
+    const margin = paragraph.margin ?? ZERO_EDGES;
     const topMargin = Math.max(lastMargin, margin.top);
     lastMargin = margin.bottom;
     const nextPos = { x: pos.x + margin.left, y: pos.y + topMargin };
@@ -60,13 +54,13 @@ export function layoutPage(content: Paragraph[], box: Box, fonts: Font[]): Frame
   return { type: 'page', x, y, width, height, children };
 }
 
-function layoutParagraph(content: Paragraph, box: Box, fonts: Font[]): Frame {
-  const padding = parseEdges(content.padding ?? 0);
+function layoutParagraph(paragraph: Paragraph, box: Box, fonts: Font[]): Frame {
+  const padding = paragraph.padding ?? ZERO_EDGES;
   const maxWidth = box.width - padding.left - padding.right;
   const maxHeight = box.height - padding.top - padding.bottom;
   const innerBox = { x: padding.left, y: padding.top, width: maxWidth, height: maxHeight };
-  const text = content.text && layoutText(content, innerBox, fonts);
-  const graphics = content.graphics && layoutGraphics(content.graphics, innerBox);
+  const text = paragraph.text && layoutText(paragraph, innerBox, fonts);
+  const graphics = paragraph.graphics && layoutGraphics(paragraph.graphics, innerBox);
   return {
     type: 'paragraph',
     ...box,
@@ -76,9 +70,8 @@ function layoutParagraph(content: Paragraph, box: Box, fonts: Font[]): Frame {
   };
 }
 
-function layoutText(content: Paragraph, box: Box, fonts: Font[]) {
-  const { text, ...attrs } = content;
-  const textSpans = parseText(text, attrs);
+function layoutText(paragraph: Paragraph, box: Box, fonts: Font[]) {
+  const textSpans = paragraph.text;
   const segments = extractTextSegments(textSpans, fonts);
   const rows = [];
   let remainingSegments = segments;
@@ -122,10 +115,8 @@ function layoutRow(segments: TextSegment[], box: Box) {
   return { row, remainder };
 }
 
-function layoutGraphics(graphics: unknown, pos: Pos): GraphicsObject[] {
-  if (!Array.isArray(graphics)) throw new TypeError(`Invalid type for graphics`);
-  return graphics.map((el) => {
-    const object = parseGraphicsObject(el);
+function layoutGraphics(graphics: GraphicsObject[], pos: Pos): GraphicsObject[] {
+  return graphics.map((object) => {
     return shiftGraphicsObject(object, pos);
   });
 }

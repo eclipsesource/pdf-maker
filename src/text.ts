@@ -1,8 +1,22 @@
 import { PDFFont } from 'pdf-lib';
 
+import { BoxEdges, parseEdges } from './box.js';
 import { Color, parseColor } from './colors.js';
-import { Text, TextAttrs } from './content.js';
 import { Font, selectFont } from './fonts.js';
+import { GraphicsObject, parseGraphics } from './graphics.js';
+import {
+  asArray,
+  asBoolean,
+  asNumber,
+  asObject,
+  asString,
+  check,
+  Obj,
+  optional,
+  pick,
+  pickDefined,
+  required,
+} from './types.js';
 
 const defaultFontSize = 18;
 const defaultLineHeight = 1.2;
@@ -25,7 +39,40 @@ type TextSpan = {
   attrs: TextAttrs;
 };
 
-export function parseText(text: Text, attrs: TextAttrs): TextSpan[] {
+type TextAttrs = {
+  fontFamily?: string;
+  fontSize?: number;
+  lineHeight?: number;
+  bold?: boolean;
+  italic?: boolean;
+  color?: Color;
+};
+
+export type Paragraph = {
+  text?: TextSpan[];
+  graphics?: GraphicsObject[];
+  padding?: BoxEdges;
+  margin?: BoxEdges;
+} & TextAttrs;
+
+export function parseContent(input: unknown): Paragraph[] {
+  const paragraphs = check(input, 'content', required(asArray));
+  return paragraphs.map((el) => parseParagraph(el));
+}
+
+export function parseParagraph(input: unknown): Paragraph {
+  if (typeof input !== 'object') throw new TypeError(`Invalid type for paragraph: ${input}`);
+  const obj = input as Obj;
+  const { text, graphics, margin, padding, ...attrs } = obj;
+  return pickDefined({
+    text: text && parseText(text, attrs),
+    graphics: graphics && parseGraphics(graphics),
+    margin: check(margin, 'margin', optional(parseEdges)),
+    padding: check(padding, 'padding', optional(parseEdges)),
+  });
+}
+
+export function parseText(text: unknown, attrs: Obj): TextSpan[] {
   if (Array.isArray(text)) {
     return text.flatMap((text) => parseText(text, attrs));
   }
@@ -33,17 +80,21 @@ export function parseText(text: Text, attrs: TextAttrs): TextSpan[] {
     return [{ text, attrs }];
   }
   if (typeof text === 'object' && 'text' in text) {
-    return parseText(text.text, { ...attrs, ...extractAttrs(text) });
+    return parseText((text as Obj).text, { ...attrs, ...parseTextAttrs(text) });
   }
   throw new TypeError(`Invalid text: ${text}`);
 }
 
-function extractAttrs(object) {
-  const result: TextAttrs = {};
-  ['fontFamily', 'fontSize', 'lineHeight', 'bold', 'italic', 'color'].forEach((name) => {
-    if (name in object) result[name] = object[name];
+export function parseTextAttrs(input: unknown): TextAttrs {
+  const obj = check(input, 'text', optional(asObject)) ?? {};
+  return pickDefined({
+    fontFamily: pick(obj, 'fontFamily', optional(asString)),
+    fontSize: pick(obj, 'fontSize', optional(asNumber)),
+    lineHeight: pick(obj, 'lineHeight', optional(asNumber)),
+    bold: pick(obj, 'bold', optional(asBoolean)),
+    italic: pick(obj, 'italic', optional(asBoolean)),
+    color: pick(obj, 'color', optional(parseColor)),
   });
-  return result;
 }
 
 export function extractTextSegments(textSpans: TextSpan[], fonts: Font[]): TextSegment[] {
@@ -52,15 +103,18 @@ export function extractTextSegments(textSpans: TextSpan[], fonts: Font[]): TextS
     const { fontSize = defaultFontSize, lineHeight = defaultLineHeight, color } = attrs;
     const font = selectFont(fonts, attrs);
     const height = font.heightAtSize(fontSize);
-    return splitChunks(text).map((text) => ({
-      text,
-      width: font.widthOfTextAtSize(text, fontSize),
-      height,
-      lineHeight,
-      font,
-      fontSize,
-      ...(color ? { color: parseColor(color) } : undefined),
-    }));
+    return splitChunks(text).map(
+      (text) =>
+        ({
+          text,
+          width: font.widthOfTextAtSize(text, fontSize),
+          height,
+          lineHeight,
+          font,
+          fontSize,
+          color,
+        } as TextSegment)
+    );
   });
 }
 

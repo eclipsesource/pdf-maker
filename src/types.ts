@@ -51,6 +51,11 @@ export function asBoolean(value: unknown): boolean {
   return value;
 }
 
+export function asString(value: unknown): string {
+  if (typeof value !== 'string') throw expected('string', value);
+  return value;
+}
+
 export function asNumber(value: unknown): number {
   if (!Number.isFinite(value)) throw expected('number', value);
   return value as number;

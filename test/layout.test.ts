@@ -22,9 +22,9 @@ describe('layout', () => {
     });
 
     it('returns a paragraph with a single text row for single text content', () => {
-      const content = [{ text: 'Test text' }];
+      const text = [{ text: 'Test text', attrs: {} }];
 
-      const frame = layoutPage(content, box, fonts);
+      const frame = layoutPage([{ text }], box, fonts);
 
       expect(frame).toEqual({
         ...{ type: 'page', ...box },
@@ -45,11 +45,10 @@ describe('layout', () => {
     });
 
     it('includes padding around text in paragraph', () => {
-      const content = [
-        { text: 'foo', padding: { left: 1, right: 2, top: 3, bottom: 4 }, fontSize: 10 },
-      ];
+      const text = [{ text: 'foo', attrs: { fontSize: 10 } }];
+      const paragraphs = [{ text, padding: { left: 1, right: 2, top: 3, bottom: 4 } }];
 
-      const frame = layoutPage(content, box, fonts);
+      const frame = layoutPage(paragraphs, box, fonts);
 
       expect(frame.children).toEqual([
         objectContaining({ type: 'paragraph', x: 0, y: 0, width: 400, height: 12 + 3 + 4 }),
@@ -60,12 +59,13 @@ describe('layout', () => {
     });
 
     it('surrounds paragraphs with margins', () => {
-      const content = [
-        { text: 'foo', margin: { left: 1, right: 2, top: 3, bottom: 4 }, fontSize: 10 },
-        { text: 'bar', margin: { left: 5, right: 6, top: 7, bottom: 8 }, fontSize: 10 },
+      const text = [{ text: 'foo', attrs: { fontSize: 10 } }];
+      const paragraphs = [
+        { text, margin: { left: 1, right: 2, top: 3, bottom: 4 } },
+        { text, margin: { left: 5, right: 6, top: 7, bottom: 8 } },
       ];
 
-      const frame = layoutPage(content, box, fonts);
+      const frame = layoutPage(paragraphs, box, fonts);
 
       expect(frame.children).toEqual([
         objectContaining({ type: 'paragraph', x: 1, y: 3, width: 400 - 1 - 2, height: 12 }),
@@ -101,8 +101,9 @@ describe('layout', () => {
         { type: 'rect', x: 1, y: 2, width: 10, height: 20 },
         { type: 'polyline', points: [p(1, 2), p(3, 4)] },
       ] as any;
+      const padding = { left: 5, right: 5, top: 5, bottom: 5 };
 
-      const frame = layoutPage([{ graphics, padding: 5 }], box, fonts);
+      const frame = layoutPage([{ graphics, padding }], box, fonts);
 
       expect(frame).toEqual(objectContaining({ type: 'page', ...box }));
       expect(frame.children).toEqual([

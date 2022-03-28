@@ -6,6 +6,7 @@ import {
   asNonNegNumber,
   asNumber,
   asObject,
+  check,
   Obj,
   optional,
   pick,
@@ -44,6 +45,10 @@ export type PolylineObject = {
   strokeColor?: Color;
   fillColor?: Color;
 };
+
+export function parseGraphics(input: unknown): GraphicsObject[] {
+  return check(input, 'graphics', optional(asArray))?.map((el) => parseGraphicsObject(el));
+}
 
 /**
  * Parses a given input as a graphics shape object. Throws if the input cannot be parsed.

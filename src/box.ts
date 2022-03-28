@@ -11,6 +11,8 @@ export type BoxEdges = {
   bottom: number;
 };
 
+export const ZERO_EDGES = Object.freeze(parseEdges(0));
+
 /**
  * Computes an inner box by subtracting the given space (e.g. a padding) from the given box.
  *
