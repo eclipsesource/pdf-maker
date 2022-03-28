@@ -66,6 +66,11 @@ export function asNonNegNumber(value: unknown): number {
   return value as number;
 }
 
+export function asDate(value: unknown): Date {
+  if (Object.prototype.toString.call(value) !== '[object Date]') throw expected('Date', value);
+  return value as Date;
+}
+
 export function asArray(value: unknown): unknown[] {
   if (!Array.isArray(value)) throw expected('array', value);
   return value;

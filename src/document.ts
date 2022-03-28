@@ -1,35 +1,76 @@
 import fontkit from '@pdf-lib/fontkit';
 import { PDFDocument } from 'pdf-lib';
 
-import { DocumentDefinition } from './content.js';
+import {
+  asArray,
+  asDate,
+  asObject,
+  asString,
+  check,
+  Obj,
+  optional,
+  pick,
+  pickDefined,
+} from './types.js';
 
-export async function createDocument(def: DocumentDefinition) {
+export async function createDocument(def: Obj) {
   const doc = await PDFDocument.create();
   doc.registerFontkit(fontkit);
-  setMetadata(doc, def);
+  setMetadata(parseInfo(def.info), doc);
   return doc;
 }
 
-function setMetadata(doc: PDFDocument, def: DocumentDefinition) {
-  if (def.info?.title) {
-    doc.setTitle(def.info.title);
+type Metadata = {
+  title?: string;
+  subject?: string;
+  keywords?: string[];
+  author?: string;
+  creationDate?: Date;
+  creator?: string;
+  producer?: string;
+};
+
+export function parseInfo(input: unknown): Metadata {
+  const obj = check(input, 'info', optional(asObject));
+  if (!obj) return undefined;
+  return pickDefined({
+    title: pick(obj, 'title', optional(asString)),
+    subject: pick(obj, 'subject', optional(asString)),
+    keywords: pick(obj, 'keywords', optional(asStringArray)) as string[],
+    author: pick(obj, 'author', optional(asString)),
+    creationDate: pick(obj, 'creationDate', optional(asDate)),
+    creator: pick(obj, 'creator', optional(asString)),
+    producer: pick(obj, 'producer', optional(asString)),
+  });
+}
+
+function asStringArray(input: unknown): string[] {
+  asArray(input).forEach((el) => {
+    if (typeof el !== 'string') throw new TypeError(`Element is not a string: ${el}`);
+  });
+  return input as string[];
+}
+
+function setMetadata(info: Metadata, doc: PDFDocument) {
+  if (info?.title) {
+    doc.setTitle(info.title);
   }
-  if (def.info?.subject) {
-    doc.setSubject(def.info.subject);
+  if (info?.subject) {
+    doc.setSubject(info.subject);
   }
-  if (def.info?.keywords) {
-    doc.setKeywords(def.info.keywords);
+  if (info?.keywords) {
+    doc.setKeywords(info.keywords);
   }
-  if (def.info?.author) {
-    doc.setAuthor(def.info.author);
+  if (info?.author) {
+    doc.setAuthor(info.author);
   }
-  if (def.info?.creationDate) {
-    doc.setCreationDate(def.info.creationDate);
+  if (info?.creationDate) {
+    doc.setCreationDate(info.creationDate);
   }
-  if (def.info?.creator) {
-    doc.setCreator(def.info.creator);
+  if (info?.creator) {
+    doc.setCreator(info.creator);
   }
-  if (def.info?.producer) {
-    doc.setProducer(def.info.producer);
+  if (info?.producer) {
+    doc.setProducer(info.producer);
   }
 }
