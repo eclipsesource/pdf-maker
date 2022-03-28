@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it } from '@jest/globals';
 
+import { Alignment } from '../src/content.js';
 import { layoutPage } from '../src/layout.js';
 import { fakeFont } from './test-utils.js';
 
@@ -96,6 +97,54 @@ describe('layout', () => {
         objectContaining({ type: 'text', x: 0, y: 0, text: 'foo ' }),
         objectContaining({ type: 'text', x: 40, y: 0, text: 'bar' }),
         objectContaining({ type: 'link', x: 0, y: 0, width: 70, height: 10, url: 'test-link' }),
+      ]);
+    });
+
+    it('align texts in paragraphs to right', () => {
+      const text = [{ text: 'foo', attrs: { fontSize: 10 } }];
+      const paragraphs = [
+        {
+          text,
+          textAlign: 'right' as Alignment,
+          margin: { left: 10, right: 20, top: 0, bottom: 0 },
+          padding: { left: 15, right: 25, top: 0, bottom: 0 },
+        },
+      ];
+
+      const frame = layoutPage(paragraphs, box, fonts);
+
+      expect(frame.children).toEqual([
+        objectContaining({ type: 'paragraph', x: 10, y: 0, width: 400 - 10 - 20, height: 12 }),
+      ]);
+      expect(frame.children[0].children).toEqual([
+        objectContaining({ type: 'row', x: 400 - 10 - 20 - 30 - 25, y: 0, width: 30, height: 12 }),
+      ]);
+    });
+
+    it('align texts in paragraphs to center', () => {
+      const text = [{ text: 'foo', attrs: { fontSize: 10 } }];
+      const paragraphs = [
+        {
+          text,
+          textAlign: 'center' as Alignment,
+          margin: { left: 10, right: 20, top: 0, bottom: 0 },
+          padding: { left: 15, right: 25, top: 0, bottom: 0 },
+        },
+      ];
+
+      const frame = layoutPage(paragraphs, box, fonts);
+
+      expect(frame.children).toEqual([
+        objectContaining({ type: 'paragraph', x: 10, y: 0, width: 400 - 10 - 20, height: 12 }),
+      ]);
+      expect(frame.children[0].children).toEqual([
+        objectContaining({
+          type: 'row',
+          x: (400 - 10 - 20 - 30 - 25 + 15) / 2,
+          y: 0,
+          width: 30,
+          height: 12,
+        }),
       ]);
     });
 
