@@ -2,6 +2,7 @@ import { PDFFont } from 'pdf-lib';
 
 import { BoxEdges, parseEdges } from './box.js';
 import { Color, parseColor } from './colors.js';
+import { Alignment } from './content.js';
 import { Font, selectFont } from './fonts.js';
 import { GraphicsObject, parseGraphics } from './graphics.js';
 import {
@@ -55,6 +56,7 @@ export type Paragraph = {
   graphics?: GraphicsObject[];
   padding?: BoxEdges;
   margin?: BoxEdges;
+  textAlign?: Alignment;
 } & TextAttrs;
 
 export function parseContent(input: Obj): Paragraph[] {
@@ -66,13 +68,15 @@ export function parseContent(input: Obj): Paragraph[] {
 }
 
 export function parseParagraph(input: Obj, defaultAttrs?: TextAttrs): Paragraph {
-  const { text, graphics, margin, padding, ...attrs } = input;
+  if (typeof input !== 'object') throw new TypeError(`Invalid type for paragraph: ${input}`);
+  const { text, graphics, margin, padding, textAlign, ...attrs } = input;
   const parseTextWithAttrs = () => parseText(text, { ...defaultAttrs, ...parseTextAttrs(attrs) });
   return pickDefined({
     text: check(text, 'text', optional(parseTextWithAttrs)),
     graphics: check(graphics, 'graphics', optional(parseGraphics)),
     margin: check(margin, 'margin', optional(parseEdges)),
     padding: check(padding, 'padding', optional(parseEdges)),
+    textAlign: check(textAlign, 'textAlign', optional(asTextAlign)),
   });
 }
 
@@ -89,6 +93,13 @@ export function parseText(text: unknown, attrs: TextAttrs): TextSpan[] {
   throw new TypeError(
     `Expected string, object with text attribute, or array of text, got: ${text}`
   );
+}
+
+function asTextAlign(input: unknown): Alignment {
+  if (input !== 'left' && input !== 'right' && input !== 'center') {
+    throw new TypeError(`Expected 'left', 'right', or 'center', got: ${input}`);
+  }
+  return input;
 }
 
 export function parseTextAttrs(input: Obj): TextAttrs {

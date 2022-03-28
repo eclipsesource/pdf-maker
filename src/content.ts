@@ -103,6 +103,11 @@ export type Paragraph = {
    * whose size is the maximum of the two margins.
    */
   margin?: Length | BoxLengths;
+  /**
+   * Align texts in paragraphs.
+   * Support `left`, `right` and `center`. By default texts are aligned to the `left`;
+   */
+  textAlign?: Alignment;
 } & TextAttrs;
 
 export type Shape = Rect | Line | Polyline;
@@ -212,3 +217,5 @@ export type NamedColor = keyof typeof namedColors;
  * A color specified in the hexadecimal format `#xxxxxx` that is usual in HTML.
  */
 export type HTMLColor = `#${string}`;
+
+export type Alignment = 'left' | 'right' | 'center';

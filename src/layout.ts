@@ -1,7 +1,8 @@
 import { PDFFont } from 'pdf-lib';
 
-import { Box, Pos, ZERO_EDGES } from './box.js';
+import { Box, Pos, Size, ZERO_EDGES } from './box.js';
 import { Color } from './colors.js';
+import { Alignment } from './content.js';
 import { Font } from './fonts.js';
 import { GraphicsObject, shiftGraphicsObject } from './graphics.js';
 import { Paragraph } from './text.js';
@@ -85,9 +86,9 @@ function layoutText(paragraph: Paragraph, box: Box, fonts: Font[]) {
   const rows = [];
   let remainingSegments = segments;
   const remainingSpace = { ...box };
-  const size = { width: 0, height: 0 };
+  const size: Size = { width: 0, height: 0 };
   while (remainingSegments?.length) {
-    const { row, remainder } = layoutRow(remainingSegments, remainingSpace);
+    const { row, remainder } = layoutRow(remainingSegments, remainingSpace, paragraph.textAlign);
     rows.push(row);
     remainingSegments = remainder;
     remainingSpace.height -= row.height;
@@ -98,7 +99,7 @@ function layoutText(paragraph: Paragraph, box: Box, fonts: Font[]) {
   return { rows, size };
 }
 
-function layoutRow(segments: TextSegment[], box: Box) {
+function layoutRow(segments: TextSegment[], box: Box, textAlign: Alignment) {
   const [lineSegments, remainder] = breakLine(segments, box.width);
   const pos = { x: 0, y: 0 };
   const size = { width: 0, height: 0 };
@@ -120,8 +121,7 @@ function layoutRow(segments: TextSegment[], box: Box) {
   flattenLinks(links).forEach((link) => objects.push(link));
   const row = {
     type: 'row',
-    x: box.x,
-    y: box.y,
+    ...alignRow(box, size, textAlign),
     width: size.width,
     height: maxLineHeight,
     objects,
@@ -156,4 +156,20 @@ function flattenLinks(links: LinkObject[]) {
     }
   });
   return result;
+}
+
+function alignRow(box: Box, textSize: Size, textAlign?: Alignment): Pos {
+  if (textAlign === 'right') {
+    return {
+      x: box.x + box.width - textSize.width,
+      y: box.y,
+    };
+  }
+  if (textAlign === 'center') {
+    return {
+      x: box.x + (box.width - textSize.width) / 2,
+      y: box.y,
+    };
+  }
+  return { x: box.x, y: box.y };
 }

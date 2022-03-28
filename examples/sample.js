@@ -23,7 +23,13 @@ export default {
     fontSize: 14,
   },
   content: [
-    { text: 'Lorem ipsum', bold: true, fontSize: 24, margin: { bottom: 10 } },
+    {
+      text: 'Lorem ipsum',
+      bold: true,
+      fontSize: 24,
+      margin: { bottom: 10 },
+      textAlign: 'center',
+    },
     {
       text: [
         'dolor sit amet, consectetur ',
