@@ -72,6 +72,30 @@ describe('types', () => {
       expect(fn).toThrowError('Invalid value for "foo": bad value');
     });
 
+    it('merges nested error messages', () => {
+      const input = 23;
+      const bad = () => {
+        throw new TypeError('bad value');
+      };
+      const nestedCheck = () => check(input, 'bar', bad);
+
+      const fn = () => check(input, 'foo', nestedCheck);
+
+      expect(fn).toThrowError('Invalid value for "foo.bar": bad value');
+    });
+
+    it('handles bracket notation in nested error messages', () => {
+      const input = 23;
+      const bad = () => {
+        throw new TypeError('bad value');
+      };
+      const nestedCheck = () => check(input, '[0]', bad);
+
+      const fn = () => check(input, 'foo', nestedCheck);
+
+      expect(fn).toThrowError('Invalid value for "foo[0]": bad value');
+    });
+
     it('throws for missing value', () => {
       const fn = () => check(undefined, 'foo', required());
 

@@ -20,7 +20,9 @@ describe('layout', () => {
     it('checks defaultStyle', () => {
       const def = { defaultStyle: { fontSize: -1 }, content: [] };
 
-      expect(() => layoutPages(def, resources)).toThrowError('Invalid value for "defaultStyle":');
+      expect(() => layoutPages(def, resources)).toThrowError(
+        'Invalid value for "defaultStyle.fontSize":'
+      );
     });
 
     it('checks margin', () => {

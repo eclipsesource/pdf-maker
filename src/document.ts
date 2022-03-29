@@ -53,7 +53,7 @@ function parseCustomAttrs(custom: Obj): Record<string, string> {
 }
 
 function asStringArray(input: unknown): string[] {
-  return asArray(input).map((el, idx) => check(el, `element ${idx + 1}`, asString));
+  return asArray(input).map((el, idx) => check(el, `[${idx}]`, asString));
 }
 
 function setMetadata(info: Metadata, doc: PDFDocument) {

@@ -95,6 +95,12 @@ describe('graphics', () => {
       expect(fn).toThrowError(`Missing value for "points"`);
     });
 
+    it(`throws for invalid point in polyline`, () => {
+      const fn = () => parseGraphicsObject({ type: 'polyline', points: [{ x: 1, y: 'a' }] });
+
+      expect(fn).toThrowError(`Invalid value for "points[0].y": Expected number, got: 'a'`);
+    });
+
     ['strokeColor', 'fillColor'].forEach((name) => {
       it(`throws for invalid rect attribute ${name}`, () => {
         const rect = { type: 'rect', x: 1, y: 2, width: 10, height: 20, [name]: 'foo' };

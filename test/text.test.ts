@@ -46,7 +46,7 @@ describe('text', () => {
     it('checks content', () => {
       const content = [{ text: 'foo' }, { text: 23 }];
 
-      expect(() => parseContent(content, {})).toThrowError('Invalid value for "content block #2":');
+      expect(() => parseContent(content, {})).toThrowError('Invalid value for "content[1].text":');
     });
   });
 

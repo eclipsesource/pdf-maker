@@ -24,11 +24,15 @@ export function check<T = unknown>(value: unknown, name: string, fn?: (value: un
   try {
     return fn?.(value) ?? (value as T);
   } catch (error) {
-    const message =
-      error.message === 'Missing value'
-        ? `Missing value for "${name}"`
-        : `Invalid value for "${name}": ${error.message}`;
-    throw new TypeError(message);
+    if (error.message === 'Missing value') {
+      throw new TypeError(`Missing value for "${name}"`);
+    }
+    if (error.message?.startsWith('Invalid value for "')) {
+      const tail = error.message.replace(/^Invalid value for "/, '');
+      const glue = tail.startsWith('[') ? '' : '.';
+      throw new TypeError(`Invalid value for "${name}${glue}${tail}`);
+    }
+    throw new TypeError(`Invalid value for "${name}": ${error.message}`);
   }
 }
 

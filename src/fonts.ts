@@ -36,9 +36,9 @@ export type FontSelector = {
 export function parseFonts(input: unknown): FontDef[] {
   const obj = check(input, 'fonts', optional(asObject)) ?? {};
   return Object.entries(obj).flatMap(([name, fontDef]) => {
-    const array = check(fontDef, `fonts > ${name}`, required(asArray));
+    const array = check(fontDef, `fonts['${name}']`, required(asArray));
     return array.map((fontDef, idx) => {
-      const font = check(fontDef, `fonts > ${name} > #${idx + 1}`, required(parseFont));
+      const font = check(fontDef, `fonts['${name}'][${idx}]`, required(parseFont));
       return { name, ...font } as FontDef;
     });
   });
