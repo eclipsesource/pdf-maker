@@ -19,6 +19,9 @@ export default {
     ],
   },
   margin: { x: '2.5cm', top: '2cm', bottom: '1.5cm' },
+  defaultStyle: {
+    fontSize: 14,
+  },
   content: [
     { text: 'Lorem ipsum', bold: true, fontSize: 24, margin: { bottom: 10 } },
     {

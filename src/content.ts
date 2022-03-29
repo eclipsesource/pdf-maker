@@ -9,6 +9,10 @@ export type DocumentDefinition = {
    */
   content: Paragraph[];
   /**
+   * The default style attributes to use in the document.
+   */
+  defaultStyle?: TextAttrs;
+  /**
    * The page margins. Defaults to 50pt on each side.
    */
   margin?: Length | BoxLengths;

@@ -6,6 +6,8 @@ import {
   extractTextSegments,
   findLinebreakOpportunity,
   flattenTextSegments,
+  parseContent,
+  parseParagraph,
   parseText,
   splitChunks,
   TextSegment,
@@ -20,6 +22,99 @@ describe('text', () => {
   beforeEach(() => {
     fonts = [fakeFont('Test'), fakeFont('Test', { italic: true })];
     [normalFont] = fonts.map((f) => f.pdfFont);
+  });
+
+  describe('parseContent', () => {
+    it('requires content', () => {
+      expect(() => parseContent({})).toThrowError('Missing value for "content"');
+    });
+
+    it('accepts empty content', () => {
+      expect(parseContent({ content: [] })).toEqual([]);
+    });
+
+    it('includes all paragraphs with defaultStyle', () => {
+      const input = {
+        content: [{ text: 'foo' }, { text: 'bar' }],
+        defaultStyle: { fontSize: 14 },
+      };
+
+      const result = parseContent(input);
+
+      expect(result).toEqual([
+        { text: [{ text: 'foo', attrs: { fontSize: 14 } }] },
+        { text: [{ text: 'bar', attrs: { fontSize: 14 } }] },
+      ]);
+    });
+
+    it('checks default style', () => {
+      const input = { content: [], defaultStyle: { fontSize: -1 } };
+
+      expect(() => parseContent(input)).toThrowError('Invalid value for "defaultStyle":');
+    });
+
+    it('checks paragraphs', () => {
+      const input = { content: [{ text: 'foo' }, { text: 23 }] };
+
+      expect(() => parseContent(input)).toThrowError('Invalid value for "paragraph #2":');
+    });
+  });
+
+  describe('parseParagraph', () => {
+    it('accepts empty object', () => {
+      expect(parseParagraph({})).toEqual({});
+    });
+
+    it('includes all properties of a paragraph', () => {
+      const input = {
+        text: 'foo',
+        graphics: [{ type: 'rect', x: 1, y: 2, width: 3, height: 4 }],
+        margin: 5,
+        padding: 6,
+      };
+
+      const result = parseParagraph(input);
+
+      expect(result).toEqual({
+        text: [{ text: 'foo', attrs: {} }],
+        graphics: [{ type: 'rect', x: 1, y: 2, width: 3, height: 4 }],
+        margin: { left: 5, right: 5, top: 5, bottom: 5 },
+        padding: { left: 6, right: 6, top: 6, bottom: 6 },
+      });
+    });
+
+    it('includes default attrs in text', () => {
+      const input = { text: 'foo' };
+      const defaultAttrs = { fontSize: 14, lineHeight: 1.5 };
+
+      const result = parseParagraph(input, defaultAttrs);
+
+      expect(result).toEqual({ text: [{ text: 'foo', attrs: { fontSize: 14, lineHeight: 1.5 } }] });
+    });
+
+    it('checks text', () => {
+      const input = { text: 23 };
+
+      expect(() => parseParagraph(input)).toThrowError('Invalid value for "text":');
+    });
+
+    it('checks graphics', () => {
+      const input = { graphics: 'foo' };
+
+      expect(() => parseParagraph(input)).toThrowError('Invalid value for "graphics":');
+    });
+
+    it('checks margin', () => {
+      const input = { margin: 'foo' };
+
+      expect(() => parseParagraph(input)).toThrowError('Invalid value for "margin":');
+    });
+
+    it('checks padding', () => {
+      const input = { padding: 'foo' };
+
+      expect(() => parseParagraph(input)).toThrowError('Invalid value for "padding":');
+    });
   });
 
   describe('parseText', () => {
@@ -62,7 +157,9 @@ describe('text', () => {
     });
 
     it('throws on invalid type', () => {
-      expect(() => parseText([23 as any], {})).toThrowError('Invalid text: 23');
+      expect(() => parseText([23 as any], {})).toThrowError(
+        'Expected string, object with text attribute, or array of text, got: 23'
+      );
     });
   });
 
@@ -75,7 +172,7 @@ describe('text', () => {
       expect(extractTextSegments([{ text: 'foo', attrs: {} }], fonts)).toEqual([
         {
           text: 'foo',
-          width: 54, // 3 * 18
+          width: 3 * 18,
           height: 18,
           fontSize: 18,
           lineHeight: 1.2,
@@ -91,7 +188,7 @@ describe('text', () => {
 
       expect(segments).toEqual([
         objectContaining({
-          width: 30, // 3 * 10
+          width: 3 * 10,
           height: 10,
           fontSize: 10,
           lineHeight: 1.5,

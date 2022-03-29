@@ -7,7 +7,7 @@ import { GraphicsObject, parseGraphics } from './graphics.js';
 import {
   asArray,
   asBoolean,
-  asNumber,
+  asNonNegNumber,
   asObject,
   asString,
   check,
@@ -55,24 +55,26 @@ export type Paragraph = {
   margin?: BoxEdges;
 } & TextAttrs;
 
-export function parseContent(input: unknown): Paragraph[] {
-  const paragraphs = check(input, 'content', required(asArray));
-  return paragraphs.map((el) => parseParagraph(el));
+export function parseContent(input: Obj): Paragraph[] {
+  const paragraphs = pick(input, 'content', required(asArray));
+  const defaultStyle = pick(input, 'defaultStyle', optional(parseTextAttrs));
+  return paragraphs.map((par, idx) =>
+    check(par, `paragraph #${idx + 1}`, () => parseParagraph(asObject(par), defaultStyle))
+  );
 }
 
-export function parseParagraph(input: unknown): Paragraph {
-  if (typeof input !== 'object') throw new TypeError(`Invalid type for paragraph: ${input}`);
-  const obj = input as Obj;
-  const { text, graphics, margin, padding, ...attrs } = obj;
+export function parseParagraph(input: Obj, defaultAttrs?: TextAttrs): Paragraph {
+  const { text, graphics, margin, padding, ...attrs } = input;
+  const parseTextWithAttrs = () => parseText(text, { ...defaultAttrs, ...parseTextAttrs(attrs) });
   return pickDefined({
-    text: text && parseText(text, attrs),
-    graphics: graphics && parseGraphics(graphics),
+    text: check(text, 'text', optional(parseTextWithAttrs)),
+    graphics: check(graphics, 'graphics', optional(parseGraphics)),
     margin: check(margin, 'margin', optional(parseEdges)),
     padding: check(padding, 'padding', optional(parseEdges)),
   });
 }
 
-export function parseText(text: unknown, attrs: Obj): TextSpan[] {
+export function parseText(text: unknown, attrs: TextAttrs): TextSpan[] {
   if (Array.isArray(text)) {
     return text.flatMap((text) => parseText(text, attrs));
   }
@@ -80,20 +82,21 @@ export function parseText(text: unknown, attrs: Obj): TextSpan[] {
     return [{ text, attrs }];
   }
   if (typeof text === 'object' && 'text' in text) {
-    return parseText((text as Obj).text, { ...attrs, ...parseTextAttrs(text) });
+    return parseText((text as Obj).text, { ...attrs, ...parseTextAttrs(text as Obj) });
   }
-  throw new TypeError(`Invalid text: ${text}`);
+  throw new TypeError(
+    `Expected string, object with text attribute, or array of text, got: ${text}`
+  );
 }
 
-export function parseTextAttrs(input: unknown): TextAttrs {
-  const obj = check(input, 'text', optional(asObject)) ?? {};
+export function parseTextAttrs(input: Obj): TextAttrs {
   return pickDefined({
-    fontFamily: pick(obj, 'fontFamily', optional(asString)),
-    fontSize: pick(obj, 'fontSize', optional(asNumber)),
-    lineHeight: pick(obj, 'lineHeight', optional(asNumber)),
-    bold: pick(obj, 'bold', optional(asBoolean)),
-    italic: pick(obj, 'italic', optional(asBoolean)),
-    color: pick(obj, 'color', optional(parseColor)),
+    fontFamily: pick(input, 'fontFamily', optional(asString)),
+    fontSize: pick(input, 'fontSize', optional(asNonNegNumber)),
+    lineHeight: pick(input, 'lineHeight', optional(asNonNegNumber)),
+    bold: pick(input, 'bold', optional(asBoolean)),
+    italic: pick(input, 'italic', optional(asBoolean)),
+    color: pick(input, 'color', optional(parseColor)),
   });
 }
 

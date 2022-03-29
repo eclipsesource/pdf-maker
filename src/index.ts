@@ -13,7 +13,7 @@ export async function makePdf(def: DocumentDefinition) {
   const fonts = await embedFonts(parseFonts(def.fonts), doc);
   const page = createPage(doc, def);
   const box = subtractEdges({ x: 0, y: 0, ...page.size }, page.margin);
-  const frame = layoutPage(parseContent(def.content), box, fonts);
+  const frame = layoutPage(parseContent(def), box, fonts);
   renderPage(frame, page);
   const pdf = await doc.save();
   return pdf;
