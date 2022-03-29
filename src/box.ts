@@ -1,4 +1,4 @@
-import { LengthUnit } from './content.js';
+import { Obj } from './types.js';
 
 export type Pos = { x: number; y: number };
 export type Size = { width: number; height: number };
@@ -44,7 +44,7 @@ export function parseEdges(input?: unknown): BoxEdges | undefined {
     return { right: value, left: value, top: value, bottom: value };
   }
   if (typeof input === 'object') {
-    const obj = input as Record<string, unknown>;
+    const obj = input as Obj;
     return {
       right: parseLength(obj.right ?? obj.x ?? 0),
       left: parseLength(obj.left ?? obj.x ?? 0),
@@ -79,7 +79,7 @@ export function parseLength(input?: unknown): number | undefined {
   throw new TypeError(`Invalid length: '${input}'`);
 }
 
-function convertToPt(value: number, fromUnit: LengthUnit): number {
+function convertToPt(value: number, fromUnit: string): number {
   // 1in = 72pt = 25.4mm
   switch (fromUnit) {
     case 'pt':

@@ -1,7 +1,6 @@
 import { describe, expect, it } from '@jest/globals';
 
 import { parseEdges, parseLength, subtractEdges } from '../src/box.js';
-import { BoxLengths } from '../src/content.js';
 
 describe('box', () => {
   describe('subtractEdges', () => {
@@ -76,7 +75,7 @@ describe('box', () => {
     });
 
     it('resolves units', () => {
-      const margin = { x: '1in', y: 2 } as BoxLengths;
+      const margin = { x: '1in', y: 2 };
 
       expect(parseEdges(margin)).toEqual({ left: 72, right: 72, top: 2, bottom: 2 });
     });

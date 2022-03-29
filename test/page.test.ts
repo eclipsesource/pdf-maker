@@ -2,7 +2,6 @@ import { beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { PDFContext, PDFFont, rgb } from 'pdf-lib';
 
 import { parseEdges } from '../src/box.js';
-import { BoxLengths } from '../src/content.js';
 import { Frame } from '../src/layout.js';
 import { createPage, renderFrame } from '../src/page.js';
 import { fakePdfFont } from './test-utils.js';
@@ -32,7 +31,7 @@ describe('page', () => {
     });
 
     it('includes margin from document definition', () => {
-      const margin: BoxLengths = { left: '1cm', right: '2cm', top: '3cm', bottom: '4cm' };
+      const margin = { left: '1cm', right: '2cm', top: '3cm', bottom: '4cm' };
 
       const page = createPage(doc, { margin } as any);
 
