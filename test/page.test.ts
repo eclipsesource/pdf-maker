@@ -6,36 +6,22 @@ import { Frame } from '../src/layout.js';
 import { createPage, renderFrame } from '../src/page.js';
 import { fakePdfFont } from './test-utils.js';
 
-const { anything, objectContaining } = expect;
+const { objectContaining } = expect;
 
 describe('page', () => {
   describe('createPage', () => {
-    let size, pdfPage, doc;
+    let size, margin, pdfPage, doc;
 
     beforeEach(() => {
       size = { width: 300, height: 400 };
-      pdfPage = { getSize: () => size };
+      margin = parseEdges(5);
       doc = { addPage: jest.fn().mockReturnValue(pdfPage) } as any;
     });
 
     it('creates page and returns wrapper', () => {
-      const page = createPage(doc, {} as any);
+      const page = createPage(doc, size, margin, {} as any);
 
-      expect(page).toEqual({ pdfPage, size, margin: anything() });
-    });
-
-    it('includes a default margin of 2cm', () => {
-      const page = createPage(doc, {} as any);
-
-      expect(page).toEqual(objectContaining({ margin: parseEdges('2cm') }));
-    });
-
-    it('includes margin from document definition', () => {
-      const margin = { left: '1cm', right: '2cm', top: '3cm', bottom: '4cm' };
-
-      const page = createPage(doc, { margin } as any);
-
-      expect(page).toEqual(objectContaining({ margin: parseEdges(margin) }));
+      expect(page).toEqual({ pdfPage, size, margin });
     });
   });
 

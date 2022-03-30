@@ -23,3 +23,7 @@ export function fakePdfFont(name: string): PDFFont {
     heightAtSize: (fontSize) => fontSize,
   } as any;
 }
+
+export function range(n) {
+  return [...Array(n).keys()];
+}

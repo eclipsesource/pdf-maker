@@ -8,14 +8,12 @@ import {
   PDFRef,
 } from 'pdf-lib';
 
-import { BoxEdges, parseEdges, Pos, Size } from './box.js';
+import { BoxEdges, Pos, Size } from './box.js';
 import { LineObject, PolylineObject, RectObject } from './graphics.js';
 import { renderGuide } from './guides.js';
 import { Frame, LinkObject, TextObject } from './layout.js';
 import { addPageAnnotations, createLinkAnnotation } from './pdf-annotations.js';
 import { asObject, Obj, optional, pick, pickDefined } from './types.js';
-
-const defaultPageMargin = '2cm';
 
 export type Page = {
   pdfPage: PDFPage;
@@ -25,12 +23,12 @@ export type Page = {
   guides?: boolean;
 };
 
-export function createPage(doc: PDFDocument, def: Obj): Page {
-  const pdfPage = doc.addPage();
+export function createPage(doc: PDFDocument, size: Size, margin: BoxEdges, def: Obj): Page {
+  const pdfPage = doc.addPage([size.width, size.height]);
   return pickDefined({
     pdfPage,
-    size: pdfPage.getSize(),
-    margin: pick(def, 'margin', optional(parseEdges)) ?? parseEdges(defaultPageMargin),
+    size,
+    margin,
     guides: pick(def, 'dev', optional(asObject))?.guides,
   }) as Page;
 }

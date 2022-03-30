@@ -44,24 +44,42 @@ export type LinkObject = {
   url: string;
 };
 
-export function layoutPage(content: Paragraph[], box: Box, fonts: Font[]): Frame {
+export function layoutPages(paragraphs: Paragraph[], box: Box, fonts: Font[]): Frame[] {
+  const pages = [];
+  let remainingParagraphs = paragraphs;
+  while (remainingParagraphs?.length) {
+    const { frame, remainder } = layoutPage(remainingParagraphs, box, fonts);
+    remainingParagraphs = remainder;
+    pages.push(frame);
+  }
+  return pages;
+}
+
+export function layoutPage(paragraphs: Paragraph[], box: Box, fonts: Font[]) {
   const { x, y, width, height } = box;
   const children = [];
   const pos = { x: 0, y: 0 };
   let lastMargin = 0;
   let remainingHeight = height;
-  content.forEach((paragraph) => {
+  let remainder;
+  for (const [idx, paragraph] of paragraphs.entries()) {
     const margin = paragraph.margin ?? ZERO_EDGES;
     const topMargin = Math.max(lastMargin, margin.top);
     lastMargin = margin.bottom;
     const nextPos = { x: pos.x + margin.left, y: pos.y + topMargin };
     const maxSize = { width: width - margin.left - margin.right, height: remainingHeight };
     const frame = layoutParagraph(paragraph, { ...nextPos, ...maxSize }, fonts);
+    // If the first paragraph does not fit on the page, render it anyway.
+    // It wouldn't fit on the next page as well, ending in an endless loop.
+    if (remainingHeight < topMargin + frame.height && idx) {
+      remainder = paragraphs.slice(idx);
+      break;
+    }
     children.push(frame);
     pos.y += topMargin + frame.height;
-    remainingHeight = height - pos.y - margin.bottom;
-  });
-  return { type: 'page', x, y, width, height, children };
+    remainingHeight = height - pos.y;
+  }
+  return { frame: { type: 'page', x, y, width, height, children }, remainder };
 }
 
 export function layoutParagraph(paragraph: Paragraph, box: Box, fonts: Font[]): Frame {
