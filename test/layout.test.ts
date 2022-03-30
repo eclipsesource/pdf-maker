@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from '@jest/globals';
 
 import { Alignment } from '../src/content.js';
-import { layoutPage } from '../src/layout.js';
+import { layoutPage, layoutParagraph } from '../src/layout.js';
 import { fakeFont } from './test-utils.js';
 
 const { objectContaining } = expect;
@@ -191,6 +191,29 @@ describe('layout', () => {
           ],
         }),
       ]);
+    });
+  });
+
+  describe('layoutParagraph', () => {
+    it('creates paragraph with intrinsic size', () => {
+      const text = [{ text: 'foo', attrs: { fontSize: 10 } }];
+      const padding = { left: 5, right: 5, top: 5, bottom: 5 };
+      const paragraph = { text, padding };
+
+      const frame = layoutParagraph(paragraph, box, fonts);
+
+      expect(frame).toEqual(
+        objectContaining({ type: 'paragraph', x: 20, y: 30, width: 400, height: 22 })
+      );
+    });
+
+    it('creates paragraph with fixed size', () => {
+      const padding = { left: 5, right: 5, top: 5, bottom: 5 };
+      const paragraph = { padding, width: 80, height: 50 };
+
+      const frame = layoutParagraph(paragraph, box, fonts);
+
+      expect(frame).toEqual({ type: 'paragraph', x: 20, y: 30, width: 80, height: 50 });
     });
   });
 });

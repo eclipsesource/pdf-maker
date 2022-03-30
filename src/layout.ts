@@ -64,17 +64,20 @@ export function layoutPage(content: Paragraph[], box: Box, fonts: Font[]): Frame
   return { type: 'page', x, y, width, height, children };
 }
 
-function layoutParagraph(paragraph: Paragraph, box: Box, fonts: Font[]): Frame {
+export function layoutParagraph(paragraph: Paragraph, box: Box, fonts: Font[]): Frame {
   const padding = paragraph.padding ?? ZERO_EDGES;
-  const maxWidth = box.width - padding.left - padding.right;
-  const maxHeight = box.height - padding.top - padding.bottom;
+  const fixedWidth = paragraph.width;
+  const fixedHeight = paragraph.height;
+  const maxWidth = (fixedWidth ?? box.width) - padding.left - padding.right;
+  const maxHeight = (fixedHeight ?? box.height) - padding.top - padding.bottom;
   const innerBox = { x: padding.left, y: padding.top, width: maxWidth, height: maxHeight };
   const text = paragraph.text && layoutText(paragraph, innerBox, fonts);
   const graphics = paragraph.graphics && layoutGraphics(paragraph.graphics, innerBox);
   return {
     type: 'paragraph',
     ...box,
-    height: (text?.size?.height ?? 0) + padding.top + padding.bottom,
+    width: fixedWidth ?? box.width,
+    height: fixedHeight ?? (text?.size?.height ?? 0) + padding.top + padding.bottom,
     ...(text?.rows?.length ? { children: text.rows } : undefined),
     ...(graphics?.length ? { objects: graphics } : undefined),
   };

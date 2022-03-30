@@ -1,6 +1,6 @@
 import { PDFFont } from 'pdf-lib';
 
-import { BoxEdges, parseEdges } from './box.js';
+import { BoxEdges, parseEdges, parseLength } from './box.js';
 import { Color, parseColor } from './colors.js';
 import { Alignment } from './content.js';
 import { Font, selectFont } from './fonts.js';
@@ -57,6 +57,8 @@ export type Paragraph = {
   padding?: BoxEdges;
   margin?: BoxEdges;
   textAlign?: Alignment;
+  width?: number;
+  height?: number;
 } & TextAttrs;
 
 export function parseContent(input: Obj): Paragraph[] {
@@ -69,7 +71,7 @@ export function parseContent(input: Obj): Paragraph[] {
 
 export function parseParagraph(input: Obj, defaultAttrs?: TextAttrs): Paragraph {
   if (typeof input !== 'object') throw new TypeError(`Invalid type for paragraph: ${input}`);
-  const { text, graphics, margin, padding, textAlign, ...attrs } = input;
+  const { text, graphics, margin, padding, textAlign, width, height, ...attrs } = input;
   const parseTextWithAttrs = () => parseText(text, { ...defaultAttrs, ...parseTextAttrs(attrs) });
   return pickDefined({
     text: check(text, 'text', optional(parseTextWithAttrs)),
@@ -77,6 +79,8 @@ export function parseParagraph(input: Obj, defaultAttrs?: TextAttrs): Paragraph 
     margin: check(margin, 'margin', optional(parseEdges)),
     padding: check(padding, 'padding', optional(parseEdges)),
     textAlign: check(textAlign, 'textAlign', optional(asTextAlign)),
+    width: check(width, 'width', optional(parseLength)),
+    height: check(height, 'height', optional(parseLength)),
   });
 }
 

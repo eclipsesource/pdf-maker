@@ -91,6 +91,8 @@ export default {
           closePath: true,
         },
       ],
+      width: '3in',
+      height: '3in',
     },
   ],
 };

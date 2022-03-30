@@ -108,6 +108,14 @@ export type Paragraph = {
    * Support `left`, `right` and `center`. By default texts are aligned to the `left`;
    */
   textAlign?: Alignment;
+  /**
+   * A fixed width for the paragraph. If left out, the paragraph uses the available width.
+   */
+  width?: Length;
+  /**
+   * A fixed height for the paragraph. If left out, the height is defined by the included text.
+   */
+  height?: Length;
 } & TextAttrs;
 
 export type Shape = Rect | Line | Polyline;

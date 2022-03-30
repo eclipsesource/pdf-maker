@@ -71,6 +71,8 @@ describe('text', () => {
         graphics: [{ type: 'rect', x: 1, y: 2, width: 3, height: 4 }],
         margin: 5,
         padding: 6,
+        width: '50pt',
+        height: '80pt',
       };
 
       const result = parseParagraph(input);
@@ -80,6 +82,8 @@ describe('text', () => {
         graphics: [{ type: 'rect', x: 1, y: 2, width: 3, height: 4 }],
         margin: { left: 5, right: 5, top: 5, bottom: 5 },
         padding: { left: 6, right: 6, top: 6, bottom: 6 },
+        width: 50,
+        height: 80,
       });
     });
 
@@ -114,6 +118,18 @@ describe('text', () => {
       const input = { padding: 'foo' };
 
       expect(() => parseParagraph(input)).toThrowError('Invalid value for "padding":');
+    });
+
+    it('checks width', () => {
+      const input = { width: 'foo' };
+
+      expect(() => parseParagraph(input)).toThrowError('Invalid value for "width":');
+    });
+
+    it('checks height', () => {
+      const input = { height: 'foo' };
+
+      expect(() => parseParagraph(input)).toThrowError('Invalid value for "height":');
     });
   });
 
