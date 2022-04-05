@@ -5,7 +5,7 @@ import { Color } from './colors.js';
 import { Alignment } from './content.js';
 import { Font } from './fonts.js';
 import { GraphicsObject, shiftGraphicsObject } from './graphics.js';
-import { Paragraph } from './text.js';
+import { Block, Columns, Paragraph } from './text.js';
 import { breakLine, extractTextSegments, flattenTextSegments, TextSegment } from './text.js';
 
 /**
@@ -55,24 +55,24 @@ export function layoutPages(paragraphs: Paragraph[], box: Box, fonts: Font[]): F
   return pages;
 }
 
-export function layoutPage(paragraphs: Paragraph[], box: Box, fonts: Font[]) {
+export function layoutPage(blocks: Block[], box: Box, fonts: Font[]) {
   const { x, y, width, height } = box;
   const children = [];
   const pos = { x: 0, y: 0 };
   let lastMargin = 0;
   let remainingHeight = height;
   let remainder;
-  for (const [idx, paragraph] of paragraphs.entries()) {
-    const margin = paragraph.margin ?? ZERO_EDGES;
+  for (const [idx, block] of blocks.entries()) {
+    const margin = block.margin ?? ZERO_EDGES;
     const topMargin = Math.max(lastMargin, margin.top);
     lastMargin = margin.bottom;
     const nextPos = { x: pos.x + margin.left, y: pos.y + topMargin };
     const maxSize = { width: width - margin.left - margin.right, height: remainingHeight };
-    const frame = layoutParagraph(paragraph, { ...nextPos, ...maxSize }, fonts);
+    const frame = layoutBlock(block, { ...nextPos, ...maxSize }, fonts);
     // If the first paragraph does not fit on the page, render it anyway.
     // It wouldn't fit on the next page as well, ending in an endless loop.
     if (remainingHeight < topMargin + frame.height && idx) {
-      remainder = paragraphs.slice(idx);
+      remainder = blocks.slice(idx);
       break;
     }
     children.push(frame);
@@ -80,6 +80,13 @@ export function layoutPage(paragraphs: Paragraph[], box: Box, fonts: Font[]) {
     remainingHeight = height - pos.y;
   }
   return { frame: { type: 'page', x, y, width, height, children }, remainder };
+}
+
+export function layoutBlock(block: Block, box: Box, fonts: Font[]): Frame {
+  if ((block as Columns).columns) {
+    return layoutColumns(block as Columns, box, fonts);
+  }
+  return layoutParagraph(block as Paragraph, box, fonts);
 }
 
 export function layoutParagraph(paragraph: Paragraph, box: Box, fonts: Font[]): Frame {
@@ -98,6 +105,42 @@ export function layoutParagraph(paragraph: Paragraph, box: Box, fonts: Font[]): 
     height: fixedHeight ?? (text?.size?.height ?? 0) + padding.top + padding.bottom,
     ...(text?.rows?.length ? { children: text.rows } : undefined),
     ...(graphics?.length ? { objects: graphics } : undefined),
+  };
+}
+
+function layoutColumns(block: Columns, box: Box, fonts: Font[]) {
+  const fixedWidth = block.width;
+  const fixedHeight = block.height;
+  const maxWidth = fixedWidth ?? box.width;
+  const maxHeight = fixedHeight ?? box.height;
+  const colWidths = block.columns.map((column) =>
+    column.width == null
+      ? undefined
+      : column.width + (column.margin?.left ?? 0) + (column.margin?.right ?? 0)
+  );
+  const reservedWidth = colWidths.reduce((p, c) => p + (c ?? 0), 0);
+  const flexColCount = colWidths.reduce((p, c) => p + (c == null ? 1 : 0), 0);
+  const flexColWidth = flexColCount ? Math.max(0, maxWidth - reservedWidth) / flexColCount : 0;
+  const children = [];
+  let colX = 0;
+  let maxColHeight = 0;
+  block.columns.forEach((column) => {
+    const margin = column.margin ?? ZERO_EDGES;
+    colX += margin.left;
+    const colWidth = column.width ?? flexColWidth - margin.left - margin.right;
+    const colBox = { x: colX, y: margin.top, width: colWidth, height: column.height ?? maxHeight };
+    colX += colWidth + margin.right;
+    const block = layoutBlock(column, colBox, fonts);
+    children.push(block);
+    maxColHeight = Math.max(maxColHeight, block.height + margin.top + margin.bottom);
+  });
+  return {
+    type: 'columns',
+    x: box.x,
+    y: box.y,
+    width: fixedWidth ?? box.width,
+    height: fixedHeight ?? maxColHeight,
+    children,
   };
 }
 

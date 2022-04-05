@@ -75,24 +75,36 @@ export default {
       margin: { y: 5 },
     },
     {
-      graphics: [
+      columns: [
         {
-          type: 'polyline',
-          strokeWidth: 2,
-          fillColor: '#4488cc',
-          strokeColor: 'white',
-          points: [
-            { x: 100, y: 10 },
-            { x: 40, y: 198 },
-            { x: 190, y: 78 },
-            { x: 10, y: 78 },
-            { x: 160, y: 198 },
+          graphics: [
+            {
+              type: 'polyline',
+              strokeWidth: 2,
+              fillColor: '#4488cc',
+              strokeColor: 'white',
+              points: [
+                { x: 100, y: 10 },
+                { x: 40, y: 198 },
+                { x: 190, y: 78 },
+                { x: 10, y: 78 },
+                { x: 160, y: 198 },
+              ],
+              closePath: true,
+            },
           ],
-          closePath: true,
+          width: '3in',
+          height: '3in',
+          margin: 7,
+        },
+        {
+          text:
+            'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor' +
+            ' incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud' +
+            ' exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.',
+          margin: { left: 5 },
         },
       ],
-      width: '3in',
-      height: '3in',
     },
     ...range(10).map((n) => ({
       text:

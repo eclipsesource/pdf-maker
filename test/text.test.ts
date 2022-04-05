@@ -56,7 +56,7 @@ describe('text', () => {
     it('checks paragraphs', () => {
       const input = { content: [{ text: 'foo' }, { text: 23 }] };
 
-      expect(() => parseContent(input)).toThrowError('Invalid value for "paragraph #2":');
+      expect(() => parseContent(input)).toThrowError('Invalid value for "block #2":');
     });
   });
 

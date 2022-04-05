@@ -5,9 +5,9 @@ import { namedColors } from './colors.js';
  */
 export type DocumentDefinition = {
   /**
-   * The sequence of content elements to render.
+   * The sequence of blocks that contain the document's content.
    */
-  content: Paragraph[];
+  content: Block[];
   /**
    * The default style attributes to use in the document.
    */
@@ -82,6 +82,15 @@ export type FontDefinition = {
   italic?: boolean;
 };
 
+export type Block = Columns | Paragraph;
+
+export type Columns = {
+  /**
+   * Paragraphs to arrange horizontally.
+   */
+  columns: Paragraph[];
+} & BlockAttrs;
+
 export type Paragraph = {
   /**
    * Text to display in this paragraph.
@@ -98,16 +107,20 @@ export type Paragraph = {
    */
   padding?: Length | BoxLengths;
   /**
-   * Space to surround the paragraph.
-   * The `top` and `bottom` margins of adjacent paragraphs are collapsed into a single margin
-   * whose size is the maximum of the two margins.
-   */
-  margin?: Length | BoxLengths;
-  /**
    * Align texts in paragraphs.
    * Support `left`, `right` and `center`. By default texts are aligned to the `left`;
    */
   textAlign?: Alignment;
+} & TextAttrs &
+  BlockAttrs;
+
+export type BlockAttrs = {
+  /**
+   * Space to surround the block.
+   * The `top` and `bottom` margins of adjacent blocks are collapsed into a single margin
+   * whose size is the maximum of the two margins. Column margins don't collapse.
+   */
+  margin?: Length | BoxLengths;
   /**
    * A fixed width for the paragraph. If left out, the paragraph uses the available width.
    */
@@ -116,7 +129,7 @@ export type Paragraph = {
    * A fixed height for the paragraph. If left out, the height is defined by the included text.
    */
   height?: Length;
-} & TextAttrs;
+};
 
 export type Shape = Rect | Line | Polyline;
 

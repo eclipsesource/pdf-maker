@@ -51,29 +51,62 @@ type TextAttrs = {
   link?: string;
 };
 
+export type Block = Columns | Paragraph;
+
+export type Columns = {
+  columns: Block[];
+} & BlockAttrs;
+
 export type Paragraph = {
   text?: TextSpan[];
   graphics?: GraphicsObject[];
   padding?: BoxEdges;
-  margin?: BoxEdges;
   textAlign?: Alignment;
+} & BlockAttrs &
+  TextAttrs;
+
+export type BlockAttrs = {
+  margin?: BoxEdges;
   width?: number;
   height?: number;
 } & TextAttrs;
 
 export function parseContent(input: Obj): Paragraph[] {
-  const paragraphs = pick(input, 'content', required(asArray));
+  const blocks = pick(input, 'content', required(asArray));
   const defaultStyle = pick(input, 'defaultStyle', optional(parseTextAttrs));
-  return paragraphs.map((par, idx) =>
-    check(par, `paragraph #${idx + 1}`, () => parseParagraph(asObject(par), defaultStyle))
+  return blocks.map((block, idx) =>
+    check(block, `block #${idx + 1}`, () => parseBlock(asObject(block), defaultStyle))
   );
+}
+
+export function parseBlock(input: Obj, defaultAttrs?: TextAttrs): Block {
+  if (input.columns) {
+    return parseColumns(input, defaultAttrs);
+  }
+  return parseParagraph(input, defaultAttrs);
+}
+
+export function parseColumns(input: Obj, defaultAttrs?: TextAttrs): Columns {
+  const parseColumns = (columns) =>
+    asArray(columns).map((col, idx) =>
+      check(col, `column #${idx + 1}`, () => parseBlock(col as Obj, defaultAttrs))
+    );
+  return pickDefined({
+    columns: pick(input, 'columns', parseColumns),
+    margin: pick(input, 'margin', optional(parseEdges)),
+    width: pick(input, 'width', optional(parseLength)),
+    height: pick(input, 'height', optional(parseLength)),
+  }) as Columns;
 }
 
 export function parseParagraph(input: Obj, defaultAttrs?: TextAttrs): Paragraph {
   if (typeof input !== 'object') throw new TypeError(`Invalid type for paragraph: ${input}`);
-  const { text, graphics, margin, padding, textAlign, width, height, ...attrs } = input;
+  const { columns, text, graphics, margin, padding, textAlign, width, height, ...attrs } = input;
   const parseTextWithAttrs = () => parseText(text, { ...defaultAttrs, ...parseTextAttrs(attrs) });
+  const parseColumns = (input) =>
+    asArray(input).map((col) => parseParagraph(col as Obj, defaultAttrs));
   return pickDefined({
+    columns: check(columns, 'columns', optional(parseColumns)),
     text: check(text, 'text', optional(parseTextWithAttrs)),
     graphics: check(graphics, 'graphics', optional(parseGraphics)),
     margin: check(margin, 'margin', optional(parseEdges)),
