@@ -18,10 +18,19 @@ export default {
       { data: fonts.DejaVu_Sans_BoldItalic, italic: true, bold: true },
     ],
   },
-  margin: { x: '2.5cm', top: '2cm', bottom: '1.5cm' },
+  margin: { x: '2.5cm', top: '2.5cm', bottom: '2cm' },
   defaultStyle: {
     fontSize: 14,
   },
+  header: {
+    columns: [{ text: 'PDF Maker' }, { text: 'sample', textAlign: 'right' }],
+    margin: { x: '2.5cm', top: '1cm' },
+  },
+  footer: ({ pageNumber, pageCount }) => ({
+    text: `${pageNumber}/${pageCount}`,
+    textAlign: 'right',
+    margin: { x: '2.5cm', bottom: '1cm' },
+  }),
   content: [
     {
       text: 'Lorem ipsum',

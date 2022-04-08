@@ -25,21 +25,15 @@ describe('text', () => {
   });
 
   describe('parseContent', () => {
-    it('requires content', () => {
-      expect(() => parseContent({})).toThrowError('Missing value for "content"');
-    });
-
     it('accepts empty content', () => {
-      expect(parseContent({ content: [] })).toEqual([]);
+      expect(parseContent([], {})).toEqual([]);
     });
 
     it('includes all paragraphs with defaultStyle', () => {
-      const input = {
-        content: [{ text: 'foo' }, { text: 'bar' }],
-        defaultStyle: { fontSize: 14 },
-      };
+      const content = [{ text: 'foo' }, { text: 'bar' }];
+      const defaultStyle = { fontSize: 14 };
 
-      const result = parseContent(input);
+      const result = parseContent(content, defaultStyle);
 
       expect(result).toEqual([
         { text: [{ text: 'foo', attrs: { fontSize: 14 } }] },
@@ -47,16 +41,10 @@ describe('text', () => {
       ]);
     });
 
-    it('checks default style', () => {
-      const input = { content: [], defaultStyle: { fontSize: -1 } };
+    it('checks content', () => {
+      const content = [{ text: 'foo' }, { text: 23 }];
 
-      expect(() => parseContent(input)).toThrowError('Invalid value for "defaultStyle":');
-    });
-
-    it('checks paragraphs', () => {
-      const input = { content: [{ text: 'foo' }, { text: 23 }] };
-
-      expect(() => parseContent(input)).toThrowError('Invalid value for "block #2":');
+      expect(() => parseContent(content, {})).toThrowError('Invalid value for "content block #2":');
     });
   });
 

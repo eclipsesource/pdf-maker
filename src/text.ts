@@ -16,7 +16,6 @@ import {
   optional,
   pick,
   pickDefined,
-  required,
 } from './types.js';
 
 const defaultFontSize = 18;
@@ -71,11 +70,9 @@ export type BlockAttrs = {
   height?: number;
 } & TextAttrs;
 
-export function parseContent(input: Obj): Paragraph[] {
-  const blocks = pick(input, 'content', required(asArray));
-  const defaultStyle = pick(input, 'defaultStyle', optional(parseTextAttrs));
-  return blocks.map((block, idx) =>
-    check(block, `block #${idx + 1}`, () => parseBlock(asObject(block), defaultStyle))
+export function parseContent(content: unknown[], defaultStyle: TextAttrs): Paragraph[] {
+  return content.map((block, idx) =>
+    check(block, `content block #${idx + 1}`, () => parseBlock(asObject(block), defaultStyle))
   );
 }
 

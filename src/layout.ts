@@ -1,12 +1,17 @@
 import { PDFFont } from 'pdf-lib';
 
-import { Box, Pos, Size, ZERO_EDGES } from './box.js';
+import { Box, parseEdges, parseLength, Pos, Size, subtractEdges, ZERO_EDGES } from './box.js';
 import { Color } from './colors.js';
 import { Alignment } from './content.js';
 import { Font } from './fonts.js';
 import { GraphicsObject, shiftGraphicsObject } from './graphics.js';
-import { Block, Columns, Paragraph } from './text.js';
+import { Page } from './page.js';
+import { Block, Columns, Paragraph, parseBlock, parseContent, parseTextAttrs } from './text.js';
 import { breakLine, extractTextSegments, flattenTextSegments, TextSegment } from './text.js';
+import { asArray, asObject, Obj, optional, pick, pickDefined, required } from './types.js';
+
+const pageSize = { width: parseLength('210mm'), height: parseLength('297mm') }; // A4, portrait
+const defaultPageMargin = parseEdges('2cm');
 
 /**
  * Frames are created during the layout process. They have a position relative to their parent,
@@ -44,18 +49,53 @@ export type LinkObject = {
   url: string;
 };
 
-export function layoutPages(paragraphs: Paragraph[], box: Box, fonts: Font[]): Frame[] {
+export function layoutPages(def: Obj, fonts: Font[]): Page[] {
+  const content = pick(def, 'content', required(asArray));
+  const pageMargin = pick(def, 'margin', optional(parseEdges)) ?? defaultPageMargin;
+  const defaultStyle = pick(def, 'defaultStyle', optional(parseTextAttrs));
+  const guides = pick(def, 'dev', optional(asObject))?.guides;
+  const contentBox = subtractEdges({ x: 0, y: 0, ...pageSize }, pageMargin);
+  const blocks = parseContent(content, defaultStyle);
   const pages = [];
-  let remainingParagraphs = paragraphs;
-  while (remainingParagraphs?.length) {
-    const { frame, remainder } = layoutPage(remainingParagraphs, box, fonts);
-    remainingParagraphs = remainder;
-    pages.push(frame);
+  let remainingBlocks = blocks;
+  while (remainingBlocks?.length) {
+    const { frame, remainder } = layoutPageContent(remainingBlocks, contentBox, fonts);
+    remainingBlocks = remainder;
+    pages.push({ size: pageSize, content: frame, guides });
   }
-  return pages;
+  pages.map((page, idx) => {
+    const pageInfo = { pageCount: pages.length, pageNumber: idx + 1, pageSize };
+    const parse = (block) => parseBlock(asObject(resolveFn(block, pageInfo)), defaultStyle);
+    const header = pick(def, 'header', optional(parse));
+    const footer = pick(def, 'footer', optional(parse));
+    page.header = header && layoutHeader(header, fonts);
+    page.footer = header && layoutFooter(footer, fonts);
+  });
+  return pages.map(pickDefined) as Page[];
 }
 
-export function layoutPage(blocks: Block[], box: Box, fonts: Font[]) {
+function resolveFn(value, ...args) {
+  if (typeof value !== 'function') return value;
+  try {
+    return value(...args);
+  } catch (error) {
+    throw new Error(`Function threw: ${error}`);
+  }
+}
+
+function layoutHeader(header, fonts) {
+  const box = subtractEdges({ x: 0, y: 0, ...pageSize }, header.margin);
+  return layoutBlock(header, box, fonts);
+}
+
+function layoutFooter(footer, fonts) {
+  const box = subtractEdges({ x: 0, y: 0, ...pageSize }, footer.margin);
+  const frame = layoutBlock(footer, box, fonts);
+  frame.y = pageSize.height - frame.height - footer.margin?.bottom ?? 0;
+  return frame;
+}
+
+export function layoutPageContent(blocks: Block[], box: Box, fonts: Font[]) {
   const { x, y, width, height } = box;
   const children = [];
   const pos = { x: 0, y: 0 };

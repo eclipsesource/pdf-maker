@@ -8,33 +8,27 @@ import {
   PDFRef,
 } from 'pdf-lib';
 
-import { BoxEdges, Pos, Size } from './box.js';
+import { Pos, Size } from './box.js';
 import { LineObject, PolylineObject, RectObject } from './graphics.js';
 import { renderGuide } from './guides.js';
 import { Frame, LinkObject, TextObject } from './layout.js';
 import { addPageAnnotations, createLinkAnnotation } from './pdf-annotations.js';
-import { asObject, Obj, optional, pick, pickDefined } from './types.js';
 
 export type Page = {
-  pdfPage: PDFPage;
   size: Size;
-  margin: BoxEdges;
-  linkRefs?: PDFRef[];
+  content: Frame;
+  header?: Frame;
+  footer?: Frame;
   guides?: boolean;
+  pdfPage?: PDFPage;
+  linkRefs?: PDFRef[];
 };
 
-export function createPage(doc: PDFDocument, size: Size, margin: BoxEdges, def: Obj): Page {
-  const pdfPage = doc.addPage([size.width, size.height]);
-  return pickDefined({
-    pdfPage,
-    size,
-    margin,
-    guides: pick(def, 'dev', optional(asObject))?.guides,
-  }) as Page;
-}
-
-export function renderPage(frame: Frame, page: Page) {
-  renderFrame(frame, page);
+export function renderPage(page: Page, doc: PDFDocument) {
+  page.pdfPage = doc.addPage([page.size.width, page.size.height]);
+  renderFrame(page.content, page);
+  page.header && renderFrame(page.header, page);
+  page.footer && renderFrame(page.footer, page);
   if (page.linkRefs?.length) {
     addPageAnnotations(page.pdfPage, page.linkRefs);
   }

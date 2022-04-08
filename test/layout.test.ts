@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from '@jest/globals';
 
 import { Alignment } from '../src/content.js';
-import { layoutPage, layoutParagraph } from '../src/layout.js';
+import { layoutPageContent, layoutPages, layoutParagraph } from '../src/layout.js';
 import { fakeFont, range } from './test-utils.js';
 
 const { objectContaining } = expect;
@@ -15,9 +15,101 @@ describe('layout', () => {
     box = { x: 20, y: 30, width: 400, height: 700 };
   });
 
-  describe('layoutPage', () => {
+  describe('layoutPages', () => {
+    it('checks defaultStyle', () => {
+      const def = { defaultStyle: { fontSize: -1 }, content: [] };
+
+      expect(() => layoutPages(def, fonts)).toThrowError('Invalid value for "defaultStyle":');
+    });
+
+    it('checks margin', () => {
+      const def = { margin: 'foo', content: [] };
+
+      expect(() => layoutPages(def, fonts)).toThrowError('Invalid value for "margin":');
+    });
+
+    it('checks content', () => {
+      const def = { content: 'foo' };
+
+      expect(() => layoutPages(def, fonts)).toThrowError('Invalid value for "content":');
+    });
+
+    it('lays out content', () => {
+      const def = { content: [{ text: 'test' }], margin: 50 };
+      const pageWidth = (210 * 72) / 25.4;
+      const pageHeight = (297 * 72) / 25.4;
+
+      const pages = layoutPages(def, fonts);
+
+      expect(pages).toEqual([
+        objectContaining({
+          content: objectContaining({
+            type: 'page',
+            x: 50,
+            y: 50,
+            width: pageWidth - 100,
+            height: pageHeight - 100,
+          }),
+          size: { width: pageWidth, height: pageHeight },
+        }),
+      ]);
+    });
+
+    it('lays out header and footer', () => {
+      const def = {
+        margin: 50,
+        content: [{ text: 'content' }],
+        header: { text: 'header', margin: 20, fontSize: 10 },
+        footer: { text: 'footer', margin: 20, fontSize: 10 },
+      };
+      const pageWidth = (210 * 72) / 25.4;
+      const pageHeight = (297 * 72) / 25.4;
+
+      const pages = layoutPages(def, fonts);
+
+      expect(pages[0].header).toEqual(
+        objectContaining({
+          type: 'paragraph',
+          x: 20,
+          y: 20,
+          width: pageWidth - 40,
+          height: 12,
+        })
+      );
+      expect(pages[0].footer).toEqual(
+        objectContaining({
+          type: 'paragraph',
+          x: 20,
+          y: pageHeight - 20 - 12,
+          width: pageWidth - 40,
+          height: 12,
+        })
+      );
+    });
+
+    it('supports dynamic header and footer', () => {
+      const def = {
+        margin: 50,
+        content: [
+          { text: 'content', height: 500 },
+          { text: 'content', height: 500 },
+        ],
+        header: ({ pageCount, pageNumber }) => ({ text: `${pageNumber}/${pageCount}` }),
+        footer: ({ pageCount, pageNumber }) => ({ text: `${pageNumber}/${pageCount}` }),
+      };
+
+      const pages = layoutPages(def, fonts);
+
+      expect((pages[0].header.children[0].objects[0] as any).text).toEqual('1/2');
+      expect((pages[0].footer.children[0].objects[0] as any).text).toEqual('1/2');
+      expect((pages[1].header.children[0].objects[0] as any).text).toEqual('2/2');
+      expect((pages[1].footer.children[0].objects[0] as any).text).toEqual('2/2');
+    });
+  });
+
+  describe('layoutPageContent', () => {
     it('returns empty page frame for empty content', () => {
-      const { frame } = layoutPage([], box, fonts);
+      const { frame } = layoutPageContent([], box, fonts);
 
       expect(frame).toEqual({ type: 'page', ...box, children: [] });
     });
@@ -25,7 +117,7 @@ describe('layout', () => {
     it('returns a paragraph with a single text row for single text content', () => {
       const text = [{ text: 'Test text', attrs: {} }];
 
-      const { frame, remainder } = layoutPage([{ text }], box, fonts);
+      const { frame, remainder } = layoutPageContent([{ text }], box, fonts);
 
       expect(remainder).toBeUndefined();
       expect(frame).toEqual({
@@ -52,7 +144,7 @@ describe('layout', () => {
         text: [{ text: `Paragraph ${n + 1}`, attrs: { fontSize: 10 } }],
       }));
 
-      const { remainder } = layoutPage(paragraphs, box, fonts);
+      const { remainder } = layoutPageContent(paragraphs, box, fonts);
 
       // 10 paragraphs * fontSize 10 * lineHeight 1.2 = height 120
       expect(remainder).toEqual(paragraphs.slice(10));
@@ -62,7 +154,7 @@ describe('layout', () => {
       const text = [{ text: 'foo', attrs: { fontSize: 10 } }];
       const paragraphs = [{ text, padding: { left: 1, right: 2, top: 3, bottom: 4 } }];
 
-      const { frame } = layoutPage(paragraphs, box, fonts);
+      const { frame } = layoutPageContent(paragraphs, box, fonts);
 
       expect(frame.children).toEqual([
         objectContaining({ type: 'paragraph', x: 0, y: 0, width: 400, height: 12 + 3 + 4 }),
@@ -79,7 +171,7 @@ describe('layout', () => {
         { text, margin: { left: 5, right: 6, top: 7, bottom: 8 } },
       ];
 
-      const { frame } = layoutPage(paragraphs, box, fonts);
+      const { frame } = layoutPageContent(paragraphs, box, fonts);
 
       expect(frame.children).toEqual([
         objectContaining({ type: 'paragraph', x: 1, y: 3, width: 400 - 1 - 2, height: 12 }),
@@ -90,7 +182,7 @@ describe('layout', () => {
     it('creates link objects', () => {
       const text = [{ text: 'foo', attrs: { link: 'test-link', fontSize: 10 } }];
 
-      const { frame } = layoutPage([{ text }], box, fonts);
+      const { frame } = layoutPageContent([{ text }], box, fonts);
 
       expect(frame.children[0].children[0].objects).toEqual([
         objectContaining({ type: 'text', x: 0, y: 0, text: 'foo' }),
@@ -104,7 +196,7 @@ describe('layout', () => {
         { text: 'bar', attrs: { italic: true, link: 'test-link', fontSize: 10 } },
       ];
 
-      const { frame } = layoutPage([{ text }], box, fonts);
+      const { frame } = layoutPageContent([{ text }], box, fonts);
 
       expect(frame.children[0].children[0].objects).toEqual([
         objectContaining({ type: 'text', x: 0, y: 0, text: 'foo ' }),
@@ -124,7 +216,7 @@ describe('layout', () => {
         },
       ];
 
-      const { frame } = layoutPage(paragraphs, box, fonts);
+      const { frame } = layoutPageContent(paragraphs, box, fonts);
 
       expect(frame.children).toEqual([
         objectContaining({ type: 'paragraph', x: 10, y: 0, width: 400 - 10 - 20, height: 12 }),
@@ -145,7 +237,7 @@ describe('layout', () => {
         },
       ];
 
-      const { frame } = layoutPage(paragraphs, box, fonts);
+      const { frame } = layoutPageContent(paragraphs, box, fonts);
 
       expect(frame.children).toEqual([
         objectContaining({ type: 'paragraph', x: 10, y: 0, width: 400 - 10 - 20, height: 12 }),
@@ -168,7 +260,7 @@ describe('layout', () => {
         { type: 'polyline', points: [p(1, 2), p(3, 4)] },
       ] as any;
 
-      const { frame } = layoutPage([{ graphics }], box, fonts);
+      const { frame } = layoutPageContent([{ graphics }], box, fonts);
 
       expect(frame).toEqual(objectContaining({ type: 'page', ...box }));
       expect(frame.children).toEqual([
@@ -191,7 +283,7 @@ describe('layout', () => {
       ] as any;
       const padding = { left: 5, right: 5, top: 5, bottom: 5 };
 
-      const { frame } = layoutPage([{ graphics, padding }], box, fonts);
+      const { frame } = layoutPageContent([{ graphics, padding }], box, fonts);
 
       expect(frame).toEqual(objectContaining({ type: 'page', ...box }));
       expect(frame.children).toEqual([

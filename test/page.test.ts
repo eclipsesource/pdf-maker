@@ -1,27 +1,64 @@
 import { beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { PDFContext, PDFFont, rgb } from 'pdf-lib';
 
-import { parseEdges } from '../src/box.js';
 import { Frame } from '../src/layout.js';
-import { createPage, renderFrame } from '../src/page.js';
+import { renderFrame, renderPage } from '../src/page.js';
 import { fakePdfFont } from './test-utils.js';
 
 const { objectContaining } = expect;
 
 describe('page', () => {
-  describe('createPage', () => {
-    let size, margin, pdfPage, doc;
+  describe('renderPage', () => {
+    let size, pdfPage, doc;
 
     beforeEach(() => {
       size = { width: 300, height: 400 };
-      margin = parseEdges(5);
+      pdfPage = { drawRectangle: jest.fn() };
       doc = { addPage: jest.fn().mockReturnValue(pdfPage) } as any;
     });
 
-    it('creates page and returns wrapper', () => {
-      const page = createPage(doc, size, margin, {} as any);
+    it('renders content', () => {
+      const content: Frame = {
+        ...{ x: 50, y: 50, width: 280, height: 300 },
+        objects: [{ type: 'rect', x: 0, y: 0, width: 280, height: 300 }],
+      };
+      const page = { size, content };
 
-      expect(page).toEqual({ pdfPage, size, margin });
+      renderPage(page, doc);
+
+      expect(pdfPage.drawRectangle).toHaveBeenCalledWith(
+        objectContaining({ x: 50, y: 50, width: 280, height: 300 })
+      );
+    });
+
+    it('renders header', () => {
+      const content = { x: 50, y: 50, width: 280, height: 300 };
+      const header: Frame = {
+        ...{ x: 50, y: 20, width: 280, height: 30 },
+        objects: [{ type: 'rect', x: 0, y: 0, width: 280, height: 30 }],
+      };
+      const page = { size, content, header };
+
+      renderPage(page, doc);
+
+      expect(pdfPage.drawRectangle).toHaveBeenCalledWith(
+        objectContaining({ x: 50, y: 350, width: 280, height: 30 })
+      );
+    });
+
+    it('renders footer', () => {
+      const content = { x: 50, y: 50, width: 280, height: 300 };
+      const footer: Frame = {
+        ...{ x: 50, y: 350, width: 280, height: 30 },
+        objects: [{ type: 'rect', x: 0, y: 0, width: 280, height: 30 }],
+      };
+      const page = { size, content, footer };
+
+      renderPage(page, doc);
+
+      expect(pdfPage.drawRectangle).toHaveBeenCalledWith(
+        objectContaining({ x: 50, y: 20, width: 280, height: 30 })
+      );
     });
   });
 

@@ -5,6 +5,16 @@ import { namedColors } from './colors.js';
  */
 export type DocumentDefinition = {
   /**
+   * A content block that is printed at the top of each page.
+   * A function can be passed to create page-specific headers.
+   */
+  header?: Block | ((info: PageInfo) => Block);
+  /**
+   * A content block that is printed at the bottom of each page.
+   * A function can be passed to create page-specific footers.
+   */
+  footer?: Block | ((info: PageInfo) => Block);
+  /**
    * The sequence of blocks that contain the document's content.
    */
   content: Block[];
@@ -86,9 +96,9 @@ export type Block = Columns | Paragraph;
 
 export type Columns = {
   /**
-   * Paragraphs to arrange horizontally.
+   * Content blocks to arrange horizontally.
    */
-  columns: Paragraph[];
+  columns: Block[];
 } & BlockAttrs;
 
 export type Paragraph = {
@@ -129,6 +139,21 @@ export type BlockAttrs = {
    * A fixed height for the paragraph. If left out, the height is defined by the included text.
    */
   height?: Length;
+};
+
+export type PageInfo = {
+  /**
+   * The number of the current page, starting at 1.
+   */
+  readonly pageNumber: number;
+  /**
+   * The total number of pages.
+   */
+  readonly pageCount: number;
+  /**
+   * The size of the current page in pt.
+   */
+  readonly pageSize: { width: number; height: number };
 };
 
 export type Shape = Rect | Line | Polyline;
