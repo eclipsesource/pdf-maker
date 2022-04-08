@@ -6,7 +6,15 @@ import { Alignment } from './content.js';
 import { Font } from './fonts.js';
 import { GraphicsObject, shiftGraphicsObject } from './graphics.js';
 import { Page } from './page.js';
-import { Block, Columns, Paragraph, parseBlock, parseContent, parseTextAttrs } from './text.js';
+import {
+  Block,
+  Columns,
+  Paragraph,
+  parseBlock,
+  parseContent,
+  parseTextAttrs,
+  Rows,
+} from './text.js';
 import { breakLine, extractTextSegments, flattenTextSegments, TextSegment } from './text.js';
 import { asArray, asObject, Obj, optional, pick, pickDefined, required } from './types.js';
 
@@ -126,6 +134,9 @@ export function layoutBlock(block: Block, box: Box, fonts: Font[]): Frame {
   if ((block as Columns).columns) {
     return layoutColumns(block as Columns, box, fonts);
   }
+  if ((block as Rows).rows) {
+    return layoutRows(block as Rows, box, fonts);
+  }
   return layoutParagraph(block as Paragraph, box, fonts);
 }
 
@@ -180,6 +191,38 @@ function layoutColumns(block: Columns, box: Box, fonts: Font[]) {
     y: box.y,
     width: fixedWidth ?? box.width,
     height: fixedHeight ?? maxColHeight,
+    children,
+  };
+}
+
+function layoutRows(block: Rows, box: Box, fonts: Font[]) {
+  const fixedWidth = block.width;
+  const fixedHeight = block.height;
+  const maxWidth = fixedWidth ?? box.width;
+  const maxHeight = fixedHeight ?? box.height;
+  const children = [];
+  let rowY = 0;
+  let lastMargin = 0;
+  let aggregatedHeight = 0;
+  let remainingHeight = maxHeight;
+  block.rows.forEach((row) => {
+    const margin = row.margin ?? ZERO_EDGES;
+    const topMargin = Math.max(lastMargin, margin.top);
+    lastMargin = margin.bottom;
+    const nextPos = { x: margin.left, y: rowY + topMargin };
+    const maxSize = { width: maxWidth - margin.left - margin.right, height: remainingHeight };
+    const frame = layoutBlock(row, { ...nextPos, ...maxSize }, fonts);
+    children.push(frame);
+    rowY += topMargin + frame.height;
+    remainingHeight -= topMargin + frame.height;
+    aggregatedHeight += topMargin + frame.height;
+  });
+  return {
+    type: 'rows',
+    x: box.x,
+    y: box.y,
+    width: fixedWidth ?? box.width,
+    height: fixedHeight ?? aggregatedHeight + lastMargin,
     children,
   };
 }

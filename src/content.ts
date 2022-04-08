@@ -92,13 +92,20 @@ export type FontDefinition = {
   italic?: boolean;
 };
 
-export type Block = Columns | Paragraph;
+export type Block = Columns | Rows | Paragraph;
 
 export type Columns = {
   /**
    * Content blocks to arrange horizontally.
    */
   columns: Block[];
+} & BlockAttrs;
+
+export type Rows = {
+  /**
+   * Blocks to arrange vertically.
+   */
+  rows: Block[];
 } & BlockAttrs;
 
 export type Paragraph = {

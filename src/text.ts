@@ -50,10 +50,14 @@ type TextAttrs = {
   link?: string;
 };
 
-export type Block = Columns | Paragraph;
+export type Block = Columns | Rows | Paragraph;
 
 export type Columns = {
   columns: Block[];
+} & BlockAttrs;
+
+export type Rows = {
+  rows: Block[];
 } & BlockAttrs;
 
 export type Paragraph = {
@@ -80,6 +84,9 @@ export function parseBlock(input: Obj, defaultAttrs?: TextAttrs): Block {
   if (input.columns) {
     return parseColumns(input, defaultAttrs);
   }
+  if (input.rows) {
+    return parseRows(input, defaultAttrs);
+  }
   return parseParagraph(input, defaultAttrs);
 }
 
@@ -90,6 +97,19 @@ export function parseColumns(input: Obj, defaultAttrs?: TextAttrs): Columns {
     );
   return pickDefined({
     columns: pick(input, 'columns', parseColumns),
+    margin: pick(input, 'margin', optional(parseEdges)),
+    width: pick(input, 'width', optional(parseLength)),
+    height: pick(input, 'height', optional(parseLength)),
+  }) as Columns;
+}
+
+export function parseRows(input: Obj, defaultAttrs?: TextAttrs): Columns {
+  const parseRows = (rows) =>
+    asArray(rows).map((col, idx) =>
+      check(col, `row #${idx + 1}`, () => parseBlock(col as Obj, defaultAttrs))
+    );
+  return pickDefined({
+    rows: pick(input, 'rows', parseRows),
     margin: pick(input, 'margin', optional(parseEdges)),
     width: pick(input, 'width', optional(parseLength)),
     height: pick(input, 'height', optional(parseLength)),
