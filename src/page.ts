@@ -1,6 +1,7 @@
 import {
   PDFDocument,
   PDFPage,
+  PDFPageDrawImageOptions,
   PDFPageDrawLineOptions,
   PDFPageDrawRectangleOptions,
   PDFPageDrawSVGOptions,
@@ -9,7 +10,7 @@ import {
 } from 'pdf-lib';
 
 import { Pos, Size } from './box.js';
-import { LineObject, PolylineObject, RectObject } from './graphics.js';
+import { ImageObject, LineObject, PolylineObject, RectObject } from './graphics.js';
 import { renderGuide } from './guides.js';
 import { Frame, LinkObject, TextObject } from './layout.js';
 import { addPageAnnotations, createLinkAnnotation } from './pdf-annotations.js';
@@ -54,6 +55,9 @@ export function renderFrame(frame: Frame, page: Page, base: Pos = null) {
     }
     if (object.type === 'polyline') {
       renderPolyline(object, page, topLeft);
+    }
+    if (object.type === 'image') {
+      renderImage(object, page, topLeft);
     }
   });
   frame.children?.forEach((frame) => {
@@ -103,6 +107,13 @@ function renderPolyline(polyline: PolylineObject, page: Page, base: Pos) {
   if ('strokeWidth' in polyline) options.borderWidth = polyline.strokeWidth;
   if ('fillColor' in polyline) options.color = polyline.fillColor;
   page.pdfPage.drawSvgPath(path, options);
+}
+
+function renderImage(object: ImageObject, page: Page, base: Pos) {
+  const { x, y } = tr({ x: object.x + base.x, y: object.y + base.y + object.height }, page);
+  const { width, height } = object;
+  const options: PDFPageDrawImageOptions = { x, y, width, height };
+  page.pdfPage.drawImage(object.image, options);
 }
 
 function createSvgPath(points: { x: number; y: number }[], closePath = false): string {

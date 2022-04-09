@@ -63,6 +63,7 @@ export type Rows = {
 
 export type Paragraph = {
   text?: TextSpan[];
+  image?: string;
   graphics?: GraphicsObject[];
   padding?: BoxEdges;
   textAlign?: Alignment;
@@ -120,6 +121,7 @@ export function parseParagraph(input: Obj, defaultAttrs?: TextAttrs): Paragraph 
   const parseTextWithAttrs = (text) => parseText(text, textAttrs);
   return pickDefined({
     text: getFrom(input, 'text', optional(parseTextWithAttrs)),
+    image: getFrom(input, 'image', optional(asString)),
     graphics: getFrom(input, 'graphics', optional(parseGraphics)),
     padding: getFrom(input, 'padding', optional(parseEdges)),
     textAlign: getFrom(input, 'textAlign', optional(asTextAlign)),

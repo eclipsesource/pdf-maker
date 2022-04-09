@@ -1,4 +1,6 @@
 /* eslint-disable import/no-default-export */
+import { readFileSync } from 'fs';
+
 import fonts from './generated/fonts.js';
 
 export default {
@@ -17,6 +19,9 @@ export default {
       { data: fonts.DejaVu_Sans_Bold, bold: true },
       { data: fonts.DejaVu_Sans_BoldItalic, italic: true, bold: true },
     ],
+  },
+  images: {
+    liberty: readFileSync('examples/liberty.jpg'),
   },
   margin: { x: '2.5cm', top: '2.5cm', bottom: '2cm' },
   defaultStyle: {
@@ -125,6 +130,10 @@ export default {
           margin: 7,
         },
       ],
+    },
+    {
+      image: 'liberty',
+      height: 200,
     },
     ...range(10).map((n) => ({
       text:

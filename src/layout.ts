@@ -4,7 +4,8 @@ import { Box, parseEdges, parseLength, Pos, Size, subtractEdges, ZERO_EDGES } fr
 import { Color } from './colors.js';
 import { Alignment } from './content.js';
 import { Font } from './fonts.js';
-import { GraphicsObject, shiftGraphicsObject } from './graphics.js';
+import { GraphicsObject, ImageObject, shiftGraphicsObject } from './graphics.js';
+import { Image } from './images.js';
 import { Page } from './page.js';
 import {
   Block,
@@ -57,7 +58,9 @@ export type LinkObject = {
   url: string;
 };
 
-export function layoutPages(def: Obj, fonts: Font[]): Page[] {
+type Resources = { fonts: Font[]; images: Image[] };
+
+export function layoutPages(def: Obj, resources: Resources): Page[] {
   const content = getFrom(def, 'content', required(asArray));
   const pageMargin = getFrom(def, 'margin', optional(parseEdges)) ?? defaultPageMargin;
   const defaultStyle = getFrom(def, 'defaultStyle', optional(parseTextAttrs));
@@ -67,7 +70,7 @@ export function layoutPages(def: Obj, fonts: Font[]): Page[] {
   const pages = [];
   let remainingBlocks = blocks;
   while (remainingBlocks?.length) {
-    const { frame, remainder } = layoutPageContent(remainingBlocks, contentBox, fonts);
+    const { frame, remainder } = layoutPageContent(remainingBlocks, contentBox, resources);
     remainingBlocks = remainder;
     pages.push({ size: pageSize, content: frame, guides });
   }
@@ -76,8 +79,8 @@ export function layoutPages(def: Obj, fonts: Font[]): Page[] {
     const parse = (block) => parseBlock(asObject(resolveFn(block, pageInfo)), defaultStyle);
     const header = getFrom(def, 'header', optional(parse));
     const footer = getFrom(def, 'footer', optional(parse));
-    page.header = header && layoutHeader(header, fonts);
-    page.footer = header && layoutFooter(footer, fonts);
+    page.header = header && layoutHeader(header, resources);
+    page.footer = header && layoutFooter(footer, resources);
   });
   return pages.map(pickDefined) as Page[];
 }
@@ -91,19 +94,19 @@ function resolveFn(value, ...args) {
   }
 }
 
-function layoutHeader(header, fonts) {
+function layoutHeader(header: Block, resources: Resources) {
   const box = subtractEdges({ x: 0, y: 0, ...pageSize }, header.margin);
-  return layoutBlock(header, box, fonts);
+  return layoutBlock(header, box, resources);
 }
 
-function layoutFooter(footer, fonts) {
+function layoutFooter(footer: Block, resources: Resources) {
   const box = subtractEdges({ x: 0, y: 0, ...pageSize }, footer.margin);
-  const frame = layoutBlock(footer, box, fonts);
+  const frame = layoutBlock(footer, box, resources);
   frame.y = pageSize.height - frame.height - footer.margin?.bottom ?? 0;
   return frame;
 }
 
-export function layoutPageContent(blocks: Block[], box: Box, fonts: Font[]) {
+export function layoutPageContent(blocks: Block[], box: Box, resources: Resources) {
   const { x, y, width, height } = box;
   const children = [];
   const pos = { x: 0, y: 0 };
@@ -116,7 +119,7 @@ export function layoutPageContent(blocks: Block[], box: Box, fonts: Font[]) {
     lastMargin = margin.bottom;
     const nextPos = { x: pos.x + margin.left, y: pos.y + topMargin };
     const maxSize = { width: width - margin.left - margin.right, height: remainingHeight };
-    const frame = layoutBlock(block, { ...nextPos, ...maxSize }, fonts);
+    const frame = layoutBlock(block, { ...nextPos, ...maxSize }, resources);
     // If the first paragraph does not fit on the page, render it anyway.
     // It wouldn't fit on the next page as well, ending in an endless loop.
     if (remainingHeight < topMargin + frame.height && idx) {
@@ -130,36 +133,40 @@ export function layoutPageContent(blocks: Block[], box: Box, fonts: Font[]) {
   return { frame: { type: 'page', x, y, width, height, children }, remainder };
 }
 
-export function layoutBlock(block: Block, box: Box, fonts: Font[]): Frame {
+export function layoutBlock(block: Block, box: Box, resources: Resources): Frame {
   if ((block as Columns).columns) {
-    return layoutColumns(block as Columns, box, fonts);
+    return layoutColumns(block as Columns, box, resources);
   }
   if ((block as Rows).rows) {
-    return layoutRows(block as Rows, box, fonts);
+    return layoutRows(block as Rows, box, resources);
   }
-  return layoutParagraph(block as Paragraph, box, fonts);
+  return layoutParagraph(block as Paragraph, box, resources);
 }
 
-export function layoutParagraph(paragraph: Paragraph, box: Box, fonts: Font[]): Frame {
+export function layoutParagraph(paragraph: Paragraph, box: Box, resources: Resources): Frame {
   const padding = paragraph.padding ?? ZERO_EDGES;
   const fixedWidth = paragraph.width;
   const fixedHeight = paragraph.height;
   const maxWidth = (fixedWidth ?? box.width) - padding.left - padding.right;
   const maxHeight = (fixedHeight ?? box.height) - padding.top - padding.bottom;
   const innerBox = { x: padding.left, y: padding.top, width: maxWidth, height: maxHeight };
-  const text = paragraph.text && layoutText(paragraph, innerBox, fonts);
+  const text = paragraph.text && layoutText(paragraph, innerBox, resources.fonts);
+  const image = paragraph.image && layoutImage(paragraph, innerBox, resources.images);
   const graphics = paragraph.graphics && layoutGraphics(paragraph.graphics, innerBox);
+  const contentHeight = Math.max(text?.size?.height ?? 0, image?.height ?? 0);
+  const objects = [...(graphics ?? []), ...(image ? [image] : [])];
   return {
     type: 'paragraph',
     ...box,
     width: fixedWidth ?? box.width,
-    height: fixedHeight ?? (text?.size?.height ?? 0) + padding.top + padding.bottom,
+    height: fixedHeight ?? (contentHeight ?? 0) + padding.top + padding.bottom,
     ...(text?.rows?.length ? { children: text.rows } : undefined),
-    ...(graphics?.length ? { objects: graphics } : undefined),
+    ...(image ? { image } : undefined),
+    ...(objects.length ? { objects } : undefined),
   };
 }
 
-function layoutColumns(block: Columns, box: Box, fonts: Font[]) {
+function layoutColumns(block: Columns, box: Box, resources: Resources) {
   const fixedWidth = block.width;
   const fixedHeight = block.height;
   const maxWidth = fixedWidth ?? box.width;
@@ -181,7 +188,7 @@ function layoutColumns(block: Columns, box: Box, fonts: Font[]) {
     const colWidth = column.width ?? flexColWidth - margin.left - margin.right;
     const colBox = { x: colX, y: margin.top, width: colWidth, height: column.height ?? maxHeight };
     colX += colWidth + margin.right;
-    const block = layoutBlock(column, colBox, fonts);
+    const block = layoutBlock(column, colBox, resources);
     children.push(block);
     maxColHeight = Math.max(maxColHeight, block.height + margin.top + margin.bottom);
   });
@@ -195,7 +202,7 @@ function layoutColumns(block: Columns, box: Box, fonts: Font[]) {
   };
 }
 
-function layoutRows(block: Rows, box: Box, fonts: Font[]) {
+function layoutRows(block: Rows, box: Box, resources: Resources) {
   const fixedWidth = block.width;
   const fixedHeight = block.height;
   const maxWidth = fixedWidth ?? box.width;
@@ -211,7 +218,7 @@ function layoutRows(block: Rows, box: Box, fonts: Font[]) {
     lastMargin = margin.bottom;
     const nextPos = { x: margin.left, y: rowY + topMargin };
     const maxSize = { width: maxWidth - margin.left - margin.right, height: remainingHeight };
-    const frame = layoutBlock(row, { ...nextPos, ...maxSize }, fonts);
+    const frame = layoutBlock(row, { ...nextPos, ...maxSize }, resources);
     children.push(frame);
     rowY += topMargin + frame.height;
     remainingHeight -= topMargin + frame.height;
@@ -228,14 +235,15 @@ function layoutRows(block: Rows, box: Box, fonts: Font[]) {
 }
 
 function layoutText(paragraph: Paragraph, box: Box, fonts: Font[]) {
-  const textSpans = paragraph.text;
+  const { text, textAlign } = paragraph;
+  const textSpans = text;
   const segments = extractTextSegments(textSpans, fonts);
   const rows = [];
   let remainingSegments = segments;
   const remainingSpace = { ...box };
   const size: Size = { width: 0, height: 0 };
   while (remainingSegments?.length) {
-    const { row, remainder } = layoutRow(remainingSegments, remainingSpace, paragraph.textAlign);
+    const { row, remainder } = layoutTextRow(remainingSegments, remainingSpace, textAlign);
     rows.push(row);
     remainingSegments = remainder;
     remainingSpace.height -= row.height;
@@ -246,7 +254,7 @@ function layoutText(paragraph: Paragraph, box: Box, fonts: Font[]) {
   return { rows, size };
 }
 
-function layoutRow(segments: TextSegment[], box: Box, textAlign: Alignment) {
+function layoutTextRow(segments: TextSegment[], box: Box, textAlign: Alignment) {
   const [lineSegments, remainder] = breakLine(segments, box.width);
   const pos = { x: 0, y: 0 };
   const size = { width: 0, height: 0 };
@@ -274,6 +282,23 @@ function layoutRow(segments: TextSegment[], box: Box, textAlign: Alignment) {
     objects,
   };
   return { row, remainder };
+}
+
+function layoutImage(paragraph: Paragraph, box: Box, images: Image[]): ImageObject {
+  const image = images.find((image) => image.name === paragraph.image)?.pdfImage;
+  if (!image) throw new Error(`Unknown image: ${paragraph.image}`);
+  const fixedWidth = paragraph.width;
+  const fixedHeight = paragraph.height;
+  const hScale = fixedWidth ? box.width / image.width : 1;
+  const vScale = fixedHeight ? box.height / image.height : 1;
+  const scale = Math.min(hScale, vScale);
+  return {
+    type: 'image',
+    ...box,
+    width: image.width * scale,
+    height: image.height * scale,
+    image,
+  };
 }
 
 function layoutGraphics(graphics: GraphicsObject[], pos: Pos): GraphicsObject[] {

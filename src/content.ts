@@ -32,6 +32,12 @@ export type DocumentDefinition = {
    */
   fonts?: FontsDefinition;
   /**
+   * The images to use in the document. Each image in the document needs to be registered.
+   * Once registered, an image can be reused without multiplying its footprint.
+   * Only JPEG images are supported.
+   */
+  images?: ImagesDefinition;
+  /**
    * Metadata to include in the document.
    */
   info?: {
@@ -92,6 +98,15 @@ export type FontDefinition = {
   italic?: boolean;
 };
 
+export type ImagesDefinition = { [name: string]: ImageDefinition[] };
+export type ImageDefinition = {
+  /**
+   * The image data, as a Uint8Array, ArrayBuffer, or a base64-encoded string.
+   * Only JPEG images are supported.
+   */
+  data: string | Uint8Array | ArrayBuffer;
+};
+
 export type Block = Columns | Rows | Paragraph;
 
 export type Columns = {
@@ -115,6 +130,8 @@ export type Paragraph = {
    * Text to display in this paragraph.
    */
   text?: Text;
+  /** */
+  image?: string;
   /**
    * Graphic elements to draw in the area covered by the paragraph.
    * The coordinate system for graphics shapes starts at the top left corner of the paragraph's

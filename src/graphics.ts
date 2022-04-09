@@ -1,3 +1,5 @@
+import { PDFImage } from 'pdf-lib';
+
 import { Pos } from './box.js';
 import { Color, parseColor } from './colors.js';
 import {
@@ -15,7 +17,7 @@ import {
   typeError,
 } from './types.js';
 
-export type GraphicsObject = RectObject | LineObject | PolylineObject;
+export type GraphicsObject = RectObject | LineObject | PolylineObject | ImageObject;
 
 export type RectObject = {
   type: 'rect';
@@ -45,6 +47,15 @@ export type PolylineObject = {
   strokeWidth?: number;
   strokeColor?: Color;
   fillColor?: Color;
+};
+
+export type ImageObject = {
+  type: 'image';
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  image: PDFImage;
 };
 
 export function parseGraphics(input: unknown): GraphicsObject[] {
