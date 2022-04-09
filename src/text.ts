@@ -91,46 +91,46 @@ export function parseBlock(input: Obj, defaultAttrs?: TextAttrs): Block {
 }
 
 export function parseColumns(input: Obj, defaultAttrs?: TextAttrs): Columns {
+  const textAttrs = { ...defaultAttrs, ...parseTextAttrs(input) };
   const parseColumns = (columns) =>
     asArray(columns).map((col, idx) =>
-      check(col, `column #${idx + 1}`, () => parseBlock(col as Obj, defaultAttrs))
+      check(col, `column #${idx + 1}`, () => parseBlock(col as Obj, textAttrs))
     );
   return pickDefined({
     columns: pick(input, 'columns', parseColumns),
-    margin: pick(input, 'margin', optional(parseEdges)),
-    width: pick(input, 'width', optional(parseLength)),
-    height: pick(input, 'height', optional(parseLength)),
+    ...parseBlockAttrs(input),
   }) as Columns;
 }
 
 export function parseRows(input: Obj, defaultAttrs?: TextAttrs): Columns {
+  const textAttrs = { ...defaultAttrs, ...parseTextAttrs(input) };
   const parseRows = (rows) =>
     asArray(rows).map((col, idx) =>
-      check(col, `row #${idx + 1}`, () => parseBlock(col as Obj, defaultAttrs))
+      check(col, `row #${idx + 1}`, () => parseBlock(col as Obj, textAttrs))
     );
   return pickDefined({
     rows: pick(input, 'rows', parseRows),
-    margin: pick(input, 'margin', optional(parseEdges)),
-    width: pick(input, 'width', optional(parseLength)),
-    height: pick(input, 'height', optional(parseLength)),
+    ...parseBlockAttrs(input),
   }) as Columns;
 }
 
 export function parseParagraph(input: Obj, defaultAttrs?: TextAttrs): Paragraph {
-  if (typeof input !== 'object') throw new TypeError(`Invalid type for paragraph: ${input}`);
-  const { columns, text, graphics, margin, padding, textAlign, width, height, ...attrs } = input;
-  const parseTextWithAttrs = () => parseText(text, { ...defaultAttrs, ...parseTextAttrs(attrs) });
-  const parseColumns = (input) =>
-    asArray(input).map((col) => parseParagraph(col as Obj, defaultAttrs));
+  const textAttrs = { ...defaultAttrs, ...parseTextAttrs(input) };
+  const parseTextWithAttrs = (text) => parseText(text, textAttrs);
   return pickDefined({
-    columns: check(columns, 'columns', optional(parseColumns)),
-    text: check(text, 'text', optional(parseTextWithAttrs)),
-    graphics: check(graphics, 'graphics', optional(parseGraphics)),
-    margin: check(margin, 'margin', optional(parseEdges)),
-    padding: check(padding, 'padding', optional(parseEdges)),
-    textAlign: check(textAlign, 'textAlign', optional(asTextAlign)),
-    width: check(width, 'width', optional(parseLength)),
-    height: check(height, 'height', optional(parseLength)),
+    text: pick(input, 'text', optional(parseTextWithAttrs)),
+    graphics: pick(input, 'graphics', optional(parseGraphics)),
+    padding: pick(input, 'padding', optional(parseEdges)),
+    textAlign: pick(input, 'textAlign', optional(asTextAlign)),
+    ...parseBlockAttrs(input),
+  });
+}
+
+function parseBlockAttrs(input: Obj): BlockAttrs {
+  return pickDefined({
+    margin: pick(input, 'margin', optional(parseEdges)),
+    width: pick(input, 'width', optional(parseLength)),
+    height: pick(input, 'height', optional(parseLength)),
   });
 }
 

@@ -99,14 +99,16 @@ export type Columns = {
    * Content blocks to arrange horizontally.
    */
   columns: Block[];
-} & BlockAttrs;
+} & TextAttrs &
+  BlockAttrs;
 
 export type Rows = {
   /**
    * Blocks to arrange vertically.
    */
   rows: Block[];
-} & BlockAttrs;
+} & TextAttrs &
+  BlockAttrs;
 
 export type Paragraph = {
   /**

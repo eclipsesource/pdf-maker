@@ -6,8 +6,10 @@ import {
   extractTextSegments,
   findLinebreakOpportunity,
   flattenTextSegments,
+  parseColumns,
   parseContent,
   parseParagraph,
+  parseRows,
   parseText,
   splitChunks,
   TextSegment,
@@ -45,6 +47,38 @@ describe('text', () => {
       const content = [{ text: 'foo' }, { text: 23 }];
 
       expect(() => parseContent(content, {})).toThrowError('Invalid value for "content block #2":');
+    });
+  });
+
+  describe('parseColumns', () => {
+    it('merges text attributes with default style', () => {
+      const content = { columns: [{ text: 'foo' }, { text: 'bar' }], fontSize: 8 };
+      const defaultStyle = { fontSize: 10, italic: true };
+
+      const result = parseColumns(content, defaultStyle);
+
+      expect(result).toEqual({
+        columns: [
+          { text: [{ attrs: { fontSize: 8, italic: true }, text: 'foo' }] },
+          { text: [{ attrs: { fontSize: 8, italic: true }, text: 'bar' }] },
+        ],
+      });
+    });
+  });
+
+  describe('parseRows', () => {
+    it('merges text attributes with default style', () => {
+      const content = { rows: [{ text: 'foo' }, { text: 'bar' }], fontSize: 8 };
+      const defaultStyle = { fontSize: 10, italic: true };
+
+      const result = parseRows(content, defaultStyle);
+
+      expect(result).toEqual({
+        rows: [
+          { text: [{ attrs: { fontSize: 8, italic: true }, text: 'foo' }] },
+          { text: [{ attrs: { fontSize: 8, italic: true }, text: 'bar' }] },
+        ],
+      });
     });
   });
 
