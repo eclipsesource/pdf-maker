@@ -16,7 +16,7 @@ export function pickDefined<T extends Obj>(obj: T): Partial<T> {
   return result;
 }
 
-export function pick<T = unknown>(object: Obj, name: string, fn?: (value: unknown) => T): T {
+export function getFrom<T = unknown>(object: Obj, name: string, fn?: (value: unknown) => T): T {
   return check?.(object[name], name, fn) ?? (object[name] as T);
 }
 

@@ -6,8 +6,8 @@ import {
   asNumber,
   asObject,
   check,
+  getFrom,
   optional,
-  pick,
   pickDefined,
   required,
 } from '../src/types.js';
@@ -75,11 +75,11 @@ describe('types', () => {
     });
   });
 
-  describe('pick', () => {
-    it('picks value from object', () => {
+  describe('getFrom', () => {
+    it('gets value from object', () => {
       const input = { foo: 23, bar: 42 };
 
-      const result = pick(input, 'foo');
+      const result = getFrom(input, 'foo');
 
       expect(result).toEqual(23);
     });
@@ -87,7 +87,7 @@ describe('types', () => {
     it('applies given function', () => {
       const input = { foo: 23, bar: 42 };
 
-      const result = pick(input, 'foo', (n) => (n as number) + 1);
+      const result = getFrom(input, 'foo', (n) => (n as number) + 1);
 
       expect(result).toEqual(24);
     });
@@ -98,7 +98,7 @@ describe('types', () => {
         throw new TypeError('bad value');
       };
 
-      const fn = () => pick(input, 'foo', bad);
+      const fn = () => getFrom(input, 'foo', bad);
 
       expect(fn).toThrowError('Invalid value for "foo": bad value');
     });

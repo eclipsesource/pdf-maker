@@ -5,8 +5,8 @@ import {
   asBoolean,
   asObject,
   check,
+  getFrom,
   optional,
-  pick,
   pickDefined,
   required,
 } from './types.js';
@@ -39,9 +39,9 @@ export function parseFonts(input: unknown): FontDef[] {
       const obj = check(fontDef, 'font', required(asObject));
       return pickDefined({
         name,
-        italic: pick(obj, 'italic', optional(asBoolean)) || undefined,
-        bold: pick(obj, 'bold', optional(asBoolean)) || undefined,
-        data: pick(obj, 'data', required()),
+        italic: getFrom(obj, 'italic', optional(asBoolean)) || undefined,
+        bold: getFrom(obj, 'bold', optional(asBoolean)) || undefined,
+        data: getFrom(obj, 'data', required()),
       }) as FontDef;
     });
   });

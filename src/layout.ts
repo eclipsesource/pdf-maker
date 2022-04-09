@@ -16,7 +16,7 @@ import {
   Rows,
 } from './text.js';
 import { breakLine, extractTextSegments, flattenTextSegments, TextSegment } from './text.js';
-import { asArray, asObject, Obj, optional, pick, pickDefined, required } from './types.js';
+import { asArray, asObject, getFrom, Obj, optional, pickDefined, required } from './types.js';
 
 const pageSize = { width: parseLength('210mm'), height: parseLength('297mm') }; // A4, portrait
 const defaultPageMargin = parseEdges('2cm');
@@ -58,10 +58,10 @@ export type LinkObject = {
 };
 
 export function layoutPages(def: Obj, fonts: Font[]): Page[] {
-  const content = pick(def, 'content', required(asArray));
-  const pageMargin = pick(def, 'margin', optional(parseEdges)) ?? defaultPageMargin;
-  const defaultStyle = pick(def, 'defaultStyle', optional(parseTextAttrs));
-  const guides = pick(def, 'dev', optional(asObject))?.guides;
+  const content = getFrom(def, 'content', required(asArray));
+  const pageMargin = getFrom(def, 'margin', optional(parseEdges)) ?? defaultPageMargin;
+  const defaultStyle = getFrom(def, 'defaultStyle', optional(parseTextAttrs));
+  const guides = getFrom(def, 'dev', optional(asObject))?.guides;
   const contentBox = subtractEdges({ x: 0, y: 0, ...pageSize }, pageMargin);
   const blocks = parseContent(content, defaultStyle);
   const pages = [];
@@ -74,8 +74,8 @@ export function layoutPages(def: Obj, fonts: Font[]): Page[] {
   pages.map((page, idx) => {
     const pageInfo = { pageCount: pages.length, pageNumber: idx + 1, pageSize };
     const parse = (block) => parseBlock(asObject(resolveFn(block, pageInfo)), defaultStyle);
-    const header = pick(def, 'header', optional(parse));
-    const footer = pick(def, 'footer', optional(parse));
+    const header = getFrom(def, 'header', optional(parse));
+    const footer = getFrom(def, 'footer', optional(parse));
     page.header = header && layoutHeader(header, fonts);
     page.footer = header && layoutFooter(footer, fonts);
   });

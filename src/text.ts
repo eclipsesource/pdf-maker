@@ -12,9 +12,9 @@ import {
   asObject,
   asString,
   check,
+  getFrom,
   Obj,
   optional,
-  pick,
   pickDefined,
 } from './types.js';
 
@@ -97,7 +97,7 @@ export function parseColumns(input: Obj, defaultAttrs?: TextAttrs): Columns {
       check(col, `column #${idx + 1}`, () => parseBlock(col as Obj, textAttrs))
     );
   return pickDefined({
-    columns: pick(input, 'columns', parseColumns),
+    columns: getFrom(input, 'columns', parseColumns),
     ...parseBlockAttrs(input),
   }) as Columns;
 }
@@ -109,7 +109,7 @@ export function parseRows(input: Obj, defaultAttrs?: TextAttrs): Columns {
       check(col, `row #${idx + 1}`, () => parseBlock(col as Obj, textAttrs))
     );
   return pickDefined({
-    rows: pick(input, 'rows', parseRows),
+    rows: getFrom(input, 'rows', parseRows),
     ...parseBlockAttrs(input),
   }) as Columns;
 }
@@ -118,19 +118,19 @@ export function parseParagraph(input: Obj, defaultAttrs?: TextAttrs): Paragraph 
   const textAttrs = { ...defaultAttrs, ...parseTextAttrs(input) };
   const parseTextWithAttrs = (text) => parseText(text, textAttrs);
   return pickDefined({
-    text: pick(input, 'text', optional(parseTextWithAttrs)),
-    graphics: pick(input, 'graphics', optional(parseGraphics)),
-    padding: pick(input, 'padding', optional(parseEdges)),
-    textAlign: pick(input, 'textAlign', optional(asTextAlign)),
+    text: getFrom(input, 'text', optional(parseTextWithAttrs)),
+    graphics: getFrom(input, 'graphics', optional(parseGraphics)),
+    padding: getFrom(input, 'padding', optional(parseEdges)),
+    textAlign: getFrom(input, 'textAlign', optional(asTextAlign)),
     ...parseBlockAttrs(input),
   });
 }
 
 function parseBlockAttrs(input: Obj): BlockAttrs {
   return pickDefined({
-    margin: pick(input, 'margin', optional(parseEdges)),
-    width: pick(input, 'width', optional(parseLength)),
-    height: pick(input, 'height', optional(parseLength)),
+    margin: getFrom(input, 'margin', optional(parseEdges)),
+    width: getFrom(input, 'width', optional(parseLength)),
+    height: getFrom(input, 'height', optional(parseLength)),
   });
 }
 
@@ -158,13 +158,13 @@ function asTextAlign(input: unknown): Alignment {
 
 export function parseTextAttrs(input: Obj): TextAttrs {
   return pickDefined({
-    fontFamily: pick(input, 'fontFamily', optional(asString)),
-    fontSize: pick(input, 'fontSize', optional(asNonNegNumber)),
-    lineHeight: pick(input, 'lineHeight', optional(asNonNegNumber)),
-    bold: pick(input, 'bold', optional(asBoolean)),
-    italic: pick(input, 'italic', optional(asBoolean)),
-    color: pick(input, 'color', optional(parseColor)),
-    link: pick(input, 'link', optional(asString)),
+    fontFamily: getFrom(input, 'fontFamily', optional(asString)),
+    fontSize: getFrom(input, 'fontSize', optional(asNonNegNumber)),
+    lineHeight: getFrom(input, 'lineHeight', optional(asNonNegNumber)),
+    bold: getFrom(input, 'bold', optional(asBoolean)),
+    italic: getFrom(input, 'italic', optional(asBoolean)),
+    color: getFrom(input, 'color', optional(parseColor)),
+    link: getFrom(input, 'link', optional(asString)),
   });
 }
 

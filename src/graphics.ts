@@ -7,9 +7,9 @@ import {
   asNumber,
   asObject,
   check,
+  getFrom,
   Obj,
   optional,
-  pick,
   pickDefined,
   required,
 } from './types.js';
@@ -77,36 +77,36 @@ export function parseGraphicsObject(input: unknown): GraphicsObject {
 function parseRect(input: Obj): RectObject {
   return pickDefined({
     type: 'rect',
-    x: pick(input, 'x', required(asNumber)),
-    y: pick(input, 'y', required(asNumber)),
-    width: pick(input, 'width', required(asNumber)),
-    height: pick(input, 'height', required(asNumber)),
-    strokeWidth: pick(input, 'strokeWidth', optional(asNonNegNumber)),
-    strokeColor: pick(input, 'strokeColor', optional(parseColor)),
-    fillColor: pick(input, 'fillColor', optional(parseColor)),
+    x: getFrom(input, 'x', required(asNumber)),
+    y: getFrom(input, 'y', required(asNumber)),
+    width: getFrom(input, 'width', required(asNumber)),
+    height: getFrom(input, 'height', required(asNumber)),
+    strokeWidth: getFrom(input, 'strokeWidth', optional(asNonNegNumber)),
+    strokeColor: getFrom(input, 'strokeColor', optional(parseColor)),
+    fillColor: getFrom(input, 'fillColor', optional(parseColor)),
   }) as RectObject;
 }
 
 function parseLine(input: Obj): LineObject {
   return pickDefined({
     type: 'line',
-    x1: pick(input, 'x1', required(asNumber)),
-    x2: pick(input, 'x2', required(asNumber)),
-    y1: pick(input, 'y1', required(asNumber)),
-    y2: pick(input, 'y2', required(asNumber)),
-    strokeWidth: pick(input, 'strokeWidth', optional(asNonNegNumber)),
-    strokeColor: pick(input, 'strokeColor', optional(parseColor)),
+    x1: getFrom(input, 'x1', required(asNumber)),
+    x2: getFrom(input, 'x2', required(asNumber)),
+    y1: getFrom(input, 'y1', required(asNumber)),
+    y2: getFrom(input, 'y2', required(asNumber)),
+    strokeWidth: getFrom(input, 'strokeWidth', optional(asNonNegNumber)),
+    strokeColor: getFrom(input, 'strokeColor', optional(parseColor)),
   }) as LineObject;
 }
 
 function parsePolyline(input: Obj): PolylineObject {
   return pickDefined({
     type: 'polyline',
-    points: pick(input, 'points', required(checkPoints)),
-    closePath: pick(input, 'closePath', optional(asBoolean)),
-    strokeWidth: pick(input, 'strokeWidth', optional(asNonNegNumber)),
-    strokeColor: pick(input, 'strokeColor', optional(parseColor)),
-    fillColor: pick(input, 'fillColor', optional(parseColor)),
+    points: getFrom(input, 'points', required(checkPoints)),
+    closePath: getFrom(input, 'closePath', optional(asBoolean)),
+    strokeWidth: getFrom(input, 'strokeWidth', optional(asNonNegNumber)),
+    strokeColor: getFrom(input, 'strokeColor', optional(parseColor)),
+    fillColor: getFrom(input, 'fillColor', optional(parseColor)),
   }) as PolylineObject;
 }
 
@@ -156,8 +156,8 @@ function checkPoints(input: unknown): { x: number; y: number }[] {
     return array.map((point) => {
       const obj = asObject(point);
       return {
-        x: pick(obj, 'x', required(asNumber)),
-        y: pick(obj, 'y', required(asNumber)),
+        x: getFrom(obj, 'x', required(asNumber)),
+        y: getFrom(obj, 'y', required(asNumber)),
       };
     }) as { x: number; y: number }[];
   } catch (error) {

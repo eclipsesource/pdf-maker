@@ -7,9 +7,9 @@ import {
   asObject,
   asString,
   check,
+  getFrom,
   Obj,
   optional,
-  pick,
   pickDefined,
 } from './types.js';
 
@@ -34,13 +34,13 @@ export function parseInfo(input: unknown): Metadata {
   const obj = check(input, 'info', optional(asObject));
   if (!obj) return undefined;
   return pickDefined({
-    title: pick(obj, 'title', optional(asString)),
-    subject: pick(obj, 'subject', optional(asString)),
-    keywords: pick(obj, 'keywords', optional(asStringArray)) as string[],
-    author: pick(obj, 'author', optional(asString)),
-    creationDate: pick(obj, 'creationDate', optional(asDate)),
-    creator: pick(obj, 'creator', optional(asString)),
-    producer: pick(obj, 'producer', optional(asString)),
+    title: getFrom(obj, 'title', optional(asString)),
+    subject: getFrom(obj, 'subject', optional(asString)),
+    keywords: getFrom(obj, 'keywords', optional(asStringArray)) as string[],
+    author: getFrom(obj, 'author', optional(asString)),
+    creationDate: getFrom(obj, 'creationDate', optional(asDate)),
+    creator: getFrom(obj, 'creator', optional(asString)),
+    producer: getFrom(obj, 'producer', optional(asString)),
   });
 }
 
