@@ -45,10 +45,7 @@ export function parseInfo(input: unknown): Metadata {
 }
 
 function asStringArray(input: unknown): string[] {
-  asArray(input).forEach((el) => {
-    if (typeof el !== 'string') throw new TypeError(`Element is not a string: ${el}`);
-  });
-  return input as string[];
+  return asArray(input).map((el, idx) => check(el, `element ${idx + 1}`, asString));
 }
 
 function setMetadata(info: Metadata, doc: PDFDocument) {

@@ -39,7 +39,7 @@ describe('document', () => {
         'Invalid value for "keywords": Expected array'
       );
       expect(() => parseInfo({ keywords: [23] })).toThrowError(
-        'Invalid value for "keywords": Element is not a string'
+        'Invalid value for "keywords": Invalid value for "element 1": Expected string, got: 23'
       );
     });
 

@@ -12,14 +12,16 @@ import {
 describe('graphics', () => {
   describe('parseGraphicsObject', () => {
     it('throws for invalid types', () => {
-      expect(() => parseGraphicsObject(23)).toThrowError('Invalid graphics object: 23');
-      expect(() => parseGraphicsObject('foo')).toThrowError('Invalid graphics object: foo');
+      expect(() => parseGraphicsObject(23)).toThrowError('Expected object, got: 23');
+      expect(() => parseGraphicsObject('foo')).toThrowError("Expected object, got: 'foo'");
     });
 
     it('throws for unsupported type attribute', () => {
       const fn = () => parseGraphicsObject({ type: 'foo' });
 
-      expect(fn).toThrowError('Unsupported graphics object type: "foo"');
+      expect(fn).toThrowError(
+        "Invalid value for \"type\": Expected 'rect', 'line', or 'polyline', got: 'foo'"
+      );
     });
 
     it('parses rect object', () => {
@@ -44,9 +46,7 @@ describe('graphics', () => {
 
         const fn = () => parseGraphicsObject(rect);
 
-        expect(fn).toThrowError(
-          `Invalid graphics object of type "rect": Missing value for "${name}"`
-        );
+        expect(fn).toThrowError(`Missing value for "${name}"`);
       });
     });
 
@@ -70,9 +70,7 @@ describe('graphics', () => {
 
         const fn = () => parseGraphicsObject(line);
 
-        expect(fn).toThrowError(
-          `Invalid graphics object of type "line": Missing value for "${name}"`
-        );
+        expect(fn).toThrowError(`Missing value for "${name}"`);
       });
     });
 
@@ -94,9 +92,7 @@ describe('graphics', () => {
     it(`throws for missing polyline attribute points`, () => {
       const fn = () => parseGraphicsObject({ type: 'polyline' });
 
-      expect(fn).toThrowError(
-        `Invalid graphics object of type "polyline": Missing value for "points"`
-      );
+      expect(fn).toThrowError(`Missing value for "points"`);
     });
 
     ['strokeColor', 'fillColor'].forEach((name) => {
@@ -105,9 +101,7 @@ describe('graphics', () => {
 
         const fn = () => parseGraphicsObject(rect);
 
-        expect(fn).toThrowError(
-          `Invalid graphics object of type "rect": Invalid value for "${name}": Unsupported color name: 'foo'`
-        );
+        expect(fn).toThrowError(`Invalid value for "${name}": Unsupported color name: 'foo'`);
       });
     });
 
@@ -117,7 +111,7 @@ describe('graphics', () => {
       const fn = () => parseGraphicsObject(rect);
 
       expect(fn).toThrowError(
-        'Invalid graphics object of type "rect": Invalid value for "strokeWidth": Expected non-negative number, got: -1'
+        'Invalid value for "strokeWidth": Expected non-negative number, got: -1'
       );
     });
   });

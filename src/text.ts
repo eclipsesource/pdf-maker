@@ -16,6 +16,7 @@ import {
   Obj,
   optional,
   pickDefined,
+  typeError,
 } from './types.js';
 
 const defaultFontSize = 18;
@@ -144,16 +145,12 @@ export function parseText(text: unknown, attrs: TextAttrs): TextSpan[] {
   if (typeof text === 'object' && 'text' in text) {
     return parseText((text as Obj).text, { ...attrs, ...parseTextAttrs(text as Obj) });
   }
-  throw new TypeError(
-    `Expected string, object with text attribute, or array of text, got: ${text}`
-  );
+  throw typeError('string, object with text attribute, or array of text', text);
 }
 
 function asTextAlign(input: unknown): Alignment {
-  if (input !== 'left' && input !== 'right' && input !== 'center') {
-    throw new TypeError(`Expected 'left', 'right', or 'center', got: ${input}`);
-  }
-  return input;
+  if (input === 'left' || input === 'right' || input === 'center') return input;
+  throw typeError("'left', 'right', or 'center'", input);
 }
 
 export function parseTextAttrs(input: Obj): TextAttrs {

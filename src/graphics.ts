@@ -12,6 +12,7 @@ import {
   optional,
   pickDefined,
   required,
+  typeError,
 } from './types.js';
 
 export type GraphicsObject = RectObject | LineObject | PolylineObject;
@@ -47,7 +48,9 @@ export type PolylineObject = {
 };
 
 export function parseGraphics(input: unknown): GraphicsObject[] {
-  return check(input, 'graphics', optional(asArray))?.map((el) => parseGraphicsObject(el));
+  return check(input, 'graphics', optional(asArray))?.map((el, idx) =>
+    check(el, `graphics object ${idx + 1} (type "${el['type']}")`, parseGraphicsObject)
+  );
 }
 
 /**
@@ -57,21 +60,21 @@ export function parseGraphics(input: unknown): GraphicsObject[] {
  * @returns A graphics shape object.
  */
 export function parseGraphicsObject(input: unknown): GraphicsObject {
-  if (typeof input !== 'object') throw new TypeError(`Invalid graphics object: ${input}`);
-  const shape = input as Obj;
-  try {
-    switch (shape.type) {
-      case 'rect':
-        return parseRect(shape);
-      case 'line':
-        return parseLine(shape);
-      case 'polyline':
-        return parsePolyline(shape);
-    }
-  } catch (error) {
-    throw new TypeError(`Invalid graphics object of type "${shape.type}": ${error.message}`);
+  const shape = asObject(input);
+  const type = getFrom(shape, 'type', required(asGraphicsType));
+  switch (type) {
+    case 'rect':
+      return parseRect(shape);
+    case 'line':
+      return parseLine(shape);
+    case 'polyline':
+      return parsePolyline(shape);
   }
-  throw new TypeError(`Unsupported graphics object type: "${shape.type}"`);
+}
+
+function asGraphicsType(input: unknown): string {
+  if (input === 'rect' || input === 'line' || input === 'polyline') return input;
+  throw typeError("'rect', 'line', or 'polyline'", input);
 }
 
 function parseRect(input: Obj): RectObject {
@@ -102,7 +105,7 @@ function parseLine(input: Obj): LineObject {
 function parsePolyline(input: Obj): PolylineObject {
   return pickDefined({
     type: 'polyline',
-    points: getFrom(input, 'points', required(checkPoints)),
+    points: getFrom(input, 'points', required(asPoints)),
     closePath: getFrom(input, 'closePath', optional(asBoolean)),
     strokeWidth: getFrom(input, 'strokeWidth', optional(asNonNegNumber)),
     strokeColor: getFrom(input, 'strokeColor', optional(parseColor)),
@@ -150,17 +153,14 @@ function shiftPolyline(polyline: PolylineObject, pos: Pos): PolylineObject {
   };
 }
 
-function checkPoints(input: unknown): { x: number; y: number }[] {
-  const array = asArray(input);
-  try {
-    return array.map((point) => {
-      const obj = asObject(point);
-      return {
-        x: getFrom(obj, 'x', required(asNumber)),
-        y: getFrom(obj, 'y', required(asNumber)),
-      };
-    }) as { x: number; y: number }[];
-  } catch (error) {
-    throw new TypeError(`Invalid point: ${error.message}`);
-  }
+function asPoints(input: unknown): { x: number; y: number }[] {
+  return asArray(input).map((point, idx) => check(point, `point ${idx + 1}`, asPoint));
+}
+
+function asPoint(input: unknown): { x: number; y: number } {
+  const obj = asObject(input);
+  return {
+    x: getFrom(obj, 'x', required(asNumber)),
+    y: getFrom(obj, 'y', required(asNumber)),
+  };
 }

@@ -17,7 +17,7 @@ export function pickDefined<T extends Obj>(obj: T): Partial<T> {
 }
 
 export function getFrom<T = unknown>(object: Obj, name: string, fn?: (value: unknown) => T): T {
-  return check?.(object[name], name, fn) ?? (object[name] as T);
+  return check(object[name], name, fn);
 }
 
 export function check<T = unknown>(value: unknown, name: string, fn?: (value: unknown) => T): T {
@@ -32,10 +32,10 @@ export function check<T = unknown>(value: unknown, name: string, fn?: (value: un
   }
 }
 
-export function optional<T>(fn: (value: unknown) => T): (value: unknown) => T {
+export function optional<T>(fn?: (value: unknown) => T): (value: unknown) => T {
   return (value: unknown) => {
     if (value === undefined) return undefined;
-    return fn(value);
+    return fn ? fn(value) : (value as T);
   };
 }
 
@@ -47,40 +47,79 @@ export function required<T = unknown>(fn?: (value: unknown) => T): (value: unkno
 }
 
 export function asBoolean(value: unknown): boolean {
-  if (typeof value !== 'boolean') throw expected('boolean', value);
-  return value;
+  if (typeof value === 'boolean') return value;
+  throw typeError('boolean', value);
 }
 
 export function asString(value: unknown): string {
-  if (typeof value !== 'string') throw expected('string', value);
-  return value;
+  if (typeof value === 'string') return value;
+  throw typeError('string', value);
 }
 
 export function asNumber(value: unknown): number {
-  if (!Number.isFinite(value)) throw expected('number', value);
-  return value as number;
+  if (Number.isFinite(value)) return value as number;
+  throw typeError('number', value);
 }
 
 export function asNonNegNumber(value: unknown): number {
-  if (asNumber(value) < 0) throw expected('non-negative number', value);
-  return value as number;
+  if (asNumber(value) >= 0) return value as number;
+  throw typeError('non-negative number', value);
 }
 
 export function asDate(value: unknown): Date {
-  if (Object.prototype.toString.call(value) !== '[object Date]') throw expected('Date', value);
-  return value as Date;
+  if (value instanceof Date) return value as Date;
+  throw typeError('Date', value);
 }
 
 export function asArray(value: unknown): unknown[] {
-  if (!Array.isArray(value)) throw expected('array', value);
-  return value;
+  if (Array.isArray(value)) return value;
+  throw typeError('array', value);
 }
 
 export function asObject(value: unknown): Obj {
-  if (typeof value !== 'object' || Array.isArray(value)) throw expected('object', value);
-  return value as Obj;
+  if (typeof value === 'object' && !Array.isArray(value)) return value as Obj;
+  throw typeError('object', value);
 }
 
-function expected(expected: string, value: unknown) {
-  return new TypeError(`Expected ${expected}, got: ${value}`);
+export function typeError(expected: string, value: unknown) {
+  return new TypeError(`Expected ${expected}, got: ${printValue(value)}`);
+}
+
+export function printValue(value: unknown, refs?: unknown[]) {
+  if (typeof value === 'string') return `'${value}'`;
+  if (Array.isArray(value)) return printArray(value, refs);
+  if (value instanceof Date) return `Date ${value.toISOString()}`;
+  if (value instanceof Function) {
+    return value.name ? `function ${value.name}` : 'anonymous function';
+  }
+  if (value instanceof ArrayBuffer) return `ArrayBuffer ${printArray([...new Uint8Array(value)])}`;
+  if (ArrayBuffer.isView(value)) {
+    return `${value.constructor.name} ${printArray([...new Uint8Array(value.buffer)])}`;
+  }
+  const str = `${value}`;
+  if (str === '[object Object]') return printObject(value, refs);
+  return str;
+}
+
+function printArray(array: unknown[], refs?: unknown[]): string {
+  if (refs?.includes(array)) return 'recursive ref';
+  const maxElements = 8;
+  const content = array
+    .slice(0, maxElements)
+    .map((v) => printValue(v, [...(refs ?? []), array]))
+    .join(', ');
+  const tail = array.length > maxElements ? ', …' : '';
+  return `[${content}${tail}]`;
+}
+
+function printObject(object: unknown, refs?: unknown[]): string {
+  if (refs?.includes(object)) return 'recursive ref';
+  const maxEntries = 8;
+  const entries = Object.entries(object);
+  const tail = entries.length > maxEntries ? ', …' : '';
+  const main = entries
+    .slice(0, maxEntries)
+    .map(([key, value]) => `${key}: ${printValue(value, [...(refs ?? []), object])}`)
+    .join(', ');
+  return `{${main}${tail}}`;
 }

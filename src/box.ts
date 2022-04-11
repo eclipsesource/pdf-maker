@@ -1,4 +1,4 @@
-import { Obj } from './types.js';
+import { Obj, typeError } from './types.js';
 
 export type Pos = { x: number; y: number };
 export type Size = { width: number; height: number };
@@ -52,7 +52,7 @@ export function parseEdges(input?: unknown): BoxEdges | undefined {
       bottom: parseLength(obj.bottom ?? obj.y ?? 0),
     };
   }
-  throw new TypeError(`Invalid box lengths: '${input}'`);
+  throw typeError('number, length string, or object', input);
 }
 
 /**
@@ -76,7 +76,7 @@ export function parseLength(input?: unknown): number | undefined {
       }
     }
   }
-  throw new TypeError(`Invalid length: '${input}'`);
+  throw typeError('number or length string', input);
 }
 
 function convertToPt(value: number, fromUnit: string): number {
