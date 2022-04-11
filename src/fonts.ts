@@ -1,5 +1,6 @@
 import { PDFDocument, PDFFont } from 'pdf-lib';
 
+import { parseBinaryData } from './binary-data.js';
 import {
   asArray,
   asBoolean,
@@ -41,7 +42,7 @@ export function parseFonts(input: unknown): FontDef[] {
         name,
         italic: getFrom(obj, 'italic', optional(asBoolean)) || undefined,
         bold: getFrom(obj, 'bold', optional(asBoolean)) || undefined,
-        data: getFrom(obj, 'data', required()),
+        data: getFrom(obj, 'data', required(parseBinaryData)),
       }) as FontDef;
     });
   });

@@ -14,22 +14,22 @@ describe('fonts', () => {
     it('returns fonts array', () => {
       const fontsDef = {
         Test: [
-          { data: 'Test_Sans_Normal' },
-          { data: 'Test_Sans_Italic', italic: true },
-          { data: 'Test_Sans_Bold', bold: true },
-          { data: 'Test_Sans_BoldItalic', italic: true, bold: true },
+          { data: mkData('Test_Sans_Normal') },
+          { data: mkData('Test_Sans_Italic'), italic: true },
+          { data: mkData('Test_Sans_Bold'), bold: true },
+          { data: mkData('Test_Sans_BoldItalic'), italic: true, bold: true },
         ],
-        Other: [{ data: 'Other_Normal' }],
+        Other: [{ data: mkData('Other_Normal') }],
       };
 
       const fonts = parseFonts(fontsDef);
 
       expect(fonts).toEqual([
-        { name: 'Test', data: 'Test_Sans_Normal' },
-        { name: 'Test', data: 'Test_Sans_Italic', italic: true },
-        { name: 'Test', data: 'Test_Sans_Bold', bold: true },
-        { name: 'Test', data: 'Test_Sans_BoldItalic', italic: true, bold: true },
-        { name: 'Other', data: 'Other_Normal' },
+        { name: 'Test', data: mkData('Test_Sans_Normal') },
+        { name: 'Test', data: mkData('Test_Sans_Italic'), italic: true },
+        { name: 'Test', data: mkData('Test_Sans_Bold'), bold: true },
+        { name: 'Test', data: mkData('Test_Sans_BoldItalic'), italic: true, bold: true },
+        { name: 'Other', data: mkData('Other_Normal') },
       ]);
     });
 
@@ -52,11 +52,12 @@ describe('fonts', () => {
     });
 
     it('removes redundant false values for italic and bold', () => {
-      const fontsDef = { Test: [{ data: 'data', italic: false, bold: false }] };
+      const data = mkData('data');
+      const fontsDef = { Test: [{ data, italic: false, bold: false }] };
 
       const fonts = parseFonts(fontsDef);
 
-      expect(fonts).toEqual([{ name: 'Test', data: 'data' }]);
+      expect(fonts).toEqual([{ name: 'Test', data }]);
     });
   });
 
@@ -161,3 +162,7 @@ describe('fonts', () => {
     });
   });
 });
+
+function mkData(value: string) {
+  return new Uint8Array(value.split('').map((c) => c.charCodeAt(0)));
+}
