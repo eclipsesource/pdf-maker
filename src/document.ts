@@ -1,5 +1,5 @@
 import fontkit from '@pdf-lib/fontkit';
-import { PDFDocument } from 'pdf-lib';
+import { PDFDict, PDFDocument, PDFHexString, PDFName } from 'pdf-lib';
 
 import {
   asArray,
@@ -16,7 +16,7 @@ import {
 export async function createDocument(def: Obj) {
   const doc = await PDFDocument.create();
   doc.registerFontkit(fontkit);
-  setMetadata(parseInfo(def.info), doc);
+  setMetadata(getFrom(def, 'info', optional(parseInfo)), doc);
   return doc;
 }
 
@@ -28,20 +28,28 @@ type Metadata = {
   creationDate?: Date;
   creator?: string;
   producer?: string;
+  custom?: Record<string, string>;
 };
 
 export function parseInfo(input: unknown): Metadata {
-  const obj = check(input, 'info', optional(asObject));
-  if (!obj) return undefined;
+  const obj = asObject(input);
+  const { title, subject, keywords, author, creationDate, creator, producer, ...custom } = obj;
   return pickDefined({
-    title: getFrom(obj, 'title', optional(asString)),
-    subject: getFrom(obj, 'subject', optional(asString)),
-    keywords: getFrom(obj, 'keywords', optional(asStringArray)) as string[],
-    author: getFrom(obj, 'author', optional(asString)),
-    creationDate: getFrom(obj, 'creationDate', optional(asDate)),
-    creator: getFrom(obj, 'creator', optional(asString)),
-    producer: getFrom(obj, 'producer', optional(asString)),
+    title: check(title, 'title', optional(asString)),
+    subject: check(subject, 'subject', optional(asString)),
+    keywords: check(keywords, 'keywords', optional(asStringArray)) as string[],
+    author: check(author, 'author', optional(asString)),
+    creationDate: check(creationDate, 'creationDate', optional(asDate)),
+    creator: check(creator, 'creator', optional(asString)),
+    producer: check(producer, 'producer', optional(asString)),
+    custom: parseCustomAttrs(custom),
   });
+}
+
+function parseCustomAttrs(custom: Obj): Record<string, string> {
+  if (custom == null || !Object.keys(custom).length) return undefined;
+  Object.entries(asObject(custom)).forEach(([key, value]) => check(value, key, asString));
+  return custom as Record<string, string>;
 }
 
 function asStringArray(input: unknown): string[] {
@@ -69,5 +77,11 @@ function setMetadata(info: Metadata, doc: PDFDocument) {
   }
   if (info?.producer) {
     doc.setProducer(info.producer);
+  }
+  if (info?.custom) {
+    const dict = (doc as any).getInfoDict() as PDFDict;
+    for (const [key, value] of Object.entries(info.custom)) {
+      dict.set(PDFName.of(key), PDFHexString.fromText(value));
+    }
   }
 }
