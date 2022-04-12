@@ -135,6 +135,20 @@ export default {
       image: 'liberty',
       height: 200,
     },
+    {
+      rows: [
+        {
+          text: 'Contents',
+          fontSize: 18,
+          margin: { bottom: 5 },
+        },
+        ...range(10).map((n) => ({
+          text: `Paragraph ${n + 1}`,
+          link: `#par:${n + 1}`,
+        })),
+      ],
+      margin: { bottom: 10 },
+    },
     ...range(10).map((n) => ({
       text:
         `(${n + 1})` +
@@ -144,6 +158,7 @@ export default {
         ' dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.' +
         ' Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt' +
         ' mollit anim id est laborum.',
+      id: `par:${n + 1}`,
     })),
   ],
 };

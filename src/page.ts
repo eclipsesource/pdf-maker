@@ -11,8 +11,8 @@ import {
 import { Pos, Size } from './box.js';
 import { ImageObject, LineObject, PolylineObject, RectObject } from './graphics.js';
 import { renderGuide } from './guides.js';
-import { Frame, LinkObject, TextObject } from './layout.js';
-import { createLinkAnnotation } from './pdf-annotations.js';
+import { DestObject, Frame, LinkObject, TextObject } from './layout.js';
+import { createLinkAnnotation, createNamedDest } from './pdf-annotations.js';
 
 export type Page = {
   size: Size;
@@ -38,6 +38,9 @@ export function renderFrame(frame: Frame, page: Page, base: Pos = null) {
   frame.objects?.forEach((object) => {
     if (object.type === 'text') {
       renderText(object, page, bottomLeft);
+    }
+    if (object.type === 'dest') {
+      renderDest(object, page, topLeft);
     }
     if (object.type === 'link') {
       renderLink(object, page, bottomLeft);
@@ -65,6 +68,11 @@ function renderText(el: TextObject, page: Page, base: Pos) {
   const options: PDFPageDrawTextOptions = { x, y, size: el.fontSize, font: el.font };
   if (el.color) options.color = el.color;
   page.pdfPage.drawText(el.text, options);
+}
+
+function renderDest(el: DestObject, page: Page, base: Pos) {
+  const { x, y } = tr({ x: el.x + base.x, y: el.y + base.y }, page);
+  createNamedDest(page.pdfPage, el.name, { x, y });
 }
 
 function renderLink(el: LinkObject, page: Page, base: Pos) {

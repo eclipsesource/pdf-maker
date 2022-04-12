@@ -37,7 +37,7 @@ export type Frame = {
   children?: Frame[];
 };
 
-export type DrawableObject = TextObject | LinkObject | GraphicsObject;
+export type DrawableObject = TextObject | DestObject | LinkObject | GraphicsObject;
 
 export type TextObject = {
   type: 'text';
@@ -56,6 +56,13 @@ export type LinkObject = {
   width: number;
   height: number;
   url: string;
+};
+
+export type DestObject = {
+  type: 'dest';
+  name: string;
+  x: number;
+  y: number;
 };
 
 type Resources = { fonts: Font[]; images: Image[] };
@@ -154,7 +161,11 @@ export function layoutParagraph(paragraph: Paragraph, box: Box, resources: Resou
   const image = paragraph.image && layoutImage(paragraph, innerBox, resources.images);
   const graphics = paragraph.graphics && layoutGraphics(paragraph.graphics, innerBox);
   const contentHeight = Math.max(text?.size?.height ?? 0, image?.height ?? 0);
-  const objects = [...(graphics ?? []), ...(image ? [image] : [])];
+  const objects = [
+    ...(graphics ?? []),
+    ...(image ? [image] : []),
+    ...(paragraph.id ? [layoutDest(paragraph.id, innerBox)] : []),
+  ];
   return {
     type: 'paragraph',
     ...box,
@@ -166,7 +177,7 @@ export function layoutParagraph(paragraph: Paragraph, box: Box, resources: Resou
   };
 }
 
-function layoutColumns(block: Columns, box: Box, resources: Resources) {
+function layoutColumns(block: Columns, box: Box, resources: Resources): Frame {
   const fixedWidth = block.width;
   const fixedHeight = block.height;
   const maxWidth = fixedWidth ?? box.width;
@@ -199,10 +210,11 @@ function layoutColumns(block: Columns, box: Box, resources: Resources) {
     width: fixedWidth ?? box.width,
     height: fixedHeight ?? maxColHeight,
     children,
+    ...(block.id && { objects: [layoutDest(block.id, box)] }),
   };
 }
 
-function layoutRows(block: Rows, box: Box, resources: Resources) {
+function layoutRows(block: Rows, box: Box, resources: Resources): Frame {
   const fixedWidth = block.width;
   const fixedHeight = block.height;
   const maxWidth = fixedWidth ?? box.width;
@@ -231,6 +243,16 @@ function layoutRows(block: Rows, box: Box, resources: Resources) {
     width: fixedWidth ?? box.width,
     height: fixedHeight ?? aggregatedHeight + lastMargin,
     children,
+    ...(block.id && { objects: [layoutDest(block.id, box)] }),
+  };
+}
+
+function layoutDest(name: string, pos: Pos): DestObject {
+  return {
+    type: 'dest',
+    name,
+    x: pos.x,
+    y: pos.y,
   };
 }
 

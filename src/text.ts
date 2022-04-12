@@ -55,11 +55,13 @@ export type Block = Columns | Rows | Paragraph;
 
 export type Columns = {
   columns: Block[];
-} & BlockAttrs;
+} & BlockAttrs &
+  TextAttrs;
 
 export type Rows = {
   rows: Block[];
-} & BlockAttrs;
+} & BlockAttrs &
+  TextAttrs;
 
 export type Paragraph = {
   text?: TextSpan[];
@@ -74,7 +76,8 @@ export type BlockAttrs = {
   margin?: BoxEdges;
   width?: number;
   height?: number;
-} & TextAttrs;
+  id?: string;
+};
 
 export function parseContent(content: unknown[], defaultStyle: TextAttrs): Paragraph[] {
   return content.map((block, idx) =>
@@ -134,6 +137,7 @@ function parseBlockAttrs(input: Obj): BlockAttrs {
     margin: getFrom(input, 'margin', optional(parseEdges)),
     width: getFrom(input, 'width', optional(parseLength)),
     height: getFrom(input, 'height', optional(parseLength)),
+    id: getFrom(input, 'id', optional(asString)),
   });
 }
 

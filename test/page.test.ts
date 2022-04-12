@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, jest } from '@jest/globals';
-import { PDFArray, PDFContext, PDFFont, PDFName, PDFRef, rgb } from 'pdf-lib';
+import { PDFArray, PDFContext, PDFDict, PDFFont, PDFName, PDFRef, rgb } from 'pdf-lib';
 
 import { Frame } from '../src/layout.js';
 import { renderFrame, renderPage } from '../src/page.js';
@@ -69,7 +69,8 @@ describe('page', () => {
       size = { width: 500, height: 800 };
       const context = PDFContext.create();
       pdfPage = {
-        doc: { context },
+        doc: { context, catalog: context.obj({}) },
+        ref: PDFRef.of(1),
         node: context.obj({}),
         drawText: jest.fn(),
         drawLine: jest.fn(),
@@ -136,9 +137,23 @@ describe('page', () => {
       });
     });
 
+    it('renders named destinations', () => {
+      const frame: Frame = {
+        ...{ x: 10, y: 20, width: 200, height: 30 },
+        objects: [{ type: 'dest', x: 1, y: 2, name: 'test-dest' }],
+      };
+
+      renderFrame(frame, page);
+
+      const names = pdfPage.doc.catalog
+        .get(PDFName.of('Names'))
+        .get(PDFName.of('Dests'))
+        .get(PDFName.of('Names'));
+      expect(names).toBeInstanceOf(PDFArray);
+      expect(names.toString()).toEqual('[ (test-dest) [ 1 0 R /XYZ 11 778 null ] ]');
+    });
+
     it('renders link objects', () => {
-      jest.spyOn(pdfPage.doc.context, 'obj');
-      jest.spyOn(pdfPage.doc.context, 'register');
       const frame: Frame = {
         ...{ x: 10, y: 20, width: 200, height: 30 },
         objects: [{ type: 'link', x: 1, y: 2, width: 80, height: 20, url: 'test-url' }],
@@ -146,15 +161,59 @@ describe('page', () => {
 
       renderFrame(frame, page);
 
-      expect(pdfPage.doc.context.obj).toHaveBeenCalledWith({
-        Type: 'Annot',
-        Subtype: 'Link',
-        Rect: [10 + 1, 800 - 20 - 2 - 30, 11 + 80, 748 + 20],
-        A: { Type: 'Action', S: 'URI', URI: { value: 'test-url' } },
-        F: 0,
-      });
-      expect(pdfPage.node.get(PDFName.of('Annots'))).toBeInstanceOf(PDFArray);
-      expect(pdfPage.node.get(PDFName.of('Annots')).get(0)).toBeInstanceOf(PDFRef);
+      const pageAnnotations = pdfPage.node.get(PDFName.of('Annots'));
+      expect(pageAnnotations).toBeInstanceOf(PDFArray);
+      expect(pageAnnotations.size()).toBe(1);
+      const ref = pageAnnotations.get(0);
+      expect(ref).toBeInstanceOf(PDFRef);
+      const annotation = pdfPage.doc.context.indirectObjects.get(ref);
+      expect(annotation.toString()).toEqual(
+        [
+          '<<',
+          '/Type /Annot',
+          '/Subtype /Link',
+          '/Rect [ 11 748 91 768 ]', // [10 + 1, 800 - 20 - 2 - 30, 11 + 80, 748 + 20]
+          '/A <<',
+          '/Type /Action',
+          '/S /URI',
+          '/URI (test-url)',
+          '>>',
+          '/C [ ]',
+          '/F 0',
+          '>>',
+        ].join('\n')
+      );
+    });
+
+    it('renders internal link objects', () => {
+      const frame: Frame = {
+        ...{ x: 10, y: 20, width: 200, height: 30 },
+        objects: [{ type: 'link', x: 1, y: 2, width: 80, height: 20, url: '#test-id' }],
+      };
+
+      renderFrame(frame, page);
+
+      const pageAnnotations = pdfPage.node.get(PDFName.of('Annots'));
+      expect(pageAnnotations).toBeInstanceOf(PDFArray);
+      expect(pageAnnotations.size()).toBe(1);
+      const annotation = pdfPage.doc.context.lookup(pageAnnotations.get(0)) as PDFDict;
+      expect(annotation).toBeInstanceOf(PDFDict);
+      expect(annotation.toString()).toEqual(
+        [
+          '<<',
+          '/Type /Annot',
+          '/Subtype /Link',
+          '/Rect [ 11 748 91 768 ]', // [10 + 1, 800 - 20 - 2 - 30, 11 + 80, 748 + 20]
+          '/A <<',
+          '/Type /Action',
+          '/S /GoTo',
+          '/D (test-id)',
+          '>>',
+          '/C [ ]',
+          '/F 0',
+          '>>',
+        ].join('\n')
+      );
     });
 
     it('renders rect objects', () => {

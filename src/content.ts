@@ -177,6 +177,12 @@ export type BlockAttrs = {
    * A fixed height for the paragraph. If left out, the height is defined by the included text.
    */
   height?: Length;
+  /**
+   * An optional *unique* id for the element. When an `id` is specified, an anchor with this id
+   * will be included in the PDF document that can be used to refer to this element using the text
+   * attribute `link`.
+   */
+  id?: string;
 };
 
 export type PageInfo = {
@@ -258,8 +264,10 @@ export type TextAttrs = {
    */
   color?: Color;
   /**
-   * A URL to point to. When this property is given, the corresponding text will be rendered
-   * as a link to this URL.
+   * A link target. When this attribute is present, the corresponding text will be rendered as a
+   * link to the given target. The target can either be a URL or a reference to an anchor in the
+   * document. An internal reference starts with a hash sign (`#`), followed by the `id` of an
+   * element in the document.
    */
   link?: string;
 };
