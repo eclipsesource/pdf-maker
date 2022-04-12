@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, jest } from '@jest/globals';
-import { PDFContext, PDFFont, rgb } from 'pdf-lib';
+import { PDFArray, PDFContext, PDFFont, PDFName, PDFRef, rgb } from 'pdf-lib';
 
 import { Frame } from '../src/layout.js';
 import { renderFrame, renderPage } from '../src/page.js';
@@ -67,10 +67,10 @@ describe('page', () => {
 
     beforeEach(() => {
       size = { width: 500, height: 800 };
+      const context = PDFContext.create();
       pdfPage = {
-        doc: {
-          context: PDFContext.create(),
-        },
+        doc: { context },
+        node: context.obj({}),
         drawText: jest.fn(),
         drawLine: jest.fn(),
         drawRectangle: jest.fn(),
@@ -137,7 +137,7 @@ describe('page', () => {
     });
 
     it('renders link objects', () => {
-      jest.spyOn(pdfPage.doc.context, 'obj').mockReturnValue('test-obj');
+      jest.spyOn(pdfPage.doc.context, 'obj');
       jest.spyOn(pdfPage.doc.context, 'register');
       const frame: Frame = {
         ...{ x: 10, y: 20, width: 200, height: 30 },
@@ -153,8 +153,8 @@ describe('page', () => {
         A: { Type: 'Action', S: 'URI', URI: { value: 'test-url' } },
         F: 0,
       });
-      expect(pdfPage.doc.context.register).toHaveBeenCalledWith('test-obj');
-      expect(page.linkRefs).toEqual([objectContaining({ tag: '1 0 R' })]);
+      expect(pdfPage.node.get(PDFName.of('Annots'))).toBeInstanceOf(PDFArray);
+      expect(pdfPage.node.get(PDFName.of('Annots')).get(0)).toBeInstanceOf(PDFRef);
     });
 
     it('renders rect objects', () => {

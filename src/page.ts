@@ -6,14 +6,13 @@ import {
   PDFPageDrawRectangleOptions,
   PDFPageDrawSVGOptions,
   PDFPageDrawTextOptions,
-  PDFRef,
 } from 'pdf-lib';
 
 import { Pos, Size } from './box.js';
 import { ImageObject, LineObject, PolylineObject, RectObject } from './graphics.js';
 import { renderGuide } from './guides.js';
 import { Frame, LinkObject, TextObject } from './layout.js';
-import { addPageAnnotations, createLinkAnnotation } from './pdf-annotations.js';
+import { createLinkAnnotation } from './pdf-annotations.js';
 
 export type Page = {
   size: Size;
@@ -22,7 +21,6 @@ export type Page = {
   footer?: Frame;
   guides?: boolean;
   pdfPage?: PDFPage;
-  linkRefs?: PDFRef[];
 };
 
 export function renderPage(page: Page, doc: PDFDocument) {
@@ -30,9 +28,6 @@ export function renderPage(page: Page, doc: PDFDocument) {
   renderFrame(page.content, page);
   page.header && renderFrame(page.header, page);
   page.footer && renderFrame(page.footer, page);
-  if (page.linkRefs?.length) {
-    addPageAnnotations(page.pdfPage, page.linkRefs);
-  }
 }
 
 export function renderFrame(frame: Frame, page: Page, base: Pos = null) {
@@ -75,8 +70,7 @@ function renderText(el: TextObject, page: Page, base: Pos) {
 function renderLink(el: LinkObject, page: Page, base: Pos) {
   const { x, y } = tr({ x: el.x + base.x, y: el.y + base.y }, page);
   const { width, height, url } = el;
-  const ref = createLinkAnnotation(page.pdfPage, { x, y, width, height }, url);
-  page.linkRefs = [...(page.linkRefs ?? []), ref];
+  createLinkAnnotation(page.pdfPage, { x, y, width, height }, url);
 }
 
 function renderRect(rect: RectObject, page: Page, base: Pos) {
