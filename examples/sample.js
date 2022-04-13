@@ -21,7 +21,7 @@ export default {
     ],
   },
   images: {
-    liberty: readFileSync('examples/liberty.jpg'),
+    liberty: { data: readFileSync('examples/liberty.jpg') },
   },
   margin: { x: '2.5cm', top: '2.5cm', bottom: '2cm' },
   defaultStyle: {

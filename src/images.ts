@@ -1,7 +1,7 @@
 import { PDFDocument, PDFImage } from 'pdf-lib';
 
 import { parseBinaryData } from './binary-data.js';
-import { asObject, check, optional, pickDefined, required } from './types.js';
+import { asObject, check, getFrom, optional, pickDefined, required } from './types.js';
 
 export type ImageDef = {
   name: string;
@@ -16,9 +16,13 @@ export type Image = {
 export function parseImages(input: unknown): ImageDef[] {
   const obj = check(input, 'images', optional(asObject)) ?? {};
   return Object.entries(obj).map(([name, imageDef]) => {
-    const data = check(imageDef, `image data for ${name}`, required(parseBinaryData));
+    const data = check(imageDef, `image ${name}`, required(parseImage));
     return { name, data };
   });
+}
+
+function parseImage(input: unknown): Uint8Array {
+  return getFrom(asObject(input), 'data', required(parseBinaryData));
 }
 
 export async function embedImages(imageDefs: ImageDef[], doc: PDFDocument): Promise<Image[]> {

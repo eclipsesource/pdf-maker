@@ -98,7 +98,7 @@ export type FontDefinition = {
   italic?: boolean;
 };
 
-export type ImagesDefinition = { [name: string]: ImageDefinition[] };
+export type ImagesDefinition = { [name: string]: ImageDefinition };
 export type ImageDefinition = {
   /**
    * The image data, as a Uint8Array, ArrayBuffer, or a base64-encoded string.

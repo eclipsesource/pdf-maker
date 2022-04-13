@@ -11,12 +11,12 @@ describe('images', () => {
     });
 
     it('returns images array', () => {
-      const fontsDef = {
-        foo: mkData('Foo'),
-        bar: mkData('Bar'),
+      const imagesDef = {
+        foo: { data: mkData('Foo') },
+        bar: { data: mkData('Bar') },
       };
 
-      const images = parseImages(fontsDef);
+      const images = parseImages(imagesDef);
 
       expect(images).toEqual([
         { name: 'foo', data: mkData('Foo') },
@@ -24,10 +24,16 @@ describe('images', () => {
       ]);
     });
 
-    it('throws on invalid image data', () => {
+    it('throws on invalid image definition', () => {
       const fn = () => parseImages({ foo: 23 });
 
-      expect(fn).toThrowError('Invalid value for "image data for foo":');
+      expect(fn).toThrowError('Invalid value for "image foo": Expected object, got: 23');
+    });
+
+    it('throws on invalid image data', () => {
+      const fn = () => parseImages({ foo: { data: 23 } });
+
+      expect(fn).toThrowError('Invalid value for "image foo": Invalid value for "data":');
     });
   });
 
@@ -41,12 +47,12 @@ describe('images', () => {
     it('embeds images in PDF document and returns images array', async () => {
       const embedJpg = jest.fn().mockImplementation((data) => Promise.resolve({ data }));
       const doc = { embedJpg } as any;
-      const fontsDef = [
+      const imageDefs = [
         { name: 'foo', data: mkData('Foo') },
         { name: 'bar', data: mkData('Bar') },
       ];
 
-      const images = await embedImages(fontsDef, doc);
+      const images = await embedImages(imageDefs, doc);
 
       expect(images).toEqual([
         { name: 'foo', pdfImage: { data: mkData('Foo') } },
@@ -58,12 +64,12 @@ describe('images', () => {
       const embedJpg = (data) =>
         data === 'Bad_Data' ? Promise.reject('Bad image') : Promise.resolve({ data });
       const doc = { embedJpg } as any;
-      const fontsDef = [
+      const imagesDef = [
         { name: 'good', data: 'Good_Data' },
         { name: 'bad', data: 'Bad_Data' },
       ];
 
-      const promise = embedImages(fontsDef, doc);
+      const promise = embedImages(imagesDef, doc);
 
       await expect(promise).rejects.toThrowError('Could not embed image "bad": Bad image');
     });
