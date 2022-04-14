@@ -154,11 +154,6 @@ export type Paragraph = {
    * Space to leave between the contents of a paragraph and its edges.
    */
   padding?: Length | BoxLengths;
-  /**
-   * Align texts in paragraphs.
-   * Support `left`, `right` and `center`. By default texts are aligned to the `left`;
-   */
-  textAlign?: Alignment;
 } & TextAttrs &
   BlockAttrs;
 
@@ -170,13 +165,18 @@ export type BlockAttrs = {
    */
   margin?: Length | BoxLengths;
   /**
-   * A fixed width for the paragraph. If left out, the paragraph uses the available width.
+   * A fixed width for the block. If left out, the block uses the available width.
    */
   width?: Length;
   /**
-   * A fixed height for the paragraph. If left out, the height is defined by the included text.
+   * A fixed height for the block. If left out, the height is defined by the included text.
    */
   height?: Length;
+  /**
+   * Align texts included in this block.
+   * Supported values are `left`, `right` and `center`. By default, texts are left-aligned.
+   */
+  textAlign?: Alignment;
   /**
    * An optional *unique* id for the element. When an `id` is specified, an anchor with this id
    * will be included in the PDF document that can be used to refer to this element using the text

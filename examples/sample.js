@@ -128,6 +128,7 @@ export default {
           ],
           fontSize: 9,
           margin: 7,
+          textAlign: 'right',
         },
       ],
     },

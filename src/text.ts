@@ -41,6 +41,24 @@ type TextSpan = {
   attrs: TextAttrs;
 };
 
+export type Block = Columns | Rows | Paragraph;
+
+export type Columns = {
+  columns: Block[];
+} & BlockAttrs;
+
+export type Rows = {
+  rows: Block[];
+} & BlockAttrs;
+
+export type Paragraph = {
+  text?: TextSpan[];
+  image?: string;
+  graphics?: GraphicsObject[];
+  padding?: BoxEdges;
+} & BlockAttrs &
+  InheritableAttrs;
+
 type TextAttrs = {
   fontFamily?: string;
   fontSize?: number;
@@ -51,41 +69,24 @@ type TextAttrs = {
   link?: string;
 };
 
-export type Block = Columns | Rows | Paragraph;
-
-export type Columns = {
-  columns: Block[];
-} & BlockAttrs &
-  TextAttrs;
-
-export type Rows = {
-  rows: Block[];
-} & BlockAttrs &
-  TextAttrs;
-
-export type Paragraph = {
-  text?: TextSpan[];
-  image?: string;
-  graphics?: GraphicsObject[];
-  padding?: BoxEdges;
-  textAlign?: Alignment;
-} & BlockAttrs &
-  TextAttrs;
-
-export type BlockAttrs = {
+type BlockAttrs = {
   margin?: BoxEdges;
   width?: number;
   height?: number;
   id?: string;
 };
 
-export function parseContent(content: unknown[], defaultStyle: TextAttrs): Paragraph[] {
+type InheritableAttrs = TextAttrs & {
+  textAlign?: Alignment;
+};
+
+export function parseContent(content: unknown[], defaultStyle: InheritableAttrs): Paragraph[] {
   return content.map((block, idx) =>
     check(block, `content block #${idx + 1}`, () => parseBlock(asObject(block), defaultStyle))
   );
 }
 
-export function parseBlock(input: Obj, defaultAttrs?: TextAttrs): Block {
+export function parseBlock(input: Obj, defaultAttrs?: InheritableAttrs): Block {
   if (input.columns) {
     return parseColumns(input, defaultAttrs);
   }
@@ -95,11 +96,11 @@ export function parseBlock(input: Obj, defaultAttrs?: TextAttrs): Block {
   return parseParagraph(input, defaultAttrs);
 }
 
-export function parseColumns(input: Obj, defaultAttrs?: TextAttrs): Columns {
-  const textAttrs = { ...defaultAttrs, ...parseTextAttrs(input) };
+export function parseColumns(input: Obj, defaultAttrs?: InheritableAttrs): Columns {
+  const mergedAttrs = { ...defaultAttrs, ...parseInheritableAttrs(input) };
   const parseColumns = (columns) =>
     asArray(columns).map((col, idx) =>
-      check(col, `column #${idx + 1}`, () => parseBlock(col as Obj, textAttrs))
+      check(col, `column #${idx + 1}`, () => parseBlock(col as Obj, mergedAttrs))
     );
   return pickDefined({
     columns: getFrom(input, 'columns', parseColumns),
@@ -107,11 +108,11 @@ export function parseColumns(input: Obj, defaultAttrs?: TextAttrs): Columns {
   }) as Columns;
 }
 
-export function parseRows(input: Obj, defaultAttrs?: TextAttrs): Columns {
-  const textAttrs = { ...defaultAttrs, ...parseTextAttrs(input) };
+export function parseRows(input: Obj, defaultAttrs?: InheritableAttrs): Columns {
+  const mergedAttrs = { ...defaultAttrs, ...parseInheritableAttrs(input) };
   const parseRows = (rows) =>
     asArray(rows).map((col, idx) =>
-      check(col, `row #${idx + 1}`, () => parseBlock(col as Obj, textAttrs))
+      check(col, `row #${idx + 1}`, () => parseBlock(col as Obj, mergedAttrs))
     );
   return pickDefined({
     rows: getFrom(input, 'rows', parseRows),
@@ -119,15 +120,16 @@ export function parseRows(input: Obj, defaultAttrs?: TextAttrs): Columns {
   }) as Columns;
 }
 
-export function parseParagraph(input: Obj, defaultAttrs?: TextAttrs): Paragraph {
-  const textAttrs = { ...defaultAttrs, ...parseTextAttrs(input) };
+export function parseParagraph(input: Obj, defaultAttrs?: InheritableAttrs): Paragraph {
+  const mergedAttrs = { ...defaultAttrs, ...input };
+  const textAttrs = parseTextAttrs(mergedAttrs);
   const parseTextWithAttrs = (text) => parseText(text, textAttrs);
   return pickDefined({
     text: getFrom(input, 'text', optional(parseTextWithAttrs)),
     image: getFrom(input, 'image', optional(asString)),
     graphics: getFrom(input, 'graphics', optional(parseGraphics)),
     padding: getFrom(input, 'padding', optional(parseEdges)),
-    textAlign: getFrom(input, 'textAlign', optional(asTextAlign)),
+    textAlign: getFrom(mergedAttrs, 'textAlign', optional(asTextAlign)),
     ...parseBlockAttrs(input),
   });
 }
@@ -138,6 +140,25 @@ function parseBlockAttrs(input: Obj): BlockAttrs {
     width: getFrom(input, 'width', optional(parseLength)),
     height: getFrom(input, 'height', optional(parseLength)),
     id: getFrom(input, 'id', optional(asString)),
+  });
+}
+
+export function parseTextAttrs(input: Obj): TextAttrs {
+  return pickDefined({
+    fontFamily: getFrom(input, 'fontFamily', optional(asString)),
+    fontSize: getFrom(input, 'fontSize', optional(asNonNegNumber)),
+    lineHeight: getFrom(input, 'lineHeight', optional(asNonNegNumber)),
+    bold: getFrom(input, 'bold', optional(asBoolean)),
+    italic: getFrom(input, 'italic', optional(asBoolean)),
+    color: getFrom(input, 'color', optional(parseColor)),
+    link: getFrom(input, 'link', optional(asString)),
+  });
+}
+
+export function parseInheritableAttrs(input: Obj): TextAttrs {
+  return pickDefined({
+    ...parseTextAttrs(input),
+    textAlign: getFrom(input, 'textAlign', optional(asTextAlign)),
   });
 }
 
@@ -157,18 +178,6 @@ export function parseText(text: unknown, attrs: TextAttrs): TextSpan[] {
 function asTextAlign(input: unknown): Alignment {
   if (input === 'left' || input === 'right' || input === 'center') return input;
   throw typeError("'left', 'right', or 'center'", input);
-}
-
-export function parseTextAttrs(input: Obj): TextAttrs {
-  return pickDefined({
-    fontFamily: getFrom(input, 'fontFamily', optional(asString)),
-    fontSize: getFrom(input, 'fontSize', optional(asNonNegNumber)),
-    lineHeight: getFrom(input, 'lineHeight', optional(asNonNegNumber)),
-    bold: getFrom(input, 'bold', optional(asBoolean)),
-    italic: getFrom(input, 'italic', optional(asBoolean)),
-    color: getFrom(input, 'color', optional(parseColor)),
-    link: getFrom(input, 'link', optional(asString)),
-  });
 }
 
 export function extractTextSegments(textSpans: TextSpan[], fonts: Font[]): TextSegment[] {

@@ -59,8 +59,21 @@ describe('text', () => {
 
       expect(result).toEqual({
         columns: [
-          { text: [{ attrs: { fontSize: 8, italic: true }, text: 'foo' }] },
-          { text: [{ attrs: { fontSize: 8, italic: true }, text: 'bar' }] },
+          { text: [{ text: 'foo', attrs: { fontSize: 8, italic: true } }] },
+          { text: [{ text: 'bar', attrs: { fontSize: 8, italic: true } }] },
+        ],
+      });
+    });
+
+    it('passes textAlign attribute to included paragraphs', () => {
+      const content = { columns: [{ text: 'foo' }, { text: 'bar' }], textAlign: 'right' };
+
+      const result = parseColumns(content);
+
+      expect(result).toEqual({
+        columns: [
+          { text: [{ text: 'foo', attrs: {} }], textAlign: 'right' },
+          { text: [{ text: 'bar', attrs: {} }], textAlign: 'right' },
         ],
       });
     });
@@ -75,8 +88,21 @@ describe('text', () => {
 
       expect(result).toEqual({
         rows: [
-          { text: [{ attrs: { fontSize: 8, italic: true }, text: 'foo' }] },
-          { text: [{ attrs: { fontSize: 8, italic: true }, text: 'bar' }] },
+          { text: [{ text: 'foo', attrs: { fontSize: 8, italic: true } }] },
+          { text: [{ text: 'bar', attrs: { fontSize: 8, italic: true } }] },
+        ],
+      });
+    });
+
+    it('passes textAlign attribute to included paragraphs', () => {
+      const content = { rows: [{ text: 'foo' }, { text: 'bar' }], textAlign: 'right' };
+
+      const result = parseRows(content);
+
+      expect(result).toEqual({
+        rows: [
+          { text: [{ text: 'foo', attrs: {} }], textAlign: 'right' },
+          { text: [{ text: 'bar', attrs: {} }], textAlign: 'right' },
         ],
       });
     });

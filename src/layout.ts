@@ -13,7 +13,7 @@ import {
   Paragraph,
   parseBlock,
   parseContent,
-  parseTextAttrs,
+  parseInheritableAttrs,
   Rows,
 } from './text.js';
 import { breakLine, extractTextSegments, flattenTextSegments, TextSegment } from './text.js';
@@ -70,7 +70,7 @@ type Resources = { fonts: Font[]; images: Image[] };
 export function layoutPages(def: Obj, resources: Resources): Page[] {
   const content = getFrom(def, 'content', required(asArray));
   const pageMargin = getFrom(def, 'margin', optional(parseEdges)) ?? defaultPageMargin;
-  const defaultStyle = getFrom(def, 'defaultStyle', optional(parseTextAttrs));
+  const defaultStyle = getFrom(def, 'defaultStyle', optional(parseInheritableAttrs));
   const guides = getFrom(def, 'dev', optional(asObject))?.guides;
   const contentBox = subtractEdges({ x: 0, y: 0, ...pageSize }, pageMargin);
   const blocks = parseContent(content, defaultStyle);
