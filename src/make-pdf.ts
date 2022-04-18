@@ -4,10 +4,12 @@ import { embedFonts, parseFonts } from './fonts.js';
 import { embedImages, parseImages } from './images.js';
 import { layoutPages } from './layout.js';
 import { renderPage } from './page.js';
+import { asObject, check, required } from './types.js';
 
 export * from './content.js';
 
 export async function makePdf(def: DocumentDefinition) {
+  check(def, 'document definition', required(asObject));
   const doc = await createDocument(def);
   const fonts = await embedFonts(parseFonts(def.fonts), doc);
   const images = await embedImages(parseImages(def.images), doc);

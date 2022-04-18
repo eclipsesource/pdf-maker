@@ -16,7 +16,7 @@ export type Image = {
 export function parseImages(input: unknown): ImageDef[] {
   const obj = check(input, 'images', optional(asObject)) ?? {};
   return Object.entries(obj).map(([name, imageDef]) => {
-    const data = check(imageDef, `image ${name}`, required(parseImage));
+    const data = check(imageDef, `images > ${name}`, required(parseImage));
     return { name, data };
   });
 }

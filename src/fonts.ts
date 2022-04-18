@@ -7,6 +7,7 @@ import {
   asObject,
   check,
   getFrom,
+  Obj,
   optional,
   pickDefined,
   required,
@@ -35,17 +36,20 @@ export type FontSelector = {
 export function parseFonts(input: unknown): FontDef[] {
   const obj = check(input, 'fonts', optional(asObject)) ?? {};
   return Object.entries(obj).flatMap(([name, fontDef]) => {
-    const array = check(fontDef, 'font definition', required(asArray));
-    return array.map((fontDef) => {
-      const obj = check(fontDef, 'font', required(asObject));
-      return pickDefined({
-        name,
-        italic: getFrom(obj, 'italic', optional(asBoolean)) || undefined,
-        bold: getFrom(obj, 'bold', optional(asBoolean)) || undefined,
-        data: getFrom(obj, 'data', required(parseBinaryData)),
-      }) as FontDef;
+    const array = check(fontDef, `fonts > ${name}`, required(asArray));
+    return array.map((fontDef, idx) => {
+      const font = check(fontDef, `fonts > ${name} > #${idx + 1}`, required(parseFont));
+      return { name, ...font } as FontDef;
     });
   });
+}
+
+export function parseFont(def: Obj): Partial<FontDef> {
+  return pickDefined({
+    italic: getFrom(def, 'italic', optional(asBoolean)) || undefined,
+    bold: getFrom(def, 'bold', optional(asBoolean)) || undefined,
+    data: getFrom(def, 'data', required(parseBinaryData)),
+  }) as FontDef;
 }
 
 export async function embedFonts(fontDefs: FontDef[], doc: PDFDocument): Promise<Font[]> {

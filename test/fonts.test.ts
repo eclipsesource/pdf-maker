@@ -5,8 +5,8 @@ import { fakeFont } from './test-utils.js';
 
 describe('fonts', () => {
   describe('parseFonts', () => {
-    it('returns an empty array for missing fonts definition', async () => {
-      const fonts = await parseFonts(undefined);
+    it('returns an empty array for missing fonts definition', () => {
+      const fonts = parseFonts(undefined);
 
       expect(fonts).toEqual([]);
     });
@@ -33,16 +33,20 @@ describe('fonts', () => {
       ]);
     });
 
+    it('throws on invalid type', () => {
+      expect(() => parseFonts(23)).toThrowError('Invalid value for "fonts":');
+    });
+
     it('throws on invalid italic value', () => {
       const fn = () => parseFonts({ Test: [{ data: 'data', italic: 23 }] });
 
-      expect(fn).toThrowError('Invalid value for "italic": Expected boolean, got: 23');
+      expect(fn).toThrowError('Invalid value for "fonts > Test > #1": Invalid value for "italic":');
     });
 
     it('throws on invalid bold value', () => {
       const fn = () => parseFonts({ Test: [{ data: 'data', bold: 23 }] });
 
-      expect(fn).toThrowError('Invalid value for "bold": Expected boolean, got: 23');
+      expect(fn).toThrowError('Invalid value for "fonts > Test > #1": Invalid value for "bold":');
     });
 
     it('throws on missing data', () => {

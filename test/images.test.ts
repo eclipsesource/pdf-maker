@@ -4,8 +4,8 @@ import { embedImages, parseImages } from '../src/images.js';
 
 describe('images', () => {
   describe('parseImages', () => {
-    it('returns an empty array for missing images definition', async () => {
-      const images = await parseImages(undefined);
+    it('returns an empty array for missing images definition', () => {
+      const images = parseImages({});
 
       expect(images).toEqual([]);
     });
@@ -24,16 +24,22 @@ describe('images', () => {
       ]);
     });
 
+    it('throws on invalid type', () => {
+      const fn = () => parseImages(23);
+
+      expect(fn).toThrowError('Invalid value for "images": Expected object, got: 23');
+    });
+
     it('throws on invalid image definition', () => {
       const fn = () => parseImages({ foo: 23 });
 
-      expect(fn).toThrowError('Invalid value for "image foo": Expected object, got: 23');
+      expect(fn).toThrowError('Invalid value for "images > foo": Expected object, got: 23');
     });
 
     it('throws on invalid image data', () => {
       const fn = () => parseImages({ foo: { data: 23 } });
 
-      expect(fn).toThrowError('Invalid value for "image foo": Invalid value for "data":');
+      expect(fn).toThrowError('Invalid value for "images > foo": Invalid value for "data":');
     });
   });
 
