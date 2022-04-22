@@ -1,6 +1,6 @@
 {
   "name": "pdf-maker",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Generate PDF documents and from JavaScript objects",
   "license": "MIT",
   "repository": {
