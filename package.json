@@ -1,5 +1,5 @@
 {
-  "name": "pdf-maker",
+  "name": "pdfmkr",
   "version": "0.1.0",
   "description": "Generate PDF documents and from JavaScript objects",
   "license": "MIT",
