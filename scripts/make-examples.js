@@ -35,13 +35,13 @@ async function main() {
 
 async function makeFonts() {
   await mkdir(dirname(fontsOutputFile), { recursive: true });
-  const entries = await Promise.all(
-    Object.entries(fonts).map(async ([name, location]) => {
-      const input = await readFile(join(fontSourceRoot, location));
-      const buffer = Buffer.from(await wawoff2.decompress(input));
-      return `  ${name}:\n    '${buffer.toString('base64')}',`;
-    })
-  );
+  const entries = [];
+  for (const [name, location] of Object.entries(fonts)) {
+    const input = await readFile(join(fontSourceRoot, location));
+    const data = await wawoff2.decompress(input);
+    const base64 = Buffer.from(data).toString('base64');
+    entries.push(`  ${name}:\n    '${base64}',`);
+  }
   const lines = ['// generated file', 'export default {', ...entries, '};'];
   await writeFile(fontsOutputFile, lines.join('\n') + '\n');
 }
