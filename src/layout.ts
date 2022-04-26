@@ -281,6 +281,7 @@ function layoutTextRow(segments: TextSegment[], box: Box, textAlign: Alignment) 
   const pos = { x: 0, y: 0 };
   const size = { width: 0, height: 0 };
   let maxLineHeight = 0;
+  let maxDescent = 0;
   const links = [];
   const objects = [];
   flattenTextSegments(lineSegments).forEach((seg) => {
@@ -293,8 +294,10 @@ function layoutTextRow(segments: TextSegment[], box: Box, textAlign: Alignment) 
     pos.x += width;
     size.width += width;
     size.height = Math.max(size.height, height);
+    maxDescent = Math.max(maxDescent, getDescent(font, fontSize));
     maxLineHeight = Math.max(maxLineHeight, height * lineHeight);
   });
+  objects.forEach((obj) => (obj.y -= maxDescent));
   flattenLinks(links).forEach((link) => objects.push(link));
   const row = {
     type: 'row',
@@ -304,6 +307,11 @@ function layoutTextRow(segments: TextSegment[], box: Box, textAlign: Alignment) 
     objects,
   };
   return { row, remainder };
+}
+
+function getDescent(font: PDFFont, fontSize: number) {
+  const fontkitFont = (font as any).embedder.font;
+  return Math.abs(((fontkitFont.descent ?? 0) * fontSize) / fontkitFont.unitsPerEm);
 }
 
 function layoutImage(paragraph: Paragraph, box: Box, images: Image[]): ImageObject {

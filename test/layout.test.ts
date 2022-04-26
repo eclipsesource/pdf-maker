@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it } from '@jest/globals';
 
 import { Alignment } from '../src/content.js';
 import { layoutPageContent, layoutPages, layoutParagraph } from '../src/layout.js';
+import { TextAttrs, TextSpan } from '../src/text.js';
 import { fakeFont, range } from './test-utils.js';
 
 const { objectContaining } = expect;
@@ -38,7 +39,7 @@ describe('layout', () => {
     });
 
     it('lays out content', () => {
-      const def = { content: [{ text: 'test' }], margin: 50 };
+      const def = { content: [span('test')], margin: 50 };
       const pageWidth = (210 * 72) / 25.4;
       const pageHeight = (297 * 72) / 25.4;
 
@@ -61,7 +62,7 @@ describe('layout', () => {
     it('lays out header and footer', () => {
       const def = {
         margin: 50,
-        content: [{ text: 'content' }],
+        content: [span('content')],
         header: { text: 'header', margin: 20, fontSize: 10 },
         footer: { text: 'footer', margin: 20, fontSize: 10 },
       };
@@ -118,7 +119,7 @@ describe('layout', () => {
     });
 
     it('returns a paragraph with a single text row for single text content', () => {
-      const text = [{ text: 'Test text', attrs: {} }];
+      const text = [span('Test')];
 
       const { frame, remainder } = layoutPageContent([{ text }], box, resources);
 
@@ -130,9 +131,9 @@ describe('layout', () => {
             ...{ type: 'paragraph', x: 0, y: 0, width: 400, height: 18 * 1.2 },
             children: [
               {
-                ...{ type: 'row', x: 0, y: 0, width: 162, height: 18 * 1.2 },
+                ...{ type: 'row', x: 0, y: 0, width: 72, height: 18 * 1.2 },
                 objects: [
-                  { type: 'text', x: 0, y: 0, text: 'Test text', font: normalFont, fontSize: 18 },
+                  { type: 'text', x: 0, y: -3.6, text: 'Test', font: normalFont, fontSize: 18 },
                 ],
               },
             ],
@@ -188,7 +189,7 @@ describe('layout', () => {
       const { frame } = layoutPageContent([{ text }], box, resources);
 
       expect(frame.children[0].children[0].objects).toEqual([
-        objectContaining({ type: 'text', x: 0, y: 0, text: 'foo' }),
+        objectContaining({ type: 'text', x: 0, y: -2, text: 'foo' }),
         objectContaining({ type: 'link', x: 0, y: 0, width: 30, height: 10, url: 'test-link' }),
       ]);
     });
@@ -202,8 +203,8 @@ describe('layout', () => {
       const { frame } = layoutPageContent([{ text }], box, resources);
 
       expect(frame.children[0].children[0].objects).toEqual([
-        objectContaining({ type: 'text', x: 0, y: 0, text: 'foo ' }),
-        objectContaining({ type: 'text', x: 40, y: 0, text: 'bar' }),
+        objectContaining({ type: 'text', x: 0, y: -2, text: 'foo ' }),
+        objectContaining({ type: 'text', x: 40, y: -2, text: 'bar' }),
         objectContaining({ type: 'link', x: 0, y: 0, width: 70, height: 10, url: 'test-link' }),
       ]);
     });
@@ -323,9 +324,43 @@ describe('layout', () => {
 
       expect(frame).toEqual({ type: 'paragraph', x: 20, y: 30, width: 80, height: 50 });
     });
+
+    it('raises text by font descent', () => {
+      const paragraph = { text: [span('Test text', { fontSize: 10 })] };
+
+      const frame = layoutParagraph(paragraph, box, resources);
+
+      expect(frame.children).toEqual([objectContaining({ type: 'row', y: 0, height: 12 })]);
+      expect(frame.children[0].objects).toEqual([
+        objectContaining({ type: 'text', y: -2, fontSize: 10 }),
+      ]);
+    });
+
+    it('raises text segments with different font size to common baseline', () => {
+      const paragraph = {
+        text: [
+          span('Text one', { fontSize: 5 }),
+          span('Text two', { fontSize: 10 }),
+          span('Text three', { fontSize: 15 }),
+        ],
+      };
+
+      const frame = layoutParagraph(paragraph, box, resources);
+
+      expect(frame.children).toEqual([objectContaining({ type: 'row', y: 0, height: 18 })]);
+      expect(frame.children[0].objects).toEqual([
+        objectContaining({ type: 'text', y: -3, fontSize: 5 }),
+        objectContaining({ type: 'text', y: -3, fontSize: 10 }),
+        objectContaining({ type: 'text', y: -3, fontSize: 15 }),
+      ]);
+    });
   });
 });
 
 function p(x: number, y: number) {
   return { x, y };
+}
+
+function span(text: string, attrs?: TextAttrs): TextSpan {
+  return { text, attrs: { ...attrs } };
 }

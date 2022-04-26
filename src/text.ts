@@ -36,7 +36,7 @@ export type TextSegment = {
 /**
  * A range of text with attributes, similar to a `<span>` in HTML.
  */
-type TextSpan = {
+export type TextSpan = {
   text: string;
   attrs: TextAttrs;
 };
@@ -59,7 +59,7 @@ export type Paragraph = {
 } & BlockAttrs &
   InheritableAttrs;
 
-type TextAttrs = {
+export type TextAttrs = {
   fontFamily?: string;
   fontSize?: number;
   lineHeight?: number;
