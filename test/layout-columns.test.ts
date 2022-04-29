@@ -40,7 +40,7 @@ describe('layout-columns', () => {
       });
     });
 
-    it('handles column with fixed width', () => {
+    it('handles column with fixed width and height', () => {
       const block = { columns: [{ width: 100, height: 50 }] };
 
       const result = layoutColumns(block, box, resources);
