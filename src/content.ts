@@ -119,7 +119,7 @@ export type ImageDefinition = {
   data: string | Uint8Array | ArrayBuffer;
 };
 
-export type Block = Columns | Rows | Paragraph;
+export type Block = Columns | Rows | Image | Paragraph;
 
 export type Columns = {
   /**
@@ -127,7 +127,7 @@ export type Columns = {
    */
   columns: Block[];
 } & TextAttrs &
-  BlockAttrs;
+  TextBlockAttrs;
 
 export type Rows = {
   /**
@@ -135,15 +135,30 @@ export type Rows = {
    */
   rows: Block[];
 } & TextAttrs &
-  BlockAttrs;
+  TextBlockAttrs;
+
+export type Image = {
+  /**
+   * The name of the JPG image to display in this block. The image must have been registered with
+   * the global `images` attribute.
+   *
+   * When any of the attributes `width` and `height` are specified, the image will be scaled
+   * proportionally to be contained in the given bounds.
+   * When neither `width` nor `height` is given, the image is not scaled unless it exceeds the
+   * maximum available width. In this case, it is scaled down to fit onto the page.
+   */
+  image?: string;
+  /**
+   * Space to leave between the image and the edges of this paragraph.
+   */
+  padding?: Length | BoxLengths;
+} & BlockAttrs;
 
 export type Paragraph = {
   /**
    * Text to display in this paragraph.
    */
   text?: Text;
-  /** */
-  image?: string;
   /**
    * Graphic elements to draw in the area covered by the paragraph.
    * The coordinate system for graphics shapes starts at the top left corner of the paragraph's
@@ -151,11 +166,19 @@ export type Paragraph = {
    */
   graphics?: Shape[];
   /**
-   * Space to leave between the contents of a paragraph and its edges.
+   * Space to leave between the text and the edges of the paragraph.
    */
   padding?: Length | BoxLengths;
 } & TextAttrs &
-  BlockAttrs;
+  TextBlockAttrs;
+
+export type TextBlockAttrs = BlockAttrs & {
+  /**
+   * Align texts included in this block.
+   * Supported values are `left`, `right` and `center`. By default, texts are left-aligned.
+   */
+  textAlign?: Alignment;
+};
 
 export type BlockAttrs = {
   /**

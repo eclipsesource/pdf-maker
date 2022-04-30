@@ -51,9 +51,13 @@ export type Rows = {
   rows: Block[];
 } & BlockAttrs;
 
+export type ImageBlock = {
+  image?: string;
+  padding?: BoxEdges;
+} & BlockAttrs;
+
 export type Paragraph = {
   text?: TextSpan[];
-  image?: string;
   graphics?: GraphicsObject[];
   padding?: BoxEdges;
 } & BlockAttrs &

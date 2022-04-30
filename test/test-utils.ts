@@ -11,6 +11,13 @@ export function fakeFont(name: string, opts: { italic?: boolean; bold?: boolean 
   } as any;
 }
 
+export function fakeImage(name: string, width: number, height: number): Font {
+  return {
+    name,
+    pdfImage: { width, height },
+  } as any;
+}
+
 /**
  * To ease calculations in tests, we use a fake font that always returns a width of
  * `fontSize * text.length`, so that at `fontSize = 10` a text with 5 chars will have

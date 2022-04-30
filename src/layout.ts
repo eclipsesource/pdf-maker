@@ -4,14 +4,16 @@ import { Box, parseEdges, parseLength, Pos, Size, subtractEdges, ZERO_EDGES } fr
 import { Color } from './colors.js';
 import { Alignment } from './content.js';
 import { Font } from './fonts.js';
-import { GraphicsObject, ImageObject, shiftGraphicsObject } from './graphics.js';
+import { GraphicsObject, shiftGraphicsObject } from './graphics.js';
 import { Image } from './images.js';
 import { layoutColumns } from './layout-columns.js';
+import { layoutImage } from './layout-image.js';
 import { layoutRows } from './layout-rows.js';
 import { Page } from './page.js';
 import {
   Block,
   Columns,
+  ImageBlock,
   Paragraph,
   parseBlock,
   parseContent,
@@ -149,7 +151,10 @@ export function layoutBlock(block: Block, box: Box, resources: Resources): Frame
   if ((block as Rows).rows) {
     return layoutRows(block as Rows, box, resources);
   }
-  return layoutParagraph(block as Paragraph, box, resources);
+  if ((block as ImageBlock).image) {
+    return layoutImage(block as ImageBlock, box, resources);
+  }
+  return layoutParagraph(block as ImageBlock, box, resources);
 }
 
 export function layoutParagraph(paragraph: Paragraph, box: Box, resources: Resources): Frame {
@@ -160,12 +165,10 @@ export function layoutParagraph(paragraph: Paragraph, box: Box, resources: Resou
   const maxHeight = (fixedHeight ?? box.height) - padding.top - padding.bottom;
   const innerBox = { x: padding.left, y: padding.top, width: maxWidth, height: maxHeight };
   const text = paragraph.text && layoutText(paragraph, innerBox, resources.fonts);
-  const image = paragraph.image && layoutImage(paragraph, innerBox, resources.images);
   const graphics = paragraph.graphics && layoutGraphics(paragraph.graphics, innerBox);
-  const contentHeight = Math.max(text?.size?.height ?? 0, image?.height ?? 0);
+  const contentHeight = text?.size?.height ?? 0;
   const objects = [
     ...(graphics ?? []),
-    ...(image ? [image] : []),
     ...(paragraph.id ? [createAnchorObject(paragraph.id)] : []),
   ];
   return {
@@ -174,7 +177,6 @@ export function layoutParagraph(paragraph: Paragraph, box: Box, resources: Resou
     width: fixedWidth ?? box.width,
     height: fixedHeight ?? (contentHeight ?? 0) + padding.top + padding.bottom,
     ...(text?.rows?.length ? { children: text.rows } : undefined),
-    ...(image ? { image } : undefined),
     ...(objects.length ? { objects } : undefined),
   };
 }
@@ -244,23 +246,6 @@ function layoutTextRow(segments: TextSegment[], box: Box, textAlign: Alignment) 
 function getDescent(font: PDFFont, fontSize: number) {
   const fontkitFont = (font as any).embedder.font;
   return Math.abs(((fontkitFont.descent ?? 0) * fontSize) / fontkitFont.unitsPerEm);
-}
-
-function layoutImage(paragraph: Paragraph, box: Box, images: Image[]): ImageObject {
-  const image = images.find((image) => image.name === paragraph.image)?.pdfImage;
-  if (!image) throw new Error(`Unknown image: ${paragraph.image}`);
-  const fixedWidth = paragraph.width;
-  const fixedHeight = paragraph.height;
-  const hScale = fixedWidth ? box.width / image.width : 1;
-  const vScale = fixedHeight ? box.height / image.height : 1;
-  const scale = Math.min(hScale, vScale);
-  return {
-    type: 'image',
-    ...box,
-    width: image.width * scale,
-    height: image.height * scale,
-    image,
-  };
 }
 
 function layoutGraphics(graphics: GraphicsObject[], pos: Pos): GraphicsObject[] {
