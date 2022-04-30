@@ -39,7 +39,7 @@ export type Frame = {
   children?: Frame[];
 };
 
-export type DrawableObject = TextObject | DestObject | LinkObject | GraphicsObject;
+export type DrawableObject = TextObject | AnchorObject | LinkObject | GraphicsObject;
 
 export type TextObject = {
   type: 'text';
@@ -60,8 +60,8 @@ export type LinkObject = {
   url: string;
 };
 
-export type DestObject = {
-  type: 'dest';
+export type AnchorObject = {
+  type: 'anchor';
   name: string;
   x: number;
   y: number;
@@ -166,7 +166,7 @@ export function layoutParagraph(paragraph: Paragraph, box: Box, resources: Resou
   const objects = [
     ...(graphics ?? []),
     ...(image ? [image] : []),
-    ...(paragraph.id ? [layoutDest(paragraph.id, innerBox)] : []),
+    ...(paragraph.id ? [createAnchorObject(paragraph.id)] : []),
   ];
   return {
     type: 'paragraph',
@@ -179,12 +179,12 @@ export function layoutParagraph(paragraph: Paragraph, box: Box, resources: Resou
   };
 }
 
-export function layoutDest(name: string, pos: Pos): DestObject {
+export function createAnchorObject(name: string, pos?: Pos): AnchorObject {
   return {
-    type: 'dest',
+    type: 'anchor',
     name,
-    x: pos.x,
-    y: pos.y,
+    x: pos?.x ?? 0,
+    y: pos?.y ?? 0,
   };
 }
 

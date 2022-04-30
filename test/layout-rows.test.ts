@@ -84,13 +84,13 @@ describe('layout-rows', () => {
       });
     });
 
-    it('includes dest object for id', () => {
+    it('includes anchor object for id', () => {
       const block = { rows: [], id: 'test' };
 
       const result = layoutRows(block, box, resources);
 
       expect(result).toEqual(
-        objectContaining({ objects: [{ type: 'dest', name: 'test', x: 20, y: 30 }] })
+        objectContaining({ objects: [{ type: 'anchor', name: 'test', x: 0, y: 0 }] })
       );
     });
   });

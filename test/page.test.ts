@@ -140,7 +140,7 @@ describe('page', () => {
     it('renders named destinations', () => {
       const frame: Frame = {
         ...{ x: 10, y: 20, width: 200, height: 30 },
-        objects: [{ type: 'dest', x: 1, y: 2, name: 'test-dest' }],
+        objects: [{ type: 'anchor', x: 1, y: 2, name: 'test-dest' }],
       };
 
       renderFrame(frame, page);

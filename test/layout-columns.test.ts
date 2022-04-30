@@ -147,13 +147,13 @@ describe('layout-columns', () => {
       });
     });
 
-    it('includes dest object for id', () => {
+    it('includes anchor object for id', () => {
       const block = { columns: [], id: 'test' };
 
       const result = layoutColumns(block, box, resources);
 
       expect(result).toEqual(
-        objectContaining({ objects: [{ type: 'dest', name: 'test', x: 20, y: 30 }] })
+        objectContaining({ objects: [{ type: 'anchor', name: 'test', x: 0, y: 0 }] })
       );
     });
   });
