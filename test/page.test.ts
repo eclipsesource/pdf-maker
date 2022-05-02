@@ -14,7 +14,7 @@ describe('page', () => {
     beforeEach(() => {
       size = { width: 300, height: 400 };
       pdfPage = { drawRectangle: jest.fn() };
-      doc = { addPage: jest.fn().mockReturnValue(pdfPage) } as any;
+      doc = { pdfDoc: { addPage: jest.fn().mockReturnValue(pdfPage) } as any };
     });
 
     it('renders content', () => {

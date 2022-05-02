@@ -3,9 +3,9 @@ import { PDFFont } from 'pdf-lib';
 import { Box, parseEdges, parseLength, Pos, Size, subtractEdges, ZERO_EDGES } from './box.js';
 import { Color } from './colors.js';
 import { Alignment } from './content.js';
+import { Document } from './document.js';
 import { Font } from './fonts.js';
 import { GraphicsObject, shiftGraphicsObject } from './graphics.js';
-import { Image } from './images.js';
 import { layoutColumns } from './layout-columns.js';
 import { layoutImage } from './layout-image.js';
 import { layoutRows } from './layout-rows.js';
@@ -69,9 +69,7 @@ export type AnchorObject = {
   y: number;
 };
 
-export type Resources = { fonts: Font[]; images: Image[] };
-
-export function layoutPages(def: Obj, resources: Resources): Page[] {
+export function layoutPages(def: Obj, doc: Document): Page[] {
   const content = getFrom(def, 'content', required(asArray));
   const pageMargin = getFrom(def, 'margin', optional(parseEdges)) ?? defaultPageMargin;
   const defaultStyle = getFrom(def, 'defaultStyle', optional(parseInheritableAttrs));
@@ -81,7 +79,7 @@ export function layoutPages(def: Obj, resources: Resources): Page[] {
   const pages = [];
   let remainingBlocks = blocks;
   while (remainingBlocks?.length) {
-    const { frame, remainder } = layoutPageContent(remainingBlocks, contentBox, resources);
+    const { frame, remainder } = layoutPageContent(remainingBlocks, contentBox, doc);
     remainingBlocks = remainder;
     pages.push({ size: pageSize, content: frame, guides });
   }
@@ -90,8 +88,8 @@ export function layoutPages(def: Obj, resources: Resources): Page[] {
     const parse = (block) => parseBlock(asObject(resolveFn(block, pageInfo)), defaultStyle);
     const header = getFrom(def, 'header', optional(parse));
     const footer = getFrom(def, 'footer', optional(parse));
-    page.header = header && layoutHeader(header, resources);
-    page.footer = header && layoutFooter(footer, resources);
+    page.header = header && layoutHeader(header, doc);
+    page.footer = header && layoutFooter(footer, doc);
   });
   return pages.map(pickDefined) as Page[];
 }
@@ -105,19 +103,19 @@ function resolveFn(value, ...args) {
   }
 }
 
-function layoutHeader(header: Block, resources: Resources) {
+function layoutHeader(header: Block, doc: Document) {
   const box = subtractEdges({ x: 0, y: 0, ...pageSize }, header.margin);
-  return layoutBlock(header, box, resources);
+  return layoutBlock(header, box, doc);
 }
 
-function layoutFooter(footer: Block, resources: Resources) {
+function layoutFooter(footer: Block, doc: Document) {
   const box = subtractEdges({ x: 0, y: 0, ...pageSize }, footer.margin);
-  const frame = layoutBlock(footer, box, resources);
+  const frame = layoutBlock(footer, box, doc);
   frame.y = pageSize.height - frame.height - footer.margin?.bottom ?? 0;
   return frame;
 }
 
-export function layoutPageContent(blocks: Block[], box: Box, resources: Resources) {
+export function layoutPageContent(blocks: Block[], box: Box, doc: Document) {
   const { x, y, width, height } = box;
   const children = [];
   const pos = { x: 0, y: 0 };
@@ -130,7 +128,7 @@ export function layoutPageContent(blocks: Block[], box: Box, resources: Resource
     lastMargin = margin.bottom;
     const nextPos = { x: pos.x + margin.left, y: pos.y + topMargin };
     const maxSize = { width: width - margin.left - margin.right, height: remainingHeight };
-    const frame = layoutBlock(block, { ...nextPos, ...maxSize }, resources);
+    const frame = layoutBlock(block, { ...nextPos, ...maxSize }, doc);
     // If the first paragraph does not fit on the page, render it anyway.
     // It wouldn't fit on the next page as well, ending in an endless loop.
     if (remainingHeight < topMargin + frame.height && idx) {
@@ -144,27 +142,27 @@ export function layoutPageContent(blocks: Block[], box: Box, resources: Resource
   return { frame: { type: 'page', x, y, width, height, children }, remainder };
 }
 
-export function layoutBlock(block: Block, box: Box, resources: Resources): Frame {
+export function layoutBlock(block: Block, box: Box, doc: Document): Frame {
   if ((block as Columns).columns) {
-    return layoutColumns(block as Columns, box, resources);
+    return layoutColumns(block as Columns, box, doc);
   }
   if ((block as Rows).rows) {
-    return layoutRows(block as Rows, box, resources);
+    return layoutRows(block as Rows, box, doc);
   }
   if ((block as ImageBlock).image) {
-    return layoutImage(block as ImageBlock, box, resources);
+    return layoutImage(block as ImageBlock, box, doc);
   }
-  return layoutParagraph(block as ImageBlock, box, resources);
+  return layoutParagraph(block as ImageBlock, box, doc);
 }
 
-export function layoutParagraph(paragraph: Paragraph, box: Box, resources: Resources): Frame {
+export function layoutParagraph(paragraph: Paragraph, box: Box, doc: Document): Frame {
   const padding = paragraph.padding ?? ZERO_EDGES;
   const fixedWidth = paragraph.width;
   const fixedHeight = paragraph.height;
   const maxWidth = (fixedWidth ?? box.width) - padding.left - padding.right;
   const maxHeight = (fixedHeight ?? box.height) - padding.top - padding.bottom;
   const innerBox = { x: padding.left, y: padding.top, width: maxWidth, height: maxHeight };
-  const text = paragraph.text && layoutText(paragraph, innerBox, resources.fonts);
+  const text = paragraph.text && layoutText(paragraph, innerBox, doc.fonts);
   const graphics = paragraph.graphics && layoutGraphics(paragraph.graphics, innerBox);
   const contentHeight = text?.size?.height ?? 0;
   const objects = [

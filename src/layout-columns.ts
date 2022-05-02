@@ -1,8 +1,9 @@
 import { Box, ZERO_EDGES } from './box.js';
-import { createAnchorObject, Frame, layoutBlock, Resources } from './layout.js';
+import { Document } from './document.js';
+import { createAnchorObject, Frame, layoutBlock } from './layout.js';
 import { Columns } from './text.js';
 
-export function layoutColumns(block: Columns, box: Box, resources: Resources): Frame {
+export function layoutColumns(block: Columns, box: Box, doc: Document): Frame {
   const fixedWidth = block.width;
   const fixedHeight = block.height;
   const maxWidth = fixedWidth ?? box.width;
@@ -24,7 +25,7 @@ export function layoutColumns(block: Columns, box: Box, resources: Resources): F
     const colWidth = column.width ?? flexColWidth - margin.left - margin.right;
     const colBox = { x: colX, y: margin.top, width: colWidth, height: column.height ?? maxHeight };
     colX += colWidth + margin.right;
-    const block = layoutBlock(column, colBox, resources);
+    const block = layoutBlock(column, colBox, doc);
     children.push(block);
     maxColHeight = Math.max(maxColHeight, block.height + margin.top + margin.bottom);
   });

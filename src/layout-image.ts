@@ -1,16 +1,17 @@
 import { Box, ZERO_EDGES } from './box.js';
+import { Document } from './document.js';
 import { ImageObject } from './graphics.js';
-import { createAnchorObject, Frame, Resources } from './layout.js';
+import { createAnchorObject, Frame } from './layout.js';
 import { ImageBlock } from './text.js';
 
-export function layoutImage(block: ImageBlock, box: Box, resources: Resources): Frame {
+export function layoutImage(block: ImageBlock, box: Box, doc: Document): Frame {
   const padding = block.padding ?? ZERO_EDGES;
   const paddingWidth = padding.left + padding.right;
   const paddingHeight = padding.top + padding.bottom;
   const fixedWidth = block.width;
   const fixedHeight = block.height;
 
-  const image = resources.images.find((image) => image.name === block.image)?.pdfImage;
+  const image = doc.images.find((image) => image.name === block.image)?.pdfImage;
   if (!image) throw new Error(`Unknown image: ${block.image}`);
 
   const xScale = ((fixedWidth ?? box.width) - paddingWidth) / image.width;

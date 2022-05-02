@@ -1,8 +1,9 @@
 import { Box, ZERO_EDGES } from './box.js';
-import { createAnchorObject, Frame, layoutBlock, Resources } from './layout.js';
+import { Document } from './document.js';
+import { createAnchorObject, Frame, layoutBlock } from './layout.js';
 import { Rows } from './text.js';
 
-export function layoutRows(block: Rows, box: Box, resources: Resources): Frame {
+export function layoutRows(block: Rows, box: Box, doc: Document): Frame {
   const fixedWidth = block.width;
   const fixedHeight = block.height;
   const maxWidth = fixedWidth ?? box.width;
@@ -18,7 +19,7 @@ export function layoutRows(block: Rows, box: Box, resources: Resources): Frame {
     lastMargin = margin.bottom;
     const nextPos = { x: margin.left, y: rowY + topMargin };
     const maxSize = { width: maxWidth - margin.left - margin.right, height: remainingHeight };
-    const frame = layoutBlock(row, { ...nextPos, ...maxSize }, resources);
+    const frame = layoutBlock(row, { ...nextPos, ...maxSize }, doc);
     children.push(frame);
     rowY += topMargin + frame.height;
     remainingHeight -= topMargin + frame.height;

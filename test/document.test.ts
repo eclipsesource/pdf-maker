@@ -109,7 +109,7 @@ describe('document', () => {
 
       const doc = await createDocument(def);
 
-      const infoDict = doc.context.lookup(doc.context.trailerInfo.Info) as PDFDict;
+      const infoDict = doc.pdfDoc.context.lookup(doc.pdfDoc.context.trailerInfo.Info) as PDFDict;
       const getInfo = (name) => infoDict.get(PDFName.of(name));
       expect(infoDict).toBeInstanceOf(PDFDict);
       expect(getInfo('Title')).toEqual(PDFHexString.fromText('test-title'));

@@ -1,5 +1,4 @@
 import {
-  PDFDocument,
   PDFPage,
   PDFPageDrawImageOptions,
   PDFPageDrawLineOptions,
@@ -9,6 +8,7 @@ import {
 } from 'pdf-lib';
 
 import { Pos, Size } from './box.js';
+import { Document } from './document.js';
 import { ImageObject, LineObject, PolylineObject, RectObject } from './graphics.js';
 import { renderGuide } from './guides.js';
 import { AnchorObject, Frame, LinkObject, TextObject } from './layout.js';
@@ -23,8 +23,8 @@ export type Page = {
   pdfPage?: PDFPage;
 };
 
-export function renderPage(page: Page, doc: PDFDocument) {
-  page.pdfPage = doc.addPage([page.size.width, page.size.height]);
+export function renderPage(page: Page, doc: Document) {
+  page.pdfPage = doc.pdfDoc.addPage([page.size.width, page.size.height]);
   renderFrame(page.content, page);
   page.header && renderFrame(page.header, page);
   page.footer && renderFrame(page.footer, page);

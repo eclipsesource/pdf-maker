@@ -1,6 +1,8 @@
 import fontkit from '@pdf-lib/fontkit';
 import { PDFDict, PDFDocument, PDFHexString, PDFName } from 'pdf-lib';
 
+import { embedFonts, Font, parseFonts } from './fonts.js';
+import { embedImages, Image, parseImages } from './images.js';
 import {
   asArray,
   asDate,
@@ -13,11 +15,21 @@ import {
   pickDefined,
 } from './types.js';
 
-export async function createDocument(def: Obj) {
-  const doc = await PDFDocument.create();
-  doc.registerFontkit(fontkit);
-  setMetadata(getFrom(def, 'info', optional(parseInfo)), doc);
-  return doc;
+export type Document = {
+  fonts: Font[];
+  images: Image[];
+  pdfDoc: PDFDocument;
+};
+
+export async function createDocument(def: Obj): Promise<Document> {
+  const pdfDoc = await PDFDocument.create();
+  pdfDoc.registerFontkit(fontkit);
+
+  const fonts = await embedFonts(getFrom(def, 'fonts', parseFonts), pdfDoc);
+  const images = await embedImages(getFrom(def, 'images', parseImages), pdfDoc);
+
+  setMetadata(getFrom(def, 'info', optional(parseInfo)), pdfDoc);
+  return { fonts, images, pdfDoc };
 }
 
 type Metadata = {
