@@ -40,13 +40,13 @@ describe('fonts', () => {
     it('throws on invalid italic value', () => {
       const fn = () => parseFonts({ Test: [{ data: 'data', italic: 23 }] });
 
-      expect(fn).toThrowError('Invalid value for "fonts[\'Test\'][0].italic":');
+      expect(fn).toThrowError('Invalid value for "fonts/Test/0/italic":');
     });
 
     it('throws on invalid bold value', () => {
       const fn = () => parseFonts({ Test: [{ data: 'data', bold: 23 }] });
 
-      expect(fn).toThrowError('Invalid value for "fonts[\'Test\'][0].bold":');
+      expect(fn).toThrowError('Invalid value for "fonts/Test/0/bold":');
     });
 
     it('throws on missing data', () => {

@@ -29,8 +29,7 @@ export function check<T = unknown>(value: unknown, name: string, fn?: (value: un
     }
     if (error.message?.startsWith('Invalid value for "')) {
       const tail = error.message.replace(/^Invalid value for "/, '');
-      const glue = tail.startsWith('[') ? '' : '.';
-      throw new TypeError(`Invalid value for "${name}${glue}${tail}`);
+      throw new TypeError(`Invalid value for "${name}/${tail}`);
     }
     throw new TypeError(`Invalid value for "${name}": ${error.message}`);
   }

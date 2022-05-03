@@ -33,13 +33,13 @@ describe('images', () => {
     it('throws on invalid image definition', () => {
       const fn = () => parseImages({ foo: 23 });
 
-      expect(fn).toThrowError('Invalid value for "images[\'foo\']": Expected object, got: 23');
+      expect(fn).toThrowError('Invalid value for "images/foo": Expected object, got: 23');
     });
 
     it('throws on invalid image data', () => {
       const fn = () => parseImages({ foo: { data: 23 } });
 
-      expect(fn).toThrowError('Invalid value for "images[\'foo\'].data":');
+      expect(fn).toThrowError('Invalid value for "images/foo/data":');
     });
   });
 

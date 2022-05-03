@@ -98,7 +98,7 @@ describe('graphics', () => {
     it(`throws for invalid point in polyline`, () => {
       const fn = () => parseGraphicsObject({ type: 'polyline', points: [{ x: 1, y: 'a' }] });
 
-      expect(fn).toThrowError(`Invalid value for "points[0].y": Expected number, got: 'a'`);
+      expect(fn).toThrowError(`Invalid value for "points/0/y": Expected number, got: 'a'`);
     });
 
     ['strokeColor', 'fillColor'].forEach((name) => {

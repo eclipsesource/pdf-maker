@@ -87,7 +87,7 @@ type InheritableAttrs = TextAttrs & {
 
 export function parseContent(content: unknown[], defaultStyle: InheritableAttrs): Paragraph[] {
   return content.map((block, idx) =>
-    check(block, `content[${idx}]`, () => parseBlock(asObject(block), defaultStyle))
+    check(block, `content/${idx}`, () => parseBlock(asObject(block), defaultStyle))
   );
 }
 
@@ -105,7 +105,7 @@ export function parseColumns(input: Obj, defaultAttrs?: InheritableAttrs): Colum
   const mergedAttrs = { ...defaultAttrs, ...parseInheritableAttrs(input) };
   const parseColumns = (columns) =>
     asArray(columns).map((col, idx) =>
-      check(col, `[${idx}]`, () => parseBlock(col as Obj, mergedAttrs))
+      check(col, `${idx}`, () => parseBlock(col as Obj, mergedAttrs))
     );
   return pickDefined({
     columns: getFrom(input, 'columns', parseColumns),
@@ -117,7 +117,7 @@ export function parseRows(input: Obj, defaultAttrs?: InheritableAttrs): Columns 
   const mergedAttrs = { ...defaultAttrs, ...parseInheritableAttrs(input) };
   const parseRows = (rows) =>
     asArray(rows).map((col, idx) =>
-      check(col, `[${idx}]`, () => parseBlock(col as Obj, mergedAttrs))
+      check(col, `${idx}`, () => parseBlock(col as Obj, mergedAttrs))
     );
   return pickDefined({
     rows: getFrom(input, 'rows', parseRows),

@@ -82,19 +82,7 @@ describe('types', () => {
 
       const fn = () => check(input, 'foo', nestedCheck);
 
-      expect(fn).toThrowError('Invalid value for "foo.bar": bad value');
-    });
-
-    it('handles bracket notation in nested error messages', () => {
-      const input = 23;
-      const bad = () => {
-        throw new TypeError('bad value');
-      };
-      const nestedCheck = () => check(input, '[0]', bad);
-
-      const fn = () => check(input, 'foo', nestedCheck);
-
-      expect(fn).toThrowError('Invalid value for "foo[0]": bad value');
+      expect(fn).toThrowError('Invalid value for "foo/bar": bad value');
     });
 
     it('throws for missing value', () => {

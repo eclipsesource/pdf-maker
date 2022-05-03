@@ -59,7 +59,7 @@ export type ImageObject = {
 };
 
 export function parseGraphics(input: unknown): GraphicsObject[] {
-  return asArray(input)?.map((el, idx) => check(el, `[${idx}]`, parseGraphicsObject));
+  return asArray(input)?.map((el, idx) => check(el, `${idx}`, parseGraphicsObject));
 }
 
 /**
@@ -163,7 +163,7 @@ function shiftPolyline(polyline: PolylineObject, pos: Pos): PolylineObject {
 }
 
 function asPoints(input: unknown): { x: number; y: number }[] {
-  return asArray(input).map((point, idx) => check(point, `[${idx}]`, asPoint));
+  return asArray(input).map((point, idx) => check(point, `${idx}`, asPoint));
 }
 
 function asPoint(input: unknown): { x: number; y: number } {

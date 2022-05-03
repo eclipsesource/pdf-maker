@@ -22,7 +22,7 @@ describe('layout', () => {
       const def = { defaultStyle: { fontSize: -1 }, content: [] };
 
       expect(() => layoutPages(def, resources)).toThrowError(
-        'Invalid value for "defaultStyle.fontSize":'
+        'Invalid value for "defaultStyle/fontSize":'
       );
     });
 
