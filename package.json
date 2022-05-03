@@ -1,6 +1,6 @@
 {
-  "name": "pdfmkr",
-  "version": "0.1.0",
+  "name": "printmaker",
+  "version": "0.1.0-pretest.1",
   "description": "Generate PDF documents and from JavaScript objects",
   "license": "MIT",
   "repository": {
