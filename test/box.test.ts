@@ -30,12 +30,6 @@ describe('box', () => {
   });
 
   describe('parseEdges', () => {
-    it('return undefined for missing input', () => {
-      expect(parseEdges()).toBeUndefined();
-      expect(parseEdges(null)).toBeUndefined();
-      expect(parseEdges(undefined)).toBeUndefined();
-    });
-
     it('supports number', () => {
       expect(parseEdges(0)).toEqual({ left: 0, right: 0, top: 0, bottom: 0 });
       expect(parseEdges(1)).toEqual({ left: 1, right: 1, top: 1, bottom: 1 });
@@ -89,6 +83,9 @@ describe('box', () => {
 
     it('throws on invalid types', () => {
       expect(() => parseEdges('')).toThrowError("Expected number or length string, got: ''");
+      expect(() => parseEdges(null)).toThrowError(
+        'Expected number, length string, or object, got: null'
+      );
       expect(() => parseEdges(true)).toThrowError(
         'Expected number, length string, or object, got: true'
       );
@@ -99,12 +96,6 @@ describe('box', () => {
   });
 
   describe('parseLength', () => {
-    it('return undefined for missing input', () => {
-      expect(parseLength()).toBeUndefined();
-      expect(parseLength(null)).toBeUndefined();
-      expect(parseLength(undefined)).toBeUndefined();
-    });
-
     it('supports numbers', () => {
       expect(parseLength(0)).toEqual(0);
       expect(parseLength(-1)).toEqual(-1);
@@ -148,6 +139,7 @@ describe('box', () => {
     });
 
     it('throws on invalid types', () => {
+      expect(() => parseLength(null)).toThrowError('Expected number or length string, got: null');
       expect(() => parseLength(true)).toThrowError('Expected number or length string, got: true');
       expect(() => parseLength(() => 23)).toThrowError(
         'Expected number or length string, got: anonymous function'

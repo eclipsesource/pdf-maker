@@ -6,12 +6,6 @@ const { closeTo } = expect;
 
 describe('color', () => {
   describe('parseColor', () => {
-    it('return undefined for missing input', () => {
-      expect(parseColor()).toBeUndefined();
-      expect(parseColor(null)).toBeUndefined();
-      expect(parseColor(undefined)).toBeUndefined();
-    });
-
     it('supports html color', () => {
       expect(parseColor('#ffffff')).toEqual({ type: 'RGB', red: 1, green: 1, blue: 1 });
       expect(parseColor('#000000')).toEqual({ type: 'RGB', red: 0, green: 0, blue: 0 });
@@ -27,13 +21,15 @@ describe('color', () => {
     });
 
     it('throws on unsupported named color', () => {
-      expect(() => parseColor('' as any)).toThrowError("Unsupported color name: ''");
-      expect(() => parseColor('salmon' as any)).toThrowError("Unsupported color name: 'salmon'");
+      expect(() => parseColor('' as any)).toThrowError("Expected valid color name, got: ''");
+      expect(() => parseColor('salmon' as any)).toThrowError(
+        "Expected valid color name, got: 'salmon'"
+      );
     });
 
     it('throws on invalid color type', () => {
-      expect(() => parseColor({} as any)).toThrowError('Invalid color: [object Object]');
-      expect(() => parseColor(23 as any)).toThrowError('Invalid color: 23');
+      expect(() => parseColor({} as any)).toThrowError('Expected valid color, got: {}');
+      expect(() => parseColor(23 as any)).toThrowError('Expected valid color, got: 23');
     });
   });
 });

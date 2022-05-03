@@ -1,4 +1,4 @@
-import { Obj, typeError } from './types.js';
+import { isObject, Obj, typeError } from './types.js';
 
 export type Pos = { x: number; y: number };
 export type Size = { width: number; height: number };
@@ -37,13 +37,12 @@ export function subtractEdges(box: Box, edges: BoxEdges) {
  * @param input the input value
  * @returns an object with the four edges in `pt`, or `undefined` if the input is missing or `null`
  */
-export function parseEdges(input?: unknown): BoxEdges | undefined {
-  if (input == null) return undefined;
+export function parseEdges(input: unknown): BoxEdges {
   if (typeof input === 'number' || typeof input === 'string') {
     const value = parseLength(input);
     return { right: value, left: value, top: value, bottom: value };
   }
-  if (typeof input === 'object') {
+  if (isObject(input)) {
     const obj = input as Obj;
     return {
       right: parseLength(obj.right ?? obj.x ?? 0),
@@ -62,8 +61,7 @@ export function parseEdges(input?: unknown): BoxEdges | undefined {
  * @param input the input value
  * @returns the length in `pt`, or `undefined` if the input is missing or `null`
  */
-export function parseLength(input?: unknown): number | undefined {
-  if (input == null) return undefined;
+export function parseLength(input: unknown): number {
   if (typeof input === 'number' && Number.isFinite(input)) {
     return input;
   }

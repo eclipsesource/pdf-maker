@@ -13,6 +13,7 @@ import {
   asString,
   check,
   getFrom,
+  isObject,
   Obj,
   optional,
   pickDefined,
@@ -173,7 +174,7 @@ export function parseText(text: unknown, attrs: TextAttrs): TextSpan[] {
   if (typeof text === 'string') {
     return [{ text, attrs }];
   }
-  if (typeof text === 'object' && 'text' in text) {
+  if (isObject(text) && 'text' in text) {
     return parseText((text as Obj).text, { ...attrs, ...parseTextAttrs(text as Obj) });
   }
   throw typeError('string, object with text attribute, or array of text', text);

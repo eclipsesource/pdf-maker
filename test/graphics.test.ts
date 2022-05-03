@@ -107,7 +107,9 @@ describe('graphics', () => {
 
         const fn = () => parseGraphicsObject(rect);
 
-        expect(fn).toThrowError(`Invalid value for "${name}": Unsupported color name: 'foo'`);
+        expect(fn).toThrowError(
+          `Invalid value for "${name}": Expected valid color name, got: 'foo'`
+        );
       });
     });
 

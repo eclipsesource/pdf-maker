@@ -10,6 +10,7 @@ import {
   asString,
   check,
   getFrom,
+  isObject,
   optional,
   pickDefined,
   printValue,
@@ -266,11 +267,34 @@ describe('types', () => {
   describe('asObject', () => {
     it('returns objects', () => {
       expect(asObject({})).toEqual({});
-      expect(asObject(new ArrayBuffer(3))).toEqual(new ArrayBuffer(3));
+      expect(asObject({ foo: 23 })).toEqual({ foo: 23 });
     });
 
-    it('throws for arrays', () => {
+    it('throws for other types', () => {
+      expect(() => asObject(null)).toThrowError('Expected object, got: null');
       expect(() => asObject([])).toThrowError('Expected object, got: []');
+      expect(() => asObject(new ArrayBuffer(3))).toThrowError(
+        'Expected object, got: ArrayBuffer [0, 0, 0]'
+      );
+    });
+  });
+
+  describe('isObject', () => {
+    it('returns true for objects', () => {
+      expect(isObject({})).toBe(true);
+      expect(isObject({ foo: 23 })).toBe(true);
+    });
+
+    it('returns false for other types', () => {
+      expect(isObject(null)).toBe(false); // typeof null === 'object'
+      expect(isObject(0)).toBe(false);
+      expect(isObject(Infinity)).toBe(false);
+      expect(isObject(NaN)).toBe(false);
+      expect(isObject('[object Object]')).toBe(false);
+      expect(isObject([])).toBe(false); // typeof [] === 'object'
+      expect(isObject([{}])).toBe(false); // [{}].toString() === '[object Object]'
+      expect(isObject(new ArrayBuffer(3))).toBe(false);
+      expect(isObject(new Date())).toBe(false);
     });
   });
 

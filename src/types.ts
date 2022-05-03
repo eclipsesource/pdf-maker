@@ -81,8 +81,17 @@ export function asArray(value: unknown): unknown[] {
 }
 
 export function asObject(value: unknown): Obj {
-  if (typeof value === 'object' && !Array.isArray(value)) return value as Obj;
+  if (isObject(value)) return value as Obj;
   throw typeError('object', value);
+}
+
+export function isObject(value: unknown): value is Record<string, unknown> {
+  return (
+    value != null &&
+    typeof value === 'object' &&
+    !Array.isArray(value) &&
+    value.toString() === '[object Object]'
+  );
 }
 
 export function typeError(expected: string, value: unknown) {
