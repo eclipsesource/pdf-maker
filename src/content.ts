@@ -1,4 +1,5 @@
 import { namedColors } from './colors.js';
+import { paperSizes } from './page-sizes.js';
 
 /**
  * The complete definition of a document to create.
@@ -22,6 +23,15 @@ export type DocumentDefinition = {
    * The default style attributes to use in the document.
    */
   defaultStyle?: TextAttrs;
+  /**
+   * The page size of the document. Defaults to A4.
+   */
+  pageSize?: PaperSize | Size;
+  /**
+   * The orientation of the pages in the document. When this parameter is set, width and height
+   * of the given page size will be reversed if necessary to match the given orientation.
+   */
+  pageOrientation?: Orientation;
   /**
    * The page margins. Defaults to 50pt on each side.
    */
@@ -334,3 +344,12 @@ export type NamedColor = keyof typeof namedColors;
 export type HTMLColor = `#${string}`;
 
 export type Alignment = 'left' | 'right' | 'center';
+
+/**
+ * All named paper sizes are in portrait orientation.
+ */
+export type PaperSize = keyof typeof paperSizes;
+
+export type Orientation = 'portrait' | 'landscape';
+
+export type Size = { width: Length; height: Length };

@@ -23,6 +23,7 @@ export default {
   images: {
     liberty: { data: readFileSync('examples/liberty.jpg') },
   },
+  pageSize: 'A4',
   margin: { x: '2.5cm', top: '2.5cm', bottom: '2cm' },
   defaultStyle: {
     fontSize: 14,

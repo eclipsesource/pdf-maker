@@ -1,8 +1,10 @@
 import fontkit from '@pdf-lib/fontkit';
 import { PDFDict, PDFDocument, PDFHexString, PDFName } from 'pdf-lib';
 
+import { Size } from './box.js';
 import { embedFonts, Font, parseFonts } from './fonts.js';
 import { embedImages, Image, parseImages } from './images.js';
+import { applyOrientation, paperSizes, parseOrientation, parsePageSize } from './page-sizes.js';
 import {
   asArray,
   asDate,
@@ -18,6 +20,7 @@ import {
 export type Document = {
   fonts: Font[];
   images: Image[];
+  pageSize: Size;
   pdfDoc: PDFDocument;
 };
 
@@ -27,9 +30,10 @@ export async function createDocument(def: Obj): Promise<Document> {
 
   const fonts = await embedFonts(getFrom(def, 'fonts', parseFonts), pdfDoc);
   const images = await embedImages(getFrom(def, 'images', parseImages), pdfDoc);
-
+  const size = getFrom(def, 'pageSize', optional(parsePageSize)) ?? paperSizes.A4;
+  const orientation = getFrom(def, 'pageOrientation', optional(parseOrientation));
   setMetadata(getFrom(def, 'info', optional(parseInfo)), pdfDoc);
-  return { fonts, images, pdfDoc };
+  return { fonts, images, pageSize: applyOrientation(size, orientation), pdfDoc };
 }
 
 type Metadata = {

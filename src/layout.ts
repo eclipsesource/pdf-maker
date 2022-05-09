@@ -1,6 +1,6 @@
 import { PDFFont } from 'pdf-lib';
 
-import { Box, parseEdges, parseLength, Pos, Size, subtractEdges, ZERO_EDGES } from './box.js';
+import { Box, parseEdges, Pos, Size, subtractEdges, ZERO_EDGES } from './box.js';
 import { Color } from './colors.js';
 import { Alignment } from './content.js';
 import { Document } from './document.js';
@@ -23,7 +23,6 @@ import {
 import { breakLine, extractTextSegments, flattenTextSegments, TextSegment } from './text.js';
 import { asArray, asObject, getFrom, Obj, optional, pickDefined, required } from './types.js';
 
-const pageSize = { width: parseLength('210mm'), height: parseLength('297mm') }; // A4, portrait
 const defaultPageMargin = parseEdges('2cm');
 
 /**
@@ -73,18 +72,18 @@ export function layoutPages(def: Obj, doc: Document): Page[] {
   const content = getFrom(def, 'content', required(asArray));
   const pageMargin = getFrom(def, 'margin', optional(parseEdges)) ?? defaultPageMargin;
   const defaultStyle = getFrom(def, 'defaultStyle', optional(parseInheritableAttrs));
-  const guides = getFrom(def, 'dev', optional(asObject))?.guides;
-  const contentBox = subtractEdges({ x: 0, y: 0, ...pageSize }, pageMargin);
+  const guides = !!getFrom(def, 'dev', optional(asObject))?.guides || undefined;
+  const contentBox = subtractEdges({ x: 0, y: 0, ...doc.pageSize }, pageMargin);
   const blocks = parseContent(content, defaultStyle);
-  const pages = [];
+  const pages: Page[] = [];
   let remainingBlocks = blocks;
   while (remainingBlocks?.length) {
     const { frame, remainder } = layoutPageContent(remainingBlocks, contentBox, doc);
     remainingBlocks = remainder;
-    pages.push({ size: pageSize, content: frame, guides });
+    pages.push({ size: doc.pageSize, content: frame, guides });
   }
   pages.map((page, idx) => {
-    const pageInfo = { pageCount: pages.length, pageNumber: idx + 1, pageSize };
+    const pageInfo = { pageCount: pages.length, pageNumber: idx + 1, pageSize: doc.pageSize };
     const parse = (block) => parseBlock(asObject(resolveFn(block, pageInfo)), defaultStyle);
     const header = getFrom(def, 'header', optional(parse));
     const footer = getFrom(def, 'footer', optional(parse));
@@ -104,14 +103,14 @@ function resolveFn(value, ...args) {
 }
 
 function layoutHeader(header: Block, doc: Document) {
-  const box = subtractEdges({ x: 0, y: 0, ...pageSize }, header.margin);
+  const box = subtractEdges({ x: 0, y: 0, ...doc.pageSize }, header.margin);
   return layoutBlock(header, box, doc);
 }
 
 function layoutFooter(footer: Block, doc: Document) {
-  const box = subtractEdges({ x: 0, y: 0, ...pageSize }, footer.margin);
+  const box = subtractEdges({ x: 0, y: 0, ...doc.pageSize }, footer.margin);
   const frame = layoutBlock(footer, box, doc);
-  frame.y = pageSize.height - frame.height - footer.margin?.bottom ?? 0;
+  frame.y = doc.pageSize.height - frame.height - footer.margin?.bottom ?? 0;
   return frame;
 }
 
