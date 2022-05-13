@@ -21,8 +21,8 @@
     "module": "./dist/index.js"
   },
   "engines": {
-    "node": "^16.13.0",
-    "npm": "8"
+    "node": ">=16.13.0",
+    "npm": ">=8"
   },
   "scripts": {
     "start": "rm -rf dist/ && tsc && concurrently -k -n build,example npm:watch:build npm:watch:example",
