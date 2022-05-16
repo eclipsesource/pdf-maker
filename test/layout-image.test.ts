@@ -6,19 +6,19 @@ import { fakeImage } from './test-utils.js';
 const { arrayContaining, objectContaining } = expect;
 
 describe('layout-image', () => {
-  let resources, box;
+  let box, doc;
 
   beforeEach(() => {
     const images = [fakeImage('img-720-480', 720, 480), fakeImage('img-72-48', 72, 48)];
-    resources = { images };
     box = { x: 20, y: 30, width: 400, height: 700 };
+    doc = { images };
   });
 
   describe('layoutImage', () => {
     it('respects fixed width and height', () => {
       const block = { image: 'img-720-480', width: 200, height: 100 };
 
-      const result = layoutImage(block, box, resources);
+      const result = layoutImage(block, box, doc);
 
       expect(result).toEqual(
         objectContaining({ type: 'paragraph', x: 20, y: 30, width: 200, height: 100 })
@@ -30,7 +30,7 @@ describe('layout-image', () => {
         it('scales image to fixed width', () => {
           const block = { image, width: 300 };
 
-          const result = layoutImage(block, box, resources);
+          const result = layoutImage(block, box, doc);
 
           expect(result).toEqual(objectContaining({ x: 20, y: 30, width: 300, height: 200 }));
           expect(result.objects[0]).toEqual(
@@ -41,7 +41,7 @@ describe('layout-image', () => {
         it('scales image to fixed height', () => {
           const block = { image, height: 200 };
 
-          const result = layoutImage(block, box, resources);
+          const result = layoutImage(block, box, doc);
 
           expect(result).toEqual(objectContaining({ x: 20, y: 30, width: 400, height: 200 }));
           expect(result.objects[0]).toEqual(
@@ -52,7 +52,7 @@ describe('layout-image', () => {
         it('scales image to fit into fixed width and height', () => {
           const block = { image, width: 300, height: 300 };
 
-          const result = layoutImage(block, box, resources);
+          const result = layoutImage(block, box, doc);
 
           expect(result.objects[0]).toEqual(
             objectContaining({ type: 'image', x: 0, y: 0, width: 300, height: 200 })
@@ -64,7 +64,7 @@ describe('layout-image', () => {
     it('does not scale image if no fixed bounds', () => {
       const block = { image: 'img-72-48' };
 
-      const result = layoutImage(block, box, resources);
+      const result = layoutImage(block, box, doc);
 
       expect(result).toEqual(objectContaining({ x: 20, y: 30, width: 400, height: 48 }));
       expect(result.objects[0]).toEqual(
@@ -75,7 +75,7 @@ describe('layout-image', () => {
     it('scales image down to fit into available width if no fixed bounds', () => {
       const block = { image: 'img-720-480' };
 
-      const result = layoutImage(block, box, resources);
+      const result = layoutImage(block, box, doc);
 
       expect(result).toEqual(objectContaining({ x: 20, y: 30, width: 400, height: (400 * 2) / 3 }));
       expect(result.objects[0]).toEqual(
@@ -87,7 +87,7 @@ describe('layout-image', () => {
       const padding = { left: 5, right: 6, top: 7, bottom: 8 };
       const block = { image: 'img-720-480', padding };
 
-      const result = layoutImage(block, box, resources);
+      const result = layoutImage(block, box, doc);
 
       const imgWidth = 400 - 5 - 6;
       const imgHeight = imgWidth / 1.5;
@@ -102,7 +102,7 @@ describe('layout-image', () => {
     it('includes anchor object for id', () => {
       const block = { image: 'img-720-480', id: 'test' };
 
-      const result = layoutImage(block, box, resources);
+      const result = layoutImage(block, box, doc);
 
       expect(result.objects).toEqual(
         arrayContaining([objectContaining({ type: 'anchor', name: 'test', x: 0, y: 0 })])

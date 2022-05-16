@@ -137,15 +137,15 @@ export type Columns = {
    */
   columns: Block[];
 } & TextAttrs &
-  TextBlockAttrs;
+  BlockAttrs;
 
 export type Rows = {
   /**
-   * Blocks to arrange vertically.
+   * Content blocks to arrange vertically.
    */
   rows: Block[];
 } & TextAttrs &
-  TextBlockAttrs;
+  BlockAttrs;
 
 export type Image = {
   /**
@@ -162,6 +162,10 @@ export type Image = {
    * Space to leave between the image and the edges of this paragraph.
    */
   padding?: Length | BoxLengths;
+  /**
+   * Align the image in this block. By default, it is center-aligned.
+   */
+  imageAlign: Alignment;
 } & BlockAttrs;
 
 export type Paragraph = {
@@ -180,15 +184,7 @@ export type Paragraph = {
    */
   padding?: Length | BoxLengths;
 } & TextAttrs &
-  TextBlockAttrs;
-
-export type TextBlockAttrs = BlockAttrs & {
-  /**
-   * Align texts included in this block.
-   * Supported values are `left`, `right` and `center`. By default, texts are left-aligned.
-   */
-  textAlign?: Alignment;
-};
+  BlockAttrs;
 
 export type BlockAttrs = {
   /**

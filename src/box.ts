@@ -20,7 +20,7 @@ export const ZERO_EDGES = Object.freeze(parseEdges(0));
  * @param edges The space to subtract.
  * @returns The resulting inner box.
  */
-export function subtractEdges(box: Box, edges: BoxEdges) {
+export function subtractEdges(box: Box, edges: BoxEdges): Box {
   return {
     x: box.x + (edges?.left ?? 0),
     y: box.y + (edges?.top ?? 0),
