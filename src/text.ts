@@ -52,6 +52,7 @@ export type Rows = {
 export type ImageBlock = {
   image?: string;
   padding?: BoxEdges;
+  imageAlign?: Alignment;
 } & BlockAttrs;
 
 export type Paragraph = {
@@ -90,6 +91,9 @@ export function readBlock(input: unknown, defaultAttrs?: InheritableAttrs): Bloc
   if (obj.rows) {
     return parseRows(obj, defaultAttrs);
   }
+  if (obj.image) {
+    return parseImage(obj);
+  }
   return parseParagraph(obj, defaultAttrs);
 }
 
@@ -113,6 +117,15 @@ export function parseRows(input: Obj, defaultAttrs?: InheritableAttrs): Columns 
 
 const tAlignment = types.string({ enum: ['left', 'right', 'center'] }) as TypeDef<Alignment>;
 
+export function parseImage(input: Obj): Paragraph {
+  return pickDefined({
+    image: readFrom(input, 'image', optional(types.string())),
+    padding: readFrom(input, 'padding', optional(parseEdges)),
+    imageAlign: readFrom(input, 'imageAlign', optional(tAlignment)),
+    ...parseBlockAttrs(input),
+  });
+}
+
 export function parseParagraph(input: Obj, defaultAttrs?: InheritableAttrs): Paragraph {
   const mergedAttrs = { ...defaultAttrs, ...input };
   const textAttrs = parseTextAttrs(mergedAttrs);
@@ -120,7 +133,6 @@ export function parseParagraph(input: Obj, defaultAttrs?: InheritableAttrs): Par
   return {
     ...readObject(input, {
       text: optional(parseTextWithAttrs),
-      image: optional(types.string()),
       graphics: optional(types.array(readGraphicsObject)),
       padding: optional(parseEdges),
     }),
