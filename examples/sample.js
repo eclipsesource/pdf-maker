@@ -136,6 +136,7 @@ export default {
     {
       image: 'liberty',
       height: 200,
+      imageAlign: 'right',
     },
     {
       rows: [

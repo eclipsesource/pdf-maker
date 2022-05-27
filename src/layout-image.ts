@@ -1,7 +1,9 @@
-import { Box, ZERO_EDGES } from './box.js';
+import { PDFImage } from 'pdf-lib';
+
+import { Box, Pos, Size, subtractEdges, ZERO_EDGES } from './box.js';
 import { Document } from './document.js';
 import { ImageObject } from './graphics.js';
-import { Frame } from './layout.js';
+import { DrawableObject, Frame } from './layout.js';
 import { ImageBlock } from './text.js';
 
 export function layoutImage(block: ImageBlock, box: Box, doc: Document): Frame {
@@ -27,21 +29,27 @@ export function layoutImage(block: ImageBlock, box: Box, doc: Document): Frame {
     ? yScale
     : Math.min(xScale, 1);
 
-  const imageObj: ImageObject = {
-    type: 'image',
-    x: padding.left,
-    y: padding.top,
-    width: image.width * scale,
-    height: image.height * scale,
-    image,
-  };
-  const objects = [imageObj];
-  return {
-    type: 'image',
-    x: box.x,
-    y: box.y,
-    width: fixedWidth ?? box.width,
-    height: fixedHeight ?? image.height * scale + paddingHeight,
-    objects,
-  };
+  const imageSize = { width: image.width * scale, height: image.height * scale };
+
+  const width = fixedWidth ?? box.width;
+  const height = fixedHeight ?? imageSize.height + paddingHeight;
+
+  const imageBox = subtractEdges({ x: 0, y: 0, width, height }, padding);
+  const imagePos = align(block.imageAlign, imageBox, imageSize);
+
+  const imageObj: ImageObject = createImageObject(image, imagePos, imageSize);
+  const objects: DrawableObject[] = [imageObj];
+  return { type: 'image', x: box.x, y: box.y, width, height, objects };
+}
+
+function align(alignment: string, box: Box, size: Size): Pos {
+  const space = { width: box.width - size.width, height: box.height - size.height };
+  const is = (a: string) => alignment === a;
+  const xShift = is('left') ? 0 : is('right') ? space.width : space.width / 2;
+  const yShift = is('top') ? 0 : is('bottom') ? space.height : space.height / 2;
+  return { x: box.x + xShift, y: box.y + yShift };
+}
+
+function createImageObject(image: PDFImage, pos: Pos, size: Size): ImageObject {
+  return { type: 'image', image, x: pos.x, y: pos.y, width: size.width, height: size.height };
 }
