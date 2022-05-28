@@ -4,20 +4,17 @@ import { BoxEdges, parseEdges, parseLength } from './box.js';
 import { Color, parseColor } from './colors.js';
 import { Alignment } from './content.js';
 import { Font, selectFont } from './fonts.js';
-import { GraphicsObject, parseGraphics } from './graphics.js';
+import { GraphicsObject, readGraphicsObject } from './graphics.js';
 import {
-  asArray,
-  asBoolean,
-  asNonNegNumber,
-  asObject,
-  asString,
-  check,
-  getFrom,
   isObject,
   Obj,
   optional,
   pickDefined,
+  readFrom,
+  readObject,
+  TypeDef,
   typeError,
+  types,
 } from './types.js';
 
 const defaultFontSize = 18;
@@ -85,85 +82,78 @@ type InheritableAttrs = TextAttrs & {
   textAlign?: Alignment;
 };
 
-export function parseContent(content: unknown[], defaultStyle: InheritableAttrs): Paragraph[] {
-  return content.map((block, idx) =>
-    check(block, `content/${idx}`, () => parseBlock(asObject(block), defaultStyle))
-  );
-}
-
-export function parseBlock(input: Obj, defaultAttrs?: InheritableAttrs): Block {
-  if (input.columns) {
-    return parseColumns(input, defaultAttrs);
+export function readBlock(input: unknown, defaultAttrs?: InheritableAttrs): Block {
+  const obj = readObject(input);
+  if (obj.columns) {
+    return parseColumns(obj, defaultAttrs);
   }
-  if (input.rows) {
-    return parseRows(input, defaultAttrs);
+  if (obj.rows) {
+    return parseRows(obj, defaultAttrs);
   }
-  return parseParagraph(input, defaultAttrs);
+  return parseParagraph(obj, defaultAttrs);
 }
 
 export function parseColumns(input: Obj, defaultAttrs?: InheritableAttrs): Columns {
   const mergedAttrs = { ...defaultAttrs, ...parseInheritableAttrs(input) };
-  const parseColumns = (columns) =>
-    asArray(columns).map((col, idx) =>
-      check(col, `${idx}`, () => parseBlock(col as Obj, mergedAttrs))
-    );
+  const readColumn = (el) => readBlock(el, mergedAttrs);
   return pickDefined({
-    columns: getFrom(input, 'columns', parseColumns),
+    columns: readFrom(input, 'columns', types.array(readColumn)),
     ...parseBlockAttrs(input),
   }) as Columns;
 }
 
 export function parseRows(input: Obj, defaultAttrs?: InheritableAttrs): Columns {
   const mergedAttrs = { ...defaultAttrs, ...parseInheritableAttrs(input) };
-  const parseRows = (rows) =>
-    asArray(rows).map((col, idx) =>
-      check(col, `${idx}`, () => parseBlock(col as Obj, mergedAttrs))
-    );
+  const readRow = (el) => readBlock(el, mergedAttrs);
   return pickDefined({
-    rows: getFrom(input, 'rows', parseRows),
+    rows: readFrom(input, 'rows', types.array(readRow)),
     ...parseBlockAttrs(input),
   }) as Columns;
 }
+
+const tAlignment = types.string({ enum: ['left', 'right', 'center'] }) as TypeDef<Alignment>;
 
 export function parseParagraph(input: Obj, defaultAttrs?: InheritableAttrs): Paragraph {
   const mergedAttrs = { ...defaultAttrs, ...input };
   const textAttrs = parseTextAttrs(mergedAttrs);
   const parseTextWithAttrs = (text) => parseText(text, textAttrs);
-  return pickDefined({
-    text: getFrom(input, 'text', optional(parseTextWithAttrs)),
-    image: getFrom(input, 'image', optional(asString)),
-    graphics: getFrom(input, 'graphics', optional(parseGraphics)),
-    padding: getFrom(input, 'padding', optional(parseEdges)),
-    textAlign: getFrom(mergedAttrs, 'textAlign', optional(asTextAlign)),
+  return {
+    ...readObject(input, {
+      text: optional(parseTextWithAttrs),
+      image: optional(types.string()),
+      graphics: optional(types.array(readGraphicsObject)),
+      padding: optional(parseEdges),
+    }),
+    textAlign: readFrom(mergedAttrs, 'textAlign', optional(tAlignment)),
     ...parseBlockAttrs(input),
-  });
+  };
 }
 
 function parseBlockAttrs(input: Obj): BlockAttrs {
-  return pickDefined({
-    margin: getFrom(input, 'margin', optional(parseEdges)),
-    width: getFrom(input, 'width', optional(parseLength)),
-    height: getFrom(input, 'height', optional(parseLength)),
-    id: getFrom(input, 'id', optional(asString)),
+  return readObject(input, {
+    margin: optional(parseEdges),
+    width: optional(parseLength),
+    height: optional(parseLength),
+    id: optional(types.string()),
   });
 }
 
 export function parseTextAttrs(input: Obj): TextAttrs {
-  return pickDefined({
-    fontFamily: getFrom(input, 'fontFamily', optional(asString)),
-    fontSize: getFrom(input, 'fontSize', optional(asNonNegNumber)),
-    lineHeight: getFrom(input, 'lineHeight', optional(asNonNegNumber)),
-    bold: getFrom(input, 'bold', optional(asBoolean)),
-    italic: getFrom(input, 'italic', optional(asBoolean)),
-    color: getFrom(input, 'color', optional(parseColor)),
-    link: getFrom(input, 'link', optional(asString)),
+  return readObject(input, {
+    fontFamily: optional(types.string()),
+    fontSize: optional(types.number({ minimum: 0 })),
+    lineHeight: optional(types.number({ minimum: 0 })),
+    bold: optional(types.boolean()),
+    italic: optional(types.boolean()),
+    color: optional(parseColor),
+    link: optional(types.string()),
   });
 }
 
 export function parseInheritableAttrs(input: Obj): TextAttrs {
   return pickDefined({
     ...parseTextAttrs(input),
-    textAlign: getFrom(input, 'textAlign', optional(asTextAlign)),
+    textAlign: readFrom(input, 'textAlign', optional(tAlignment)),
   });
 }
 
@@ -178,11 +168,6 @@ export function parseText(text: unknown, attrs: TextAttrs): TextSpan[] {
     return parseText((text as Obj).text, { ...attrs, ...parseTextAttrs(text as Obj) });
   }
   throw typeError('string, object with text attribute, or array of text', text);
-}
-
-function asTextAlign(input: unknown): Alignment {
-  if (input === 'left' || input === 'right' || input === 'center') return input;
-  throw typeError("'left', 'right', or 'center'", input);
 }
 
 export function extractTextSegments(textSpans: TextSpan[], fonts: Font[]): TextSegment[] {

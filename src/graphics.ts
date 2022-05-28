@@ -2,20 +2,7 @@ import { PDFImage } from 'pdf-lib';
 
 import { Pos } from './box.js';
 import { Color, parseColor } from './colors.js';
-import {
-  asArray,
-  asBoolean,
-  asNonNegNumber,
-  asNumber,
-  asObject,
-  check,
-  getFrom,
-  Obj,
-  optional,
-  pickDefined,
-  required,
-  typeError,
-} from './types.js';
+import { Obj, optional, readFrom, readObject, required, types } from './types.js';
 
 export type GraphicsObject = RectObject | LineObject | PolylineObject | ImageObject;
 
@@ -58,67 +45,54 @@ export type ImageObject = {
   image: PDFImage;
 };
 
-export function parseGraphics(input: unknown): GraphicsObject[] {
-  return asArray(input)?.map((el, idx) => check(el, `${idx}`, parseGraphicsObject));
-}
+const shapeTypes = ['rect', 'line', 'polyline'];
 
-/**
- * Parses a given input as a graphics shape object. Throws if the input cannot be parsed.
- *
- * @param input The input value to parse.
- * @returns A graphics shape object.
- */
-export function parseGraphicsObject(input: unknown): GraphicsObject {
-  const shape = asObject(input);
-  const type = getFrom(shape, 'type', required(asGraphicsType));
+export function readGraphicsObject(input: unknown): GraphicsObject {
+  const shape = readObject(input);
+  const type = readFrom(shape, 'type', required(types.string({ enum: shapeTypes })));
   switch (type) {
     case 'rect':
-      return parseRect(shape);
+      return readRect(shape);
     case 'line':
-      return parseLine(shape);
+      return readLine(shape);
     case 'polyline':
-      return parsePolyline(shape);
+      return readPolyline(shape);
   }
 }
 
-function asGraphicsType(input: unknown): string {
-  if (input === 'rect' || input === 'line' || input === 'polyline') return input;
-  throw typeError("'rect', 'line', or 'polyline'", input);
-}
-
-function parseRect(input: Obj): RectObject {
-  return pickDefined({
-    type: 'rect',
-    x: getFrom(input, 'x', required(asNumber)),
-    y: getFrom(input, 'y', required(asNumber)),
-    width: getFrom(input, 'width', required(asNumber)),
-    height: getFrom(input, 'height', required(asNumber)),
-    strokeWidth: getFrom(input, 'strokeWidth', optional(asNonNegNumber)),
-    strokeColor: getFrom(input, 'strokeColor', optional(parseColor)),
-    fillColor: getFrom(input, 'fillColor', optional(parseColor)),
+function readRect(input: Obj): RectObject {
+  return readObject(input, {
+    type: () => 'rect',
+    x: required(types.number()),
+    y: required(types.number()),
+    width: required(types.number()),
+    height: required(types.number()),
+    strokeWidth: optional(types.number({ minimum: 0 })),
+    strokeColor: optional(parseColor),
+    fillColor: optional(parseColor),
   }) as RectObject;
 }
 
-function parseLine(input: Obj): LineObject {
-  return pickDefined({
-    type: 'line',
-    x1: getFrom(input, 'x1', required(asNumber)),
-    x2: getFrom(input, 'x2', required(asNumber)),
-    y1: getFrom(input, 'y1', required(asNumber)),
-    y2: getFrom(input, 'y2', required(asNumber)),
-    strokeWidth: getFrom(input, 'strokeWidth', optional(asNonNegNumber)),
-    strokeColor: getFrom(input, 'strokeColor', optional(parseColor)),
+function readLine(input: Obj): LineObject {
+  return readObject(input, {
+    type: () => 'line',
+    x1: required(types.number()),
+    x2: required(types.number()),
+    y1: required(types.number()),
+    y2: required(types.number()),
+    strokeWidth: optional(types.number({ minimum: 0 })),
+    strokeColor: optional(parseColor),
   }) as LineObject;
 }
 
-function parsePolyline(input: Obj): PolylineObject {
-  return pickDefined({
-    type: 'polyline',
-    points: getFrom(input, 'points', required(asPoints)),
-    closePath: getFrom(input, 'closePath', optional(asBoolean)),
-    strokeWidth: getFrom(input, 'strokeWidth', optional(asNonNegNumber)),
-    strokeColor: getFrom(input, 'strokeColor', optional(parseColor)),
-    fillColor: getFrom(input, 'fillColor', optional(parseColor)),
+function readPolyline(input: Obj): PolylineObject {
+  return readObject(input, {
+    type: () => 'polyline',
+    points: required(types.array(readPoint)),
+    closePath: optional(types.boolean()),
+    strokeWidth: optional(types.number({ minimum: 0 })),
+    strokeColor: optional(parseColor),
+    fillColor: optional(parseColor),
   }) as PolylineObject;
 }
 
@@ -162,14 +136,9 @@ function shiftPolyline(polyline: PolylineObject, pos: Pos): PolylineObject {
   };
 }
 
-function asPoints(input: unknown): { x: number; y: number }[] {
-  return asArray(input).map((point, idx) => check(point, `${idx}`, asPoint));
-}
-
-function asPoint(input: unknown): { x: number; y: number } {
-  const obj = asObject(input);
-  return {
-    x: getFrom(obj, 'x', required(asNumber)),
-    y: getFrom(obj, 'y', required(asNumber)),
-  };
+function readPoint(input: unknown): { x: number; y: number } {
+  return readObject(input, {
+    x: required(types.number()),
+    y: required(types.number()),
+  }) as { x: number; y: number };
 }

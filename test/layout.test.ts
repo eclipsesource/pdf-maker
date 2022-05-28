@@ -38,6 +38,30 @@ describe('layout', () => {
       expect(() => layoutPages(def, doc)).toThrowError('Invalid value for "content":');
     });
 
+    it('checks content blocks', () => {
+      const content = [{ text: 'foo' }, { text: 23 }];
+
+      expect(() => layoutPages({ content }, doc)).toThrowError(
+        'Invalid value for "content/1/text": Expected string'
+      );
+    });
+
+    it('accepts empty content', () => {
+      expect(() => layoutPages({ content: [] }, doc)).not.toThrow();
+    });
+
+    it('includes defaultStyle in all paragraphs', () => {
+      const content = [{ text: 'foo' }, { text: 'bar' }];
+      const defaultStyle = { fontSize: 14 };
+
+      const pages = layoutPages({ content, defaultStyle }, doc);
+
+      expect(pages[0].content.children).toEqual([
+        objectContaining({ height: 14 * 1.2 }),
+        objectContaining({ height: 14 * 1.2 }),
+      ]);
+    });
+
     it('lays out content', () => {
       const def = { content: [span('test')], margin: 50 };
       const pageWidth = doc.pageSize.width;

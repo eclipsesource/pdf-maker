@@ -3,24 +3,24 @@ import { rgb } from 'pdf-lib';
 
 import {
   LineObject,
-  parseGraphicsObject,
   PolylineObject,
+  readGraphicsObject,
   RectObject,
   shiftGraphicsObject,
 } from '../src/graphics.js';
 
 describe('graphics', () => {
-  describe('parseGraphicsObject', () => {
+  describe('readGraphicsObject', () => {
     it('throws for invalid types', () => {
-      expect(() => parseGraphicsObject(23)).toThrowError('Expected object, got: 23');
-      expect(() => parseGraphicsObject('foo')).toThrowError("Expected object, got: 'foo'");
+      expect(() => readGraphicsObject(23)).toThrowError('Expected object, got: 23');
+      expect(() => readGraphicsObject('foo')).toThrowError("Expected object, got: 'foo'");
     });
 
     it('throws for unsupported type attribute', () => {
-      const fn = () => parseGraphicsObject({ type: 'foo' });
+      const fn = () => readGraphicsObject({ type: 'foo' });
 
       expect(fn).toThrowError(
-        "Invalid value for \"type\": Expected 'rect', 'line', or 'polyline', got: 'foo'"
+        `Invalid value for "type": Expected one of ('rect', 'line', 'polyline'), got: 'foo'`
       );
     });
 
@@ -32,7 +32,7 @@ describe('graphics', () => {
         fillColor: 'blue',
       };
 
-      expect(parseGraphicsObject(rect)).toEqual({
+      expect(readGraphicsObject(rect)).toEqual({
         ...rect,
         strokeColor: rgb(1, 0, 0),
         fillColor: rgb(0, 0, 1),
@@ -44,7 +44,7 @@ describe('graphics', () => {
         const rect = { type: 'rect', x: 1, y: 2, width: 10, height: 20 };
         delete rect[name];
 
-        const fn = () => parseGraphicsObject(rect);
+        const fn = () => readGraphicsObject(rect);
 
         expect(fn).toThrowError(`Missing value for "${name}"`);
       });
@@ -57,7 +57,7 @@ describe('graphics', () => {
         strokeColor: 'red',
       };
 
-      expect(parseGraphicsObject(line)).toEqual({
+      expect(readGraphicsObject(line)).toEqual({
         ...line,
         strokeColor: rgb(1, 0, 0),
       });
@@ -68,7 +68,7 @@ describe('graphics', () => {
         const line = { type: 'line', x1: 1, y1: 2, x2: 11, y2: 12 };
         delete line[name];
 
-        const fn = () => parseGraphicsObject(line);
+        const fn = () => readGraphicsObject(line);
 
         expect(fn).toThrowError(`Missing value for "${name}"`);
       });
@@ -82,7 +82,7 @@ describe('graphics', () => {
         fillColor: 'blue',
       };
 
-      expect(parseGraphicsObject(polyline)).toEqual({
+      expect(readGraphicsObject(polyline)).toEqual({
         ...polyline,
         strokeColor: rgb(1, 0, 0),
         fillColor: rgb(0, 0, 1),
@@ -90,13 +90,13 @@ describe('graphics', () => {
     });
 
     it(`throws for missing polyline attribute points`, () => {
-      const fn = () => parseGraphicsObject({ type: 'polyline' });
+      const fn = () => readGraphicsObject({ type: 'polyline' });
 
       expect(fn).toThrowError(`Missing value for "points"`);
     });
 
     it(`throws for invalid point in polyline`, () => {
-      const fn = () => parseGraphicsObject({ type: 'polyline', points: [{ x: 1, y: 'a' }] });
+      const fn = () => readGraphicsObject({ type: 'polyline', points: [{ x: 1, y: 'a' }] });
 
       expect(fn).toThrowError(`Invalid value for "points/0/y": Expected number, got: 'a'`);
     });
@@ -105,7 +105,7 @@ describe('graphics', () => {
       it(`throws for invalid rect attribute ${name}`, () => {
         const rect = { type: 'rect', x: 1, y: 2, width: 10, height: 20, [name]: 'foo' };
 
-        const fn = () => parseGraphicsObject(rect);
+        const fn = () => readGraphicsObject(rect);
 
         expect(fn).toThrowError(
           `Invalid value for "${name}": Expected valid color name, got: 'foo'`
@@ -116,11 +116,9 @@ describe('graphics', () => {
     it(`throws for negative value in attribute strokeWidth`, () => {
       const rect = { type: 'rect', x: 1, y: 2, width: 10, height: 20, strokeWidth: -1 };
 
-      const fn = () => parseGraphicsObject(rect);
+      const fn = () => readGraphicsObject(rect);
 
-      expect(fn).toThrowError(
-        'Invalid value for "strokeWidth": Expected non-negative number, got: -1'
-      );
+      expect(fn).toThrowError('Invalid value for "strokeWidth": Expected number >= 0, got: -1');
     });
   });
 

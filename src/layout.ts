@@ -9,16 +9,8 @@ import { layoutImage } from './layout-image.js';
 import { layoutRows } from './layout-rows.js';
 import { layoutParagraph } from './layout-text.js';
 import { Page } from './page.js';
-import {
-  Block,
-  Columns,
-  ImageBlock,
-  parseBlock,
-  parseContent,
-  parseInheritableAttrs,
-  Rows,
-} from './text.js';
-import { asArray, asObject, getFrom, Obj, optional, pickDefined, required } from './types.js';
+import { Block, Columns, ImageBlock, parseInheritableAttrs, readBlock, Rows } from './text.js';
+import { Obj, optional, pickDefined, readFrom, readObject, required, types } from './types.js';
 
 const defaultPageMargin = parseEdges('2cm');
 
@@ -66,12 +58,12 @@ export type AnchorObject = {
 };
 
 export function layoutPages(def: Obj, doc: Document): Page[] {
-  const content = getFrom(def, 'content', required(asArray));
-  const pageMargin = getFrom(def, 'margin', optional(parseEdges)) ?? defaultPageMargin;
-  const defaultStyle = getFrom(def, 'defaultStyle', optional(parseInheritableAttrs));
-  const guides = !!getFrom(def, 'dev', optional(asObject))?.guides || undefined;
+  const pageMargin = readFrom(def, 'margin', optional(parseEdges)) ?? defaultPageMargin;
+  const defaultStyle = readFrom(def, 'defaultStyle', optional(parseInheritableAttrs));
+  const guides = !!readFrom(def, 'dev', optional(readDev))?.guides || undefined;
   const contentBox = subtractEdges({ x: 0, y: 0, ...doc.pageSize }, pageMargin);
-  const blocks = parseContent(content, defaultStyle);
+  const tBlock = (block) => readBlock(block, defaultStyle);
+  const blocks = readFrom(def, 'content', required(types.array(tBlock)));
   const pages: Page[] = [];
   let remainingBlocks = blocks;
   while (remainingBlocks?.length) {
@@ -81,13 +73,17 @@ export function layoutPages(def: Obj, doc: Document): Page[] {
   }
   pages.forEach((page, idx) => {
     const pageInfo = { pageCount: pages.length, pageNumber: idx + 1, pageSize: doc.pageSize };
-    const parse = (block) => parseBlock(asObject(resolveFn(block, pageInfo)), defaultStyle);
-    const header = getFrom(def, 'header', optional(parse));
-    const footer = getFrom(def, 'footer', optional(parse));
+    const parse = (block) => readBlock(resolveFn(block, pageInfo), defaultStyle);
+    const header = readFrom(def, 'header', optional(parse));
+    const footer = readFrom(def, 'footer', optional(parse));
     page.header = header && layoutHeader(header, doc);
     page.footer = header && layoutFooter(footer, doc);
   });
   return pages.map(pickDefined) as Page[];
+}
+
+function readDev(input: unknown) {
+  return readObject(input, { guides: optional(types.boolean()) });
 }
 
 function resolveFn(value, ...args) {

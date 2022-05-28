@@ -1,16 +1,10 @@
 import { beforeEach, describe, expect, it, jest } from '@jest/globals';
 
-import { embedFonts, parseFonts, selectFont } from '../src/fonts.js';
+import { embedFonts, readFonts, selectFont } from '../src/fonts.js';
 import { fakeFont } from './test-utils.js';
 
 describe('fonts', () => {
-  describe('parseFonts', () => {
-    it('returns an empty array for missing fonts definition', () => {
-      const fonts = parseFonts(undefined);
-
-      expect(fonts).toEqual([]);
-    });
-
+  describe('readFonts', () => {
     it('returns fonts array', () => {
       const fontsDef = {
         Test: [
@@ -22,7 +16,7 @@ describe('fonts', () => {
         Other: [{ data: mkData('Other_Normal') }],
       };
 
-      const fonts = parseFonts(fontsDef);
+      const fonts = readFonts(fontsDef);
 
       expect(fonts).toEqual([
         { name: 'Test', data: mkData('Test_Sans_Normal') },
@@ -33,24 +27,28 @@ describe('fonts', () => {
       ]);
     });
 
+    it('throws on missing input', () => {
+      expect(() => readFonts(undefined)).toThrowError('Expected object, got: undefined');
+    });
+
     it('throws on invalid type', () => {
-      expect(() => parseFonts(23)).toThrowError('Invalid value for "fonts":');
+      expect(() => readFonts(23)).toThrowError('Expected object, got: 23');
     });
 
     it('throws on invalid italic value', () => {
-      const fn = () => parseFonts({ Test: [{ data: 'data', italic: 23 }] });
+      const fn = () => readFonts({ Test: [{ data: 'data', italic: 23 }] });
 
-      expect(fn).toThrowError('Invalid value for "fonts/Test/0/italic":');
+      expect(fn).toThrowError('Invalid value for "Test/0/italic":');
     });
 
     it('throws on invalid bold value', () => {
-      const fn = () => parseFonts({ Test: [{ data: 'data', bold: 23 }] });
+      const fn = () => readFonts({ Test: [{ data: 'data', bold: 23 }] });
 
-      expect(fn).toThrowError('Invalid value for "fonts/Test/0/bold":');
+      expect(fn).toThrowError('Invalid value for "Test/0/bold":');
     });
 
     it('throws on missing data', () => {
-      const fn = () => parseFonts({ Test: [{ italic: true }] });
+      const fn = () => readFonts({ Test: [{ italic: true }] });
 
       expect(fn).toThrowError('Missing value for "data"');
     });
@@ -59,7 +57,7 @@ describe('fonts', () => {
       const data = mkData('data');
       const fontsDef = { Test: [{ data, italic: false, bold: false }] };
 
-      const fonts = parseFonts(fontsDef);
+      const fonts = readFonts(fontsDef);
 
       expect(fonts).toEqual([{ name: 'Test', data }]);
     });

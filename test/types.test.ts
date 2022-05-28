@@ -1,20 +1,20 @@
 import { describe, expect, it } from '@jest/globals';
 
 import {
-  asArray,
-  asBoolean,
-  asDate,
-  asNonNegNumber,
-  asNumber,
-  asObject,
-  asString,
-  check,
-  getFrom,
   isObject,
   optional,
   pickDefined,
   printValue,
+  readArray,
+  readAs,
+  readBoolean,
+  readDate,
+  readFrom,
+  readNumber,
+  readObject,
+  readString,
   required,
+  types,
 } from '../src/types.js';
 
 describe('types', () => {
@@ -45,11 +45,11 @@ describe('types', () => {
     });
   });
 
-  describe('check', () => {
+  describe('readAs', () => {
     it('returns value', () => {
       const input = 23;
 
-      const result = check(input, 'foo');
+      const result = readAs(input, 'foo');
 
       expect(result).toEqual(23);
     });
@@ -57,7 +57,7 @@ describe('types', () => {
     it('applies given function', () => {
       const input = 23;
 
-      const result = check(input, 'foo', (n) => (n as number) + 1);
+      const result = readAs(input, 'foo', (n) => (n as number) + 1);
 
       expect(result).toEqual(24);
     });
@@ -68,7 +68,7 @@ describe('types', () => {
         throw new TypeError('bad value');
       };
 
-      const fn = () => check(input, 'foo', bad);
+      const fn = () => readAs(input, 'foo', bad);
 
       expect(fn).toThrowError('Invalid value for "foo": bad value');
     });
@@ -78,25 +78,25 @@ describe('types', () => {
       const bad = () => {
         throw new TypeError('bad value');
       };
-      const nestedCheck = () => check(input, 'bar', bad);
+      const nestedCheck = () => readAs(input, 'bar', bad);
 
-      const fn = () => check(input, 'foo', nestedCheck);
+      const fn = () => readAs(input, 'foo', nestedCheck);
 
       expect(fn).toThrowError('Invalid value for "foo/bar": bad value');
     });
 
     it('throws for missing value', () => {
-      const fn = () => check(undefined, 'foo', required());
+      const fn = () => readAs(undefined, 'foo', required());
 
       expect(fn).toThrowError('Missing value for "foo"');
     });
   });
 
-  describe('getFrom', () => {
-    it('gets value from object', () => {
+  describe('readFrom', () => {
+    it('reads value from object', () => {
       const input = { foo: 23, bar: 42 };
 
-      const result = getFrom(input, 'foo');
+      const result = readFrom(input, 'foo');
 
       expect(result).toEqual(23);
     });
@@ -104,7 +104,7 @@ describe('types', () => {
     it('applies given function', () => {
       const input = { foo: 23, bar: 42 };
 
-      const result = getFrom(input, 'foo', (n) => (n as number) + 1);
+      const result = readFrom(input, 'foo', (n) => (n as number) + 1);
 
       expect(result).toEqual(24);
     });
@@ -115,7 +115,7 @@ describe('types', () => {
         throw new TypeError('bad value');
       };
 
-      const fn = () => getFrom(input, 'foo', bad);
+      const fn = () => readFrom(input, 'foo', bad);
 
       expect(fn).toThrowError('Invalid value for "foo": bad value');
     });
@@ -167,55 +167,79 @@ describe('types', () => {
     });
   });
 
-  describe('asBoolean', () => {
+  describe('readBoolean', () => {
     it('returns boolean values', () => {
-      expect(asBoolean(true)).toBe(true);
-      expect(asBoolean(false)).toBe(false);
+      expect(readBoolean(true)).toBe(true);
+      expect(readBoolean(false)).toBe(false);
     });
 
     it('throws for other types', () => {
-      expect(() => asBoolean(23)).toThrowError('Expected boolean, got: 23');
-      expect(() => asBoolean(null)).toThrowError('Expected boolean, got: null');
+      expect(() => readBoolean(23)).toThrowError('Expected boolean, got: 23');
+      expect(() => readBoolean(null)).toThrowError('Expected boolean, got: null');
     });
   });
 
-  describe('asString', () => {
-    it('returns strings', () => {
-      expect(asString('foo')).toBe('foo');
-      expect(asString('')).toBe('');
+  describe('readString', () => {
+    it('reads a string', () => {
+      expect(readString('')).toEqual('');
+      expect(readString('Foo')).toEqual('Foo');
+      expect(readString('23')).toEqual('23');
+    });
+
+    it('accepts a string that matches a pattern', () => {
+      expect(readString('foo', { pattern: /[a-z]/ })).toEqual('foo');
+      expect(readString('foo', { pattern: /^[a-z]+$/ })).toEqual('foo');
+    });
+
+    it('throws if string does not match pattern', () => {
+      expect(() => readString('23', { pattern: /[a-z]/ })).toThrowError(
+        "Expected string matching pattern /[a-z]/, got: '23'"
+      );
+    });
+
+    it('accepts a string that matches an enum', () => {
+      expect(readString('foo', { enum: ['foo', 'bar'] })).toEqual('foo');
+      expect(readString('bar', { enum: ['foo', 'bar'] })).toEqual('bar');
+    });
+
+    it('throws if string does not match enum', () => {
+      expect(() => readString('baz', { enum: ['foo', 'bar'] })).toThrowError(
+        "Expected one of ('foo', 'bar'), got: 'baz'"
+      );
     });
 
     it('throws for other types', () => {
-      expect(() => asString(23)).toThrowError('Expected string, got: 23');
-      expect(() => asString(null)).toThrowError('Expected string, got: null');
+      expect(() => readString(null)).toThrowError('Expected string, got: null');
+      expect(() => readString(23)).toThrowError('Expected string, got: 23');
+      expect(() => readString([23])).toThrowError('Expected string, got: [23]');
     });
   });
 
-  describe('asNumber', () => {
+  describe('readNumber', () => {
     it('returns numbers', () => {
-      expect(asNumber(23)).toBe(23);
-      expect(asNumber(-1.5)).toBe(-1.5);
+      expect(readNumber(23)).toBe(23);
+      expect(readNumber(-1.5)).toBe(-1.5);
+    });
+
+    it('accepts a number within given range', () => {
+      expect(readNumber(0, { minimum: 0, maximum: 100 })).toBe(0);
+      expect(readNumber(23, { minimum: 0, maximum: 100 })).toBe(23);
+      expect(readNumber(100, { minimum: 0, maximum: 100 })).toBe(100);
+    });
+
+    it('throws if number exceeds given range', () => {
+      expect(() => readNumber(23, { maximum: 10 })).toThrowError('Expected number <= 10, got: 23');
+      expect(() => readNumber(-3, { minimum: 0 })).toThrowError('Expected number >= 0, got: -3');
     });
 
     it('throws for non-finite numbers', () => {
-      expect(() => asNumber(NaN)).toThrowError('Expected number, got: NaN');
-      expect(() => asNumber(Infinity)).toThrowError('Expected number, got: Infinity');
+      expect(() => readNumber(NaN)).toThrowError('Expected number, got: NaN');
+      expect(() => readNumber(Infinity)).toThrowError('Expected number, got: Infinity');
     });
 
     it('throws for other types', () => {
-      expect(() => asNumber('23')).toThrowError("Expected number, got: '23'");
-      expect(() => asNumber(null)).toThrowError('Expected number, got: null');
-    });
-  });
-
-  describe('asNonNegNumber', () => {
-    it('returns zero and positive numbers', () => {
-      expect(asNonNegNumber(0)).toBe(0);
-      expect(asNonNegNumber(23)).toBe(23);
-    });
-
-    it('throws for negative numbers', () => {
-      expect(() => asNonNegNumber(-1)).toThrowError('Expected non-negative number, got: -1');
+      expect(() => readNumber('23')).toThrowError("Expected number, got: '23'");
+      expect(() => readNumber(null)).toThrowError('Expected number, got: null');
     });
   });
 
@@ -223,45 +247,91 @@ describe('types', () => {
     it('returns date objects', () => {
       const date = new Date('2000-04-01T12:13:14.000Z');
 
-      expect(asDate(date)).toBe(date);
+      expect(readDate(date)).toBe(date);
     });
 
     it('throws for date strings', () => {
-      expect(() => asDate('2000-04-01T12:13:14.000Z')).toThrowError(
+      expect(() => readDate('2000-04-01T12:13:14.000Z')).toThrowError(
         "Expected Date, got: '2000-04-01T12:13:14.000Z'"
       );
     });
 
     it('throws for other types', () => {
-      expect(() => asDate(23)).toThrowError('Expected Date, got: 23');
-      expect(() => asDate(null)).toThrowError('Expected Date, got: null');
+      expect(() => readDate(23)).toThrowError('Expected Date, got: 23');
+      expect(() => readDate(null)).toThrowError('Expected Date, got: null');
     });
   });
 
-  describe('asArray', () => {
+  describe('readArray', () => {
     it('returns arrays', () => {
-      expect(asArray([])).toEqual([]);
-      expect(asArray(['foo'])).toEqual(['foo']);
+      expect(readArray([])).toEqual([]);
+      expect(readArray(['foo'])).toEqual(['foo']);
+    });
+
+    it('accepts an array with a matching length', () => {
+      expect(readArray([1], null, { minItems: 1, maxItems: 3 })).toEqual([1]);
+      expect(readArray([1, 2, 3], null, { minItems: 1, maxItems: 3 })).toEqual([1, 2, 3]);
+    });
+
+    it('throws if array length exceeds given range', () => {
+      expect(() => readArray([], null, { minItems: 1 })).toThrowError(
+        'Expected array with minimum length 1, got: []'
+      );
+      expect(() => readArray([1, 2, 3, 4], null, { maxItems: 3 })).toThrowError(
+        'Expected array with maximum length 3, got: [1, 2, 3, 4]'
+      );
+    });
+
+    it('accepts an array with unique items', () => {
+      expect(readArray([], null, { uniqueItems: true })).toEqual([]);
+      expect(readArray([1], null, { uniqueItems: true })).toEqual([1]);
+      expect(readArray(['foo'], null, { uniqueItems: true })).toEqual(['foo']);
+      expect(readArray([1, 2, 3], null, { uniqueItems: true })).toEqual([1, 2, 3]);
+      expect(readArray(['foo', 'bar'], null, { uniqueItems: true })).toEqual(['foo', 'bar']);
+    });
+
+    it('throws if array has duplicates', () => {
+      expect(() => readArray([1, 2, 1], null, { uniqueItems: true })).toThrowError(
+        'Expected array with unique items, got: [1, 2, 1]'
+      );
+      expect(() => readArray(['foo', 'bar', 'foo'], null, { uniqueItems: true })).toThrowError(
+        "Expected array with unique items, got: ['foo', 'bar', 'foo']"
+      );
+    });
+
+    it('accepts an array with matching items', () => {
+      expect(readArray([], types.string())).toEqual([]);
+      expect(readArray(['foo'], types.string())).toEqual(['foo']);
+      expect(readArray([1, 2, 3], types.number())).toEqual([1, 2, 3]);
+    });
+
+    it('throws if array item does not match item type', () => {
+      expect(() => readArray(['foo'], types.number())).toThrowError(
+        `Invalid value for "0": Expected number, got: 'foo'`
+      );
+      expect(() => readArray([1, 2, 'foo', 4], types.number())).toThrowError(
+        `Invalid value for "2": Expected number, got: 'foo'`
+      );
     });
 
     it('throws for objects', () => {
-      expect(() => asArray({})).toThrowError('Expected array, got: {}');
-      expect(() => asArray(Uint8Array.of(1, 2, 3).buffer)).toThrowError(
+      expect(() => readArray({})).toThrowError('Expected array, got: {}');
+      expect(() => readArray(Uint8Array.of(1, 2, 3).buffer)).toThrowError(
         'Expected array, got: ArrayBuffer [1, 2, 3]'
       );
     });
   });
 
-  describe('asObject', () => {
+  describe('readObject', () => {
     it('returns objects', () => {
-      expect(asObject({})).toEqual({});
-      expect(asObject({ foo: 23 })).toEqual({ foo: 23 });
+      expect(readObject({})).toEqual({});
+      expect(readObject({ foo: 23 })).toEqual({ foo: 23 });
     });
 
     it('throws for other types', () => {
-      expect(() => asObject(null)).toThrowError('Expected object, got: null');
-      expect(() => asObject([])).toThrowError('Expected object, got: []');
-      expect(() => asObject(new ArrayBuffer(3))).toThrowError(
+      expect(() => readObject(null)).toThrowError('Expected object, got: null');
+      expect(() => readObject([])).toThrowError('Expected object, got: []');
+      expect(() => readObject(new ArrayBuffer(3))).toThrowError(
         'Expected object, got: ArrayBuffer [0, 0, 0]'
       );
     });

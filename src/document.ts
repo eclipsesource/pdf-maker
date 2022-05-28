@@ -2,20 +2,10 @@ import fontkit from '@pdf-lib/fontkit';
 import { PDFDict, PDFDocument, PDFHexString, PDFName } from 'pdf-lib';
 
 import { Size } from './box.js';
-import { embedFonts, Font, parseFonts } from './fonts.js';
-import { embedImages, Image, parseImages } from './images.js';
+import { embedFonts, Font, readFonts } from './fonts.js';
+import { embedImages, Image, readImages } from './images.js';
 import { applyOrientation, paperSizes, parseOrientation, parsePageSize } from './page-sizes.js';
-import {
-  asArray,
-  asDate,
-  asObject,
-  asString,
-  check,
-  getFrom,
-  Obj,
-  optional,
-  pickDefined,
-} from './types.js';
+import { optional, readAs, readObject, readString, types } from './types.js';
 
 export type Document = {
   fonts: Font[];
@@ -24,16 +14,21 @@ export type Document = {
   pdfDoc: PDFDocument;
 };
 
-export async function createDocument(def: Obj): Promise<Document> {
+export async function createDocument(input: unknown): Promise<Document> {
+  const def = readObject(input, {
+    fonts: optional(readFonts),
+    images: optional(readImages),
+    pageSize: optional(parsePageSize),
+    pageOrientation: optional(parseOrientation),
+    info: optional(parseInfo),
+  });
   const pdfDoc = await PDFDocument.create();
   pdfDoc.registerFontkit(fontkit);
-
-  const fonts = await embedFonts(getFrom(def, 'fonts', parseFonts), pdfDoc);
-  const images = await embedImages(getFrom(def, 'images', parseImages), pdfDoc);
-  const size = getFrom(def, 'pageSize', optional(parsePageSize)) ?? paperSizes.A4;
-  const orientation = getFrom(def, 'pageOrientation', optional(parseOrientation));
-  setMetadata(getFrom(def, 'info', optional(parseInfo)), pdfDoc);
-  return { fonts, images, pageSize: applyOrientation(size, orientation), pdfDoc };
+  const fonts = await embedFonts(def.fonts ?? [], pdfDoc);
+  const images = await embedImages(def.images ?? [], pdfDoc);
+  const pageSize = applyOrientation(def.pageSize ?? paperSizes.A4, def.pageOrientation);
+  setMetadata(def.info, pdfDoc);
+  return { fonts, images, pageSize, pdfDoc };
 }
 
 type Metadata = {
@@ -48,28 +43,22 @@ type Metadata = {
 };
 
 export function parseInfo(input: unknown): Metadata {
-  const obj = asObject(input);
-  const { title, subject, keywords, author, creationDate, creator, producer, ...custom } = obj;
-  return pickDefined({
-    title: check(title, 'title', optional(asString)),
-    subject: check(subject, 'subject', optional(asString)),
-    keywords: check(keywords, 'keywords', optional(asStringArray)) as string[],
-    author: check(author, 'author', optional(asString)),
-    creationDate: check(creationDate, 'creationDate', optional(asDate)),
-    creator: check(creator, 'creator', optional(asString)),
-    producer: check(producer, 'producer', optional(asString)),
-    custom: parseCustomAttrs(custom),
-  });
-}
-
-function parseCustomAttrs(custom: Obj): Record<string, string> {
-  if (custom == null || !Object.keys(custom).length) return undefined;
-  Object.entries(asObject(custom)).forEach(([key, value]) => check(value, key, asString));
-  return custom as Record<string, string>;
-}
-
-function asStringArray(input: unknown): string[] {
-  return asArray(input).map((el, idx) => check(el, `${idx}`, asString));
+  const properties = {
+    title: optional(types.string()),
+    subject: optional(types.string()),
+    keywords: optional(types.array(types.string())),
+    author: optional(types.string()),
+    creationDate: optional(types.date()),
+    creator: optional(types.string()),
+    producer: optional(types.string()),
+  };
+  const obj = readObject(input, properties);
+  const custom = Object.fromEntries(
+    Object.entries(input)
+      .filter(([key]) => !(key in properties))
+      .map(([key, value]) => [key, readAs(value, key, readString)])
+  );
+  return Object.keys(custom).length ? { ...obj, custom } : obj;
 }
 
 function setMetadata(info: Metadata, doc: PDFDocument) {

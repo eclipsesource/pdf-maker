@@ -7,7 +7,6 @@ import {
   findLinebreakOpportunity,
   flattenTextSegments,
   parseColumns,
-  parseContent,
   parseParagraph,
   parseRows,
   parseText,
@@ -24,30 +23,6 @@ describe('text', () => {
   beforeEach(() => {
     fonts = [fakeFont('Test'), fakeFont('Test', { italic: true })];
     [normalFont] = fonts.map((f) => f.pdfFont);
-  });
-
-  describe('parseContent', () => {
-    it('accepts empty content', () => {
-      expect(parseContent([], {})).toEqual([]);
-    });
-
-    it('includes all paragraphs with defaultStyle', () => {
-      const content = [{ text: 'foo' }, { text: 'bar' }];
-      const defaultStyle = { fontSize: 14 };
-
-      const result = parseContent(content, defaultStyle);
-
-      expect(result).toEqual([
-        { text: [{ text: 'foo', attrs: { fontSize: 14 } }] },
-        { text: [{ text: 'bar', attrs: { fontSize: 14 } }] },
-      ]);
-    });
-
-    it('checks content', () => {
-      const content = [{ text: 'foo' }, { text: 23 }];
-
-      expect(() => parseContent(content, {})).toThrowError('Invalid value for "content/1/text":');
-    });
   });
 
   describe('parseColumns', () => {

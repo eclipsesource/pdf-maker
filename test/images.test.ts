@@ -1,11 +1,11 @@
 import { describe, expect, it, jest } from '@jest/globals';
 
-import { embedImages, parseImages } from '../src/images.js';
+import { embedImages, readImages } from '../src/images.js';
 
 describe('images', () => {
-  describe('parseImages', () => {
+  describe('readImages', () => {
     it('returns an empty array for missing images definition', () => {
-      const images = parseImages({});
+      const images = readImages({});
 
       expect(images).toEqual([]);
     });
@@ -16,7 +16,7 @@ describe('images', () => {
         bar: { data: mkData('Bar') },
       };
 
-      const images = parseImages(imagesDef);
+      const images = readImages(imagesDef);
 
       expect(images).toEqual([
         { name: 'foo', data: mkData('Foo') },
@@ -25,21 +25,21 @@ describe('images', () => {
     });
 
     it('throws on invalid type', () => {
-      const fn = () => parseImages(23);
+      const fn = () => readImages(23);
 
-      expect(fn).toThrowError('Invalid value for "images": Expected object, got: 23');
+      expect(fn).toThrowError('Expected object, got: 23');
     });
 
     it('throws on invalid image definition', () => {
-      const fn = () => parseImages({ foo: 23 });
+      const fn = () => readImages({ foo: 23 });
 
-      expect(fn).toThrowError('Invalid value for "images/foo": Expected object, got: 23');
+      expect(fn).toThrowError('Invalid value for "foo": Expected object, got: 23');
     });
 
     it('throws on invalid image data', () => {
-      const fn = () => parseImages({ foo: { data: 23 } });
+      const fn = () => readImages({ foo: { data: 23 } });
 
-      expect(fn).toThrowError('Invalid value for "images/foo/data":');
+      expect(fn).toThrowError('Invalid value for "foo/data":');
     });
   });
 

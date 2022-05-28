@@ -1,5 +1,5 @@
 import { parseLength, Size } from './box.js';
-import { getFrom, isObject, required, typeError } from './types.js';
+import { isObject, readFrom, required, typeError } from './types.js';
 
 export function parsePageSize(def?: unknown): Size {
   if (typeof def === 'string') {
@@ -9,8 +9,8 @@ export function parsePageSize(def?: unknown): Size {
     return { width, height };
   }
   if (isObject(def)) {
-    const width = getFrom(def, 'width', required(parseLength));
-    const height = getFrom(def, 'height', required(parseLength));
+    const width = readFrom(def, 'width', required(parseLength));
+    const height = readFrom(def, 'height', required(parseLength));
     if (width <= 0) throw typeError('positive width', width);
     if (height <= 0) throw typeError('positive height', height);
     return { width, height };

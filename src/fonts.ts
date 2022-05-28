@@ -2,15 +2,13 @@ import { PDFDocument, PDFFont } from 'pdf-lib';
 
 import { parseBinaryData } from './binary-data.js';
 import {
-  asArray,
-  asBoolean,
-  asObject,
-  check,
-  getFrom,
-  Obj,
   optional,
   pickDefined,
+  readAs,
+  readBoolean,
+  readObject,
   required,
+  types,
 } from './types.js';
 
 export type FontDef = {
@@ -33,22 +31,19 @@ export type FontSelector = {
   bold?: boolean;
 };
 
-export function parseFonts(input: unknown): FontDef[] {
-  const obj = check(input, 'fonts', optional(asObject)) ?? {};
-  return Object.entries(obj).flatMap(([name, fontDef]) => {
-    const array = check(fontDef, `fonts/${name}`, required(asArray));
-    return array.map((fontDef, idx) => {
-      const font = check(fontDef, `fonts/${name}/${idx}`, required(parseFont));
-      return { name, ...font } as FontDef;
-    });
+export function readFonts(input: unknown): FontDef[] {
+  return Object.entries(readObject(input)).flatMap(([name, fontDef]) => {
+    return readAs(fontDef, name, required(types.array(readFont))).map(
+      (font) => ({ name, ...font } as FontDef)
+    );
   });
 }
 
-export function parseFont(def: Obj): Partial<FontDef> {
-  return pickDefined({
-    italic: getFrom(def, 'italic', optional(asBoolean)) || undefined,
-    bold: getFrom(def, 'bold', optional(asBoolean)) || undefined,
-    data: getFrom(def, 'data', required(parseBinaryData)),
+export function readFont(input: unknown): Partial<FontDef> {
+  return readObject(input, {
+    italic: optional((value) => readBoolean(value) || undefined),
+    bold: optional((value) => readBoolean(value) || undefined),
+    data: required(parseBinaryData),
   }) as FontDef;
 }
 
