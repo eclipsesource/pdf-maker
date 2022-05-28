@@ -26,7 +26,7 @@ describe('layout', () => {
       const frame = layoutParagraph(paragraph, box, doc);
 
       expect(frame).toEqual(
-        objectContaining({ type: 'paragraph', x: 20, y: 30, width: 400, height: 22 })
+        objectContaining({ type: 'text', x: 20, y: 30, width: 400, height: 22 })
       );
     });
 
@@ -36,7 +36,7 @@ describe('layout', () => {
 
       const frame = layoutParagraph(paragraph, box, doc);
 
-      expect(frame).toEqual({ type: 'paragraph', x: 20, y: 30, width: 80, height: 50 });
+      expect(frame).toEqual({ type: 'text', x: 20, y: 30, width: 80, height: 50 });
     });
 
     it('raises text by font descent', () => {
@@ -75,9 +75,7 @@ describe('layout', () => {
 
       const frame = layoutParagraph(paragraph, box, doc);
 
-      expect(frame).toEqual(
-        objectContaining({ type: 'paragraph', width: 400, height: 12 + 3 + 4 })
-      );
+      expect(frame).toEqual(objectContaining({ type: 'text', width: 400, height: 12 + 3 + 4 }));
       expect(frame.children).toEqual([
         objectContaining({ type: 'row', x: 1, y: 3, width: 30, height: 12 }),
       ]);
@@ -159,7 +157,7 @@ describe('layout', () => {
 
       const frame = layoutParagraph({ graphics }, box, doc);
 
-      expect(frame).toEqual(objectContaining({ type: 'paragraph', width: 400, height: 0 }));
+      expect(frame).toEqual(objectContaining({ type: 'text', width: 400, height: 0 }));
       expect(frame.objects).toEqual([
         { type: 'line', x1: 1, y1: 2, x2: 3, y2: 4 },
         { type: 'rect', x: 1, y: 2, width: 10, height: 20 },
@@ -177,7 +175,7 @@ describe('layout', () => {
 
       const frame = layoutParagraph({ graphics, padding }, box, doc);
 
-      expect(frame).toEqual(objectContaining({ type: 'paragraph', width: 400, height: 10 }));
+      expect(frame).toEqual(objectContaining({ type: 'text', width: 400, height: 10 }));
       expect(frame.objects).toEqual([
         { type: 'line', x1: 6, y1: 7, x2: 8, y2: 9 },
         { type: 'rect', x: 6, y: 7, width: 10, height: 20 },

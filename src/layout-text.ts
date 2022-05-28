@@ -21,7 +21,7 @@ export function layoutParagraph(paragraph: Paragraph, box: Box, doc: Document): 
   const contentHeight = text?.size?.height ?? 0;
   const objects = [...(graphics ?? [])];
   return {
-    type: 'paragraph',
+    type: 'text',
     ...box,
     width: fixedWidth ?? box.width,
     height: fixedHeight ?? (contentHeight ?? 0) + padding.top + padding.bottom,

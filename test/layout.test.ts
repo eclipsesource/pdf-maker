@@ -73,7 +73,7 @@ describe('layout', () => {
 
       expect(pages[0].header).toEqual(
         objectContaining({
-          type: 'paragraph',
+          type: 'text',
           x: 20,
           y: 20,
           width: pageWidth - 40,
@@ -82,7 +82,7 @@ describe('layout', () => {
       );
       expect(pages[0].footer).toEqual(
         objectContaining({
-          type: 'paragraph',
+          type: 'text',
           x: 20,
           y: pageHeight - 20 - 12,
           width: pageWidth - 40,
@@ -128,7 +128,7 @@ describe('layout', () => {
         ...{ type: 'page', ...box },
         children: [
           {
-            ...{ type: 'paragraph', x: 0, y: 0, width: 400, height: 18 * 1.2 },
+            ...{ type: 'text', x: 0, y: 0, width: 400, height: 18 * 1.2 },
             children: [
               {
                 ...{ type: 'row', x: 0, y: 0, width: 72, height: 18 * 1.2 },
@@ -164,8 +164,8 @@ describe('layout', () => {
       const { frame } = layoutPageContent(paragraphs, box, doc);
 
       expect(frame.children).toEqual([
-        objectContaining({ type: 'paragraph', x: 1, y: 3, width: 400 - 1 - 2, height: 12 }),
-        objectContaining({ type: 'paragraph', x: 5, y: 3 + 12 + 7, width: 400 - 5 - 6 }),
+        objectContaining({ type: 'text', x: 1, y: 3, width: 400 - 1 - 2, height: 12 }),
+        objectContaining({ type: 'text', x: 5, y: 3 + 12 + 7, width: 400 - 5 - 6 }),
       ]);
     });
   });

@@ -37,7 +37,7 @@ export function layoutImage(block: ImageBlock, box: Box, doc: Document): Frame {
   };
   const objects = [imageObj];
   return {
-    type: 'paragraph',
+    type: 'image',
     x: box.x,
     y: box.y,
     width: fixedWidth ?? box.width,

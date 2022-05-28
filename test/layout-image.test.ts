@@ -21,7 +21,7 @@ describe('layout-image', () => {
       const result = layoutImage(block, box, doc);
 
       expect(result).toEqual(
-        objectContaining({ type: 'paragraph', x: 20, y: 30, width: 200, height: 100 })
+        objectContaining({ type: 'image', x: 20, y: 30, width: 200, height: 100 })
       );
     });
 

@@ -44,7 +44,7 @@ describe('layout-rows', () => {
 
       expect(result).toEqual({
         type: 'rows',
-        children: [{ type: 'paragraph', x: 0, y: 0, width: 100, height: 50 }],
+        children: [{ type: 'text', x: 0, y: 0, width: 100, height: 50 }],
         ...{ x: 20, y: 30, width: 400, height: 50 },
       });
     });
@@ -57,7 +57,7 @@ describe('layout-rows', () => {
 
       expect(result).toEqual({
         type: 'rows',
-        children: [{ type: 'paragraph', x: 5, y: 7, width: 100, height: 50 }],
+        children: [{ type: 'text', x: 5, y: 7, width: 100, height: 50 }],
         ...{ x: 20, y: 30, width: 400, height: 50 + 7 + 8 },
       });
     });
@@ -75,8 +75,8 @@ describe('layout-rows', () => {
       expect(result).toEqual({
         type: 'rows',
         children: [
-          { type: 'paragraph', x: 5, y: 7, width: 100, height: 50 },
-          { type: 'paragraph', x: 5, y: 7 + 50 + 8, width: 100, height: 50 },
+          { type: 'text', x: 5, y: 7, width: 100, height: 50 },
+          { type: 'text', x: 5, y: 7 + 50 + 8, width: 100, height: 50 },
         ],
         ...{ x: 20, y: 30, width: 400, height: 7 + 50 + 8 + 50 + 8 },
       });
