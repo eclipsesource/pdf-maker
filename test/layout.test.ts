@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from '@jest/globals';
 
-import { layoutPageContent, layoutPages } from '../src/layout.js';
+import { layoutBlock, layoutPageContent, layoutPages } from '../src/layout.js';
 import { paperSizes } from '../src/page-sizes.js';
 import { TextAttrs, TextSpan } from '../src/text.js';
 import { fakeFont, range } from './test-utils.js';
@@ -167,6 +167,18 @@ describe('layout', () => {
         objectContaining({ type: 'paragraph', x: 1, y: 3, width: 400 - 1 - 2, height: 12 }),
         objectContaining({ type: 'paragraph', x: 5, y: 3 + 12 + 7, width: 400 - 5 - 6 }),
       ]);
+    });
+  });
+
+  describe('layoutBlock', () => {
+    it('includes anchor object for id', () => {
+      const block = { columns: [], id: 'test' };
+
+      const result = layoutBlock(block, box, doc);
+
+      expect(result).toEqual(
+        objectContaining({ objects: [{ type: 'anchor', name: 'test', x: 0, y: 0 }] })
+      );
     });
   });
 });

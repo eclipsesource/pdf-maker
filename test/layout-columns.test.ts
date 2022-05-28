@@ -146,16 +146,6 @@ describe('layout-columns', () => {
         ...{ x: 20, y: 30, width: 300, height: 100 },
       });
     });
-
-    it('includes anchor object for id', () => {
-      const block = { columns: [], id: 'test' };
-
-      const result = layoutColumns(block, box, resources);
-
-      expect(result).toEqual(
-        objectContaining({ objects: [{ type: 'anchor', name: 'test', x: 0, y: 0 }] })
-      );
-    });
   });
 });
 

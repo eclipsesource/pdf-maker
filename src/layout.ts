@@ -1,6 +1,6 @@
 import { PDFFont } from 'pdf-lib';
 
-import { Box, parseEdges, Pos, subtractEdges, ZERO_EDGES } from './box.js';
+import { Box, parseEdges, subtractEdges, ZERO_EDGES } from './box.js';
 import { Color } from './colors.js';
 import { Document } from './document.js';
 import { GraphicsObject } from './graphics.js';
@@ -139,6 +139,12 @@ export function layoutPageContent(blocks: Block[], box: Box, doc: Document) {
 }
 
 export function layoutBlock(block: Block, box: Box, doc: Document): Frame {
+  const frame = layoutBlockContent(block, box, doc);
+  addAnchor(frame, block);
+  return frame;
+}
+
+function layoutBlockContent(block: Block, box: Box, doc: Document): Frame {
   if ((block as Columns).columns) {
     return layoutColumns(block as Columns, box, doc);
   }
@@ -151,11 +157,13 @@ export function layoutBlock(block: Block, box: Box, doc: Document): Frame {
   return layoutParagraph(block as ImageBlock, box, doc);
 }
 
-export function createAnchorObject(name: string, pos?: Pos): AnchorObject {
-  return {
-    type: 'anchor',
-    name,
-    x: pos?.x ?? 0,
-    y: pos?.y ?? 0,
-  };
+function addAnchor(frame: Frame, block: Block) {
+  if (block.id) {
+    if (!frame.objects) frame.objects = [];
+    frame.objects.push(createAnchorObject(block.id));
+  }
+}
+
+function createAnchorObject(name: string): AnchorObject {
+  return { type: 'anchor', name, x: 0, y: 0 };
 }

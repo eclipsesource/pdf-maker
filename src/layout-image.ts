@@ -1,7 +1,7 @@
 import { Box, ZERO_EDGES } from './box.js';
 import { Document } from './document.js';
 import { ImageObject } from './graphics.js';
-import { createAnchorObject, Frame } from './layout.js';
+import { Frame } from './layout.js';
 import { ImageBlock } from './text.js';
 
 export function layoutImage(block: ImageBlock, box: Box, doc: Document): Frame {
@@ -35,7 +35,7 @@ export function layoutImage(block: ImageBlock, box: Box, doc: Document): Frame {
     height: image.height * scale,
     image,
   };
-  const objects = [imageObj, ...(block.id ? [createAnchorObject(block.id)] : [])];
+  const objects = [imageObj];
   return {
     type: 'paragraph',
     x: box.x,

@@ -5,7 +5,7 @@ import { Alignment } from './content.js';
 import { Document } from './document.js';
 import { Font } from './fonts.js';
 import { GraphicsObject, shiftGraphicsObject } from './graphics.js';
-import { createAnchorObject, Frame, LinkObject, TextObject } from './layout.js';
+import { Frame, LinkObject, TextObject } from './layout.js';
 import { Paragraph } from './text.js';
 import { breakLine, extractTextSegments, flattenTextSegments, TextSegment } from './text.js';
 
@@ -19,10 +19,7 @@ export function layoutParagraph(paragraph: Paragraph, box: Box, doc: Document): 
   const text = paragraph.text && layoutText(paragraph, innerBox, doc.fonts);
   const graphics = paragraph.graphics && layoutGraphics(paragraph.graphics, innerBox);
   const contentHeight = text?.size?.height ?? 0;
-  const objects = [
-    ...(graphics ?? []),
-    ...(paragraph.id ? [createAnchorObject(paragraph.id)] : []),
-  ];
+  const objects = [...(graphics ?? [])];
   return {
     type: 'paragraph',
     ...box,

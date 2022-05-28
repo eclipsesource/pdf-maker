@@ -1,6 +1,6 @@
 import { Box, ZERO_EDGES } from './box.js';
 import { Document } from './document.js';
-import { createAnchorObject, Frame, layoutBlock } from './layout.js';
+import { Frame, layoutBlock } from './layout.js';
 import { Columns } from './text.js';
 
 export function layoutColumns(block: Columns, box: Box, doc: Document): Frame {
@@ -36,6 +36,5 @@ export function layoutColumns(block: Columns, box: Box, doc: Document): Frame {
     width: fixedWidth ?? box.width,
     height: fixedHeight ?? maxColHeight,
     children,
-    ...(block.id && { objects: [createAnchorObject(block.id)] }),
   };
 }

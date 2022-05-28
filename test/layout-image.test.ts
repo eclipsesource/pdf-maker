@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it } from '@jest/globals';
 import { layoutImage } from '../src/layout-image.js';
 import { fakeImage } from './test-utils.js';
 
-const { arrayContaining, objectContaining } = expect;
+const { objectContaining } = expect;
 
 describe('layout-image', () => {
   let box, doc;
@@ -96,16 +96,6 @@ describe('layout-image', () => {
       );
       expect(result.objects[0]).toEqual(
         objectContaining({ type: 'image', x: 5, y: 7, width: imgWidth, height: imgHeight })
-      );
-    });
-
-    it('includes anchor object for id', () => {
-      const block = { image: 'img-720-480', id: 'test' };
-
-      const result = layoutImage(block, box, doc);
-
-      expect(result.objects).toEqual(
-        arrayContaining([objectContaining({ type: 'anchor', name: 'test', x: 0, y: 0 })])
       );
     });
   });

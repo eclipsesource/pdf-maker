@@ -3,8 +3,6 @@ import { beforeEach, describe, expect, it } from '@jest/globals';
 import { layoutRows } from '../src/layout-rows.js';
 import { fakeFont } from './test-utils.js';
 
-const { objectContaining } = expect;
-
 describe('layout-rows', () => {
   let resources, box;
 
@@ -82,16 +80,6 @@ describe('layout-rows', () => {
         ],
         ...{ x: 20, y: 30, width: 400, height: 7 + 50 + 8 + 50 + 8 },
       });
-    });
-
-    it('includes anchor object for id', () => {
-      const block = { rows: [], id: 'test' };
-
-      const result = layoutRows(block, box, resources);
-
-      expect(result).toEqual(
-        objectContaining({ objects: [{ type: 'anchor', name: 'test', x: 0, y: 0 }] })
-      );
     });
   });
 });
