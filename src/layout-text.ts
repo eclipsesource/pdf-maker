@@ -50,12 +50,27 @@ function layoutText(paragraph: Paragraph, box: Box, fonts: Font[]) {
   return { rows, size };
 }
 
+/*
+ * ---------------------------------------------------------------------
+ *                                                                    ˄
+ * ---------------------------------------------------------------    |
+ *                                                              ˄     |
+ *       /\     |                                               |     |
+ *      /  \    |       ___                                     |     |
+ *     /----\   |---,  /   \  \  /                             row   line
+ *    /      \  |   |  \___/   \/                               |     |
+ * ----------------------------/------baseline--------˅---------|     |
+ *                            /                    descent      ˅     |
+ * ---------------------------------------------------˄-----------    |
+ *                                                                    ˅
+ * ---------------------------------------------------------------------
+ */
 function layoutTextRow(segments: TextSegment[], box: Box, textAlign: Alignment) {
   const [lineSegments, remainder] = breakLine(segments, box.width);
   const pos = { x: 0, y: 0 };
   const size = { width: 0, height: 0 };
-  let maxLineHeight = 0;
-  let maxDescent = 0;
+  let baseline = 0;
+  let rowHeight = 0;
   const links = [];
   const objects = [];
   flattenTextSegments(lineSegments).forEach((seg) => {
@@ -68,16 +83,18 @@ function layoutTextRow(segments: TextSegment[], box: Box, textAlign: Alignment) 
     pos.x += width;
     size.width += width;
     size.height = Math.max(size.height, height);
-    maxDescent = Math.max(maxDescent, getDescent(font, fontSize));
-    maxLineHeight = Math.max(maxLineHeight, height * lineHeight);
+    const offset = (height * (lineHeight - 1)) / 2;
+
+    baseline = Math.max(baseline, getDescent(font, fontSize) + offset);
+    rowHeight = Math.max(rowHeight, height * lineHeight);
   });
-  objects.forEach((obj) => (obj.y -= maxDescent));
+  objects.forEach((obj) => (obj.y -= baseline));
   flattenLinks(links).forEach((link) => objects.push(link));
   const row = {
     type: 'row',
     ...alignRow(box, size, textAlign),
     width: size.width,
-    height: maxLineHeight,
+    height: rowHeight,
     objects,
   };
   return { row, remainder };

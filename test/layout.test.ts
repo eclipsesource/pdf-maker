@@ -132,7 +132,7 @@ describe('layout', () => {
               {
                 ...{ type: 'row', x: 0, y: 0, width: 72, height: 18 * 1.2 },
                 objects: [
-                  { type: 'text', x: 0, y: -3.6, text: 'Test', font: normalFont, fontSize: 18 },
+                  objectContaining({ type: 'text', text: 'Test', font: normalFont, fontSize: 18 }),
                 ],
               },
             ],
