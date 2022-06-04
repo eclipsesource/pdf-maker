@@ -75,18 +75,11 @@ export default {
     },
     {
       text: 'Text and graphics',
-      graphics: [
-        {
-          type: 'rect',
-          x: -15,
-          y: 0,
-          width: 10,
-          height: 20,
-          fillColor: 'red',
-        },
-        { type: 'line', x1: 0, y1: 30, x2: 150, y2: 30, strokeWidth: 0.5, strokeColor: '#239842' },
+      graphics: ({ width, height }) => [
+        { type: 'rect', x: 0, y: 0, width: 10, height: 20, fillColor: 'red' },
+        { type: 'line', x1: 0, y1: height, x2: width, y2: height, strokeWidth: 0.5 },
       ],
-      padding: { left: 15, top: 5, bottom: 15 },
+      padding: { left: 15, y: 5 },
       margin: { y: 5 },
     },
     {

@@ -147,47 +147,8 @@ describe('layout', () => {
         objectContaining({ type: 'link', x: 0, y: 0, width: 70, height: 10, url: 'test-link' }),
       ]);
     });
-
-    it('includes graphics objects in child frame', () => {
-      const graphics = [
-        { type: 'line', x1: 1, y1: 2, x2: 3, y2: 4 },
-        { type: 'rect', x: 1, y: 2, width: 10, height: 20 },
-        { type: 'polyline', points: [p(1, 2), p(3, 4)] },
-      ] as any;
-
-      const frame = layoutParagraph({ graphics }, box, doc);
-
-      expect(frame).toEqual(objectContaining({ type: 'text', width: 400, height: 0 }));
-      expect(frame.objects).toEqual([
-        { type: 'line', x1: 1, y1: 2, x2: 3, y2: 4 },
-        { type: 'rect', x: 1, y: 2, width: 10, height: 20 },
-        { type: 'polyline', points: [p(1, 2), p(3, 4)] },
-      ]);
-    });
-
-    it('applies padding to graphics objects', () => {
-      const graphics = [
-        { type: 'line', x1: 1, y1: 2, x2: 3, y2: 4 },
-        { type: 'rect', x: 1, y: 2, width: 10, height: 20 },
-        { type: 'polyline', points: [p(1, 2), p(3, 4)] },
-      ] as any;
-      const padding = { left: 5, right: 5, top: 5, bottom: 5 };
-
-      const frame = layoutParagraph({ graphics, padding }, box, doc);
-
-      expect(frame).toEqual(objectContaining({ type: 'text', width: 400, height: 10 }));
-      expect(frame.objects).toEqual([
-        { type: 'line', x1: 6, y1: 7, x2: 8, y2: 9 },
-        { type: 'rect', x: 6, y: 7, width: 10, height: 20 },
-        { type: 'polyline', points: [p(6, 7), p(8, 9)] },
-      ]);
-    });
   });
 });
-
-function p(x: number, y: number) {
-  return { x, y };
-}
 
 function span(text: string, attrs?: TextAttrs): TextSpan {
   return { text, attrs: { ...attrs } };

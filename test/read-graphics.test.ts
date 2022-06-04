@@ -1,13 +1,7 @@
 import { describe, expect, it } from '@jest/globals';
 import { rgb } from 'pdf-lib';
 
-import {
-  LineObject,
-  PolylineObject,
-  readGraphicsObject,
-  RectObject,
-  shiftGraphicsObject,
-} from '../src/graphics.js';
+import { readGraphicsObject } from '../src/read-graphics.js';
 
 describe('graphics', () => {
   describe('readGraphicsObject', () => {
@@ -119,32 +113,6 @@ describe('graphics', () => {
       const fn = () => readGraphicsObject(rect);
 
       expect(fn).toThrowError('Invalid value for "strokeWidth": Expected number >= 0, got: -1');
-    });
-  });
-
-  describe('shiftGraphicsObject', () => {
-    it('shifts rect', () => {
-      const rect: RectObject = { type: 'rect', x: 1, y: 2, width: 30, height: 40 };
-
-      const shifted = shiftGraphicsObject(rect, { x: 5, y: 6 });
-
-      expect(shifted).toEqual({ type: 'rect', x: 6, y: 8, width: 30, height: 40 });
-    });
-
-    it('shifts line', () => {
-      const line: LineObject = { type: 'line', x1: 1, y1: 2, x2: 11, y2: 12 };
-
-      const shifted = shiftGraphicsObject(line, { x: 5, y: 6 });
-
-      expect(shifted).toEqual({ type: 'line', x1: 6, y1: 8, x2: 16, y2: 18 });
-    });
-
-    it('shifts polyline', () => {
-      const polyline: PolylineObject = { type: 'polyline', points: [p(1, 2), p(3, 4)] };
-
-      const shifted = shiftGraphicsObject(polyline, { x: 5, y: 6 });
-
-      expect(shifted).toEqual({ type: 'polyline', points: [p(6, 8), p(8, 10)] });
     });
   });
 });

@@ -9,10 +9,10 @@ import {
 
 import { Pos, Size } from './box.js';
 import { Document } from './document.js';
-import { ImageObject, LineObject, PolylineObject, RectObject } from './graphics.js';
 import { renderGuide } from './guides.js';
 import { AnchorObject, Frame, LinkObject, TextObject } from './layout.js';
 import { createLinkAnnotation, createNamedDest } from './pdf-annotations.js';
+import { ImageObject, LineObject, PolylineObject, RectObject } from './read-graphics.js';
 
 export type Page = {
   size: Size;

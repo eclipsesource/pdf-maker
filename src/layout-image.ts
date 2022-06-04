@@ -2,8 +2,8 @@ import { PDFImage } from 'pdf-lib';
 
 import { Box, Pos, Size, subtractEdges, ZERO_EDGES } from './box.js';
 import { Document } from './document.js';
-import { ImageObject } from './graphics.js';
 import { DrawableObject, Frame } from './layout.js';
+import { ImageObject } from './read-graphics.js';
 import { ImageBlock } from './text.js';
 
 export function layoutImage(block: ImageBlock, box: Box, doc: Document): Frame {

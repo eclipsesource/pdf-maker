@@ -102,7 +102,7 @@ describe('text', () => {
 
       expect(result).toEqual({
         text: [{ text: 'foo', attrs: {} }],
-        graphics: [{ type: 'rect', x: 1, y: 2, width: 3, height: 4 }],
+        graphics: expect.any(Function),
         margin: { left: 5, right: 5, top: 5, bottom: 5 },
         padding: { left: 6, right: 6, top: 6, bottom: 6 },
         width: 50,

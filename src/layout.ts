@@ -3,13 +3,13 @@ import { PDFFont } from 'pdf-lib';
 import { Box, parseEdges, subtractEdges, ZERO_EDGES } from './box.js';
 import { Color } from './colors.js';
 import { Document } from './document.js';
-import { GraphicsObject } from './graphics.js';
 import { layoutColumns } from './layout-columns.js';
 import { layoutImage } from './layout-image.js';
 import { layoutRows } from './layout-rows.js';
 import { layoutParagraph } from './layout-text.js';
 import { Page } from './page.js';
 import { DocumentDefinition } from './read-document.js';
+import { GraphicsObject } from './read-graphics.js';
 import { Block, Columns, ImageBlock, Rows } from './text.js';
 import { pickDefined } from './types.js';
 
@@ -119,6 +119,7 @@ export function layoutPageContent(blocks: Block[], box: Box, doc: Document) {
 export function layoutBlock(block: Block, box: Box, doc: Document): Frame {
   const frame = layoutBlockContent(block, box, doc);
   addAnchor(frame, block);
+  addGraphics(frame, block);
   return frame;
 }
 
@@ -144,4 +145,15 @@ function addAnchor(frame: Frame, block: Block) {
 
 function createAnchorObject(name: string): AnchorObject {
   return { type: 'anchor', name, x: 0, y: 0 };
+}
+
+function addGraphics(frame: Frame, block: Block) {
+  if (block.graphics) {
+    const info = { width: frame.width, height: frame.height, padding: (block as any).padding };
+    const graphicsObjects = block.graphics(info);
+    if (graphicsObjects?.length) {
+      if (!frame.objects) frame.objects = [];
+      frame.objects.push(...graphicsObjects);
+    }
+  }
 }

@@ -4,7 +4,6 @@ import { Box, Pos, Size, ZERO_EDGES } from './box.js';
 import { Alignment } from './content.js';
 import { Document } from './document.js';
 import { Font } from './fonts.js';
-import { GraphicsObject, shiftGraphicsObject } from './graphics.js';
 import { Frame, LinkObject, TextObject } from './layout.js';
 import { Paragraph } from './text.js';
 import { breakLine, extractTextSegments, flattenTextSegments, TextSegment } from './text.js';
@@ -17,16 +16,13 @@ export function layoutParagraph(paragraph: Paragraph, box: Box, doc: Document): 
   const maxHeight = (fixedHeight ?? box.height) - padding.top - padding.bottom;
   const innerBox = { x: padding.left, y: padding.top, width: maxWidth, height: maxHeight };
   const text = paragraph.text && layoutText(paragraph, innerBox, doc.fonts);
-  const graphics = paragraph.graphics && layoutGraphics(paragraph.graphics, innerBox);
   const contentHeight = text?.size?.height ?? 0;
-  const objects = [...(graphics ?? [])];
   return {
     type: 'text',
     ...box,
     width: fixedWidth ?? box.width,
     height: fixedHeight ?? (contentHeight ?? 0) + padding.top + padding.bottom,
     ...(text?.rows?.length ? { children: text.rows } : undefined),
-    ...(objects.length ? { objects } : undefined),
   };
 }
 
@@ -103,12 +99,6 @@ function layoutTextRow(segments: TextSegment[], box: Box, textAlign: Alignment) 
 function getDescent(font: PDFFont, fontSize: number) {
   const fontkitFont = (font as any).embedder.font;
   return Math.abs(((fontkitFont.descent ?? 0) * fontSize) / fontkitFont.unitsPerEm);
-}
-
-function layoutGraphics(graphics: GraphicsObject[], pos: Pos): GraphicsObject[] {
-  return graphics.map((object) => {
-    return shiftGraphicsObject(object, pos);
-  });
 }
 
 /**

@@ -174,12 +174,6 @@ export type Paragraph = {
    */
   text?: Text;
   /**
-   * Graphic elements to draw in the area covered by the paragraph.
-   * The coordinate system for graphics shapes starts at the top left corner of the paragraph's
-   * padding.
-   */
-  graphics?: Shape[];
-  /**
    * Space to leave between the text and the edges of the paragraph.
    */
   padding?: Length | BoxLengths;
@@ -212,6 +206,12 @@ export type BlockAttrs = {
    * attribute `link`.
    */
   id?: string;
+  /**
+   * Graphic elements to draw in the area covered by the block.
+   * The coordinate system for graphics shapes starts at the top left corner of the block.
+   * A function can be passed to take the final size of the block into account.
+   */
+  graphics?: Shape[] | ((info: BlockInfo) => Shape[]);
 };
 
 export type PageInfo = {
@@ -227,6 +227,21 @@ export type PageInfo = {
    * The size of the current page in pt.
    */
   readonly pageSize: { width: number; height: number };
+};
+
+export type BlockInfo = {
+  /**
+   * The width of the block in pt.
+   */
+  readonly width: number;
+  /**
+   * The height of the block in pt.
+   */
+  readonly height: number;
+  /**
+   * The padding of the block, all values in pt.
+   */
+  readonly padding: { left: number; right: number; top: number; bottom: number };
 };
 
 export type Shape = Rect | Line | Polyline;

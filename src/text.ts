@@ -4,8 +4,9 @@ import { BoxEdges, parseEdges, parseLength } from './box.js';
 import { Color, parseColor } from './colors.js';
 import { Alignment } from './content.js';
 import { Font, selectFont } from './fonts.js';
-import { GraphicsObject, readGraphicsObject } from './graphics.js';
+import { GraphicsObject, readGraphicsObject } from './read-graphics.js';
 import {
+  dynamic,
   isObject,
   Obj,
   optional,
@@ -39,7 +40,7 @@ export type TextSpan = {
   attrs: TextAttrs;
 };
 
-export type Block = Columns | Rows | Paragraph;
+export type Block = Columns | Rows | Paragraph | ImageBlock;
 
 export type Columns = {
   columns: Block[];
@@ -57,7 +58,6 @@ export type ImageBlock = {
 
 export type Paragraph = {
   text?: TextSpan[];
-  graphics?: GraphicsObject[];
   padding?: BoxEdges;
 } & BlockAttrs &
   InheritableAttrs;
@@ -77,6 +77,13 @@ type BlockAttrs = {
   width?: number;
   height?: number;
   id?: string;
+  graphics?: (info: BlockInfo) => GraphicsObject[];
+};
+
+export type BlockInfo = {
+  readonly width: number;
+  readonly height: number;
+  readonly padding: { left: number; right: number; top: number; bottom: number };
 };
 
 type InheritableAttrs = TextAttrs & {
@@ -133,7 +140,6 @@ export function parseParagraph(input: Obj, defaultAttrs?: InheritableAttrs): Par
   return {
     ...readObject(input, {
       text: optional(parseTextWithAttrs),
-      graphics: optional(types.array(readGraphicsObject)),
       padding: optional(parseEdges),
     }),
     textAlign: readFrom(mergedAttrs, 'textAlign', optional(tAlignment)),
@@ -147,6 +153,7 @@ function parseBlockAttrs(input: Obj): BlockAttrs {
     width: optional(parseLength),
     height: optional(parseLength),
     id: optional(types.string()),
+    graphics: optional(dynamic(types.array(readGraphicsObject), 'graphics')),
   });
 }
 
