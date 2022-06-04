@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it } from '@jest/globals';
 
 import { layoutBlock, layoutPageContent, layoutPages } from '../src/layout.js';
 import { paperSizes } from '../src/page-sizes.js';
+import { readDocumentDefinition } from '../src/read-document.js';
 import { TextAttrs, TextSpan } from '../src/text.js';
 import { fakeFont, range } from './test-utils.js';
 
@@ -18,43 +19,17 @@ describe('layout', () => {
   });
 
   describe('layoutPages', () => {
-    it('checks defaultStyle', () => {
-      const def = { defaultStyle: { fontSize: -1 }, content: [] };
-
-      expect(() => layoutPages(def, doc)).toThrowError(
-        'Invalid value for "defaultStyle/fontSize":'
-      );
-    });
-
-    it('checks margin', () => {
-      const def = { margin: 'foo', content: [] };
-
-      expect(() => layoutPages(def, doc)).toThrowError('Invalid value for "margin":');
-    });
-
-    it('checks content', () => {
-      const def = { content: 'foo' };
-
-      expect(() => layoutPages(def, doc)).toThrowError('Invalid value for "content":');
-    });
-
-    it('checks content blocks', () => {
-      const content = [{ text: 'foo' }, { text: 23 }];
-
-      expect(() => layoutPages({ content }, doc)).toThrowError(
-        'Invalid value for "content/1/text": Expected string'
-      );
-    });
-
     it('accepts empty content', () => {
       expect(() => layoutPages({ content: [] }, doc)).not.toThrow();
     });
 
     it('includes defaultStyle in all paragraphs', () => {
-      const content = [{ text: 'foo' }, { text: 'bar' }];
-      const defaultStyle = { fontSize: 14 };
+      const def = readDocumentDefinition({
+        content: [{ text: [span('foo')] }, { text: [span('bar')] }],
+        defaultStyle: { fontSize: 14 },
+      });
 
-      const pages = layoutPages({ content, defaultStyle }, doc);
+      const pages = layoutPages(def, doc);
 
       expect(pages[0].content.children).toEqual([
         objectContaining({ height: 14 * 1.2 }),
@@ -63,7 +38,7 @@ describe('layout', () => {
     });
 
     it('lays out content', () => {
-      const def = { content: [span('test')], margin: 50 };
+      const def = readDocumentDefinition({ content: [{ text: 'test' }], margin: 50 });
       const pageWidth = doc.pageSize.width;
       const pageHeight = doc.pageSize.height;
 
@@ -84,12 +59,12 @@ describe('layout', () => {
     });
 
     it('lays out header and footer', () => {
-      const def = {
+      const def = readDocumentDefinition({
         margin: 50,
-        content: [span('content')],
+        content: [{ text: 'content' }],
         header: { text: 'header', margin: 20, fontSize: 10 },
         footer: { text: 'footer', margin: 20, fontSize: 10 },
-      };
+      });
       const pageWidth = doc.pageSize.width;
       const pageHeight = doc.pageSize.height;
 
@@ -116,7 +91,7 @@ describe('layout', () => {
     });
 
     it('supports dynamic header and footer', () => {
-      const def = {
+      const def = readDocumentDefinition({
         margin: 50,
         content: [
           { text: 'content', height: 500 },
@@ -124,7 +99,7 @@ describe('layout', () => {
         ],
         header: ({ pageCount, pageNumber }) => ({ text: `${pageNumber}/${pageCount}` }),
         footer: ({ pageCount, pageNumber }) => ({ text: `${pageNumber}/${pageCount}` }),
-      };
+      });
 
       const pages = layoutPages(def, doc);
 
