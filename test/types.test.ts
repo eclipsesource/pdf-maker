@@ -1,6 +1,7 @@
 import { describe, expect, it } from '@jest/globals';
 
 import {
+  dynamic,
   isObject,
   optional,
   pickDefined,
@@ -163,6 +164,48 @@ describe('types', () => {
       expect(required(fn)(null)).toEqual('null');
       expect(required(fn)(false)).toEqual('false');
       expect(required(fn)('')).toEqual('');
+    });
+  });
+
+  describe('dynamic', () => {
+    const validate = dynamic(types.string(), 'test');
+
+    describe('when applied to a fixed value', () => {
+      it('returns a resolve function that returns the value', () => {
+        const resolve = validate('foo');
+
+        expect(resolve()).toEqual('foo');
+      });
+
+      it('throws immediately when value is invalid', () => {
+        expect(() => validate(23)).toThrowError('Expected string, got: 23');
+      });
+    });
+
+    describe('when applied to a function value', () => {
+      it('returns a resolve function that calls function with arguments and returns result', () => {
+        const resolve = validate((s: string) => 'foo' + s);
+
+        expect(resolve('bar')).toEqual('foobar');
+      });
+
+      it('throws when function returns invalid value', () => {
+        const resolve = validate(() => 23);
+
+        expect(() => resolve()).toThrowError(
+          'Supplied function for "test" returned invalid value: Expected string, got: 23'
+        );
+      });
+
+      it('throws when function throws', () => {
+        const resolve = validate(() => {
+          throw new Error('test error');
+        });
+
+        expect(() => resolve()).toThrowError(
+          'Supplied function for "test" threw: Error: test error'
+        );
+      });
     });
   });
 

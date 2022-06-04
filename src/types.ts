@@ -84,6 +84,35 @@ export function required<T = unknown>(type?: TypeDef<T>): TypeDef<T> {
   };
 }
 
+export function dynamic<T = unknown>(
+  type: TypeDef<T>,
+  name?: string
+): TypeDef<(...args: unknown[]) => T> {
+  return (value: unknown) => {
+    if (typeof value !== 'function') {
+      const result = asType(value, type);
+      return () => result;
+    }
+    const subject = name ? `Supplied function for "${name}"` : 'Supplied function';
+    return (...args) => {
+      const result = saveCall(value as (...params: unknown[]) => unknown, args, subject);
+      try {
+        return asType(result, type);
+      } catch (error) {
+        throw new Error(`${subject} returned invalid value: ${error.message}`);
+      }
+    };
+  };
+}
+
+function saveCall(fn: (...params: unknown[]) => unknown, args: unknown[], subject) {
+  try {
+    return fn(...args);
+  } catch (error) {
+    throw new Error(`${subject} threw: ${error.stack ?? error.message ?? error}`);
+  }
+}
+
 function asType<T = unknown>(value: unknown, type?: TypeDef<T>): T {
   if (type == null) return value as T;
   if (typeof type === 'function') return type(value);
