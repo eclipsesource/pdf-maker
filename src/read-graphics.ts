@@ -1,9 +1,7 @@
-import { PDFImage } from 'pdf-lib';
-
 import { Color, parseColor } from './colors.js';
 import { Obj, optional, readFrom, readObject, required, types } from './types.js';
 
-export type GraphicsObject = RectObject | LineObject | PolylineObject | ImageObject;
+export type GraphicsObject = RectObject | LineObject | PolylineObject;
 
 export type RectObject = {
   type: 'rect';
@@ -33,15 +31,6 @@ export type PolylineObject = {
   strokeWidth?: number;
   strokeColor?: Color;
   fillColor?: Color;
-};
-
-export type ImageObject = {
-  type: 'image';
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-  image: PDFImage;
 };
 
 const shapeTypes = ['rect', 'line', 'polyline'];

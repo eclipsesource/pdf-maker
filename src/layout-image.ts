@@ -3,8 +3,16 @@ import { PDFImage } from 'pdf-lib';
 import { Box, Pos, Size, subtractEdges, ZERO_EDGES } from './box.js';
 import { Document } from './document.js';
 import { DrawableObject, Frame } from './layout.js';
-import { ImageObject } from './read-graphics.js';
 import { ImageBlock } from './text.js';
+
+export type ImageObject = {
+  type: 'image';
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  image: PDFImage;
+};
 
 export function layoutImage(block: ImageBlock, box: Box, doc: Document): Frame {
   const padding = block.padding ?? ZERO_EDGES;

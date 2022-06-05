@@ -4,7 +4,7 @@ import { Box, parseEdges, subtractEdges, ZERO_EDGES } from './box.js';
 import { Color } from './colors.js';
 import { Document } from './document.js';
 import { layoutColumns } from './layout-columns.js';
-import { layoutImage } from './layout-image.js';
+import { ImageObject, layoutImage } from './layout-image.js';
 import { layoutRows } from './layout-rows.js';
 import { layoutParagraph } from './layout-text.js';
 import { Page } from './page.js';
@@ -30,7 +30,7 @@ export type Frame = {
   children?: Frame[];
 };
 
-export type DrawableObject = TextObject | AnchorObject | LinkObject | GraphicsObject;
+export type DrawableObject = TextObject | ImageObject | GraphicsObject | LinkObject | AnchorObject;
 
 export type TextObject = {
   type: 'text';
