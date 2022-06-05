@@ -3,12 +3,16 @@ import {
   closePath,
   fill,
   fillAndStroke,
+  LineCapStyle,
+  LineJoinStyle,
   lineTo,
   moveTo,
   PDFOperator,
   popGraphicsState,
   pushGraphicsState,
   setFillingColor,
+  setLineCap,
+  setLineJoin,
   setLineWidth,
   setStrokingColor,
   stroke,
@@ -78,11 +82,27 @@ function drawPath(hasFillColor: boolean, hasStrokeColor: boolean) {
   return fill(); // fall back to a black shape
 }
 
+const lineCapTr = {
+  butt: LineCapStyle.Butt,
+  round: LineCapStyle.Round,
+  square: LineCapStyle.Projecting,
+};
+const trLineCap = (lineCap: string) => lineCapTr[lineCap];
+
+const lineJoinTr = {
+  miter: LineJoinStyle.Miter,
+  round: LineJoinStyle.Round,
+  bevel: LineJoinStyle.Bevel,
+};
+const trLineJoin = (lineJoin: string) => lineJoinTr[lineJoin];
+
 function setStyleAttrs(obj: GraphicsObject): PDFOperator[] {
   return [
     'fillColor' in obj && setFillingColor(obj.fillColor),
     'strokeColor' in obj && setStrokingColor(obj.strokeColor),
     'strokeWidth' in obj && setLineWidth(obj.strokeWidth),
+    'lineCap' in obj && setLineCap(trLineCap(obj.lineCap)),
+    'lineJoin' in obj && setLineJoin(trLineJoin(obj.lineJoin)),
   ].filter(Boolean);
 }
 

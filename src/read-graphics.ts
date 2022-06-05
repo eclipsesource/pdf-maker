@@ -11,6 +11,7 @@ export type RectObject = {
   height: number;
   strokeWidth?: number;
   strokeColor?: Color;
+  lineJoin?: LineJoin;
   fillColor?: Color;
 };
 
@@ -22,6 +23,7 @@ export type LineObject = {
   y2: number;
   strokeWidth?: number;
   strokeColor?: Color;
+  lineCap?: LineCap;
 };
 
 export type PolylineObject = {
@@ -30,8 +32,16 @@ export type PolylineObject = {
   closePath?: boolean;
   strokeWidth?: number;
   strokeColor?: Color;
+  lineCap?: LineCap;
+  lineJoin?: LineJoin;
   fillColor?: Color;
 };
+
+type LineCap = 'butt' | 'round' | 'square';
+type LineJoin = 'miter' | 'round' | 'bevel';
+
+const tLineCap = types.string({ enum: ['butt', 'round', 'square'] });
+const tLineJoin = types.string({ enum: ['miter', 'round', 'bevel'] });
 
 const shapeTypes = ['rect', 'line', 'polyline'];
 
@@ -57,6 +67,7 @@ function readRect(input: Obj): RectObject {
     height: required(types.number()),
     strokeWidth: optional(types.number({ minimum: 0 })),
     strokeColor: optional(parseColor),
+    lineJoin: optional(tLineJoin),
     fillColor: optional(parseColor),
   }) as RectObject;
 }
@@ -70,6 +81,7 @@ function readLine(input: Obj): LineObject {
     y2: required(types.number()),
     strokeWidth: optional(types.number({ minimum: 0 })),
     strokeColor: optional(parseColor),
+    lineCap: optional(tLineCap),
   }) as LineObject;
 }
 
@@ -80,6 +92,8 @@ function readPolyline(input: Obj): PolylineObject {
     closePath: optional(types.boolean()),
     strokeWidth: optional(types.number({ minimum: 0 })),
     strokeColor: optional(parseColor),
+    lineCap: optional(tLineCap),
+    lineJoin: optional(tLineJoin),
     fillColor: optional(parseColor),
   }) as PolylineObject;
 }

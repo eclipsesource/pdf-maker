@@ -254,6 +254,7 @@ export type Rect = {
   height: number;
   strokeWidth?: number;
   strokeColor?: Color;
+  lineJoin?: LineJoin;
   fillColor?: Color;
 };
 
@@ -265,6 +266,7 @@ export type Line = {
   y2: number;
   strokeWidth?: number;
   strokeColor?: Color;
+  lineCap?: LineCap;
 };
 
 export type Polyline = {
@@ -273,8 +275,13 @@ export type Polyline = {
   closePath?: boolean;
   strokeWidth?: number;
   strokeColor?: Color;
+  lineCap?: LineCap;
+  lineJoin?: LineJoin;
   fillColor?: Color;
 };
+
+type LineCap = 'butt' | 'round' | 'square';
+type LineJoin = 'miter' | 'round' | 'bevel';
 
 /**
  * A piece of inline text. A list can be used to apply styles to parts of a paragraph.
