@@ -21,14 +21,14 @@ describe('graphics', () => {
     it('parses rect object', () => {
       const rect = {
         ...{ type: 'rect', x: 1, y: 2, width: 10, height: 20 },
-        strokeWidth: 1.5,
-        strokeColor: 'red',
+        lineWidth: 1.5,
+        lineColor: 'red',
         fillColor: 'blue',
       };
 
       expect(readGraphicsObject(rect)).toEqual({
         ...rect,
-        strokeColor: rgb(1, 0, 0),
+        lineColor: rgb(1, 0, 0),
         fillColor: rgb(0, 0, 1),
       });
     });
@@ -47,13 +47,13 @@ describe('graphics', () => {
     it('parses line object', () => {
       const line = {
         ...{ type: 'line', x1: 1, y1: 2, x2: 11, y2: 12 },
-        strokeWidth: 1.5,
-        strokeColor: 'red',
+        lineWidth: 1.5,
+        lineColor: 'red',
       };
 
       expect(readGraphicsObject(line)).toEqual({
         ...line,
-        strokeColor: rgb(1, 0, 0),
+        lineColor: rgb(1, 0, 0),
       });
     });
 
@@ -71,14 +71,14 @@ describe('graphics', () => {
     it('parses polyline object', () => {
       const polyline = {
         ...{ type: 'polyline', points: [p(1, 2), p(3, 4)] },
-        strokeWidth: 1.5,
-        strokeColor: 'red',
+        lineWidth: 1.5,
+        lineColor: 'red',
         fillColor: 'blue',
       };
 
       expect(readGraphicsObject(polyline)).toEqual({
         ...polyline,
-        strokeColor: rgb(1, 0, 0),
+        lineColor: rgb(1, 0, 0),
         fillColor: rgb(0, 0, 1),
       });
     });
@@ -95,7 +95,7 @@ describe('graphics', () => {
       expect(fn).toThrowError(`Invalid value for "points/0/y": Expected number, got: 'a'`);
     });
 
-    ['strokeColor', 'fillColor'].forEach((name) => {
+    ['lineColor', 'fillColor'].forEach((name) => {
       it(`throws for invalid rect attribute ${name}`, () => {
         const rect = { type: 'rect', x: 1, y: 2, width: 10, height: 20, [name]: 'foo' };
 
@@ -107,12 +107,12 @@ describe('graphics', () => {
       });
     });
 
-    it(`throws for negative value in attribute strokeWidth`, () => {
-      const rect = { type: 'rect', x: 1, y: 2, width: 10, height: 20, strokeWidth: -1 };
+    it(`throws for negative value in attribute lineWidth`, () => {
+      const rect = { type: 'rect', x: 1, y: 2, width: 10, height: 20, lineWidth: -1 };
 
       const fn = () => readGraphicsObject(rect);
 
-      expect(fn).toThrowError('Invalid value for "strokeWidth": Expected number >= 0, got: -1');
+      expect(fn).toThrowError('Invalid value for "lineWidth": Expected number >= 0, got: -1');
     });
   });
 });

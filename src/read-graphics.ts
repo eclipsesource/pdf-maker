@@ -9,8 +9,8 @@ export type RectObject = {
   y: number;
   width: number;
   height: number;
-  strokeWidth?: number;
-  strokeColor?: Color;
+  lineWidth?: number;
+  lineColor?: Color;
   lineJoin?: LineJoin;
   fillColor?: Color;
 };
@@ -21,8 +21,8 @@ export type LineObject = {
   y1: number;
   x2: number;
   y2: number;
-  strokeWidth?: number;
-  strokeColor?: Color;
+  lineWidth?: number;
+  lineColor?: Color;
   lineCap?: LineCap;
 };
 
@@ -30,8 +30,8 @@ export type PolylineObject = {
   type: 'polyline';
   points: { x: number; y: number }[];
   closePath?: boolean;
-  strokeWidth?: number;
-  strokeColor?: Color;
+  lineWidth?: number;
+  lineColor?: Color;
   lineCap?: LineCap;
   lineJoin?: LineJoin;
   fillColor?: Color;
@@ -65,8 +65,8 @@ function readRect(input: Obj): RectObject {
     y: required(types.number()),
     width: required(types.number()),
     height: required(types.number()),
-    strokeWidth: optional(types.number({ minimum: 0 })),
-    strokeColor: optional(parseColor),
+    lineWidth: optional(types.number({ minimum: 0 })),
+    lineColor: optional(parseColor),
     lineJoin: optional(tLineJoin),
     fillColor: optional(parseColor),
   }) as RectObject;
@@ -79,8 +79,8 @@ function readLine(input: Obj): LineObject {
     x2: required(types.number()),
     y1: required(types.number()),
     y2: required(types.number()),
-    strokeWidth: optional(types.number({ minimum: 0 })),
-    strokeColor: optional(parseColor),
+    lineWidth: optional(types.number({ minimum: 0 })),
+    lineColor: optional(parseColor),
     lineCap: optional(tLineCap),
   }) as LineObject;
 }
@@ -90,8 +90,8 @@ function readPolyline(input: Obj): PolylineObject {
     type: () => 'polyline',
     points: required(types.array(readPoint)),
     closePath: optional(types.boolean()),
-    strokeWidth: optional(types.number({ minimum: 0 })),
-    strokeColor: optional(parseColor),
+    lineWidth: optional(types.number({ minimum: 0 })),
+    lineColor: optional(parseColor),
     lineCap: optional(tLineCap),
     lineJoin: optional(tLineJoin),
     fillColor: optional(parseColor),

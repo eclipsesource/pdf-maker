@@ -51,7 +51,7 @@ function drawLine(obj: LineObject): PDFOperator[] {
 function drawRect(obj: RectObject): PDFOperator[] {
   return [
     createRect(obj.x, -obj.y, obj.width, -obj.height),
-    drawPath(!!obj.fillColor, !!obj.strokeColor),
+    drawPath(!!obj.fillColor, !!obj.lineColor),
   ].filter(Boolean);
 }
 
@@ -68,7 +68,7 @@ function drawPolyLine(obj: PolylineObject): PDFOperator[] {
   return [
     ...pathOperations(obj.points),
     obj.closePath && closePath(),
-    drawPath(!!obj.fillColor, !!obj.strokeColor),
+    drawPath(!!obj.fillColor, !!obj.lineColor),
   ].filter(Boolean);
 }
 
@@ -76,9 +76,9 @@ function pathOperations(points: { x: number; y: number }[]): any[] {
   return points.reduce((a, p) => [...a, (a.length ? lineTo : moveTo)(p.x, -p.y)], []);
 }
 
-function drawPath(hasFillColor: boolean, hasStrokeColor: boolean) {
-  if (hasFillColor && hasStrokeColor) return fillAndStroke();
-  if (hasStrokeColor) return stroke();
+function drawPath(hasFillColor: boolean, haslineColor: boolean) {
+  if (hasFillColor && haslineColor) return fillAndStroke();
+  if (haslineColor) return stroke();
   return fill(); // fall back to a black shape
 }
 
@@ -99,8 +99,8 @@ const trLineJoin = (lineJoin: string) => lineJoinTr[lineJoin];
 function setStyleAttrs(obj: GraphicsObject): PDFOperator[] {
   return [
     'fillColor' in obj && setFillingColor(obj.fillColor),
-    'strokeColor' in obj && setStrokingColor(obj.strokeColor),
-    'strokeWidth' in obj && setLineWidth(obj.strokeWidth),
+    'lineColor' in obj && setStrokingColor(obj.lineColor),
+    'lineWidth' in obj && setLineWidth(obj.lineWidth),
     'lineCap' in obj && setLineCap(trLineCap(obj.lineCap)),
     'lineJoin' in obj && setLineJoin(trLineJoin(obj.lineJoin)),
   ].filter(Boolean);

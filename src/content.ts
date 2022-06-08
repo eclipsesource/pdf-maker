@@ -252,8 +252,8 @@ export type Rect = {
   y: number;
   width: number;
   height: number;
-  strokeWidth?: number;
-  strokeColor?: Color;
+  lineWidth?: number;
+  lineColor?: Color;
   lineJoin?: LineJoin;
   fillColor?: Color;
 };
@@ -264,8 +264,8 @@ export type Line = {
   y1: number;
   x2: number;
   y2: number;
-  strokeWidth?: number;
-  strokeColor?: Color;
+  lineWidth?: number;
+  lineColor?: Color;
   lineCap?: LineCap;
 };
 
@@ -273,8 +273,8 @@ export type Polyline = {
   type: 'polyline';
   points: { x: number; y: number }[];
   closePath?: boolean;
-  strokeWidth?: number;
-  strokeColor?: Color;
+  lineWidth?: number;
+  lineColor?: Color;
   lineCap?: LineCap;
   lineJoin?: LineJoin;
   fillColor?: Color;

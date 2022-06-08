@@ -21,7 +21,7 @@ describe('render-graphics', () => {
     const head = ['q', '1 0 0 1 10 780 cm', 'q'];
     const tail = ['Q', 'Q'];
 
-    it('renders line without strokeColor', () => {
+    it('renders line without lineColor', () => {
       const line: LineObject = { type: 'line', x1: 1, y1: 2, x2: 3, y2: 4 };
 
       renderGraphics([line], page, pos);
@@ -38,8 +38,8 @@ describe('render-graphics', () => {
     it('renders line with all attributes', () => {
       const line: LineObject = {
         ...{ type: 'line', x1: 1, y1: 2, x2: 3, y2: 4 },
-        strokeColor: rgb(1, 0, 0),
-        strokeWidth: 1,
+        lineColor: rgb(1, 0, 0),
+        lineWidth: 1,
         lineCap: 'round',
       };
 
@@ -87,10 +87,10 @@ describe('render-graphics', () => {
       ]);
     });
 
-    it('renders rect with strokeColor', () => {
+    it('renders rect with lineColor', () => {
       const rect: RectObject = {
         ...{ type: 'rect', x: 1, y: 2, width: 3, height: 4 },
-        strokeColor: rgb(1, 0, 0),
+        lineColor: rgb(1, 0, 0),
       };
 
       renderGraphics([rect], page, pos);
@@ -108,8 +108,8 @@ describe('render-graphics', () => {
       const rect: RectObject = {
         ...{ type: 'rect', x: 1, y: 2, width: 3, height: 4 },
         fillColor: rgb(0, 0, 1),
-        strokeColor: rgb(1, 0, 0),
-        strokeWidth: 1,
+        lineColor: rgb(1, 0, 0),
+        lineWidth: 1,
         lineJoin: 'round',
       };
 
@@ -164,8 +164,8 @@ describe('render-graphics', () => {
       const polyline: PolylineObject = {
         ...{ type: 'polyline', points: [p(1, 2), p(3, 4)] },
         fillColor: rgb(0, 0, 1),
-        strokeColor: rgb(1, 0, 0),
-        strokeWidth: 1,
+        lineColor: rgb(1, 0, 0),
+        lineWidth: 1,
         lineCap: 'round',
         lineJoin: 'round',
       };

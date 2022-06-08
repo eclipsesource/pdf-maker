@@ -77,7 +77,7 @@ export default {
       text: 'Text and graphics',
       graphics: ({ width, height }) => [
         { type: 'rect', x: 0, y: 0, width: 10, height: 20, fillColor: 'red' },
-        { type: 'line', x1: 0, y1: height, x2: width, y2: height, strokeWidth: 0.5 },
+        { type: 'line', x1: 0, y1: height, x2: width, y2: height, lineWidth: 0.5 },
       ],
       padding: { left: 15, y: 5 },
       margin: { y: 5 },
@@ -87,10 +87,10 @@ export default {
         {
           graphics: [
             { type: 'line', x1: 10, y1: 10, x2: 80, y2: 10 },
-            { type: 'line', x1: 10, y1: 17, x2: 80, y2: 17, strokeColor: '#4488cc' },
-            { type: 'line', x1: 10, y1: 27, x2: 80, y2: 27, strokeWidth: 7 },
-            { type: 'line', x1: 10, y1: 39, x2: 80, y2: 39, strokeWidth: 7, lineCap: 'round' },
-            { type: 'line', x1: 10, y1: 51, x2: 80, y2: 51, strokeWidth: 7, lineCap: 'square' },
+            { type: 'line', x1: 10, y1: 17, x2: 80, y2: 17, lineColor: '#4488cc' },
+            { type: 'line', x1: 10, y1: 27, x2: 80, y2: 27, lineWidth: 7 },
+            { type: 'line', x1: 10, y1: 39, x2: 80, y2: 39, lineWidth: 7, lineCap: 'round' },
+            { type: 'line', x1: 10, y1: 51, x2: 80, y2: 51, lineWidth: 7, lineCap: 'square' },
             { type: 'rect', x: 120, y: 10, width: 22, height: 22 },
             { type: 'rect', x: 130, y: 20, width: 22, height: 22, fillColor: '#cccccc' },
             {
@@ -99,8 +99,8 @@ export default {
               y: 30,
               width: 22,
               height: 22,
-              strokeColor: '#4488cc',
-              strokeWidth: 2,
+              lineColor: '#4488cc',
+              lineWidth: 2,
               lineJoin: 'round',
             },
             {
@@ -110,9 +110,9 @@ export default {
               width: 22,
               height: 22,
               fillColor: '#cccccc',
-              strokeColor: '#4488cc',
+              lineColor: '#4488cc',
               lineJoin: 'bevel',
-              strokeWidth: 2,
+              lineWidth: 2,
             },
             {
               type: 'polyline',
@@ -137,8 +137,8 @@ export default {
               ],
               closePath: true,
               fillColor: '#cccccc',
-              strokeColor: '#4488cc',
-              strokeWidth: 2,
+              lineColor: '#4488cc',
+              lineWidth: 2,
               lineJoin: 'round',
             },
           ],
