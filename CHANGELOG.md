@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Fixed
+
+* Attribute `imageAlign` marked optional in type definition
+
 ## [0.2.0] - 2022-06-08
 
 ### Breaking changes
@@ -24,3 +28,7 @@
 ## [0.1.0] - 2022-04-25
 
 First public version.
+
+[Unreleased]: https://github.com/eclipsesource/pdf-maker
+[0.1.0]: https://github.com/eclipsesource/pdf-maker/releases/tag/v0.1.0
+[0.2.0]: https://github.com/eclipsesource/pdf-maker/releases/tag/v0.2.0

@@ -165,7 +165,7 @@ export type Image = {
   /**
    * Align the image in this block. By default, it is center-aligned.
    */
-  imageAlign: Alignment;
+  imageAlign?: Alignment;
 } & BlockAttrs;
 
 export type Paragraph = {
