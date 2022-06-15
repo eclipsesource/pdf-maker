@@ -1,20 +1,49 @@
 import { beforeEach, describe, expect, it, jest } from '@jest/globals';
-import { PDFArray, PDFContext, PDFDict, PDFFont, PDFName, PDFRef, rgb } from 'pdf-lib';
+import { PDFArray, PDFDict, PDFName, PDFRef } from 'pdf-lib';
 
 import { Frame } from '../src/layout.js';
-import { renderFrame, renderPage } from '../src/page.js';
-import { fakePdfFont } from './test-utils.js';
-
-const { objectContaining } = expect;
+import { getFont, renderFrame, renderPage } from '../src/page.js';
+import { fakePdfFont, fakePdfPage } from './test-utils.js';
 
 describe('page', () => {
+  let page, pdfPage;
+
+  beforeEach(() => {
+    pdfPage = fakePdfPage();
+    page = { pdfPage };
+  });
+
+  describe('getFont', () => {
+    let fontA, fontB;
+
+    beforeEach(() => {
+      fontA = fakePdfFont('fontA');
+      fontB = fakePdfFont('fontB');
+    });
+
+    it('returns same font for same input', () => {
+      const font1 = getFont(page, fontA);
+      const font2 = getFont(page, fontA);
+
+      expect(font1.toString()).toBe('/fontA-1');
+      expect(font2).toEqual(font1);
+    });
+
+    it('returns different fonts for different inputs', () => {
+      const font1 = getFont(page, fontA);
+      const font2 = getFont(page, fontB);
+
+      expect(font1.toString()).toBe('/fontA-1');
+      expect(font2).not.toEqual(font1);
+    });
+  });
+
   describe('renderPage', () => {
-    let size, pdfPage, doc, contentStream;
+    let size, doc, contentStream;
 
     beforeEach(() => {
       size = { width: 300, height: 400 };
-      contentStream = [];
-      pdfPage = { getContentStream: () => contentStream };
+      contentStream = pdfPage.getContentStream();
       doc = { pdfDoc: { addPage: jest.fn().mockReturnValue(pdfPage) } as any };
     });
 
@@ -58,19 +87,11 @@ describe('page', () => {
   });
 
   describe('renderFrame', () => {
-    let page, size, pdfPage, contentStream, font: PDFFont;
+    let page, size, font, contentStream;
 
     beforeEach(() => {
       size = { width: 500, height: 800 };
-      const context = PDFContext.create();
-      contentStream = [];
-      pdfPage = {
-        doc: { context, catalog: context.obj({}) },
-        ref: PDFRef.of(1),
-        node: context.obj({}),
-        drawText: jest.fn(),
-        getContentStream: () => contentStream,
-      };
+      contentStream = pdfPage.getContentStream();
       page = { size, pdfPage };
       font = fakePdfFont('Test');
     });
@@ -83,30 +104,8 @@ describe('page', () => {
 
       renderFrame(frame, page);
 
-      expect(pdfPage.drawText).toHaveBeenCalledWith('Test text', {
-        x: 10 + 1,
-        y: 800 - 20 - 2 - 30,
-        size: 12,
-        font,
-      });
-    });
-
-    it('renders text objects with style attrs', () => {
-      const frame: Frame = {
-        ...{ x: 10, y: 20, width: 200, height: 30 },
-        objects: [
-          {
-            ...{ type: 'text', x: 1, y: 2, text: 'Test text', fontSize: 12, font },
-            color: rgb(1, 0, 0),
-          },
-        ],
-      };
-
-      renderFrame(frame, page);
-
-      expect(pdfPage.drawText).toHaveBeenCalledWith(
-        'Test text',
-        objectContaining({ color: rgb(1, 0, 0) })
+      expect(contentStream.toString()).toEqual(
+        'BT,0 0 0 rg,/Test-1 12 Tf,1 0 0 1 11 748 Tm,Test text Tj,ET'
       );
     });
 
@@ -123,15 +122,13 @@ describe('page', () => {
 
       renderFrame(frame, page);
 
-      expect(pdfPage.drawText).toHaveBeenCalledWith('Test text', {
-        x: 10 + 10 + 1,
-        y: 800 - 20 - 20 - 2 - 30,
-        size: 12,
-        font,
-      });
+      // text rendered at (21, 728) instead of (11, 748)
+      expect(contentStream.toString()).toEqual(
+        'BT,0 0 0 rg,/Test-1 12 Tf,1 0 0 1 21 728 Tm,Test text Tj,ET'
+      );
     });
 
-    it('renders named destinations', () => {
+    it('renders named destinations (anchors)', () => {
       const frame: Frame = {
         ...{ x: 10, y: 20, width: 200, height: 30 },
         objects: [{ type: 'anchor', x: 1, y: 2, name: 'test-dest' }],

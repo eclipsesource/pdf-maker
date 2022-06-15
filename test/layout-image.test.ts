@@ -34,7 +34,7 @@ describe('layout-image', () => {
           const result = layoutImage(block, box, doc);
 
           expect(result).toEqual(objectContaining({ x: 20, y: 30, width: 300, height: 200 }));
-          expect(result.objects[0]).toEqual(
+          expect(result.objects?.[0]).toEqual(
             objectContaining({ type: 'image', width: 300, height: 200 })
           );
         });
@@ -45,7 +45,7 @@ describe('layout-image', () => {
           const result = layoutImage(block, box, doc);
 
           expect(result).toEqual(objectContaining({ x: 20, y: 30, width: 400, height: 200 }));
-          expect(result.objects[0]).toEqual(
+          expect(result.objects?.[0]).toEqual(
             objectContaining({ type: 'image', width: 300, height: 200 })
           );
         });
@@ -55,7 +55,7 @@ describe('layout-image', () => {
 
           const result = layoutImage(block, box, doc);
 
-          expect(result.objects[0]).toEqual(
+          expect(result.objects?.[0]).toEqual(
             objectContaining({ type: 'image', width: 300, height: 200 })
           );
         });
@@ -68,7 +68,9 @@ describe('layout-image', () => {
       const result = layoutImage(block, box, doc);
 
       expect(result).toEqual(objectContaining({ x: 20, y: 30, width: 400, height: 48 }));
-      expect(result.objects[0]).toEqual(objectContaining({ type: 'image', width: 72, height: 48 }));
+      expect(result.objects?.[0]).toEqual(
+        objectContaining({ type: 'image', width: 72, height: 48 })
+      );
     });
 
     it('scales image down to fit into available width if no fixed bounds', () => {
@@ -77,7 +79,7 @@ describe('layout-image', () => {
       const result = layoutImage(block, box, doc);
 
       expect(result).toEqual(objectContaining({ x: 20, y: 30, width: 400, height: (400 * 2) / 3 }));
-      expect(result.objects[0]).toEqual(
+      expect(result.objects?.[0]).toEqual(
         objectContaining({ type: 'image', width: 400, height: (400 * 2) / 3 })
       );
     });
@@ -93,7 +95,7 @@ describe('layout-image', () => {
       expect(result).toEqual(
         objectContaining({ x: 20, y: 30, width: 400, height: imgHeight + 7 + 8 })
       );
-      expect(result.objects[0]).toEqual(
+      expect(result.objects?.[0]).toEqual(
         objectContaining({ type: 'image', x: 5, y: 7, width: imgWidth, height: imgHeight })
       );
     });
@@ -104,7 +106,7 @@ describe('layout-image', () => {
 
       const result = layoutImage(block, box, doc);
 
-      expect(result.objects[0]).toEqual(
+      expect(result.objects?.[0]).toEqual(
         objectContaining({ type: 'image', x: 5 + (400 - 72 - 5 - 6) / 2, y: 7 })
       );
     });
@@ -115,7 +117,7 @@ describe('layout-image', () => {
 
       const result = layoutImage(block, box, doc);
 
-      expect(result.objects[0]).toEqual(objectContaining({ type: 'image', x: 5, y: 7 }));
+      expect(result.objects?.[0]).toEqual(objectContaining({ type: 'image', x: 5, y: 7 }));
     });
 
     it('right-aligns image', () => {
@@ -124,7 +126,9 @@ describe('layout-image', () => {
 
       const result = layoutImage(block, box, doc);
 
-      expect(result.objects[0]).toEqual(objectContaining({ type: 'image', x: 400 - 72 - 6, y: 7 }));
+      expect(result.objects?.[0]).toEqual(
+        objectContaining({ type: 'image', x: 400 - 72 - 6, y: 7 })
+      );
     });
   });
 });

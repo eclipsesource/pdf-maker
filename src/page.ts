@@ -1,4 +1,4 @@
-import { PDFPage, PDFPageDrawImageOptions, PDFPageDrawTextOptions } from 'pdf-lib';
+import { PDFFont, PDFName, PDFPage, PDFPageDrawImageOptions } from 'pdf-lib';
 
 import { Pos, Size } from './box.js';
 import { Document } from './document.js';
@@ -8,6 +8,7 @@ import { ImageObject } from './layout-image.js';
 import { createLinkAnnotation, createNamedDest } from './pdf-annotations.js';
 import { GraphicsObject } from './read-graphics.js';
 import { renderGraphics } from './render-graphics.js';
+import { renderTexts } from './render-text.js';
 
 export type Page = {
   size: Size;
@@ -16,7 +17,17 @@ export type Page = {
   footer?: Frame;
   guides?: boolean;
   pdfPage?: PDFPage;
+  fonts?: { [ref: string]: PDFName };
 };
+
+export function getFont(page: Page, font: PDFFont): PDFName {
+  if (!page.fonts) page.fonts = {};
+  const refStr = font.ref.toString();
+  if (!(refStr in page.fonts)) {
+    page.fonts[refStr] = (page.pdfPage as any).node.newFontDictionary(font.name, font.ref);
+  }
+  return page.fonts[refStr];
+}
 
 export function renderPage(page: Page, doc: Document) {
   page.pdfPage = doc.pdfDoc.addPage([page.size.width, page.size.height]);
@@ -35,11 +46,10 @@ export function renderFrame(frame: Frame, page: Page, base: Pos = null) {
     (object) => object.type === 'rect' || object.type === 'line' || object.type === 'polyline'
   ) as GraphicsObject[];
   graphicsObjects?.length && renderGraphics(graphicsObjects, page, topLeft);
+  const textObjects = frame.objects?.filter((object) => object.type === 'text') as TextObject[];
+  textObjects?.length && renderTexts(textObjects, page, bottomLeft);
 
   frame.objects?.forEach((object) => {
-    if (object.type === 'text') {
-      renderText(object, page, bottomLeft);
-    }
     if (object.type === 'anchor') {
       renderAnchor(object, page, topLeft);
     }
@@ -53,13 +63,6 @@ export function renderFrame(frame: Frame, page: Page, base: Pos = null) {
   frame.children?.forEach((frame) => {
     renderFrame(frame, page, topLeft);
   });
-}
-
-function renderText(el: TextObject, page: Page, base: Pos) {
-  const { x, y } = tr({ x: el.x + base.x, y: el.y + base.y }, page);
-  const options: PDFPageDrawTextOptions = { x, y, size: el.fontSize, font: el.font };
-  if (el.color) options.color = el.color;
-  page.pdfPage.drawText(el.text, options);
 }
 
 function renderAnchor(el: AnchorObject, page: Page, base: Pos) {
