@@ -3,7 +3,7 @@ import { PDFFont } from 'pdf-lib';
 import { Box, Pos, Size, ZERO_EDGES } from './box.js';
 import { Alignment } from './content.js';
 import { Document } from './document.js';
-import { createGuides } from './guides.js';
+import { createRowGuides } from './guides.js';
 import { Frame, LinkObject, TextObject } from './layout.js';
 import { Paragraph } from './text.js';
 import { breakLine, extractTextSegments, flattenTextSegments, TextSegment } from './text.js';
@@ -85,6 +85,7 @@ function layoutTextRow(segments: TextSegment[], box: Box, textAlign: Alignment, 
   });
   objects.forEach((obj) => (obj.y -= baseline));
   flattenLinks(links).forEach((link) => objects.push(link));
+  doc.guides && objects.push(createRowGuides(size.width, rowHeight, baseline));
   const row = {
     type: 'row',
     ...alignRow(box, size, textAlign),
@@ -92,7 +93,6 @@ function layoutTextRow(segments: TextSegment[], box: Box, textAlign: Alignment, 
     height: rowHeight,
     objects,
   };
-  doc.guides && row.objects.push(createGuides(row));
   return { row, remainder };
 }
 

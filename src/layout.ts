@@ -3,7 +3,7 @@ import { PDFFont } from 'pdf-lib';
 import { Box, parseEdges, subtractEdges, ZERO_EDGES } from './box.js';
 import { Color } from './colors.js';
 import { Document } from './document.js';
-import { createGuides } from './guides.js';
+import { createFrameGuides } from './guides.js';
 import { layoutColumns } from './layout-columns.js';
 import { ImageObject, layoutImage } from './layout-image.js';
 import { layoutRows } from './layout-rows.js';
@@ -164,6 +164,6 @@ function addGraphics(frame: Frame, block: Block) {
 
 function addGuides(frame: Frame) {
   if (!frame.objects) frame.objects = [];
-  const guides = createGuides(frame);
+  const guides = createFrameGuides(frame);
   frame.objects.push(guides);
 }

@@ -6,7 +6,19 @@ import { GraphicsObject } from './read-graphics.js';
 const lineWidth = 0.5;
 const lineOpacity = 0.25;
 
-export function createGuides(frame: Frame): GraphicsObject {
+export function createRowGuides(width: number, height: number, baseline: number): GraphicsObject {
+  const lineColor = rgb(0, 0.5, 0);
+  const yb = height - baseline;
+  return {
+    type: 'graphics',
+    shapes: [
+      { type: 'rect', x: 0, y: 0, width, height, lineColor, lineWidth, lineOpacity },
+      { type: 'line', x1: 0, y1: yb, x2: width, y2: yb, lineColor, lineWidth, lineOpacity },
+    ],
+  };
+}
+
+export function createFrameGuides(frame: Frame): GraphicsObject {
   const { width, height } = frame;
   const lineColor = getColor(frame.type);
   return {
