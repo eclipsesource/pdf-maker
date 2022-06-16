@@ -4,7 +4,7 @@ import { BoxEdges, parseEdges, parseLength } from './box.js';
 import { Color, parseColor } from './colors.js';
 import { Alignment } from './content.js';
 import { Font, selectFont } from './fonts.js';
-import { GraphicsObject, readGraphicsObject } from './read-graphics.js';
+import { readShape, Shape } from './read-graphics.js';
 import {
   dynamic,
   isObject,
@@ -77,7 +77,7 @@ type BlockAttrs = {
   width?: number;
   height?: number;
   id?: string;
-  graphics?: (info: BlockInfo) => GraphicsObject[];
+  graphics?: (info: BlockInfo) => Shape[];
 };
 
 export type BlockInfo = {
@@ -153,7 +153,7 @@ function parseBlockAttrs(input: Obj): BlockAttrs {
     width: optional(parseLength),
     height: optional(parseLength),
     id: optional(types.string()),
-    graphics: optional(dynamic(types.array(readGraphicsObject), 'graphics')),
+    graphics: optional(dynamic(types.array(readShape), 'graphics')),
   });
 }
 

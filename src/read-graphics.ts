@@ -1,7 +1,12 @@
 import { Color, parseColor } from './colors.js';
 import { Obj, optional, readFrom, readObject, required, types } from './types.js';
 
-export type GraphicsObject = RectObject | LineObject | PolylineObject;
+export type GraphicsObject = {
+  type: 'graphics';
+  shapes: Shape[];
+};
+
+export type Shape = RectObject | LineObject | PolylineObject;
 
 export type RectObject = {
   type: 'rect';
@@ -45,7 +50,7 @@ const tLineJoin = types.string({ enum: ['miter', 'round', 'bevel'] });
 
 const shapeTypes = ['rect', 'line', 'polyline'];
 
-export function readGraphicsObject(input: unknown): GraphicsObject {
+export function readShape(input: unknown): Shape {
   const shape = readObject(input);
   const type = readFrom(shape, 'type', required(types.string({ enum: shapeTypes })));
   switch (type) {

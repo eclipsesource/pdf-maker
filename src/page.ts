@@ -4,7 +4,6 @@ import { Pos, Size } from './box.js';
 import { Document } from './document.js';
 import { renderGuide } from './guides.js';
 import { Frame, TextObject } from './layout.js';
-import { GraphicsObject } from './read-graphics.js';
 import { renderAnchor, renderLink } from './render-annotations.js';
 import { renderGraphics } from './render-graphics.js';
 import { renderImage } from './render-image.js';
@@ -52,14 +51,13 @@ export function renderFrame(frame: Frame, page: Page, base: Pos = null) {
   const bottomLeft = { x: topLeft.x, y: topLeft.y + height };
   renderGuide(page, { ...tr(bottomLeft, page), width, height }, frame.type);
 
-  const graphicsObjects = frame.objects?.filter(
-    (object) => object.type === 'rect' || object.type === 'line' || object.type === 'polyline'
-  ) as GraphicsObject[];
-  graphicsObjects?.length && renderGraphics(graphicsObjects, page, topLeft);
   const textObjects = frame.objects?.filter((object) => object.type === 'text') as TextObject[];
   textObjects?.length && renderTexts(textObjects, page, bottomLeft);
 
   frame.objects?.forEach((object) => {
+    if (object.type === 'graphics') {
+      renderGraphics(object, page, topLeft);
+    }
     if (object.type === 'anchor') {
       renderAnchor(object, page, topLeft);
     }

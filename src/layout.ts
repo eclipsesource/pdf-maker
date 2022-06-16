@@ -150,10 +150,11 @@ function createAnchorObject(name: string): AnchorObject {
 function addGraphics(frame: Frame, block: Block) {
   if (block.graphics) {
     const info = { width: frame.width, height: frame.height, padding: (block as any).padding };
-    const graphicsObjects = block.graphics(info);
-    if (graphicsObjects?.length) {
+    const shapes = block.graphics(info);
+    if (shapes?.length) {
       if (!frame.objects) frame.objects = [];
-      frame.objects.push(...graphicsObjects);
+      // Insert graphics as first element to ensure they are rendered below text and images
+      frame.objects.unshift({ type: 'graphics', shapes });
     }
   }
 }

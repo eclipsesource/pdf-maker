@@ -1,17 +1,17 @@
 import { describe, expect, it } from '@jest/globals';
 import { rgb } from 'pdf-lib';
 
-import { readGraphicsObject } from '../src/read-graphics.js';
+import { readShape } from '../src/read-graphics.js';
 
-describe('graphics', () => {
-  describe('readGraphicsObject', () => {
+describe('read-graphics', () => {
+  describe('readShape', () => {
     it('throws for invalid types', () => {
-      expect(() => readGraphicsObject(23)).toThrowError('Expected object, got: 23');
-      expect(() => readGraphicsObject('foo')).toThrowError("Expected object, got: 'foo'");
+      expect(() => readShape(23)).toThrowError('Expected object, got: 23');
+      expect(() => readShape('foo')).toThrowError("Expected object, got: 'foo'");
     });
 
     it('throws for unsupported type attribute', () => {
-      const fn = () => readGraphicsObject({ type: 'foo' });
+      const fn = () => readShape({ type: 'foo' });
 
       expect(fn).toThrowError(
         `Invalid value for "type": Expected one of ('rect', 'line', 'polyline'), got: 'foo'`
@@ -26,7 +26,7 @@ describe('graphics', () => {
         fillColor: 'blue',
       };
 
-      expect(readGraphicsObject(rect)).toEqual({
+      expect(readShape(rect)).toEqual({
         ...rect,
         lineColor: rgb(1, 0, 0),
         fillColor: rgb(0, 0, 1),
@@ -38,7 +38,7 @@ describe('graphics', () => {
         const rect = { type: 'rect', x: 1, y: 2, width: 10, height: 20 };
         delete rect[name];
 
-        const fn = () => readGraphicsObject(rect);
+        const fn = () => readShape(rect);
 
         expect(fn).toThrowError(`Missing value for "${name}"`);
       });
@@ -51,7 +51,7 @@ describe('graphics', () => {
         lineColor: 'red',
       };
 
-      expect(readGraphicsObject(line)).toEqual({
+      expect(readShape(line)).toEqual({
         ...line,
         lineColor: rgb(1, 0, 0),
       });
@@ -62,7 +62,7 @@ describe('graphics', () => {
         const line = { type: 'line', x1: 1, y1: 2, x2: 11, y2: 12 };
         delete line[name];
 
-        const fn = () => readGraphicsObject(line);
+        const fn = () => readShape(line);
 
         expect(fn).toThrowError(`Missing value for "${name}"`);
       });
@@ -76,7 +76,7 @@ describe('graphics', () => {
         fillColor: 'blue',
       };
 
-      expect(readGraphicsObject(polyline)).toEqual({
+      expect(readShape(polyline)).toEqual({
         ...polyline,
         lineColor: rgb(1, 0, 0),
         fillColor: rgb(0, 0, 1),
@@ -84,13 +84,13 @@ describe('graphics', () => {
     });
 
     it(`throws for missing polyline attribute points`, () => {
-      const fn = () => readGraphicsObject({ type: 'polyline' });
+      const fn = () => readShape({ type: 'polyline' });
 
       expect(fn).toThrowError(`Missing value for "points"`);
     });
 
     it(`throws for invalid point in polyline`, () => {
-      const fn = () => readGraphicsObject({ type: 'polyline', points: [{ x: 1, y: 'a' }] });
+      const fn = () => readShape({ type: 'polyline', points: [{ x: 1, y: 'a' }] });
 
       expect(fn).toThrowError(`Invalid value for "points/0/y": Expected number, got: 'a'`);
     });
@@ -99,7 +99,7 @@ describe('graphics', () => {
       it(`throws for invalid rect attribute ${name}`, () => {
         const rect = { type: 'rect', x: 1, y: 2, width: 10, height: 20, [name]: 'foo' };
 
-        const fn = () => readGraphicsObject(rect);
+        const fn = () => readShape(rect);
 
         expect(fn).toThrowError(
           `Invalid value for "${name}": Expected valid color name, got: 'foo'`
@@ -110,7 +110,7 @@ describe('graphics', () => {
     it(`throws for negative value in attribute lineWidth`, () => {
       const rect = { type: 'rect', x: 1, y: 2, width: 10, height: 20, lineWidth: -1 };
 
-      const fn = () => readGraphicsObject(rect);
+      const fn = () => readShape(rect);
 
       expect(fn).toThrowError('Invalid value for "lineWidth": Expected number >= 0, got: -1');
     });

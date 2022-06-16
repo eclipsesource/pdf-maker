@@ -50,7 +50,9 @@ describe('page', () => {
     it('renders content', () => {
       const content: Frame = {
         ...{ x: 50, y: 50, width: 280, height: 300 },
-        objects: [{ type: 'rect', x: 0, y: 0, width: 280, height: 300 }],
+        objects: [
+          { type: 'graphics', shapes: [{ type: 'rect', x: 0, y: 0, width: 280, height: 300 }] },
+        ],
       };
       const page = { size, content };
 
@@ -63,7 +65,9 @@ describe('page', () => {
       const content = { x: 50, y: 50, width: 280, height: 300 };
       const header: Frame = {
         ...{ x: 50, y: 20, width: 280, height: 30 },
-        objects: [{ type: 'rect', x: 0, y: 0, width: 280, height: 30 }],
+        objects: [
+          { type: 'graphics', shapes: [{ type: 'rect', x: 0, y: 0, width: 280, height: 30 }] },
+        ],
       };
       const page = { size, content, header };
 
@@ -76,7 +80,9 @@ describe('page', () => {
       const content = { x: 50, y: 50, width: 280, height: 300 };
       const footer: Frame = {
         ...{ x: 50, y: 350, width: 280, height: 30 },
-        objects: [{ type: 'rect', x: 0, y: 0, width: 280, height: 30 }],
+        objects: [
+          { type: 'graphics', shapes: [{ type: 'rect', x: 0, y: 0, width: 280, height: 30 }] },
+        ],
       };
       const page = { size, content, footer };
 

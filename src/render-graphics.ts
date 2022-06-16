@@ -21,27 +21,26 @@ import {
 
 import { Pos } from './box.js';
 import { Page } from './page.js';
-import { GraphicsObject, LineObject, PolylineObject, RectObject } from './read-graphics.js';
+import { GraphicsObject, LineObject, PolylineObject, RectObject, Shape } from './read-graphics.js';
 
-export function renderGraphics(objects: GraphicsObject[], page: Page, base: Pos) {
+export function renderGraphics(object: GraphicsObject, page: Page, base: Pos) {
   const pos = tr(base, page);
-  const operators = [];
-  operators.push(pushGraphicsState(), translate(pos.x, pos.y));
-  objects?.forEach((object) => {
-    operators.push(pushGraphicsState(), ...setStyleAttrs(object));
-    if (object.type === 'line') {
-      operators.push(...drawLine(object));
+  const contentStream = (page.pdfPage as any).getContentStream();
+  contentStream.push(pushGraphicsState(), translate(pos.x, pos.y));
+  object.shapes.forEach((shape) => {
+    contentStream.push(pushGraphicsState(), ...setStyleAttrs(shape));
+    if (shape.type === 'line') {
+      contentStream.push(...drawLine(shape));
     }
-    if (object.type === 'rect') {
-      operators.push(...drawRect(object));
+    if (shape.type === 'rect') {
+      contentStream.push(...drawRect(shape));
     }
-    if (object.type === 'polyline') {
-      operators.push(...drawPolyLine(object));
+    if (shape.type === 'polyline') {
+      contentStream.push(...drawPolyLine(shape));
     }
-    operators.push(popGraphicsState());
+    contentStream.push(popGraphicsState());
   });
-  operators.push(popGraphicsState());
-  (page.pdfPage as any).getContentStream().push(...operators);
+  contentStream.push(popGraphicsState());
 }
 
 function drawLine(obj: LineObject): PDFOperator[] {
@@ -96,7 +95,7 @@ const lineJoinTr = {
 };
 const trLineJoin = (lineJoin: string) => lineJoinTr[lineJoin];
 
-function setStyleAttrs(obj: GraphicsObject): PDFOperator[] {
+function setStyleAttrs(obj: Shape): PDFOperator[] {
   return [
     'fillColor' in obj && setFillingColor(obj.fillColor),
     'lineColor' in obj && setStrokingColor(obj.lineColor),

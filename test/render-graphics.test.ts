@@ -24,7 +24,7 @@ describe('render-graphics', () => {
     it('renders line without lineColor', () => {
       const line: LineObject = { type: 'line', x1: 1, y1: 2, x2: 3, y2: 4 };
 
-      renderGraphics([line], page, pos);
+      renderGraphics({ type: 'graphics', shapes: [line] }, page, pos);
 
       expect(contentStream.map((o) => o?.toString())).toEqual([
         ...head,
@@ -43,7 +43,7 @@ describe('render-graphics', () => {
         lineCap: 'round',
       };
 
-      renderGraphics([line], page, pos);
+      renderGraphics({ type: 'graphics', shapes: [line] }, page, pos);
 
       expect(contentStream.map((o) => o.toString())).toEqual([
         ...head,
@@ -60,7 +60,7 @@ describe('render-graphics', () => {
     it('renders rect without color attributes', () => {
       const rect: RectObject = { type: 'rect', x: 1, y: 2, width: 3, height: 4 };
 
-      renderGraphics([rect], page, pos);
+      renderGraphics({ type: 'graphics', shapes: [rect] }, page, pos);
 
       expect(contentStream.map((o) => o.toString())).toEqual([
         ...head,
@@ -76,7 +76,7 @@ describe('render-graphics', () => {
         fillColor: rgb(1, 0, 0),
       };
 
-      renderGraphics([rect], page, pos);
+      renderGraphics({ type: 'graphics', shapes: [rect] }, page, pos);
 
       expect(contentStream.map((o) => o.toString())).toEqual([
         ...head,
@@ -93,7 +93,7 @@ describe('render-graphics', () => {
         lineColor: rgb(1, 0, 0),
       };
 
-      renderGraphics([rect], page, pos);
+      renderGraphics({ type: 'graphics', shapes: [rect] }, page, pos);
 
       expect(contentStream.map((o) => o.toString())).toEqual([
         ...head,
@@ -113,7 +113,7 @@ describe('render-graphics', () => {
         lineJoin: 'round',
       };
 
-      renderGraphics([rect], page, pos);
+      renderGraphics({ type: 'graphics', shapes: [rect] }, page, pos);
 
       expect(contentStream.map((o) => o.toString())).toEqual([
         ...head,
@@ -130,7 +130,7 @@ describe('render-graphics', () => {
     it('renders polyline without color attributes', () => {
       const polyline: PolylineObject = { type: 'polyline', points: [p(1, 2), p(3, 4)] };
 
-      renderGraphics([polyline], page, pos);
+      renderGraphics({ type: 'graphics', shapes: [polyline] }, page, pos);
 
       expect(contentStream.map((o) => o.toString())).toEqual([
         ...head,
@@ -148,7 +148,7 @@ describe('render-graphics', () => {
         closePath: true,
       };
 
-      renderGraphics([polyline], page, pos);
+      renderGraphics({ type: 'graphics', shapes: [polyline] }, page, pos);
 
       expect(contentStream.map((o) => o.toString())).toEqual([
         ...head,
@@ -170,7 +170,7 @@ describe('render-graphics', () => {
         lineJoin: 'round',
       };
 
-      renderGraphics([polyline], page, pos);
+      renderGraphics({ type: 'graphics', shapes: [polyline] }, page, pos);
 
       expect(contentStream.map((o) => o.toString())).toEqual([
         ...head,
@@ -182,6 +182,25 @@ describe('render-graphics', () => {
         '1 -2 m',
         '3 -4 l',
         'B',
+        ...tail,
+      ]);
+    });
+
+    it('renders multiple shapes', () => {
+      const line: LineObject = { type: 'line', x1: 1, y1: 2, x2: 3, y2: 4 };
+      const rect: RectObject = { type: 'rect', x: 1, y: 2, width: 3, height: 4 };
+
+      renderGraphics({ type: 'graphics', shapes: [line, rect] }, page, pos);
+
+      expect(contentStream.map((o) => o?.toString())).toEqual([
+        ...head,
+        '1 -2 m',
+        '3 -4 l',
+        'S',
+        'Q',
+        'q',
+        '1 -2 3 -4 re',
+        'f',
         ...tail,
       ]);
     });

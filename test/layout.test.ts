@@ -103,10 +103,10 @@ describe('layout', () => {
 
       const pages = layoutPages(def, doc);
 
-      expect((pages[0].header.children[0].objects[0] as any).text).toEqual('1/2');
-      expect((pages[0].footer.children[0].objects[0] as any).text).toEqual('1/2');
-      expect((pages[1].header.children[0].objects[0] as any).text).toEqual('2/2');
-      expect((pages[1].footer.children[0].objects[0] as any).text).toEqual('2/2');
+      expect((pages[0].header?.children?.[0].objects?.[0] as any).text).toEqual('1/2');
+      expect((pages[0].footer?.children?.[0].objects?.[0] as any).text).toEqual('1/2');
+      expect((pages[1].header?.children?.[0].objects?.[0] as any).text).toEqual('2/2');
+      expect((pages[1].footer?.children?.[0].objects?.[0] as any).text).toEqual('2/2');
     });
   });
 
@@ -191,9 +191,14 @@ describe('layout', () => {
 
       expect(frame).toEqual(objectContaining({ type: 'text', width: 400, height: 0 }));
       expect(frame.objects).toEqual([
-        { type: 'line', x1: 1, y1: 2, x2: 3, y2: 4 },
-        { type: 'rect', x: 1, y: 2, width: 10, height: 20 },
-        { type: 'polyline', points: [p(1, 2), p(3, 4)] },
+        {
+          type: 'graphics',
+          shapes: [
+            { type: 'line', x1: 1, y1: 2, x2: 3, y2: 4 },
+            { type: 'rect', x: 1, y: 2, width: 10, height: 20 },
+            { type: 'polyline', points: [p(1, 2), p(3, 4)] },
+          ],
+        },
       ]);
     });
 
@@ -209,9 +214,14 @@ describe('layout', () => {
 
       expect(frame).toEqual(objectContaining({ type: 'text', width: 400, height: 10 }));
       expect(frame.objects).toEqual([
-        { type: 'line', x1: 1, y1: 2, x2: 3, y2: 4 },
-        { type: 'rect', x: 1, y: 2, width: 10, height: 20 },
-        { type: 'polyline', points: [p(1, 2), p(3, 4)] },
+        {
+          type: 'graphics',
+          shapes: [
+            { type: 'line', x1: 1, y1: 2, x2: 3, y2: 4 },
+            { type: 'rect', x: 1, y: 2, width: 10, height: 20 },
+            { type: 'polyline', points: [p(1, 2), p(3, 4)] },
+          ],
+        },
       ]);
     });
   });
