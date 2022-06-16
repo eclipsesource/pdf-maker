@@ -168,9 +168,16 @@ export default {
       ],
     },
     {
-      image: 'liberty',
-      height: 200,
-      imageAlign: 'right',
+      columns: [
+        { image: 'liberty' },
+        {
+          rows: [
+            { image: 'liberty', height: 75, imageAlign: 'left' },
+            { image: 'liberty', height: 75, imageAlign: 'center' },
+            { image: 'liberty', height: 75, imageAlign: 'right' },
+          ],
+        },
+      ],
     },
     {
       rows: [

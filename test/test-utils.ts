@@ -42,6 +42,7 @@ export function fakePdfPage(): PDFPage {
   const contentStream = [];
   let counter = 1;
   (node as any).newFontDictionary = (name: string) => PDFName.of(`${name}-${counter++}`);
+  (node as any).newXObject = (type, ref) => PDFName.of(`${type}-${ref}-${counter++}`);
   return {
     doc: { context, catalog: context.obj({}) },
     ref: PDFRef.of(1),

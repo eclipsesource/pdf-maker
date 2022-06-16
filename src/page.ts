@@ -1,13 +1,13 @@
-import { PDFFont, PDFName, PDFPage, PDFPageDrawImageOptions } from 'pdf-lib';
+import { PDFFont, PDFImage, PDFName, PDFPage } from 'pdf-lib';
 
 import { Pos, Size } from './box.js';
 import { Document } from './document.js';
 import { renderGuide } from './guides.js';
 import { AnchorObject, Frame, LinkObject, TextObject } from './layout.js';
-import { ImageObject } from './layout-image.js';
 import { createLinkAnnotation, createNamedDest } from './pdf-annotations.js';
 import { GraphicsObject } from './read-graphics.js';
 import { renderGraphics } from './render-graphics.js';
+import { renderImage } from './render-image.js';
 import { renderTexts } from './render-text.js';
 
 export type Page = {
@@ -18,6 +18,7 @@ export type Page = {
   guides?: boolean;
   pdfPage?: PDFPage;
   fonts?: { [ref: string]: PDFName };
+  images?: { [ref: string]: PDFName };
 };
 
 export function getFont(page: Page, font: PDFFont): PDFName {
@@ -27,6 +28,15 @@ export function getFont(page: Page, font: PDFFont): PDFName {
     page.fonts[refStr] = (page.pdfPage as any).node.newFontDictionary(font.name, font.ref);
   }
   return page.fonts[refStr];
+}
+
+export function getImage(page: Page, image: PDFImage): PDFName {
+  if (!page.images) page.images = {};
+  const refStr = image.ref.toString();
+  if (!(refStr in page.images)) {
+    page.images[refStr] = (page.pdfPage as any).node.newXObject('Image', image.ref);
+  }
+  return page.images[refStr];
 }
 
 export function renderPage(page: Page, doc: Document) {
@@ -57,7 +67,7 @@ export function renderFrame(frame: Frame, page: Page, base: Pos = null) {
       renderLink(object, page, bottomLeft);
     }
     if (object.type === 'image') {
-      renderImage(object, page, topLeft);
+      renderImage(object, page, bottomLeft);
     }
   });
   frame.children?.forEach((frame) => {
@@ -74,13 +84,6 @@ function renderLink(el: LinkObject, page: Page, base: Pos) {
   const { x, y } = tr({ x: el.x + base.x, y: el.y + base.y }, page);
   const { width, height, url } = el;
   createLinkAnnotation(page.pdfPage, { x, y, width, height }, url);
-}
-
-function renderImage(object: ImageObject, page: Page, base: Pos) {
-  const { x, y } = tr({ x: object.x + base.x, y: object.y + base.y + object.height }, page);
-  const { width, height } = object;
-  const options: PDFPageDrawImageOptions = { x, y, width, height };
-  page.pdfPage.drawImage(object.image, options);
 }
 
 function tr(pos: Pos, page: Page): Pos {
