@@ -9,8 +9,8 @@ import { renderTexts } from './render-text.js';
 
 export function renderPage(page: Page, doc: Document) {
   page.pdfPage = doc.pdfDoc.addPage([page.size.width, page.size.height]);
-  renderFrame(page.content, page);
   page.header && renderFrame(page.header, page);
+  renderFrame(page.content, page);
   page.footer && renderFrame(page.footer, page);
 }
 
