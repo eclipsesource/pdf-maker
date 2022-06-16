@@ -3,6 +3,7 @@ import { PDFFont } from 'pdf-lib';
 import { Box, parseEdges, subtractEdges, ZERO_EDGES } from './box.js';
 import { Color } from './colors.js';
 import { Document } from './document.js';
+import { createGuides } from './guides.js';
 import { layoutColumns } from './layout-columns.js';
 import { ImageObject, layoutImage } from './layout-image.js';
 import { layoutRows } from './layout-rows.js';
@@ -61,13 +62,12 @@ export type AnchorObject = {
 export function layoutPages(def: DocumentDefinition, doc: Document): Page[] {
   const pageMargin = def.margin ?? defaultPageMargin;
   const contentBox = subtractEdges({ x: 0, y: 0, ...doc.pageSize }, pageMargin);
-  const guides = !!def.dev?.guides || undefined;
   const pages: Page[] = [];
   let remainingBlocks = def.content;
   while (remainingBlocks?.length) {
     const { frame, remainder } = layoutPageContent(remainingBlocks, contentBox, doc);
     remainingBlocks = remainder;
-    pages.push({ size: doc.pageSize, content: frame, guides });
+    pages.push({ size: doc.pageSize, content: frame });
   }
   pages.forEach((page, idx) => {
     const pageInfo = { pageCount: pages.length, pageNumber: idx + 1, pageSize: doc.pageSize };
@@ -113,13 +113,16 @@ export function layoutPageContent(blocks: Block[], box: Box, doc: Document) {
     pos.y += topMargin + frame.height;
     remainingHeight = height - pos.y;
   }
-  return { frame: { type: 'page', x, y, width, height, children }, remainder };
+  const frame = { type: 'page', x, y, width, height, children };
+  doc.guides && addGuides(frame);
+  return { frame, remainder };
 }
 
 export function layoutBlock(block: Block, box: Box, doc: Document): Frame {
   const frame = layoutBlockContent(block, box, doc);
   addAnchor(frame, block);
   addGraphics(frame, block);
+  doc.guides && addGuides(frame);
   return frame;
 }
 
@@ -157,4 +160,10 @@ function addGraphics(frame: Frame, block: Block) {
       frame.objects.unshift({ type: 'graphics', shapes });
     }
   }
+}
+
+function addGuides(frame: Frame) {
+  if (!frame.objects) frame.objects = [];
+  const guides = createGuides(frame);
+  frame.objects.push(guides);
 }

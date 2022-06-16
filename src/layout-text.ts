@@ -3,7 +3,7 @@ import { PDFFont } from 'pdf-lib';
 import { Box, Pos, Size, ZERO_EDGES } from './box.js';
 import { Alignment } from './content.js';
 import { Document } from './document.js';
-import { Font } from './fonts.js';
+import { createGuides } from './guides.js';
 import { Frame, LinkObject, TextObject } from './layout.js';
 import { Paragraph } from './text.js';
 import { breakLine, extractTextSegments, flattenTextSegments, TextSegment } from './text.js';
@@ -15,7 +15,7 @@ export function layoutParagraph(paragraph: Paragraph, box: Box, doc: Document): 
   const maxWidth = (fixedWidth ?? box.width) - padding.left - padding.right;
   const maxHeight = (fixedHeight ?? box.height) - padding.top - padding.bottom;
   const innerBox = { x: padding.left, y: padding.top, width: maxWidth, height: maxHeight };
-  const text = paragraph.text && layoutText(paragraph, innerBox, doc.fonts);
+  const text = paragraph.text && layoutText(paragraph, innerBox, doc);
   const contentHeight = text?.size?.height ?? 0;
   return {
     type: 'text',
@@ -26,16 +26,16 @@ export function layoutParagraph(paragraph: Paragraph, box: Box, doc: Document): 
   };
 }
 
-function layoutText(paragraph: Paragraph, box: Box, fonts: Font[]) {
+function layoutText(paragraph: Paragraph, box: Box, doc: Document) {
   const { text, textAlign } = paragraph;
   const textSpans = text;
-  const segments = extractTextSegments(textSpans, fonts);
+  const segments = extractTextSegments(textSpans, doc.fonts);
   const rows = [];
   let remainingSegments = segments;
   const remainingSpace = { ...box };
   const size: Size = { width: 0, height: 0 };
   while (remainingSegments?.length) {
-    const { row, remainder } = layoutTextRow(remainingSegments, remainingSpace, textAlign);
+    const { row, remainder } = layoutTextRow(remainingSegments, remainingSpace, textAlign, doc);
     rows.push(row);
     remainingSegments = remainder;
     remainingSpace.height -= row.height;
@@ -61,7 +61,7 @@ function layoutText(paragraph: Paragraph, box: Box, fonts: Font[]) {
  *                                                                    ˅
  * ---------------------------------------------------------------------
  */
-function layoutTextRow(segments: TextSegment[], box: Box, textAlign: Alignment) {
+function layoutTextRow(segments: TextSegment[], box: Box, textAlign: Alignment, doc: Document) {
   const [lineSegments, remainder] = breakLine(segments, box.width);
   const pos = { x: 0, y: 0 };
   const size = { width: 0, height: 0 };
@@ -80,7 +80,6 @@ function layoutTextRow(segments: TextSegment[], box: Box, textAlign: Alignment) 
     size.width += width;
     size.height = Math.max(size.height, height);
     const offset = (height * (lineHeight - 1)) / 2;
-
     baseline = Math.max(baseline, getDescent(font, fontSize) + offset);
     rowHeight = Math.max(rowHeight, height * lineHeight);
   });
@@ -93,6 +92,7 @@ function layoutTextRow(segments: TextSegment[], box: Box, textAlign: Alignment) 
     height: rowHeight,
     objects,
   };
+  doc.guides && row.objects.push(createGuides(row));
   return { row, remainder };
 }
 

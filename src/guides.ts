@@ -1,22 +1,18 @@
 import { rgb } from 'pdf-lib';
 
-import { Box } from './box.js';
-import { Page } from './page.js';
+import { Frame } from './layout.js';
+import { GraphicsObject } from './read-graphics.js';
 
-export function renderGuide(page: Page, box: Box, type: string) {
-  if (page.guides) {
-    const { x, y, width, height } = box;
-    const color = getColor(type);
-    page.pdfPage.drawRectangle({
-      x,
-      y,
-      width,
-      height,
-      borderColor: color,
-      borderWidth: 0.5,
-      borderOpacity: 0.25,
-    });
-  }
+const lineWidth = 0.5;
+const lineOpacity = 0.25;
+
+export function createGuides(frame: Frame): GraphicsObject {
+  const { width, height } = frame;
+  const lineColor = getColor(frame.type);
+  return {
+    type: 'graphics',
+    shapes: [{ type: 'rect', x: 0, y: 0, width, height, lineColor, lineWidth, lineOpacity }],
+  };
 }
 
 function getColor(type: string) {
@@ -26,8 +22,6 @@ function getColor(type: string) {
     case 'text':
     case 'image':
       return rgb(0, 0, 1);
-    case 'row':
-      return rgb(0, 0.5, 0);
     default:
       return rgb(0, 0, 0);
   }

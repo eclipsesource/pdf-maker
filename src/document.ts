@@ -12,6 +12,7 @@ export type Document = {
   images: Image[];
   pageSize: Size;
   pdfDoc: PDFDocument;
+  guides?: boolean;
 };
 
 export async function createDocument(def: DocumentDefinition): Promise<Document> {
@@ -21,7 +22,8 @@ export async function createDocument(def: DocumentDefinition): Promise<Document>
   const images = await embedImages(def.images ?? [], pdfDoc);
   const pageSize = applyOrientation(def.pageSize ?? paperSizes.A4, def.pageOrientation);
   setMetadata(def.info, pdfDoc);
-  return { fonts, images, pageSize, pdfDoc };
+  const guides = !!def.dev?.guides;
+  return { fonts, images, pageSize, pdfDoc, guides };
 }
 
 function setMetadata(info: Metadata, doc: PDFDocument) {

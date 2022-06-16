@@ -2,7 +2,6 @@ import { PDFFont, PDFImage, PDFName, PDFPage } from 'pdf-lib';
 
 import { Pos, Size } from './box.js';
 import { Document } from './document.js';
-import { renderGuide } from './guides.js';
 import { Frame, TextObject } from './layout.js';
 import { renderAnchor, renderLink } from './render-annotations.js';
 import { renderGraphics } from './render-graphics.js';
@@ -14,7 +13,6 @@ export type Page = {
   content: Frame;
   header?: Frame;
   footer?: Frame;
-  guides?: boolean;
   pdfPage?: PDFPage;
   fonts?: { [ref: string]: PDFName };
   images?: { [ref: string]: PDFName };
@@ -59,10 +57,8 @@ export function renderPage(page: Page, doc: Document) {
 }
 
 export function renderFrame(frame: Frame, page: Page, base: Pos = null) {
-  const { width, height } = frame;
   const topLeft = { x: frame.x + (base?.x ?? 0), y: frame.y + (base?.y ?? 0) };
-  const bottomLeft = { x: topLeft.x, y: topLeft.y + height };
-  renderGuide(page, { ...tr(bottomLeft, page), width, height }, frame.type);
+  const bottomLeft = { x: topLeft.x, y: topLeft.y + frame.height };
 
   const textObjects = frame.objects?.filter((object) => object.type === 'text') as TextObject[];
   textObjects?.length && renderTexts(textObjects, page, bottomLeft);
@@ -84,8 +80,4 @@ export function renderFrame(frame: Frame, page: Page, base: Pos = null) {
   frame.children?.forEach((frame) => {
     renderFrame(frame, page, topLeft);
   });
-}
-
-function tr(pos: Pos, page: Page): Pos {
-  return { x: pos.x, y: page.size.height - pos.y };
 }
