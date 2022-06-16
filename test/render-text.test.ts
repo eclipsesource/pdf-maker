@@ -44,8 +44,6 @@ describe('render-text', () => {
         '/fontA-1 10 Tf',
         '1 0 0 1 11 778 Tm',
         'foo Tj',
-        '0 0 0 rg',
-        '/fontA-1 10 Tf',
         '1 0 0 1 18 778 Tm',
         'bar Tj',
         'ET',
