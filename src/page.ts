@@ -3,9 +3,9 @@ import { PDFFont, PDFImage, PDFName, PDFPage } from 'pdf-lib';
 import { Pos, Size } from './box.js';
 import { Document } from './document.js';
 import { renderGuide } from './guides.js';
-import { AnchorObject, Frame, LinkObject, TextObject } from './layout.js';
-import { createLinkAnnotation, createNamedDest } from './pdf-annotations.js';
+import { Frame, TextObject } from './layout.js';
 import { GraphicsObject } from './read-graphics.js';
+import { renderAnchor, renderLink } from './render-annotations.js';
 import { renderGraphics } from './render-graphics.js';
 import { renderImage } from './render-image.js';
 import { renderTexts } from './render-text.js';
@@ -73,17 +73,6 @@ export function renderFrame(frame: Frame, page: Page, base: Pos = null) {
   frame.children?.forEach((frame) => {
     renderFrame(frame, page, topLeft);
   });
-}
-
-function renderAnchor(el: AnchorObject, page: Page, base: Pos) {
-  const { x, y } = tr({ x: el.x + base.x, y: el.y + base.y }, page);
-  createNamedDest(page.pdfPage, el.name, { x, y });
-}
-
-function renderLink(el: LinkObject, page: Page, base: Pos) {
-  const { x, y } = tr({ x: el.x + base.x, y: el.y + base.y }, page);
-  const { width, height, url } = el;
-  createLinkAnnotation(page.pdfPage, { x, y, width, height }, url);
 }
 
 function tr(pos: Pos, page: Page): Pos {
