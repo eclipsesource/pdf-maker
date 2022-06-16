@@ -1,8 +1,8 @@
 import { DocumentDefinition } from './content.js';
 import { createDocument } from './document.js';
 import { layoutPages } from './layout.js';
-import { renderPage } from './page.js';
 import { readDocumentDefinition } from './read-document.js';
+import { renderPage } from './render-page.js';
 import { readAs } from './types.js';
 
 export * from './content.js';
