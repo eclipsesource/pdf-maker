@@ -4,7 +4,7 @@ import { Box, Pos, Size, ZERO_EDGES } from './box.js';
 import { Alignment } from './content.js';
 import { Document } from './document.js';
 import { createRowGuides } from './guides.js';
-import { Frame, LinkObject, TextObject } from './layout.js';
+import { Frame, LinkObject } from './layout.js';
 import { Paragraph } from './read-block.js';
 import { breakLine, extractTextSegments, flattenTextSegments, TextSegment } from './text.js';
 
@@ -69,10 +69,10 @@ function layoutTextRow(segments: TextSegment[], box: Box, textAlign: Alignment, 
   let rowHeight = 0;
   const links = [];
   const objects = [];
+  const segmentObjects = [];
   flattenTextSegments(lineSegments).forEach((seg) => {
     const { text, width, height, lineHeight, font, fontSize, link, color } = seg;
-    const object: TextObject = { type: 'text', ...pos, text, font, fontSize, color };
-    objects.push(object);
+    segmentObjects.push({ text, font, fontSize, color });
     if (link) {
       links.push({ type: 'link', ...pos, width, height, url: link });
     }
@@ -83,7 +83,7 @@ function layoutTextRow(segments: TextSegment[], box: Box, textAlign: Alignment, 
     baseline = Math.max(baseline, getDescent(font, fontSize) + offset);
     rowHeight = Math.max(rowHeight, height * lineHeight);
   });
-  objects.forEach((obj) => (obj.y -= baseline));
+  objects.push({ type: 'text', segments: segmentObjects, x: 0, y: rowHeight - baseline });
   flattenLinks(links).forEach((link) => objects.push(link));
   doc.guides && objects.push(createRowGuides(size.width, rowHeight, baseline));
   const row = {

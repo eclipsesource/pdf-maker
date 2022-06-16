@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from '@jest/globals';
 
 import { TextObject } from '../src/layout.js';
-import { renderTexts } from '../src/render-text.js';
+import { renderText } from '../src/render-text.js';
 import { fakePdfFont, fakePdfPage } from './test-utils.js';
 
 describe('render-text', () => {
@@ -14,37 +14,38 @@ describe('render-text', () => {
     page = { size, pdfPage };
   });
 
-  describe('renderTexts', () => {
+  describe('renderText', () => {
     const pos = { x: 10, y: 20 };
 
-    it('renders single text object', () => {
-      const obj: TextObject = { type: 'text', text: 'foo', x: 1, y: 2, font, fontSize: 10 };
+    it('renders single text segment', () => {
+      const seg = { text: 'foo', font, fontSize: 10 };
+      const obj: TextObject = { type: 'text', segments: [seg], x: 1, y: 2 };
 
-      renderTexts([obj], page, pos);
+      renderText(obj, page, pos);
 
       expect(pdfPage.getContentStream().map((o) => o?.toString())).toEqual([
         'BT',
+        '1 0 0 1 11 778 Tm',
         '0 0 0 rg',
         '/fontA-1 10 Tf',
-        '1 0 0 1 11 778 Tm',
         'foo Tj',
         'ET',
       ]);
     });
 
-    it('renders multiple text objects', () => {
-      const obj1: TextObject = { type: 'text', text: 'foo', x: 1, y: 2, font, fontSize: 10 };
-      const obj2: TextObject = { type: 'text', text: 'bar', x: 8, y: 2, font, fontSize: 10 };
+    it('renders multiple text segments', () => {
+      const seg1 = { text: 'foo', font, fontSize: 10 };
+      const seg2 = { text: 'bar', font, fontSize: 10 };
+      const obj: TextObject = { type: 'text', segments: [seg1, seg2], x: 1, y: 2 };
 
-      renderTexts([obj1, obj2], page, pos);
+      renderText(obj, page, pos);
 
       expect(pdfPage.getContentStream().map((o) => o?.toString())).toEqual([
         'BT',
+        '1 0 0 1 11 778 Tm',
         '0 0 0 rg',
         '/fontA-1 10 Tf',
-        '1 0 0 1 11 778 Tm',
         'foo Tj',
-        '1 0 0 1 18 778 Tm',
         'bar Tj',
         'ET',
       ]);

@@ -37,6 +37,10 @@ export type TextObject = {
   type: 'text';
   x: number;
   y: number;
+  segments: TextSegmentObject[];
+};
+
+export type TextSegmentObject = {
   text: string;
   font: PDFFont;
   fontSize: number;

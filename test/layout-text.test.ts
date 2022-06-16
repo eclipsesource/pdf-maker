@@ -39,18 +39,21 @@ describe('layout', () => {
       expect(frame).toEqual({ type: 'text', x: 20, y: 30, width: 80, height: 50 });
     });
 
-    it('raises text by font descent', () => {
+    it('positions text at baseline', () => {
       const paragraph = { text: [span('Test text', { fontSize: 10 })] };
 
-      const frame = layoutParagraph(paragraph, box, doc);
+      const frame = layoutParagraph(paragraph, box, doc) as any;
 
       expect(frame.children).toEqual([objectContaining({ type: 'row', y: 0, height: 12 })]);
-      expect(frame.children?.[0].objects).toEqual([
-        objectContaining({ type: 'text', y: -3, fontSize: 10 }),
+      expect(frame.children[0].objects).toEqual([
+        {
+          ...{ type: 'text', x: 0, y: 9 },
+          segments: [{ font: doc.fonts[0].pdfFont, fontSize: 10, text: 'Test text' }],
+        },
       ]);
     });
 
-    it('raises text segments with different font size to common baseline', () => {
+    it('positions text segments with different font size at common baseline', () => {
       const paragraph = {
         text: [
           span('Text one', { fontSize: 5 }),
@@ -59,13 +62,18 @@ describe('layout', () => {
         ],
       };
 
-      const frame = layoutParagraph(paragraph, box, doc);
+      const frame = layoutParagraph(paragraph, box, doc) as any;
 
       expect(frame.children).toEqual([objectContaining({ type: 'row', y: 0, height: 18 })]);
-      expect(frame.children?.[0].objects).toEqual([
-        objectContaining({ type: 'text', y: -4.5, fontSize: 5 }),
-        objectContaining({ type: 'text', y: -4.5, fontSize: 10 }),
-        objectContaining({ type: 'text', y: -4.5, fontSize: 15 }),
+      expect(frame.children[0].objects).toEqual([
+        {
+          ...{ type: 'text', x: 0, y: 13.5 },
+          segments: [
+            { font: doc.fonts[0].pdfFont, fontSize: 5, text: 'Text one' },
+            { font: doc.fonts[0].pdfFont, fontSize: 10, text: 'Text two' },
+            { font: doc.fonts[0].pdfFont, fontSize: 15, text: 'Text three' },
+          ],
+        },
       ]);
     });
 
@@ -126,7 +134,7 @@ describe('layout', () => {
       const frame = layoutParagraph(paragraph, box, doc);
 
       expect(frame.children?.[0].objects).toEqual([
-        objectContaining({ type: 'text', x: 0, y: -3, text: 'foo' }),
+        objectContaining({ type: 'text', x: 0, y: 9 }),
         objectContaining({ type: 'link', x: 0, y: 0, width: 30, height: 10, url: 'test-link' }),
       ]);
     });
@@ -142,8 +150,7 @@ describe('layout', () => {
       const frame = layoutParagraph(paragraph, box, doc);
 
       expect(frame.children?.[0].objects).toEqual([
-        objectContaining({ type: 'text', x: 0, y: -3, text: 'foo ' }),
-        objectContaining({ type: 'text', x: 40, y: -3, text: 'bar' }),
+        objectContaining({ type: 'text', x: 0, y: 9 }),
         objectContaining({ type: 'link', x: 0, y: 0, width: 70, height: 10, url: 'test-link' }),
       ]);
     });

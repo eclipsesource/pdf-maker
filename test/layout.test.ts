@@ -103,10 +103,10 @@ describe('layout', () => {
 
       const pages = layoutPages(def, doc);
 
-      expect((pages[0].header?.children?.[0].objects?.[0] as any).text).toEqual('1/2');
-      expect((pages[0].footer?.children?.[0].objects?.[0] as any).text).toEqual('1/2');
-      expect((pages[1].header?.children?.[0].objects?.[0] as any).text).toEqual('2/2');
-      expect((pages[1].footer?.children?.[0].objects?.[0] as any).text).toEqual('2/2');
+      expect((pages[0] as any).header.children[0].objects[0].segments[0].text).toEqual('1/2');
+      expect((pages[0] as any).footer.children[0].objects[0].segments[0].text).toEqual('1/2');
+      expect((pages[1] as any).header.children[0].objects[0].segments[0].text).toEqual('2/2');
+      expect((pages[1] as any).footer.children[0].objects[0].segments[0].text).toEqual('2/2');
     });
   });
 
@@ -120,25 +120,22 @@ describe('layout', () => {
     it('returns a paragraph with a single text row for single text content', () => {
       const text = [span('Test')];
 
-      const { frame, remainder } = layoutPageContent([{ text }], box, doc);
+      const { frame, remainder } = layoutPageContent([{ text }], box, doc) as any;
 
       expect(remainder).toBeUndefined();
-      expect(frame).toEqual({
-        ...{ type: 'page', ...box },
-        children: [
-          {
-            ...{ type: 'text', x: 0, y: 0, width: 400, height: 18 * 1.2 },
-            children: [
-              {
-                ...{ type: 'row', x: 0, y: 0, width: 72, height: 18 * 1.2 },
-                objects: [
-                  objectContaining({ type: 'text', text: 'Test', font: normalFont, fontSize: 18 }),
-                ],
-              },
-            ],
-          },
-        ],
-      });
+      expect(frame).toEqual(objectContaining({ type: 'page', ...box }));
+      expect(frame.children).toEqual([
+        objectContaining({ type: 'text', x: 0, y: 0, width: 400, height: 18 * 1.2 }),
+      ]);
+      expect(frame.children[0].children).toEqual([
+        objectContaining({ type: 'row', x: 0, y: 0, width: 72, height: 18 * 1.2 }),
+      ]);
+      expect(frame.children[0].children[0].objects).toEqual([
+        objectContaining({
+          type: 'text',
+          segments: [{ text: 'Test', font: normalFont, fontSize: 18 }],
+        }),
+      ]);
     });
 
     it('returns remaining paragraphs along with the page', () => {

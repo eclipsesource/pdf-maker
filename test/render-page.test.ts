@@ -6,18 +6,18 @@ import { renderFrame, renderPage } from '../src/render-page.js';
 import { fakePdfFont, fakePdfPage } from './test-utils.js';
 
 describe('render-page', () => {
-  let pdfPage;
+  let pdfPage, contentStream;
 
   beforeEach(() => {
     pdfPage = fakePdfPage();
+    contentStream = pdfPage.getContentStream();
   });
 
   describe('renderPage', () => {
-    let size, doc, contentStream;
+    let size, doc;
 
     beforeEach(() => {
       size = { width: 300, height: 400 };
-      contentStream = pdfPage.getContentStream();
       doc = { pdfDoc: { addPage: jest.fn().mockReturnValue(pdfPage) } as any };
     });
 
@@ -67,11 +67,10 @@ describe('render-page', () => {
   });
 
   describe('renderFrame', () => {
-    let page, size, font, contentStream;
+    let page, size, font;
 
     beforeEach(() => {
       size = { width: 500, height: 800 };
-      contentStream = pdfPage.getContentStream();
       page = { size, pdfPage };
       font = fakePdfFont('Test');
     });
@@ -79,13 +78,15 @@ describe('render-page', () => {
     it('renders text objects', () => {
       const frame: Frame = {
         ...{ x: 10, y: 20, width: 200, height: 30 },
-        objects: [{ type: 'text', x: 1, y: 2, text: 'Test text', fontSize: 12, font }],
+        objects: [
+          { type: 'text', segments: [{ text: 'Test text', fontSize: 12, font }], x: 5, y: 10 },
+        ],
       };
 
       renderFrame(frame, page);
 
       expect(contentStream.toString()).toEqual(
-        'BT,0 0 0 rg,/Test-1 12 Tf,1 0 0 1 11 748 Tm,Test text Tj,ET'
+        'BT,1 0 0 1 15 770 Tm,0 0 0 rg,/Test-1 12 Tf,Test text Tj,ET'
       );
     });
 
@@ -95,16 +96,18 @@ describe('render-page', () => {
         children: [
           {
             ...{ x: 10, y: 20, width: 80, height: 30 },
-            objects: [{ type: 'text', x: 1, y: 2, text: 'Test text', fontSize: 12, font }],
+            objects: [
+              { type: 'text', segments: [{ text: 'Test text', fontSize: 12, font }], x: 5, y: 10 },
+            ],
           },
         ],
       };
 
       renderFrame(frame, page);
 
-      // text rendered at (21, 728) instead of (11, 748)
+      // text rendered at (25, 750) + (10, 20)
       expect(contentStream.toString()).toEqual(
-        'BT,0 0 0 rg,/Test-1 12 Tf,1 0 0 1 21 728 Tm,Test text Tj,ET'
+        'BT,1 0 0 1 25 750 Tm,0 0 0 rg,/Test-1 12 Tf,Test text Tj,ET'
       );
     });
 

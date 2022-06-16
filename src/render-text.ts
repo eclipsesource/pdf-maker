@@ -16,20 +16,18 @@ import { Pos } from './box.js';
 import { TextObject } from './layout.js';
 import { getPageFont, Page } from './page.js';
 
-export function renderTexts(els: TextObject[], page: Page, base: Pos) {
+export function renderText(object: TextObject, page: Page, base: Pos) {
   const contentStream: PDFContentStream = (page.pdfPage as any).getContentStream();
-  contentStream.push(beginText());
   const state: TextState = {};
-  els.forEach((el) => {
-    const x = base.x + el.x;
-    const y = page.size.height - base.y - el.y;
-    const options = { x, y, size: el.fontSize, font: el.font, color: el.color };
-    const fontKey = getPageFont(page, options.font);
-    const encodedText = options.font.encodeText(el.text);
+  const x = base.x + object.x;
+  const y = page.size.height - base.y - object.y;
+  contentStream.push(beginText(), setTextMatrix(1, 0, 0, 1, x, y));
+  object.segments.forEach((seg) => {
+    const fontKey = getPageFont(page, seg.font);
+    const encodedText = seg.font.encodeText(seg.text);
     const operators = [
-      setTextColor(state, options.color),
-      setTextFontAndSize(state, fontKey, options.size),
-      setTextMatrix(1, 0, 0, 1, x, y),
+      setTextColor(state, seg.color),
+      setTextFontAndSize(state, fontKey, seg.fontSize),
       showText(encodedText),
     ].filter(Boolean);
     contentStream.push(...operators);
