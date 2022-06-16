@@ -14,7 +14,7 @@ import {
 
 import { Pos } from './box.js';
 import { TextObject } from './layout.js';
-import { getFont, Page } from './page.js';
+import { getPageFont, Page } from './page.js';
 
 export function renderTexts(els: TextObject[], page: Page, base: Pos) {
   const contentStream: PDFContentStream = (page.pdfPage as any).getContentStream();
@@ -24,7 +24,7 @@ export function renderTexts(els: TextObject[], page: Page, base: Pos) {
     const x = base.x + el.x;
     const y = page.size.height - base.y - el.y;
     const options = { x, y, size: el.fontSize, font: el.font, color: el.color };
-    const fontKey = getFont(page, options.font);
+    const fontKey = getPageFont(page, options.font);
     const encodedText = options.font.encodeText(el.text);
     const operators = [
       setTextColor(state, options.color),

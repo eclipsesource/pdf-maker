@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+* Attributes `lineOpacity` and `fillOpacity` on graphics shapes.
+
 ### Fixed
 
 * Attribute `imageAlign` marked optional in type definition

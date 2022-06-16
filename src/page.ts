@@ -18,24 +18,37 @@ export type Page = {
   pdfPage?: PDFPage;
   fonts?: { [ref: string]: PDFName };
   images?: { [ref: string]: PDFName };
+  extGStates?: { [ref: string]: PDFName };
 };
 
-export function getFont(page: Page, font: PDFFont): PDFName {
+export function getPageFont(page: Page, font: PDFFont): PDFName {
   if (!page.fonts) page.fonts = {};
-  const refStr = font.ref.toString();
-  if (!(refStr in page.fonts)) {
-    page.fonts[refStr] = (page.pdfPage as any).node.newFontDictionary(font.name, font.ref);
+  const key = font.ref.toString();
+  if (!(key in page.fonts)) {
+    page.fonts[key] = (page.pdfPage as any).node.newFontDictionary(font.name, font.ref);
   }
-  return page.fonts[refStr];
+  return page.fonts[key];
 }
 
-export function getImage(page: Page, image: PDFImage): PDFName {
+export function getPageImage(page: Page, image: PDFImage): PDFName {
   if (!page.images) page.images = {};
-  const refStr = image.ref.toString();
-  if (!(refStr in page.images)) {
-    page.images[refStr] = (page.pdfPage as any).node.newXObject('Image', image.ref);
+  const key = image.ref.toString();
+  if (!(key in page.images)) {
+    page.images[key] = (page.pdfPage as any).node.newXObject('Image', image.ref);
   }
-  return page.images[refStr];
+  return page.images[key];
+}
+
+type GraphicsState = { ca: number; CA: number };
+
+export function getPageGraphicsState(page: Page, graphicsState: GraphicsState): PDFName {
+  if (!page.extGStates) page.extGStates = {};
+  const key = `CA:${graphicsState.CA},ca:${graphicsState.ca}`;
+  if (!(key in page.extGStates)) {
+    const dict = page.pdfPage.doc.context.obj({ Type: 'ExtGState', ...graphicsState });
+    page.extGStates[key] = (page.pdfPage as any).node.newExtGState('GS', dict);
+  }
+  return page.extGStates[key];
 }
 
 export function renderPage(page: Page, doc: Document) {

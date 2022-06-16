@@ -254,8 +254,10 @@ export type Rect = {
   height: number;
   lineWidth?: number;
   lineColor?: Color;
+  lineOpacity?: number;
   lineJoin?: LineJoin;
   fillColor?: Color;
+  fillOpacity?: number;
 };
 
 export type Line = {
@@ -266,6 +268,7 @@ export type Line = {
   y2: number;
   lineWidth?: number;
   lineColor?: Color;
+  lineOpacity?: number;
   lineCap?: LineCap;
 };
 
@@ -275,9 +278,11 @@ export type Polyline = {
   closePath?: boolean;
   lineWidth?: number;
   lineColor?: Color;
+  lineOpacity?: number;
   lineCap?: LineCap;
   lineJoin?: LineJoin;
   fillColor?: Color;
+  fillOpacity?: number;
 };
 
 type LineCap = 'butt' | 'round' | 'square';

@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { PDFArray, PDFDict, PDFName, PDFRef } from 'pdf-lib';
 
 import { Frame } from '../src/layout.js';
-import { getFont, renderFrame, renderPage } from '../src/page.js';
+import { getPageFont, getPageGraphicsState, renderFrame, renderPage } from '../src/page.js';
 import { fakePdfFont, fakePdfPage } from './test-utils.js';
 
 describe('page', () => {
@@ -13,7 +13,7 @@ describe('page', () => {
     page = { pdfPage };
   });
 
-  describe('getFont', () => {
+  describe('getPageFont', () => {
     let fontA, fontB;
 
     beforeEach(() => {
@@ -22,19 +22,37 @@ describe('page', () => {
     });
 
     it('returns same font for same input', () => {
-      const font1 = getFont(page, fontA);
-      const font2 = getFont(page, fontA);
+      const font1 = getPageFont(page, fontA);
+      const font2 = getPageFont(page, fontA);
 
       expect(font1.toString()).toBe('/fontA-1');
       expect(font2).toEqual(font1);
     });
 
     it('returns different fonts for different inputs', () => {
-      const font1 = getFont(page, fontA);
-      const font2 = getFont(page, fontB);
+      const font1 = getPageFont(page, fontA);
+      const font2 = getPageFont(page, fontB);
 
       expect(font1.toString()).toBe('/fontA-1');
       expect(font2).not.toEqual(font1);
+    });
+  });
+
+  describe('getPageGraphicsState', () => {
+    it('returns same graphics state for same input', () => {
+      const name1 = getPageGraphicsState(page, { ca: 0.1, CA: 0.2 });
+      const name2 = getPageGraphicsState(page, { ca: 0.1, CA: 0.2 });
+
+      expect(name1.toString()).toBe('/GS-1');
+      expect(name2).toEqual(name2);
+    });
+
+    it('returns different graphics states for different inputs', () => {
+      const name1 = getPageGraphicsState(page, { ca: 0.1, CA: 0.2 });
+      const name2 = getPageGraphicsState(page, { ca: 0.2, CA: 0.1 });
+
+      expect(name1.toString()).toBe('/GS-1');
+      expect(name2).not.toEqual(name1);
     });
   });
 

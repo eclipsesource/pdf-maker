@@ -16,8 +16,10 @@ export type RectObject = {
   height: number;
   lineWidth?: number;
   lineColor?: Color;
+  lineOpacity?: number;
   lineJoin?: LineJoin;
   fillColor?: Color;
+  fillOpacity?: number;
 };
 
 export type LineObject = {
@@ -28,6 +30,7 @@ export type LineObject = {
   y2: number;
   lineWidth?: number;
   lineColor?: Color;
+  lineOpacity?: number;
   lineCap?: LineCap;
 };
 
@@ -37,9 +40,11 @@ export type PolylineObject = {
   closePath?: boolean;
   lineWidth?: number;
   lineColor?: Color;
+  lineOpacity?: number;
   lineCap?: LineCap;
   lineJoin?: LineJoin;
   fillColor?: Color;
+  fillOpacity?: number;
 };
 
 type LineCap = 'butt' | 'round' | 'square';
@@ -47,6 +52,8 @@ type LineJoin = 'miter' | 'round' | 'bevel';
 
 const tLineCap = types.string({ enum: ['butt', 'round', 'square'] });
 const tLineJoin = types.string({ enum: ['miter', 'round', 'bevel'] });
+const tLineWidth = types.number({ minimum: 0 });
+const tOpacity = types.number({ minimum: 0, maximum: 1 });
 
 const shapeTypes = ['rect', 'line', 'polyline'];
 
@@ -70,10 +77,12 @@ function readRect(input: Obj): RectObject {
     y: required(types.number()),
     width: required(types.number()),
     height: required(types.number()),
-    lineWidth: optional(types.number({ minimum: 0 })),
+    lineWidth: optional(tLineWidth),
     lineColor: optional(parseColor),
+    lineOpacity: optional(tOpacity),
     lineJoin: optional(tLineJoin),
     fillColor: optional(parseColor),
+    fillOpacity: optional(tOpacity),
   }) as RectObject;
 }
 
@@ -84,8 +93,9 @@ function readLine(input: Obj): LineObject {
     x2: required(types.number()),
     y1: required(types.number()),
     y2: required(types.number()),
-    lineWidth: optional(types.number({ minimum: 0 })),
+    lineWidth: optional(tLineWidth),
     lineColor: optional(parseColor),
+    lineOpacity: optional(tOpacity),
     lineCap: optional(tLineCap),
   }) as LineObject;
 }
@@ -95,11 +105,13 @@ function readPolyline(input: Obj): PolylineObject {
     type: () => 'polyline',
     points: required(types.array(readPoint)),
     closePath: optional(types.boolean()),
-    lineWidth: optional(types.number({ minimum: 0 })),
+    lineWidth: optional(tLineWidth),
     lineColor: optional(parseColor),
+    lineOpacity: optional(tOpacity),
     lineCap: optional(tLineCap),
     lineJoin: optional(tLineJoin),
     fillColor: optional(parseColor),
+    fillOpacity: optional(tOpacity),
   }) as PolylineObject;
 }
 

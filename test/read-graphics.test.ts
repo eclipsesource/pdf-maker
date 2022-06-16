@@ -24,12 +24,16 @@ describe('read-graphics', () => {
         lineWidth: 1.5,
         lineColor: 'red',
         fillColor: 'blue',
+        lineOpacity: 0.5,
+        fillOpacity: 0.3,
       };
 
       expect(readShape(rect)).toEqual({
         ...rect,
         lineColor: rgb(1, 0, 0),
         fillColor: rgb(0, 0, 1),
+        lineOpacity: 0.5,
+        fillOpacity: 0.3,
       });
     });
 
@@ -49,11 +53,13 @@ describe('read-graphics', () => {
         ...{ type: 'line', x1: 1, y1: 2, x2: 11, y2: 12 },
         lineWidth: 1.5,
         lineColor: 'red',
+        lineOpacity: 0.5,
       };
 
       expect(readShape(line)).toEqual({
         ...line,
         lineColor: rgb(1, 0, 0),
+        lineOpacity: 0.5,
       });
     });
 
@@ -74,12 +80,16 @@ describe('read-graphics', () => {
         lineWidth: 1.5,
         lineColor: 'red',
         fillColor: 'blue',
+        lineOpacity: 0.5,
+        fillOpacity: 0.3,
       };
 
       expect(readShape(polyline)).toEqual({
         ...polyline,
         lineColor: rgb(1, 0, 0),
         fillColor: rgb(0, 0, 1),
+        lineOpacity: 0.5,
+        fillOpacity: 0.3,
       });
     });
 
@@ -96,7 +106,7 @@ describe('read-graphics', () => {
     });
 
     ['lineColor', 'fillColor'].forEach((name) => {
-      it(`throws for invalid rect attribute ${name}`, () => {
+      it(`throws for invalid attribute ${name}`, () => {
         const rect = { type: 'rect', x: 1, y: 2, width: 10, height: 20, [name]: 'foo' };
 
         const fn = () => readShape(rect);
@@ -113,6 +123,23 @@ describe('read-graphics', () => {
       const fn = () => readShape(rect);
 
       expect(fn).toThrowError('Invalid value for "lineWidth": Expected number >= 0, got: -1');
+    });
+
+    it(`throws for invalid opacity attributes`, () => {
+      const rect = { type: 'rect', x: 1, y: 2, width: 10, height: 20 };
+
+      expect(() => readShape({ ...rect, lineOpacity: -1 })).toThrowError(
+        'Invalid value for "lineOpacity": Expected number >= 0, got: -1'
+      );
+      expect(() => readShape({ ...rect, lineOpacity: 1.5 })).toThrowError(
+        'Invalid value for "lineOpacity": Expected number <= 1, got: 1.5'
+      );
+      expect(() => readShape({ ...rect, fillOpacity: -1 })).toThrowError(
+        'Invalid value for "fillOpacity": Expected number >= 0, got: -1'
+      );
+      expect(() => readShape({ ...rect, fillOpacity: 1.5 })).toThrowError(
+        'Invalid value for "fillOpacity": Expected number <= 1, got: 1.5'
+      );
     });
   });
 });

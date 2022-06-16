@@ -10,14 +10,14 @@ import {
 
 import { Pos } from './box.js';
 import { ImageObject } from './layout-image.js';
-import { getImage, Page } from './page.js';
+import { getPageImage, Page } from './page.js';
 
 export function renderImage(object: ImageObject, page: Page, base: Pos) {
   const x = base.x + object.x;
   const y = page.size.height - base.y - object.y;
   const { width, height } = object;
   const contentStream: PDFContentStream = (page.pdfPage as any).getContentStream();
-  const name = getImage(page, object.image);
+  const name = getPageImage(page, object.image);
   contentStream.push(
     ...([
       pushGraphicsState(),

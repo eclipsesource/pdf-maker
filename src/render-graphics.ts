@@ -7,10 +7,12 @@ import {
   LineJoinStyle,
   lineTo,
   moveTo,
+  PDFName,
   PDFOperator,
   popGraphicsState,
   pushGraphicsState,
   setFillingColor,
+  setGraphicsState,
   setLineCap,
   setLineJoin,
   setLineWidth,
@@ -20,7 +22,7 @@ import {
 } from 'pdf-lib';
 
 import { Pos } from './box.js';
-import { Page } from './page.js';
+import { getPageGraphicsState, Page } from './page.js';
 import { GraphicsObject, LineObject, PolylineObject, RectObject, Shape } from './read-graphics.js';
 
 export function renderGraphics(object: GraphicsObject, page: Page, base: Pos) {
@@ -28,7 +30,7 @@ export function renderGraphics(object: GraphicsObject, page: Page, base: Pos) {
   const contentStream = (page.pdfPage as any).getContentStream();
   contentStream.push(pushGraphicsState(), translate(pos.x, pos.y));
   object.shapes.forEach((shape) => {
-    contentStream.push(pushGraphicsState(), ...setStyleAttrs(shape));
+    contentStream.push(pushGraphicsState(), ...setStyleAttrs(shape, page));
     if (shape.type === 'line') {
       contentStream.push(...drawLine(shape));
     }
@@ -95,16 +97,29 @@ const lineJoinTr = {
 };
 const trLineJoin = (lineJoin: string) => lineJoinTr[lineJoin];
 
-function setStyleAttrs(obj: Shape): PDFOperator[] {
+function setStyleAttrs(shape: Shape, page: Page): PDFOperator[] {
+  const graphicsState = getGraphicsState(shape, page);
   return [
-    'fillColor' in obj && setFillingColor(obj.fillColor),
-    'lineColor' in obj && setStrokingColor(obj.lineColor),
-    'lineWidth' in obj && setLineWidth(obj.lineWidth),
-    'lineCap' in obj && setLineCap(trLineCap(obj.lineCap)),
-    'lineJoin' in obj && setLineJoin(trLineJoin(obj.lineJoin)),
+    graphicsState && setGraphicsState(graphicsState),
+    'fillColor' in shape && setFillingColor(shape.fillColor),
+    'lineColor' in shape && setStrokingColor(shape.lineColor),
+    'lineWidth' in shape && setLineWidth(shape.lineWidth),
+    'lineCap' in shape && setLineCap(trLineCap(shape.lineCap)),
+    'lineJoin' in shape && setLineJoin(trLineJoin(shape.lineJoin)),
   ].filter(Boolean);
 }
 
 function tr(pos: Pos, page: Page): Pos {
   return { x: pos.x, y: page.size.height - pos.y };
+}
+
+function getGraphicsState(shape: Shape, page: Page): PDFName {
+  const { lineOpacity, fillOpacity } = shape as { lineOpacity: number; fillOpacity: number };
+  if (lineOpacity != null || fillOpacity != null) {
+    const graphicsState = {
+      CA: lineOpacity ?? 1,
+      ca: fillOpacity ?? 1,
+    };
+    return getPageGraphicsState(page, graphicsState);
+  }
 }

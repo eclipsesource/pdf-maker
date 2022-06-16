@@ -3,16 +3,15 @@ import { rgb } from 'pdf-lib';
 
 import { LineObject, PolylineObject, RectObject } from '../src/read-graphics.js';
 import { renderGraphics } from '../src/render-graphics.js';
+import { fakePdfPage } from './test-utils.js';
 
 describe('render-graphics', () => {
   let page, size, pdfPage, contentStream;
 
   beforeEach(() => {
     size = { width: 500, height: 800 };
-    contentStream = [];
-    pdfPage = {
-      getContentStream: () => contentStream,
-    };
+    pdfPage = fakePdfPage();
+    contentStream = pdfPage.getContentStream();
     page = { size, pdfPage };
   });
 
@@ -39,6 +38,7 @@ describe('render-graphics', () => {
       const line: LineObject = {
         ...{ type: 'line', x1: 1, y1: 2, x2: 3, y2: 4 },
         lineColor: rgb(1, 0, 0),
+        lineOpacity: 0.5,
         lineWidth: 1,
         lineCap: 'round',
       };
@@ -47,6 +47,7 @@ describe('render-graphics', () => {
 
       expect(contentStream.map((o) => o.toString())).toEqual([
         ...head,
+        '/GS-1 gs',
         '1 0 0 RG',
         '1 w',
         '1 J',
@@ -111,12 +112,15 @@ describe('render-graphics', () => {
         lineColor: rgb(1, 0, 0),
         lineWidth: 1,
         lineJoin: 'round',
+        fillOpacity: 0.5,
+        lineOpacity: 0.5,
       };
 
       renderGraphics({ type: 'graphics', shapes: [rect] }, page, pos);
 
       expect(contentStream.map((o) => o.toString())).toEqual([
         ...head,
+        '/GS-1 gs',
         '0 0 1 rg',
         '1 0 0 RG',
         '1 w',

@@ -43,6 +43,7 @@ export function fakePdfPage(): PDFPage {
   let counter = 1;
   (node as any).newFontDictionary = (name: string) => PDFName.of(`${name}-${counter++}`);
   (node as any).newXObject = (type, ref) => PDFName.of(`${type}-${ref}-${counter++}`);
+  (node as any).newExtGState = (type) => PDFName.of(`${type}-${counter++}`);
   return {
     doc: { context, catalog: context.obj({}) },
     ref: PDFRef.of(1),
