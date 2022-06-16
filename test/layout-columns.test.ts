@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from '@jest/globals';
 
 import { layoutColumns } from '../src/layout-columns.js';
-import { Block, TextAttrs, TextSpan } from '../src/text.js';
+import { Block, TextAttrs, TextSpan } from '../src/read-block.js';
 import { fakeFont } from './test-utils.js';
 
 const { objectContaining } = expect;

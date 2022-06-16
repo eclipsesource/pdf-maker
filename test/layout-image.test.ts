@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from '@jest/globals';
 
 import { layoutImage } from '../src/layout-image.js';
-import { ImageBlock } from '../src/text.js';
+import { ImageBlock } from '../src/read-block.js';
 import { fakeImage } from './test-utils.js';
 
 const { objectContaining } = expect;

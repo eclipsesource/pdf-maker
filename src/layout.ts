@@ -9,9 +9,9 @@ import { ImageObject, layoutImage } from './layout-image.js';
 import { layoutRows } from './layout-rows.js';
 import { layoutParagraph } from './layout-text.js';
 import { Page } from './page.js';
+import { Block, Columns, ImageBlock, Rows } from './read-block.js';
 import { DocumentDefinition } from './read-document.js';
 import { GraphicsObject } from './read-graphics.js';
-import { Block, Columns, ImageBlock, Rows } from './text.js';
 import { pickDefined } from './types.js';
 
 const defaultPageMargin = parseEdges('2cm');

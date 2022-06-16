@@ -1,7 +1,7 @@
 import { Box, ZERO_EDGES } from './box.js';
 import { Document } from './document.js';
 import { Frame, layoutBlock } from './layout.js';
-import { Rows } from './text.js';
+import { Rows } from './read-block.js';
 
 export function layoutRows(block: Rows, box: Box, doc: Document): Frame {
   const fixedWidth = block.width;

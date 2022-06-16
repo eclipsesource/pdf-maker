@@ -5,7 +5,7 @@ import { Alignment } from './content.js';
 import { Document } from './document.js';
 import { createRowGuides } from './guides.js';
 import { Frame, LinkObject, TextObject } from './layout.js';
-import { Paragraph } from './text.js';
+import { Paragraph } from './read-block.js';
 import { breakLine, extractTextSegments, flattenTextSegments, TextSegment } from './text.js';
 
 export function layoutParagraph(paragraph: Paragraph, box: Box, doc: Document): Frame {

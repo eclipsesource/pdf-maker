@@ -2,8 +2,8 @@ import { beforeEach, describe, expect, it } from '@jest/globals';
 
 import { layoutBlock, layoutPageContent, layoutPages } from '../src/layout.js';
 import { paperSizes } from '../src/page-sizes.js';
+import { TextAttrs, TextSpan } from '../src/read-block.js';
 import { readDocumentDefinition } from '../src/read-document.js';
-import { TextAttrs, TextSpan } from '../src/text.js';
 import { fakeFont, range } from './test-utils.js';
 
 const { objectContaining } = expect;

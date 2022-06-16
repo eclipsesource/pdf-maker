@@ -3,7 +3,7 @@ import { PDFImage } from 'pdf-lib';
 import { Box, Pos, Size, subtractEdges, ZERO_EDGES } from './box.js';
 import { Document } from './document.js';
 import { DrawableObject, Frame } from './layout.js';
-import { ImageBlock } from './text.js';
+import { ImageBlock } from './read-block.js';
 
 export type ImageObject = {
   type: 'image';

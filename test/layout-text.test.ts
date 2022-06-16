@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it } from '@jest/globals';
 import { Alignment } from '../src/content.js';
 import { layoutParagraph } from '../src/layout-text.js';
 import { paperSizes } from '../src/page-sizes.js';
-import { TextAttrs, TextSpan } from '../src/text.js';
+import { TextAttrs, TextSpan } from '../src/read-block.js';
 import { fakeFont } from './test-utils.js';
 
 const { objectContaining } = expect;
@@ -45,7 +45,7 @@ describe('layout', () => {
       const frame = layoutParagraph(paragraph, box, doc);
 
       expect(frame.children).toEqual([objectContaining({ type: 'row', y: 0, height: 12 })]);
-      expect(frame.children[0].objects).toEqual([
+      expect(frame.children?.[0].objects).toEqual([
         objectContaining({ type: 'text', y: -3, fontSize: 10 }),
       ]);
     });
@@ -62,7 +62,7 @@ describe('layout', () => {
       const frame = layoutParagraph(paragraph, box, doc);
 
       expect(frame.children).toEqual([objectContaining({ type: 'row', y: 0, height: 18 })]);
-      expect(frame.children[0].objects).toEqual([
+      expect(frame.children?.[0].objects).toEqual([
         objectContaining({ type: 'text', y: -4.5, fontSize: 5 }),
         objectContaining({ type: 'text', y: -4.5, fontSize: 10 }),
         objectContaining({ type: 'text', y: -4.5, fontSize: 15 }),
@@ -125,7 +125,7 @@ describe('layout', () => {
 
       const frame = layoutParagraph(paragraph, box, doc);
 
-      expect(frame.children[0].objects).toEqual([
+      expect(frame.children?.[0].objects).toEqual([
         objectContaining({ type: 'text', x: 0, y: -3, text: 'foo' }),
         objectContaining({ type: 'link', x: 0, y: 0, width: 30, height: 10, url: 'test-link' }),
       ]);
@@ -141,7 +141,7 @@ describe('layout', () => {
 
       const frame = layoutParagraph(paragraph, box, doc);
 
-      expect(frame.children[0].objects).toEqual([
+      expect(frame.children?.[0].objects).toEqual([
         objectContaining({ type: 'text', x: 0, y: -3, text: 'foo ' }),
         objectContaining({ type: 'text', x: 40, y: -3, text: 'bar' }),
         objectContaining({ type: 'link', x: 0, y: 0, width: 70, height: 10, url: 'test-link' }),

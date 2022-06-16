@@ -2,7 +2,7 @@ import { BoxEdges, parseEdges, Size } from './box.js';
 import { FontDef, readFonts } from './fonts.js';
 import { ImageDef, readImages } from './images.js';
 import { parseOrientation, parsePageSize } from './page-sizes.js';
-import { Block, parseInheritableAttrs, readBlock, TextAttrs } from './text.js';
+import { Block, readBlock, readInheritableAttrs, TextAttrs } from './read-block.js';
 import { dynamic, optional, readAs, readObject, required, types } from './types.js';
 
 export type DocumentDefinition = {
@@ -43,7 +43,7 @@ export function readDocumentDefinition(input: unknown): DocumentDefinition {
     pageSize: optional(parsePageSize),
     pageOrientation: optional(parseOrientation),
     info: optional(readInfo),
-    defaultStyle: optional(parseInheritableAttrs),
+    defaultStyle: optional(readInheritableAttrs),
     margin: optional(parseEdges),
     dev: optional(types.object({ guides: optional(types.boolean()) })),
   });
