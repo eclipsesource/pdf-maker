@@ -16,7 +16,6 @@ export function renderPage(page: Page, doc: Document) {
 
 export function renderFrame(frame: Frame, page: Page, base: Pos = null) {
   const topLeft = { x: frame.x + (base?.x ?? 0), y: frame.y + (base?.y ?? 0) };
-  const bottomLeft = { x: topLeft.x, y: topLeft.y + frame.height };
   frame.objects?.forEach((object) => {
     if (object.type === 'graphics') {
       renderGraphics(object, page, topLeft);
@@ -31,7 +30,7 @@ export function renderFrame(frame: Frame, page: Page, base: Pos = null) {
       renderLink(object, page, topLeft);
     }
     if (object.type === 'image') {
-      renderImage(object, page, bottomLeft);
+      renderImage(object, page, topLeft);
     }
   });
   frame.children?.forEach((frame) => {

@@ -24,7 +24,7 @@ describe('render-image', () => {
 
       expect(pdfPage.getContentStream().map((o) => o?.toString())).toEqual([
         'q',
-        '1 0 0 1 11 778 cm',
+        '1 0 0 1 11 738 cm',
         '30 0 0 40 0 0 cm',
         '/Image-23-1 Do',
         'Q',
