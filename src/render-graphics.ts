@@ -1,6 +1,7 @@
 import {
   asPDFNumber,
   closePath,
+  concatTransformationMatrix,
   fill,
   fillAndStroke,
   LineCapStyle,
@@ -18,7 +19,6 @@ import {
   setLineWidth,
   setStrokingColor,
   stroke,
-  translate,
 } from 'pdf-lib';
 
 import { Pos } from './box.js';
@@ -28,7 +28,7 @@ import { GraphicsObject, LineObject, PolylineObject, RectObject, Shape } from '.
 export function renderGraphics(object: GraphicsObject, page: Page, base: Pos) {
   const pos = tr(base, page);
   const contentStream = (page.pdfPage as any).getContentStream();
-  contentStream.push(pushGraphicsState(), translate(pos.x, pos.y));
+  contentStream.push(pushGraphicsState(), concatTransformationMatrix(1, 0, 0, -1, pos.x, pos.y));
   object.shapes.forEach((shape) => {
     contentStream.push(pushGraphicsState(), ...setStyleAttrs(shape, page));
     if (shape.type === 'line') {
@@ -46,12 +46,12 @@ export function renderGraphics(object: GraphicsObject, page: Page, base: Pos) {
 }
 
 function drawLine(obj: LineObject): PDFOperator[] {
-  return [moveTo(obj.x1, -obj.y1), lineTo(obj.x2, -obj.y2), stroke()].filter(Boolean);
+  return [moveTo(obj.x1, obj.y1), lineTo(obj.x2, obj.y2), stroke()].filter(Boolean);
 }
 
 function drawRect(obj: RectObject): PDFOperator[] {
   return [
-    createRect(obj.x, -obj.y, obj.width, -obj.height),
+    createRect(obj.x, obj.y, obj.width, obj.height),
     drawPath(!!obj.fillColor, !!obj.lineColor),
   ].filter(Boolean);
 }
@@ -74,7 +74,7 @@ function drawPolyLine(obj: PolylineObject): PDFOperator[] {
 }
 
 function pathOperations(points: { x: number; y: number }[]): any[] {
-  return points.reduce((a, p) => [...a, (a.length ? lineTo : moveTo)(p.x, -p.y)], []);
+  return points.reduce((a, p) => [...a, (a.length ? lineTo : moveTo)(p.x, p.y)], []);
 }
 
 function drawPath(hasFillColor: boolean, haslineColor: boolean) {

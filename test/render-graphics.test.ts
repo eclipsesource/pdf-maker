@@ -17,7 +17,7 @@ describe('render-graphics', () => {
 
   describe('renderGraphics', () => {
     const pos = { x: 10, y: 20 };
-    const head = ['q', '1 0 0 1 10 780 cm', 'q'];
+    const head = ['q', '1 0 0 -1 10 780 cm', 'q'];
     const tail = ['Q', 'Q'];
 
     it('renders line without lineColor', () => {
@@ -27,8 +27,8 @@ describe('render-graphics', () => {
 
       expect(contentStream.map((o) => o?.toString())).toEqual([
         ...head,
-        '1 -2 m',
-        '3 -4 l',
+        '1 2 m',
+        '3 4 l',
         'S',
         ...tail,
       ]);
@@ -51,8 +51,8 @@ describe('render-graphics', () => {
         '1 0 0 RG',
         '1 w',
         '1 J',
-        '1 -2 m',
-        '3 -4 l',
+        '1 2 m',
+        '3 4 l',
         'S',
         ...tail,
       ]);
@@ -63,12 +63,7 @@ describe('render-graphics', () => {
 
       renderGraphics({ type: 'graphics', shapes: [rect] }, page, pos);
 
-      expect(contentStream.map((o) => o.toString())).toEqual([
-        ...head,
-        '1 -2 3 -4 re',
-        'f',
-        ...tail,
-      ]);
+      expect(contentStream.map((o) => o.toString())).toEqual([...head, '1 2 3 4 re', 'f', ...tail]);
     });
 
     it('renders rect with fillColor', () => {
@@ -82,7 +77,7 @@ describe('render-graphics', () => {
       expect(contentStream.map((o) => o.toString())).toEqual([
         ...head,
         '1 0 0 rg',
-        '1 -2 3 -4 re',
+        '1 2 3 4 re',
         'f',
         ...tail,
       ]);
@@ -99,7 +94,7 @@ describe('render-graphics', () => {
       expect(contentStream.map((o) => o.toString())).toEqual([
         ...head,
         '1 0 0 RG',
-        '1 -2 3 -4 re',
+        '1 2 3 4 re',
         'S',
         ...tail,
       ]);
@@ -125,7 +120,7 @@ describe('render-graphics', () => {
         '1 0 0 RG',
         '1 w',
         '1 j',
-        '1 -2 3 -4 re',
+        '1 2 3 4 re',
         'B',
         ...tail,
       ]);
@@ -138,8 +133,8 @@ describe('render-graphics', () => {
 
       expect(contentStream.map((o) => o.toString())).toEqual([
         ...head,
-        '1 -2 m',
-        '3 -4 l',
+        '1 2 m',
+        '3 4 l',
         'f',
         ...tail,
       ]);
@@ -156,8 +151,8 @@ describe('render-graphics', () => {
 
       expect(contentStream.map((o) => o.toString())).toEqual([
         ...head,
-        '1 -2 m',
-        '3 -4 l',
+        '1 2 m',
+        '3 4 l',
         'h',
         'f',
         ...tail,
@@ -183,8 +178,8 @@ describe('render-graphics', () => {
         '1 w',
         '1 J',
         '1 j',
-        '1 -2 m',
-        '3 -4 l',
+        '1 2 m',
+        '3 4 l',
         'B',
         ...tail,
       ]);
@@ -198,12 +193,12 @@ describe('render-graphics', () => {
 
       expect(contentStream.map((o) => o?.toString())).toEqual([
         ...head,
-        '1 -2 m',
-        '3 -4 l',
+        '1 2 m',
+        '3 4 l',
         'S',
         'Q',
         'q',
-        '1 -2 3 -4 re',
+        '1 2 3 4 re',
         'f',
         ...tail,
       ]);
