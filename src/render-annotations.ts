@@ -4,16 +4,16 @@ import { Box, Pos } from './box.js';
 import { AnchorObject, LinkObject } from './layout.js';
 import { Page } from './page.js';
 
-export function renderAnchor(el: AnchorObject, page: Page, base: Pos) {
-  const x = el.x + base.x;
-  const y = page.size.height - base.y - el.y;
-  createNamedDest(page.pdfPage, el.name, { x, y });
+export function renderAnchor(obj: AnchorObject, page: Page, base: Pos) {
+  const x = base.x + obj.x;
+  const y = page.size.height - base.y - obj.y;
+  createNamedDest(page.pdfPage, obj.name, { x, y });
 }
 
-export function renderLink(el: LinkObject, page: Page, base: Pos) {
-  const x = el.x + base.x;
-  const y = page.size.height - base.y - el.y;
-  const { width, height, url } = el;
+export function renderLink(obj: LinkObject, page: Page, base: Pos) {
+  const { width, height, url } = obj;
+  const x = base.x + obj.x;
+  const y = page.size.height - base.y - obj.y - height;
   createLinkAnnotation(page.pdfPage, { x, y, width, height }, url);
 }
 

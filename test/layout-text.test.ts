@@ -135,7 +135,7 @@ describe('layout', () => {
 
       expect(frame.children?.[0].objects).toEqual([
         objectContaining({ type: 'text', x: 0, y: 9 }),
-        objectContaining({ type: 'link', x: 0, y: 0, width: 30, height: 10, url: 'test-link' }),
+        objectContaining({ type: 'link', x: 0, y: 1, width: 30, height: 10, url: 'test-link' }),
       ]);
     });
 
@@ -151,7 +151,7 @@ describe('layout', () => {
 
       expect(frame.children?.[0].objects).toEqual([
         objectContaining({ type: 'text', x: 0, y: 9 }),
-        objectContaining({ type: 'link', x: 0, y: 0, width: 70, height: 10, url: 'test-link' }),
+        objectContaining({ type: 'link', x: 0, y: 1, width: 70, height: 10, url: 'test-link' }),
       ]);
     });
   });

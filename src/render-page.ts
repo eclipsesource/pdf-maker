@@ -28,7 +28,7 @@ export function renderFrame(frame: Frame, page: Page, base: Pos = null) {
       renderAnchor(object, page, topLeft);
     }
     if (object.type === 'link') {
-      renderLink(object, page, bottomLeft);
+      renderLink(object, page, topLeft);
     }
     if (object.type === 'image') {
       renderImage(object, page, bottomLeft);

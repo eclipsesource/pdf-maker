@@ -73,13 +73,13 @@ function layoutTextRow(segments: TextSegment[], box: Box, textAlign: Alignment, 
   flattenTextSegments(lineSegments).forEach((seg) => {
     const { text, width, height, lineHeight, font, fontSize, link, color } = seg;
     segmentObjects.push({ text, font, fontSize, color });
+    const offset = (height * lineHeight - height) / 2;
     if (link) {
-      links.push({ type: 'link', ...pos, width, height, url: link });
+      links.push({ type: 'link', x: pos.x, y: pos.y + offset, width, height, url: link });
     }
     pos.x += width;
     size.width += width;
     size.height = Math.max(size.height, height);
-    const offset = (height * (lineHeight - 1)) / 2;
     baseline = Math.max(baseline, getDescent(font, fontSize) + offset);
     rowHeight = Math.max(rowHeight, height * lineHeight);
   });
