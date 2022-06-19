@@ -17,15 +17,18 @@ describe('render-text', () => {
   describe('renderText', () => {
     const pos = { x: 10, y: 20 };
 
-    it('renders single text segment', () => {
+    it('renders single row with single text segment', () => {
       const seg = { text: 'foo', font, fontSize: 10 };
-      const obj: TextObject = { type: 'text', segments: [seg], x: 1, y: 2 };
+      const obj: TextObject = {
+        type: 'text',
+        rows: [{ segments: [seg], x: 1, y: 2, width: 30, height: 20, baseline: 8 }],
+      };
 
       renderText(obj, page, pos);
 
       expect(pdfPage.getContentStream().map((o) => o?.toString())).toEqual([
         'BT',
-        '1 0 0 1 11 778 Tm',
+        '1 0 0 1 11 770 Tm',
         '0 0 0 rg',
         '/fontA-1 10 Tf',
         'foo Tj',
@@ -33,18 +36,27 @@ describe('render-text', () => {
       ]);
     });
 
-    it('renders multiple text segments', () => {
+    it('renders multiple rows with multiple text segments', () => {
       const seg1 = { text: 'foo', font, fontSize: 10 };
       const seg2 = { text: 'bar', font, fontSize: 10 };
-      const obj: TextObject = { type: 'text', segments: [seg1, seg2], x: 1, y: 2 };
+      const obj: TextObject = {
+        type: 'text',
+        rows: [
+          { segments: [seg1, seg2], x: 1, y: 2, width: 60, height: 12, baseline: 8 },
+          { segments: [seg1, seg2], x: 1, y: 18, width: 60, height: 12, baseline: 8 },
+        ],
+      };
 
       renderText(obj, page, pos);
 
       expect(pdfPage.getContentStream().map((o) => o?.toString())).toEqual([
         'BT',
-        '1 0 0 1 11 778 Tm',
+        '1 0 0 1 11 770 Tm',
         '0 0 0 rg',
         '/fontA-1 10 Tf',
+        'foo Tj',
+        'bar Tj',
+        '1 0 0 1 11 754 Tm',
         'foo Tj',
         'bar Tj',
         'ET',

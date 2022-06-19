@@ -101,12 +101,12 @@ describe('layout', () => {
         footer: ({ pageCount, pageNumber }) => ({ text: `${pageNumber}/${pageCount}` }),
       });
 
-      const pages = layoutPages(def, doc);
+      const pages = layoutPages(def, doc) as any;
 
-      expect((pages[0] as any).header.children[0].objects[0].segments[0].text).toEqual('1/2');
-      expect((pages[0] as any).footer.children[0].objects[0].segments[0].text).toEqual('1/2');
-      expect((pages[1] as any).header.children[0].objects[0].segments[0].text).toEqual('2/2');
-      expect((pages[1] as any).footer.children[0].objects[0].segments[0].text).toEqual('2/2');
+      expect(pages[0].header.objects[0].rows[0].segments[0].text).toEqual('1/2');
+      expect(pages[0].footer.objects[0].rows[0].segments[0].text).toEqual('1/2');
+      expect(pages[1].header.objects[0].rows[0].segments[0].text).toEqual('2/2');
+      expect(pages[1].footer.objects[0].rows[0].segments[0].text).toEqual('2/2');
     });
   });
 
@@ -127,14 +127,12 @@ describe('layout', () => {
       expect(frame.children).toEqual([
         objectContaining({ type: 'text', x: 0, y: 0, width: 400, height: 18 * 1.2 }),
       ]);
-      expect(frame.children[0].children).toEqual([
-        objectContaining({ type: 'row', x: 0, y: 0, width: 72, height: 18 * 1.2 }),
+      expect(frame.children[0].objects).toEqual([objectContaining({ type: 'text' })]);
+      expect(frame.children[0].objects[0].rows).toEqual([
+        objectContaining({ x: 0, y: 0, width: 72, height: 18 * 1.2, baseline: 16.2 }),
       ]);
-      expect(frame.children[0].children[0].objects).toEqual([
-        objectContaining({
-          type: 'text',
-          segments: [{ text: 'Test', font: normalFont, fontSize: 18 }],
-        }),
+      expect(frame.children[0].objects[0].rows[0].segments).toEqual([
+        { text: 'Test', font: normalFont, fontSize: 18 },
       ]);
     });
 

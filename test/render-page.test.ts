@@ -79,14 +79,26 @@ describe('render-page', () => {
       const frame: Frame = {
         ...{ x: 10, y: 20, width: 200, height: 30 },
         objects: [
-          { type: 'text', segments: [{ text: 'Test text', fontSize: 12, font }], x: 5, y: 10 },
+          {
+            type: 'text',
+            rows: [
+              {
+                x: 5,
+                y: 10,
+                width: 90,
+                height: 14,
+                baseline: 8,
+                segments: [{ text: 'Test text', fontSize: 12, font }],
+              },
+            ],
+          },
         ],
       };
 
       renderFrame(frame, page);
 
       expect(contentStream.toString()).toEqual(
-        'BT,1 0 0 1 15 770 Tm,0 0 0 rg,/Test-1 12 Tf,Test text Tj,ET'
+        'BT,1 0 0 1 15 762 Tm,0 0 0 rg,/Test-1 12 Tf,Test text Tj,ET'
       );
     });
 
@@ -97,7 +109,19 @@ describe('render-page', () => {
           {
             ...{ x: 10, y: 20, width: 80, height: 30 },
             objects: [
-              { type: 'text', segments: [{ text: 'Test text', fontSize: 12, font }], x: 5, y: 10 },
+              {
+                type: 'text',
+                rows: [
+                  {
+                    x: 5,
+                    y: 10,
+                    width: 90,
+                    height: 14,
+                    baseline: 8,
+                    segments: [{ text: 'Test text', fontSize: 12, font }],
+                  },
+                ],
+              },
             ],
           },
         ],
@@ -107,7 +131,7 @@ describe('render-page', () => {
 
       // text rendered at (25, 750) + (10, 20)
       expect(contentStream.toString()).toEqual(
-        'BT,1 0 0 1 25 750 Tm,0 0 0 rg,/Test-1 12 Tf,Test text Tj,ET'
+        'BT,1 0 0 1 25 742 Tm,0 0 0 rg,/Test-1 12 Tf,Test text Tj,ET'
       );
     });
 

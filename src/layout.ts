@@ -35,8 +35,15 @@ export type DrawableObject = TextObject | ImageObject | GraphicsObject | LinkObj
 
 export type TextObject = {
   type: 'text';
+  rows: TextRowObject[];
+};
+
+export type TextRowObject = {
   x: number;
   y: number;
+  width: number;
+  height: number;
+  baseline: number;
   segments: TextSegmentObject[];
 };
 

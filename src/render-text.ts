@@ -19,18 +19,21 @@ import { getPageFont, Page } from './page.js';
 export function renderText(object: TextObject, page: Page, base: Pos) {
   const contentStream: PDFContentStream = (page.pdfPage as any).getContentStream();
   const state: TextState = {};
-  const x = base.x + object.x;
-  const y = page.size.height - base.y - object.y;
-  contentStream.push(beginText(), setTextMatrix(1, 0, 0, 1, x, y));
-  object.segments.forEach((seg) => {
-    const fontKey = getPageFont(page, seg.font);
-    const encodedText = seg.font.encodeText(seg.text);
-    const operators = [
-      setTextColor(state, seg.color),
-      setTextFontAndSize(state, fontKey, seg.fontSize),
-      showText(encodedText),
-    ].filter(Boolean);
-    contentStream.push(...operators);
+  const x = base.x;
+  const y = page.size.height - base.y;
+  contentStream.push(beginText());
+  (object as any).rows?.forEach((row) => {
+    contentStream.push(setTextMatrix(1, 0, 0, 1, x + row.x, y - row.y - row.baseline));
+    row.segments?.forEach((seg) => {
+      const fontKey = getPageFont(page, seg.font);
+      const encodedText = seg.font.encodeText(seg.text);
+      const operators = [
+        setTextColor(state, seg.color),
+        setTextFontAndSize(state, fontKey, seg.fontSize),
+        showText(encodedText),
+      ].filter(Boolean);
+      contentStream.push(...operators);
+    });
   });
   contentStream.push(endText());
 }

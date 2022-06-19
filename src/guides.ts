@@ -1,19 +1,20 @@
 import { rgb } from 'pdf-lib';
 
-import { Frame } from './layout.js';
+import { Frame, TextRowObject } from './layout.js';
 import { GraphicsObject } from './read-graphics.js';
 
 const lineWidth = 0.5;
 const lineOpacity = 0.25;
 
-export function createRowGuides(width: number, height: number, baseline: number): GraphicsObject {
+export function createRowGuides({ x, y, width, height, baseline }: TextRowObject): GraphicsObject {
   const lineColor = rgb(0, 0.5, 0);
-  const yb = height - baseline;
+  const yb = y + baseline;
   return {
     type: 'graphics',
     shapes: [
-      { type: 'rect', x: 0, y: 0, width, height, lineColor, lineWidth, lineOpacity },
-      { type: 'line', x1: 0, y1: yb, x2: width, y2: yb, lineColor, lineWidth, lineOpacity },
+      { type: 'rect', x, y, width: 3, height: 3, fillColor: lineColor, fillOpacity: lineOpacity },
+      { type: 'rect', x, y, width, height, lineColor, lineWidth, lineOpacity },
+      { type: 'line', x1: x, y1: yb, x2: x + width, y2: yb, lineColor, lineWidth, lineOpacity },
     ],
   };
 }

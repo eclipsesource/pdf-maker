@@ -1,6 +1,5 @@
 import { beforeEach, describe, expect, it } from '@jest/globals';
 
-import { Alignment } from '../src/content.js';
 import { layoutParagraph } from '../src/layout-text.js';
 import { paperSizes } from '../src/page-sizes.js';
 import { TextAttrs, TextSpan } from '../src/read-block.js';
@@ -39,16 +38,20 @@ describe('layout', () => {
       expect(frame).toEqual({ type: 'text', x: 20, y: 30, width: 80, height: 50 });
     });
 
-    it('positions text at baseline', () => {
+    it('includes text baseline', () => {
       const paragraph = { text: [span('Test text', { fontSize: 10 })] };
 
       const frame = layoutParagraph(paragraph, box, doc) as any;
 
-      expect(frame.children).toEqual([objectContaining({ type: 'row', y: 0, height: 12 })]);
-      expect(frame.children[0].objects).toEqual([
+      expect(frame.objects).toEqual([
         {
-          ...{ type: 'text', x: 0, y: 9 },
-          segments: [{ font: doc.fonts[0].pdfFont, fontSize: 10, text: 'Test text' }],
+          type: 'text',
+          rows: [
+            {
+              ...{ x: 0, y: 0, width: 90, height: 12, baseline: 9 },
+              segments: [{ font: doc.fonts[0].pdfFont, fontSize: 10, text: 'Test text' }],
+            },
+          ],
         },
       ]);
     });
@@ -64,14 +67,18 @@ describe('layout', () => {
 
       const frame = layoutParagraph(paragraph, box, doc) as any;
 
-      expect(frame.children).toEqual([objectContaining({ type: 'row', y: 0, height: 18 })]);
-      expect(frame.children[0].objects).toEqual([
+      expect(frame.objects).toEqual([
         {
-          ...{ type: 'text', x: 0, y: 13.5 },
-          segments: [
-            { font: doc.fonts[0].pdfFont, fontSize: 5, text: 'Text one' },
-            { font: doc.fonts[0].pdfFont, fontSize: 10, text: 'Text two' },
-            { font: doc.fonts[0].pdfFont, fontSize: 15, text: 'Text three' },
+          type: 'text',
+          rows: [
+            {
+              ...{ x: 0, y: 0, width: 270, height: 18, baseline: 13.5 },
+              segments: [
+                { font: doc.fonts[0].pdfFont, fontSize: 5, text: 'Text one' },
+                { font: doc.fonts[0].pdfFont, fontSize: 10, text: 'Text two' },
+                { font: doc.fonts[0].pdfFont, fontSize: 15, text: 'Text three' },
+              ],
+            },
           ],
         },
       ]);
@@ -84,8 +91,8 @@ describe('layout', () => {
       const frame = layoutParagraph(paragraph, box, doc);
 
       expect(frame).toEqual(objectContaining({ type: 'text', width: 400, height: 12 + 3 + 4 }));
-      expect(frame.children).toEqual([
-        objectContaining({ type: 'row', x: 1, y: 3, width: 30, height: 12 }),
+      expect(frame.objects).toEqual([
+        { type: 'text', rows: [objectContaining({ x: 1, y: 3, width: 30, height: 12 })] },
       ]);
     });
 
@@ -93,15 +100,18 @@ describe('layout', () => {
       const text = [span('foo', { fontSize: 10 })];
       const paragraph = {
         text,
-        textAlign: 'right' as Alignment,
+        textAlign: 'right' as const,
         margin: { left: 10, right: 20, top: 0, bottom: 0 },
         padding: { left: 15, right: 25, top: 0, bottom: 0 },
       };
 
       const frame = layoutParagraph(paragraph, box, doc);
 
-      expect(frame.children).toEqual([
-        objectContaining({ type: 'row', x: 400 - 30 - 25, y: 0, width: 30, height: 12 }),
+      expect(frame.objects).toEqual([
+        {
+          type: 'text',
+          rows: [objectContaining({ x: 400 - 30 - 25, y: 0, width: 30, height: 12 })],
+        },
       ]);
     });
 
@@ -109,20 +119,18 @@ describe('layout', () => {
       const text = [span('foo', { fontSize: 10 })];
       const paragraph = {
         text,
-        textAlign: 'center' as Alignment,
+        textAlign: 'center' as const,
         margin: { left: 10, right: 20, top: 0, bottom: 0 },
         padding: { left: 15, right: 25, top: 0, bottom: 0 },
       };
+
       const frame = layoutParagraph(paragraph, box, doc);
 
-      expect(frame.children).toEqual([
-        objectContaining({
-          type: 'row',
-          x: (400 - 30 - 25 + 15) / 2,
-          y: 0,
-          width: 30,
-          height: 12,
-        }),
+      expect(frame.objects).toEqual([
+        {
+          type: 'text',
+          rows: [objectContaining({ x: (400 - 30 - 25 + 15) / 2, y: 0, width: 30, height: 12 })],
+        },
       ]);
     });
 
@@ -133,8 +141,8 @@ describe('layout', () => {
 
       const frame = layoutParagraph(paragraph, box, doc);
 
-      expect(frame.children?.[0].objects).toEqual([
-        objectContaining({ type: 'text', x: 0, y: 9 }),
+      expect(frame.objects).toEqual([
+        { type: 'text', rows: [objectContaining({ x: 0, y: 0 })] },
         objectContaining({ type: 'link', x: 0, y: 1, width: 30, height: 10, url: 'test-link' }),
       ]);
     });
@@ -149,8 +157,8 @@ describe('layout', () => {
 
       const frame = layoutParagraph(paragraph, box, doc);
 
-      expect(frame.children?.[0].objects).toEqual([
-        objectContaining({ type: 'text', x: 0, y: 9 }),
+      expect(frame.objects).toEqual([
+        { type: 'text', rows: [objectContaining({ x: 0, y: 0 })] },
         objectContaining({ type: 'link', x: 0, y: 1, width: 70, height: 10, url: 'test-link' }),
       ]);
     });
