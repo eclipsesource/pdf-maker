@@ -1,8 +1,40 @@
 import { describe, expect, it } from '@jest/globals';
 
-import { readColumnsBlock, readRowsBlock, readText, readTextBlock } from '../src/read-block.js';
+import {
+  readBlock,
+  readColumnsBlock,
+  readRowsBlock,
+  readText,
+  readTextBlock,
+} from '../src/read-block.js';
 
 describe('read-block', () => {
+  describe('readBlock', () => {
+    it('accepts empty object', () => {
+      expect(readBlock({})).toEqual({});
+    });
+
+    it('includes all block attributes', () => {
+      const input = {
+        padding: 6,
+        margin: 5,
+        width: '50pt',
+        height: '80pt',
+        graphics: [{ type: 'rect', x: 1, y: 2, width: 3, height: 4 }],
+      };
+
+      const result = readBlock(input);
+
+      expect(result).toEqual({
+        padding: { left: 6, right: 6, top: 6, bottom: 6 },
+        margin: { left: 5, right: 5, top: 5, bottom: 5 },
+        width: 50,
+        height: 80,
+        graphics: expect.any(Function),
+      });
+    });
+  });
+
   describe('readColumnsBlock', () => {
     it('merges text attributes with default style', () => {
       const content = { columns: [{ text: 'foo' }, { text: 'bar' }], fontSize: 8 };
@@ -62,10 +94,6 @@ describe('read-block', () => {
   });
 
   describe('readTextBlock', () => {
-    it('accepts empty object', () => {
-      expect(readTextBlock({})).toEqual({});
-    });
-
     it('includes all properties of a blocks', () => {
       const input = {
         text: 'foo',
@@ -104,31 +132,31 @@ describe('read-block', () => {
     });
 
     it('checks graphics', () => {
-      const input = { graphics: 'foo' };
+      const input = { text: [], graphics: 'foo' };
 
       expect(() => readTextBlock(input)).toThrowError('Invalid value for "graphics":');
     });
 
     it('checks margin', () => {
-      const input = { margin: 'foo' };
+      const input = { text: [], margin: 'foo' };
 
       expect(() => readTextBlock(input)).toThrowError('Invalid value for "margin":');
     });
 
     it('checks padding', () => {
-      const input = { padding: 'foo' };
+      const input = { text: [], padding: 'foo' };
 
       expect(() => readTextBlock(input)).toThrowError('Invalid value for "padding":');
     });
 
     it('checks width', () => {
-      const input = { width: 'foo' };
+      const input = { text: [], width: 'foo' };
 
       expect(() => readTextBlock(input)).toThrowError('Invalid value for "width":');
     });
 
     it('checks height', () => {
-      const input = { height: 'foo' };
+      const input = { text: [], height: 'foo' };
 
       expect(() => readTextBlock(input)).toThrowError('Invalid value for "height":');
     });

@@ -31,7 +31,7 @@ describe('layout', () => {
 
     it('creates frame with fixed size', () => {
       const padding = { left: 5, right: 5, top: 5, bottom: 5 };
-      const block = { padding, width: 80, height: 50 };
+      const block = { text: [], padding, width: 80, height: 50 };
 
       const frame = layoutTextBlock(block, box, doc);
 

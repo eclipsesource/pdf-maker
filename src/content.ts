@@ -129,13 +129,13 @@ export type ImageDefinition = {
   data: string | Uint8Array | ArrayBuffer;
 };
 
-export type Block = TextBlock | ImageBlock | ColumnsBlock | RowsBlock;
+export type Block = TextBlock | ImageBlock | ColumnsBlock | RowsBlock | EmptyBlock;
 
 export type TextBlock = {
   /**
    * Text to display in this block.
    */
-  text?: Text;
+  text: Text;
 } & TextAttrs &
   BlockAttrs;
 
@@ -149,7 +149,7 @@ export type ImageBlock = {
    * When neither `width` nor `height` is given, the image is not scaled unless it exceeds the
    * maximum available width. In this case, it is scaled down to fit onto the page.
    */
-  image?: string;
+  image: string;
   /**
    * Align the image in this block. By default, it is center-aligned.
    */
@@ -171,6 +171,8 @@ export type RowsBlock = {
   rows: Block[];
 } & TextAttrs &
   BlockAttrs;
+
+export type EmptyBlock = BlockAttrs;
 
 export type BlockAttrs = {
   /**

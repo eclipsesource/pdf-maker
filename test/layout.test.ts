@@ -184,7 +184,7 @@ describe('layout', () => {
 
       const frame = layoutBlock({ graphics } as any, box, doc);
 
-      expect(frame).toEqual(objectContaining({ type: 'text', width: 400, height: 0 }));
+      expect(frame).toEqual(objectContaining({ type: 'empty', width: 400, height: 0 }));
       expect(frame.objects).toEqual([
         {
           type: 'graphics',
@@ -207,7 +207,7 @@ describe('layout', () => {
 
       const frame = layoutBlock({ graphics, padding } as any, box, doc);
 
-      expect(frame).toEqual(objectContaining({ type: 'text', width: 400, height: 10 }));
+      expect(frame).toEqual(objectContaining({ type: 'empty', width: 400, height: 10 }));
       expect(frame.objects).toEqual([
         {
           type: 'graphics',

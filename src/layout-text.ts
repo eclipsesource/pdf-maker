@@ -15,14 +15,12 @@ export function layoutTextBlock(block: TextBlock, box: Box, doc: Document): Fram
   const maxWidth = (fixedWidth ?? box.width) - padding.left - padding.right;
   const maxHeight = (fixedHeight ?? box.height) - padding.top - padding.bottom;
   const innerBox = { x: padding.left, y: padding.top, width: maxWidth, height: maxHeight };
-  const text = block.text && layoutText(block, innerBox, doc);
-  const contentHeight = text?.size?.height ?? 0;
+  const text = layoutText(block, innerBox, doc);
+  const contentHeight = text.size?.height ?? 0;
   const objects: DrawableObject[] = [];
-  if (text) {
-    objects.push({ type: 'text', rows: text.rows });
-    objects.push(...(text?.objects ?? []));
-    if (doc.guides) objects.push(...text.rows.map((row) => createRowGuides(row)));
-  }
+  text.rows.length && objects.push({ type: 'text', rows: text.rows });
+  text.objects?.length && objects.push(...text.objects);
+  if (doc.guides) objects.push(...text.rows.map((row) => createRowGuides(row)));
   return {
     type: 'text',
     ...box,

@@ -60,7 +60,7 @@ describe('layout-columns', () => {
 
       expect(result).toEqual({
         type: 'columns',
-        children: [{ type: 'text', x: 0, y: 0, width: 100, height: 50 }],
+        children: [{ type: 'empty', x: 0, y: 0, width: 100, height: 50 }],
         ...{ x: 20, y: 30, width: 400, height: 50 },
       });
     });
@@ -73,7 +73,7 @@ describe('layout-columns', () => {
 
       expect(result).toEqual({
         type: 'columns',
-        children: [{ type: 'text', x: 5, y: 7, width: 100, height: 50 }],
+        children: [{ type: 'empty', x: 5, y: 7, width: 100, height: 50 }],
         ...{ x: 20, y: 30, width: 400, height: 50 + 7 + 8 },
       });
     });
@@ -91,8 +91,8 @@ describe('layout-columns', () => {
       expect(result).toEqual({
         type: 'columns',
         children: [
-          { type: 'text', x: 5, y: 7, width: 100, height: 50 },
-          { type: 'text', x: 5 + 100 + 6 + 5, y: 7, width: 100, height: 50 },
+          { type: 'empty', x: 5, y: 7, width: 100, height: 50 },
+          { type: 'empty', x: 5 + 100 + 6 + 5, y: 7, width: 100, height: 50 },
         ],
         ...{ x: 20, y: 30, width: 400, height: 50 + 7 + 8 },
       });
@@ -112,8 +112,8 @@ describe('layout-columns', () => {
       expect(result).toEqual({
         type: 'columns',
         children: [
-          { type: 'text', x: 1 + 5, y: 3 + 7, width: 100, height: 50 },
-          { type: 'text', x: 1 + 5 + 100 + 6 + 5, y: 3 + 7, width: 100, height: 50 },
+          { type: 'empty', x: 1 + 5, y: 3 + 7, width: 100, height: 50 },
+          { type: 'empty', x: 1 + 5 + 100 + 6 + 5, y: 3 + 7, width: 100, height: 50 },
         ],
         ...{ x: 20, y: 30, width: 400, height: 3 + 7 + 50 + 8 + 4 },
       });

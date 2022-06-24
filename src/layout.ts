@@ -9,7 +9,7 @@ import { ImageObject, layoutImageBlock } from './layout-image.js';
 import { layoutRowsBlock } from './layout-rows.js';
 import { layoutTextBlock } from './layout-text.js';
 import { Page } from './page.js';
-import { Block, ColumnsBlock, ImageBlock, RowsBlock } from './read-block.js';
+import { Block, EmptyBlock } from './read-block.js';
 import { DocumentDefinition } from './read-document.js';
 import { GraphicsObject } from './read-graphics.js';
 import { pickDefined } from './types.js';
@@ -138,16 +138,32 @@ export function layoutBlock(block: Block, box: Box, doc: Document): Frame {
 }
 
 function layoutBlockContent(block: Block, box: Box, doc: Document): Frame {
-  if ((block as ColumnsBlock).columns) {
-    return layoutColumnsBlock(block as ColumnsBlock, box, doc);
+  if ('text' in block) {
+    return layoutTextBlock(block, box, doc);
   }
-  if ((block as RowsBlock).rows) {
-    return layoutRowsBlock(block as RowsBlock, box, doc);
+  if ('image' in block) {
+    return layoutImageBlock(block, box, doc);
   }
-  if ((block as ImageBlock).image) {
-    return layoutImageBlock(block as ImageBlock, box, doc);
+  if ('columns' in block) {
+    return layoutColumnsBlock(block, box, doc);
   }
-  return layoutTextBlock(block as ImageBlock, box, doc);
+  if ('rows' in block) {
+    return layoutRowsBlock(block, box, doc);
+  }
+  return layoutEmptyBlock(block, box);
+}
+
+function layoutEmptyBlock(block: EmptyBlock, box: Box): Frame {
+  const padding = block.padding ?? ZERO_EDGES;
+  const fixedWidth = block.width;
+  const fixedHeight = block.height;
+  return {
+    type: 'empty',
+    x: box.x,
+    y: box.y,
+    width: fixedWidth ?? box.width,
+    height: fixedHeight ?? padding.top + padding.bottom,
+  };
 }
 
 function addAnchor(frame: Frame, block: Block) {
