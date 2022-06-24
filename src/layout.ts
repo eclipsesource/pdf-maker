@@ -168,8 +168,7 @@ function layoutEmptyBlock(block: EmptyBlock, box: Box): Frame {
 
 function addAnchor(frame: Frame, block: Block) {
   if (block.id) {
-    if (!frame.objects) frame.objects = [];
-    frame.objects.push(createAnchorObject(block.id));
+    (frame.objects ??= []).push(createAnchorObject(block.id));
   }
 }
 
@@ -182,15 +181,13 @@ function addGraphics(frame: Frame, block: Block) {
     const info = { width: frame.width, height: frame.height, padding: (block as any).padding };
     const shapes = block.graphics(info);
     if (shapes?.length) {
-      if (!frame.objects) frame.objects = [];
       // Insert graphics as first element to ensure they are rendered below text and images
-      frame.objects.unshift({ type: 'graphics', shapes });
+      (frame.objects ??= []).unshift({ type: 'graphics', shapes });
     }
   }
 }
 
 function addGuides(frame: Frame) {
-  if (!frame.objects) frame.objects = [];
   const guides = createFrameGuides(frame);
-  frame.objects.push(guides);
+  (frame.objects ??= []).push(guides);
 }

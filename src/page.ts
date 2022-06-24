@@ -15,7 +15,7 @@ export type Page = {
 };
 
 export function getPageFont(page: Page, font: PDFFont): PDFName {
-  if (!page.fonts) page.fonts = {};
+  page.fonts ??= {};
   const key = font.ref.toString();
   if (!(key in page.fonts)) {
     page.fonts[key] = (page.pdfPage as any).node.newFontDictionary(font.name, font.ref);
@@ -24,7 +24,7 @@ export function getPageFont(page: Page, font: PDFFont): PDFName {
 }
 
 export function getPageImage(page: Page, image: PDFImage): PDFName {
-  if (!page.images) page.images = {};
+  page.images ??= {};
   const key = image.ref.toString();
   if (!(key in page.images)) {
     page.images[key] = (page.pdfPage as any).node.newXObject('Image', image.ref);
@@ -35,7 +35,7 @@ export function getPageImage(page: Page, image: PDFImage): PDFName {
 type GraphicsState = { ca: number; CA: number };
 
 export function getPageGraphicsState(page: Page, graphicsState: GraphicsState): PDFName {
-  if (!page.extGStates) page.extGStates = {};
+  page.extGStates ??= {};
   const key = `CA:${graphicsState.CA},ca:${graphicsState.ca}`;
   if (!(key in page.extGStates)) {
     const dict = page.pdfPage.doc.context.obj({ Type: 'ExtGState', ...graphicsState });
