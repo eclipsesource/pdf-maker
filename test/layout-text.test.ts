@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from '@jest/globals';
 
-import { layoutParagraph } from '../src/layout-text.js';
+import { layoutTextBlock } from '../src/layout-text.js';
 import { paperSizes } from '../src/page-sizes.js';
 import { TextAttrs, TextSpan } from '../src/read-block.js';
 import { fakeFont } from './test-utils.js';
@@ -16,32 +16,32 @@ describe('layout', () => {
     doc = { fonts, pageSize: paperSizes.A4 };
   });
 
-  describe('layoutParagraph', () => {
-    it('creates paragraph with intrinsic size', () => {
+  describe('layoutTextBlock', () => {
+    it('creates frame with intrinsic size', () => {
       const text = [{ text: 'foo', attrs: { fontSize: 10 } }];
       const padding = { left: 5, right: 5, top: 5, bottom: 5 };
-      const paragraph = { text, padding };
+      const block = { text, padding };
 
-      const frame = layoutParagraph(paragraph, box, doc);
+      const frame = layoutTextBlock(block, box, doc);
 
       expect(frame).toEqual(
         objectContaining({ type: 'text', x: 20, y: 30, width: 400, height: 22 })
       );
     });
 
-    it('creates paragraph with fixed size', () => {
+    it('creates frame with fixed size', () => {
       const padding = { left: 5, right: 5, top: 5, bottom: 5 };
-      const paragraph = { padding, width: 80, height: 50 };
+      const block = { padding, width: 80, height: 50 };
 
-      const frame = layoutParagraph(paragraph, box, doc);
+      const frame = layoutTextBlock(block, box, doc);
 
       expect(frame).toEqual({ type: 'text', x: 20, y: 30, width: 80, height: 50 });
     });
 
     it('includes text baseline', () => {
-      const paragraph = { text: [span('Test text', { fontSize: 10 })] };
+      const block = { text: [span('Test text', { fontSize: 10 })] };
 
-      const frame = layoutParagraph(paragraph, box, doc) as any;
+      const frame = layoutTextBlock(block, box, doc) as any;
 
       expect(frame.objects).toEqual([
         {
@@ -57,7 +57,7 @@ describe('layout', () => {
     });
 
     it('positions text segments with different font size at common baseline', () => {
-      const paragraph = {
+      const block = {
         text: [
           span('Text one', { fontSize: 5 }),
           span('Text two', { fontSize: 10 }),
@@ -65,7 +65,7 @@ describe('layout', () => {
         ],
       };
 
-      const frame = layoutParagraph(paragraph, box, doc) as any;
+      const frame = layoutTextBlock(block, box, doc) as any;
 
       expect(frame.objects).toEqual([
         {
@@ -84,11 +84,11 @@ describe('layout', () => {
       ]);
     });
 
-    it('includes padding around text in paragraph', () => {
+    it('includes padding around text in block', () => {
       const text = [span('foo', { fontSize: 10 })];
-      const paragraph = { text, padding: { left: 1, right: 2, top: 3, bottom: 4 } };
+      const block = { text, padding: { left: 1, right: 2, top: 3, bottom: 4 } };
 
-      const frame = layoutParagraph(paragraph, box, doc);
+      const frame = layoutTextBlock(block, box, doc);
 
       expect(frame).toEqual(objectContaining({ type: 'text', width: 400, height: 12 + 3 + 4 }));
       expect(frame.objects).toEqual([
@@ -96,16 +96,16 @@ describe('layout', () => {
       ]);
     });
 
-    it('align texts in paragraph to right', () => {
+    it('align texts in block to the right', () => {
       const text = [span('foo', { fontSize: 10 })];
-      const paragraph = {
+      const block = {
         text,
         textAlign: 'right' as const,
         margin: { left: 10, right: 20, top: 0, bottom: 0 },
         padding: { left: 15, right: 25, top: 0, bottom: 0 },
       };
 
-      const frame = layoutParagraph(paragraph, box, doc);
+      const frame = layoutTextBlock(block, box, doc);
 
       expect(frame.objects).toEqual([
         {
@@ -115,16 +115,16 @@ describe('layout', () => {
       ]);
     });
 
-    it('align texts in paragraphs to center', () => {
+    it('align texts in blocks to the center', () => {
       const text = [span('foo', { fontSize: 10 })];
-      const paragraph = {
+      const block = {
         text,
         textAlign: 'center' as const,
         margin: { left: 10, right: 20, top: 0, bottom: 0 },
         padding: { left: 15, right: 25, top: 0, bottom: 0 },
       };
 
-      const frame = layoutParagraph(paragraph, box, doc);
+      const frame = layoutTextBlock(block, box, doc);
 
       expect(frame.objects).toEqual([
         {
@@ -135,11 +135,11 @@ describe('layout', () => {
     });
 
     it('creates link objects', () => {
-      const paragraph = {
+      const block = {
         text: [span('foo', { link: 'test-link', fontSize: 10 })],
       };
 
-      const frame = layoutParagraph(paragraph, box, doc);
+      const frame = layoutTextBlock(block, box, doc);
 
       expect(frame.objects).toEqual([
         { type: 'text', rows: [objectContaining({ x: 0, y: 0 })] },
@@ -148,14 +148,14 @@ describe('layout', () => {
     });
 
     it('merges adjacent link objects', () => {
-      const paragraph = {
+      const block = {
         text: [
           span('foo ', { link: 'test-link', fontSize: 10 }),
           span('bar', { italic: true, link: 'test-link', fontSize: 10 }),
         ],
       };
 
-      const frame = layoutParagraph(paragraph, box, doc);
+      const frame = layoutTextBlock(block, box, doc);
 
       expect(frame.objects).toEqual([
         { type: 'text', rows: [objectContaining({ x: 0, y: 0 })] },

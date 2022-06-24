@@ -5,17 +5,17 @@ import { Alignment } from './content.js';
 import { Document } from './document.js';
 import { createRowGuides } from './guides.js';
 import { DrawableObject, Frame, LinkObject, TextRowObject } from './layout.js';
-import { Paragraph } from './read-block.js';
+import { TextBlock } from './read-block.js';
 import { breakLine, extractTextSegments, flattenTextSegments, TextSegment } from './text.js';
 
-export function layoutParagraph(paragraph: Paragraph, box: Box, doc: Document): Frame {
-  const padding = paragraph.padding ?? ZERO_EDGES;
-  const fixedWidth = paragraph.width;
-  const fixedHeight = paragraph.height;
+export function layoutTextBlock(block: TextBlock, box: Box, doc: Document): Frame {
+  const padding = block.padding ?? ZERO_EDGES;
+  const fixedWidth = block.width;
+  const fixedHeight = block.height;
   const maxWidth = (fixedWidth ?? box.width) - padding.left - padding.right;
   const maxHeight = (fixedHeight ?? box.height) - padding.top - padding.bottom;
   const innerBox = { x: padding.left, y: padding.top, width: maxWidth, height: maxHeight };
-  const text = paragraph.text && layoutText(paragraph, innerBox, doc);
+  const text = block.text && layoutText(block, innerBox, doc);
   const contentHeight = text?.size?.height ?? 0;
   const objects: DrawableObject[] = [];
   if (text) {
@@ -32,8 +32,8 @@ export function layoutParagraph(paragraph: Paragraph, box: Box, doc: Document): 
   };
 }
 
-function layoutText(paragraph: Paragraph, box: Box, doc: Document) {
-  const { text, textAlign } = paragraph;
+function layoutText(block: TextBlock, box: Box, doc: Document) {
+  const { text, textAlign } = block;
   const textSpans = text;
   const segments = extractTextSegments(textSpans, doc.fonts);
   const rows: TextRowObject[] = [];

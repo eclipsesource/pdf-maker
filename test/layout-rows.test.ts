@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from '@jest/globals';
 
-import { layoutRows } from '../src/layout-rows.js';
+import { layoutRowsBlock } from '../src/layout-rows.js';
 import { fakeFont } from './test-utils.js';
 
 describe('layout-rows', () => {
@@ -12,11 +12,11 @@ describe('layout-rows', () => {
     box = { x: 20, y: 30, width: 400, height: 700 };
   });
 
-  describe('layoutRows', () => {
+  describe('layoutRowsBlock', () => {
     it('creates empty frame for empty rows array', () => {
       const block = { rows: [] };
 
-      const result = layoutRows(block, box, doc);
+      const result = layoutRowsBlock(block, box, doc);
 
       expect(result).toEqual({
         type: 'rows',
@@ -29,7 +29,7 @@ describe('layout-rows', () => {
       const padding = { left: 1, right: 2, top: 3, bottom: 4 };
       const block = { rows: [], padding };
 
-      const result = layoutRows(block, box, doc);
+      const result = layoutRowsBlock(block, box, doc);
 
       expect(result).toEqual({
         type: 'rows',
@@ -41,7 +41,7 @@ describe('layout-rows', () => {
     it('creates frame with fixed width and height', () => {
       const block = { rows: [], width: 200, height: 100 };
 
-      const result = layoutRows(block, box, doc);
+      const result = layoutRowsBlock(block, box, doc);
 
       expect(result).toEqual({
         type: 'rows',
@@ -53,7 +53,7 @@ describe('layout-rows', () => {
     it('creates child for row with fixed width and height', () => {
       const block = { rows: [{ width: 100, height: 50 }] };
 
-      const result = layoutRows(block, box, doc);
+      const result = layoutRowsBlock(block, box, doc);
 
       expect(result).toEqual({
         type: 'rows',
@@ -66,7 +66,7 @@ describe('layout-rows', () => {
       const margin = { left: 5, right: 6, top: 7, bottom: 8 };
       const block = { rows: [{ width: 100, height: 50, margin }] };
 
-      const result = layoutRows(block, box, doc);
+      const result = layoutRowsBlock(block, box, doc);
 
       expect(result).toEqual({
         type: 'rows',
@@ -83,7 +83,7 @@ describe('layout-rows', () => {
       ];
       const block = { rows };
 
-      const result = layoutRows(block, box, doc);
+      const result = layoutRowsBlock(block, box, doc);
 
       expect(result).toEqual({
         type: 'rows',
@@ -104,7 +104,7 @@ describe('layout-rows', () => {
       ];
       const block = { rows, padding };
 
-      const result = layoutRows(block, box, doc);
+      const result = layoutRowsBlock(block, box, doc);
 
       expect(result).toEqual({
         type: 'rows',

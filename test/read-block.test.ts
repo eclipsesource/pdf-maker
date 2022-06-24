@@ -1,14 +1,14 @@
 import { describe, expect, it } from '@jest/globals';
 
-import { readColumns, readParagraph, readRows, readText } from '../src/read-block.js';
+import { readColumnsBlock, readRowsBlock, readText, readTextBlock } from '../src/read-block.js';
 
 describe('read-block', () => {
-  describe('readColumns', () => {
+  describe('readColumnsBlock', () => {
     it('merges text attributes with default style', () => {
       const content = { columns: [{ text: 'foo' }, { text: 'bar' }], fontSize: 8 };
       const defaultStyle = { fontSize: 10, italic: true };
 
-      const result = readColumns(content, defaultStyle);
+      const result = readColumnsBlock(content, defaultStyle);
 
       expect(result).toEqual({
         columns: [
@@ -18,10 +18,10 @@ describe('read-block', () => {
       });
     });
 
-    it('passes textAlign attribute to included paragraphs', () => {
+    it('passes textAlign attribute to included blocks', () => {
       const content = { columns: [{ text: 'foo' }, { text: 'bar' }], textAlign: 'right' };
 
-      const result = readColumns(content);
+      const result = readColumnsBlock(content);
 
       expect(result).toEqual({
         columns: [
@@ -32,12 +32,12 @@ describe('read-block', () => {
     });
   });
 
-  describe('readRows', () => {
+  describe('readRowsBlock', () => {
     it('merges text attributes with default style', () => {
       const content = { rows: [{ text: 'foo' }, { text: 'bar' }], fontSize: 8 };
       const defaultStyle = { fontSize: 10, italic: true };
 
-      const result = readRows(content, defaultStyle);
+      const result = readRowsBlock(content, defaultStyle);
 
       expect(result).toEqual({
         rows: [
@@ -47,10 +47,10 @@ describe('read-block', () => {
       });
     });
 
-    it('passes textAlign attribute to included paragraphs', () => {
+    it('passes textAlign attribute to included blocks', () => {
       const content = { rows: [{ text: 'foo' }, { text: 'bar' }], textAlign: 'right' };
 
-      const result = readRows(content);
+      const result = readRowsBlock(content);
 
       expect(result).toEqual({
         rows: [
@@ -61,12 +61,12 @@ describe('read-block', () => {
     });
   });
 
-  describe('readParagraph', () => {
+  describe('readTextBlock', () => {
     it('accepts empty object', () => {
-      expect(readParagraph({})).toEqual({});
+      expect(readTextBlock({})).toEqual({});
     });
 
-    it('includes all properties of a paragraph', () => {
+    it('includes all properties of a blocks', () => {
       const input = {
         text: 'foo',
         graphics: [{ type: 'rect', x: 1, y: 2, width: 3, height: 4 }],
@@ -76,7 +76,7 @@ describe('read-block', () => {
         height: '80pt',
       };
 
-      const result = readParagraph(input);
+      const result = readTextBlock(input);
 
       expect(result).toEqual({
         text: [{ text: 'foo', attrs: {} }],
@@ -92,7 +92,7 @@ describe('read-block', () => {
       const input = { text: 'foo' };
       const defaultAttrs = { fontSize: 14, lineHeight: 1.5 };
 
-      const result = readParagraph(input, defaultAttrs);
+      const result = readTextBlock(input, defaultAttrs);
 
       expect(result).toEqual({ text: [{ text: 'foo', attrs: { fontSize: 14, lineHeight: 1.5 } }] });
     });
@@ -100,37 +100,37 @@ describe('read-block', () => {
     it('checks text', () => {
       const input = { text: 23 };
 
-      expect(() => readParagraph(input)).toThrowError('Invalid value for "text":');
+      expect(() => readTextBlock(input)).toThrowError('Invalid value for "text":');
     });
 
     it('checks graphics', () => {
       const input = { graphics: 'foo' };
 
-      expect(() => readParagraph(input)).toThrowError('Invalid value for "graphics":');
+      expect(() => readTextBlock(input)).toThrowError('Invalid value for "graphics":');
     });
 
     it('checks margin', () => {
       const input = { margin: 'foo' };
 
-      expect(() => readParagraph(input)).toThrowError('Invalid value for "margin":');
+      expect(() => readTextBlock(input)).toThrowError('Invalid value for "margin":');
     });
 
     it('checks padding', () => {
       const input = { padding: 'foo' };
 
-      expect(() => readParagraph(input)).toThrowError('Invalid value for "padding":');
+      expect(() => readTextBlock(input)).toThrowError('Invalid value for "padding":');
     });
 
     it('checks width', () => {
       const input = { width: 'foo' };
 
-      expect(() => readParagraph(input)).toThrowError('Invalid value for "width":');
+      expect(() => readTextBlock(input)).toThrowError('Invalid value for "width":');
     });
 
     it('checks height', () => {
       const input = { height: 'foo' };
 
-      expect(() => readParagraph(input)).toThrowError('Invalid value for "height":');
+      expect(() => readTextBlock(input)).toThrowError('Invalid value for "height":');
     });
   });
 

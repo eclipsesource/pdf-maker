@@ -23,7 +23,7 @@ describe('layout', () => {
       expect(() => layoutPages({ content: [] }, doc)).not.toThrow();
     });
 
-    it('includes defaultStyle in all paragraphs', () => {
+    it('includes defaultStyle in all blocks', () => {
       const def = readDocumentDefinition({
         content: [{ text: [span('foo')] }, { text: [span('bar')] }],
         defaultStyle: { fontSize: 14 },
@@ -117,7 +117,7 @@ describe('layout', () => {
       expect(frame).toEqual({ type: 'page', ...box, children: [] });
     });
 
-    it('returns a paragraph with a single text row for single text content', () => {
+    it('returns a frame with a single text row for single text content', () => {
       const text = [span('Test')];
 
       const { frame, remainder } = layoutPageContent([{ text }], box, doc) as any;
@@ -136,26 +136,26 @@ describe('layout', () => {
       ]);
     });
 
-    it('returns remaining paragraphs along with the page', () => {
+    it('returns remaining blocks along with the page', () => {
       const box = { x: 20, y: 30, width: 400, height: 120 };
-      const paragraphs = range(23).map((n) => ({
+      const block = range(23).map((n) => ({
         text: [{ text: `Paragraph ${n + 1}`, attrs: { fontSize: 10 } }],
       }));
 
-      const { remainder } = layoutPageContent(paragraphs, box, doc);
+      const { remainder } = layoutPageContent(block, box, doc);
 
-      // 10 paragraphs * fontSize 10 * lineHeight 1.2 = height 120
-      expect(remainder).toEqual(paragraphs.slice(10));
+      // 10 blocks * fontSize 10 * lineHeight 1.2 = height 120
+      expect(remainder).toEqual(block.slice(10));
     });
 
-    it('surrounds paragraphs with margins', () => {
+    it('surrounds blocks with margins', () => {
       const text = [{ text: 'foo', attrs: { fontSize: 10 } }];
-      const paragraphs = [
+      const blocks = [
         { text, margin: { left: 1, right: 2, top: 3, bottom: 4 } },
         { text, margin: { left: 5, right: 6, top: 7, bottom: 8 } },
       ];
 
-      const { frame } = layoutPageContent(paragraphs, box, doc);
+      const { frame } = layoutPageContent(blocks, box, doc);
 
       expect(frame.children).toEqual([
         objectContaining({ type: 'text', x: 1, y: 3, width: 400 - 1 - 2, height: 12 }),

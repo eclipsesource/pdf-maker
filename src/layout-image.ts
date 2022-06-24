@@ -14,7 +14,7 @@ export type ImageObject = {
   image: PDFImage;
 };
 
-export function layoutImage(block: ImageBlock, box: Box, doc: Document): Frame {
+export function layoutImageBlock(block: ImageBlock, box: Box, doc: Document): Frame {
   const padding = block.padding ?? ZERO_EDGES;
   const paddingWidth = padding.left + padding.right;
   const paddingHeight = padding.top + padding.bottom;

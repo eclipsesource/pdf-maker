@@ -29,9 +29,9 @@ const pdfData = await makePdf({
   },
   // Page margins (`x` is a shorthand for left and right)
   margin: { x: '2.5cm', top: '2cm', bottom: '1.5cm' },
-  // Content as an array of paragraphs
+  // Content as an array of blocks
   content: [
-    // Paragraphs can contain text and text attributes
+    // Blocks can contain text and text attributes
     { text: 'Lorem ipsum', bold: true, textAlign: 'center', fontSize: 24 },
     // Text can also be an array of text ranges with different attributes
     { text: [
@@ -99,7 +99,7 @@ const documentDefinition = {
 ### Content
 
 The `content` attribute of the document definition accepts an array of top-level *blocks* that can
-be text paragraphs, images, column layouts or row layouts.
+be text blocks, image blocks, column or row layout blocks.
 Page breaks will only occur between top-level blocks.
 
 ### Columns

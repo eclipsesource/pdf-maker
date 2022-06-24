@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from '@jest/globals';
 
-import { layoutColumns } from '../src/layout-columns.js';
+import { layoutColumnsBlock } from '../src/layout-columns.js';
 import { Block, TextAttrs, TextSpan } from '../src/read-block.js';
 import { fakeFont } from './test-utils.js';
 
@@ -15,11 +15,11 @@ describe('layout-columns', () => {
     box = { x: 20, y: 30, width: 400, height: 700 };
   });
 
-  describe('layoutColumns', () => {
+  describe('layoutColumnsBlock', () => {
     it('creates empty frame for empty columns array', () => {
       const block = { columns: [] };
 
-      const result = layoutColumns(block, box, doc);
+      const result = layoutColumnsBlock(block, box, doc);
 
       expect(result).toEqual({
         type: 'columns',
@@ -32,7 +32,7 @@ describe('layout-columns', () => {
       const padding = { left: 1, right: 2, top: 3, bottom: 4 };
       const block = { columns: [], padding };
 
-      const result = layoutColumns(block, box, doc);
+      const result = layoutColumnsBlock(block, box, doc);
 
       expect(result).toEqual({
         type: 'columns',
@@ -44,7 +44,7 @@ describe('layout-columns', () => {
     it('creates frame with fixed width and height', () => {
       const block = { columns: [], width: 200, height: 100 };
 
-      const result = layoutColumns(block, box, doc);
+      const result = layoutColumnsBlock(block, box, doc);
 
       expect(result).toEqual({
         type: 'columns',
@@ -56,7 +56,7 @@ describe('layout-columns', () => {
     it('creates child for column with fixed width and height', () => {
       const block = { columns: [{ width: 100, height: 50 }] };
 
-      const result = layoutColumns(block, box, doc);
+      const result = layoutColumnsBlock(block, box, doc);
 
       expect(result).toEqual({
         type: 'columns',
@@ -69,7 +69,7 @@ describe('layout-columns', () => {
       const margin = { left: 5, right: 6, top: 7, bottom: 8 };
       const block = { columns: [{ width: 100, height: 50, margin }] };
 
-      const result = layoutColumns(block, box, doc);
+      const result = layoutColumnsBlock(block, box, doc);
 
       expect(result).toEqual({
         type: 'columns',
@@ -86,7 +86,7 @@ describe('layout-columns', () => {
       ];
       const block = { columns };
 
-      const result = layoutColumns(block, box, doc);
+      const result = layoutColumnsBlock(block, box, doc);
 
       expect(result).toEqual({
         type: 'columns',
@@ -107,7 +107,7 @@ describe('layout-columns', () => {
       ];
       const block = { columns, padding };
 
-      const result = layoutColumns(block, box, doc);
+      const result = layoutColumnsBlock(block, box, doc);
 
       expect(result).toEqual({
         type: 'columns',
@@ -127,7 +127,7 @@ describe('layout-columns', () => {
       ];
       const block = { columns };
 
-      const result = layoutColumns(block, box, doc);
+      const result = layoutColumnsBlock(block, box, doc);
 
       expect(result).toEqual({
         type: 'columns',
@@ -148,7 +148,7 @@ describe('layout-columns', () => {
       ];
       const block = { columns };
 
-      const result = layoutColumns(block, box, doc);
+      const result = layoutColumnsBlock(block, box, doc);
 
       expect(result).toEqual({
         type: 'columns',
@@ -169,7 +169,7 @@ describe('layout-columns', () => {
       ];
       const block = { columns, width: 300, height: 100 };
 
-      const result = layoutColumns(block, box, doc);
+      const result = layoutColumnsBlock(block, box, doc);
 
       expect(result).toEqual({
         type: 'columns',

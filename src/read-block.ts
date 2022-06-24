@@ -15,30 +15,30 @@ import {
   types,
 } from './types.js';
 
-export type TextSpan = {
-  text: string;
-  attrs: TextAttrs;
-};
+export type Block = TextBlock | ImageBlock | ColumnsBlock | RowsBlock;
 
-export type Block = Columns | Rows | Paragraph | ImageBlock;
-
-export type Columns = {
-  columns: Block[];
-} & BlockAttrs;
-
-export type Rows = {
-  rows: Block[];
-} & BlockAttrs;
+export type TextBlock = {
+  text?: TextSpan[];
+} & BlockAttrs &
+  InheritableAttrs;
 
 export type ImageBlock = {
   image?: string;
   imageAlign?: Alignment;
 } & BlockAttrs;
 
-export type Paragraph = {
-  text?: TextSpan[];
-} & BlockAttrs &
-  InheritableAttrs;
+export type ColumnsBlock = {
+  columns: Block[];
+} & BlockAttrs;
+
+export type RowsBlock = {
+  rows: Block[];
+} & BlockAttrs;
+
+export type TextSpan = {
+  text: string;
+  attrs: TextAttrs;
+};
 
 export type TextAttrs = {
   fontFamily?: string;
@@ -72,38 +72,38 @@ type InheritableAttrs = TextAttrs & {
 export function readBlock(input: unknown, defaultAttrs?: InheritableAttrs): Block {
   const obj = readObject(input);
   if (obj.columns) {
-    return readColumns(obj, defaultAttrs);
+    return readColumnsBlock(obj, defaultAttrs);
   }
   if (obj.rows) {
-    return readRows(obj, defaultAttrs);
+    return readRowsBlock(obj, defaultAttrs);
   }
   if (obj.image) {
-    return readImage(obj);
+    return readImageBlock(obj);
   }
-  return readParagraph(obj, defaultAttrs);
+  return readTextBlock(obj, defaultAttrs);
 }
 
-export function readColumns(input: Obj, defaultAttrs?: InheritableAttrs): Columns {
+export function readColumnsBlock(input: Obj, defaultAttrs?: InheritableAttrs): ColumnsBlock {
   const mergedAttrs = { ...defaultAttrs, ...readInheritableAttrs(input) };
   const readColumn = (el) => readBlock(el, mergedAttrs);
   return pickDefined({
     columns: readFrom(input, 'columns', types.array(readColumn)),
     ...readBlockAttrs(input),
-  }) as Columns;
+  }) as ColumnsBlock;
 }
 
-export function readRows(input: Obj, defaultAttrs?: InheritableAttrs): Columns {
+export function readRowsBlock(input: Obj, defaultAttrs?: InheritableAttrs): ColumnsBlock {
   const mergedAttrs = { ...defaultAttrs, ...readInheritableAttrs(input) };
   const readRow = (el) => readBlock(el, mergedAttrs);
   return pickDefined({
     rows: readFrom(input, 'rows', types.array(readRow)),
     ...readBlockAttrs(input),
-  }) as Columns;
+  }) as ColumnsBlock;
 }
 
 const tAlignment = types.string({ enum: ['left', 'right', 'center'] }) as TypeDef<Alignment>;
 
-export function readImage(input: Obj): Paragraph {
+export function readImageBlock(input: Obj): TextBlock {
   return pickDefined({
     image: readFrom(input, 'image', optional(types.string())),
     imageAlign: readFrom(input, 'imageAlign', optional(tAlignment)),
@@ -111,7 +111,7 @@ export function readImage(input: Obj): Paragraph {
   });
 }
 
-export function readParagraph(input: Obj, defaultAttrs?: InheritableAttrs): Paragraph {
+export function readTextBlock(input: Obj, defaultAttrs?: InheritableAttrs): TextBlock {
   const mergedAttrs = { ...defaultAttrs, ...input };
   const textAttrs = readTextAttrs(mergedAttrs);
   const parseTextWithAttrs = (text) => readText(text, textAttrs);

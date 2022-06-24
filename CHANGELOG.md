@@ -2,13 +2,20 @@
 
 ## [Unreleased]
 
+### Breaking changes
+
+* Renamed block types `Paragraph` to `TextBlock`, `Image` to `ImageBlock`,
+  `Columns` to `ColumnsBlock`, and `Rows` to `RowsBlock`.
+
 ### Added
 
 * Attributes `lineOpacity` and `fillOpacity` on graphics shapes.
+* Attribute `padding` on all block types.
 
 ### Fixed
 
 * Attribute `imageAlign` marked optional in type definition
+* Copied text from a PDF document now includes headers and footers in correct order
 
 ## [0.2.0] - 2022-06-08
 

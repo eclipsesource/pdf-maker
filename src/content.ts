@@ -129,25 +129,17 @@ export type ImageDefinition = {
   data: string | Uint8Array | ArrayBuffer;
 };
 
-export type Block = Columns | Rows | Image | Paragraph;
+export type Block = TextBlock | ImageBlock | ColumnsBlock | RowsBlock;
 
-export type Columns = {
+export type TextBlock = {
   /**
-   * Content blocks to arrange horizontally.
+   * Text to display in this block.
    */
-  columns: Block[];
+  text?: Text;
 } & TextAttrs &
   BlockAttrs;
 
-export type Rows = {
-  /**
-   * Content blocks to arrange vertically.
-   */
-  rows: Block[];
-} & TextAttrs &
-  BlockAttrs;
-
-export type Image = {
+export type ImageBlock = {
   /**
    * The name of the JPG image to display in this block. The image must have been registered with
    * the global `images` attribute.
@@ -164,11 +156,19 @@ export type Image = {
   imageAlign?: Alignment;
 } & BlockAttrs;
 
-export type Paragraph = {
+export type ColumnsBlock = {
   /**
-   * Text to display in this paragraph.
+   * Content blocks to arrange horizontally.
    */
-  text?: Text;
+  columns: Block[];
+} & TextAttrs &
+  BlockAttrs;
+
+export type RowsBlock = {
+  /**
+   * Content blocks to arrange vertically.
+   */
+  rows: Block[];
 } & TextAttrs &
   BlockAttrs;
 
@@ -285,9 +285,11 @@ type LineCap = 'butt' | 'round' | 'square';
 type LineJoin = 'miter' | 'round' | 'bevel';
 
 /**
- * A piece of inline text. A list can be used to apply styles to parts of a paragraph.
+ * A piece of inline text. A list can be used to apply different styles to individual ranges of a
+ * text.
  */
 export type Text = string | ({ text: Text } & TextAttrs) | Text[];
+
 export type TextAttrs = {
   /**
    * The name of the font to use.

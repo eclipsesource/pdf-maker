@@ -4,12 +4,12 @@ import { Box, parseEdges, subtractEdges, ZERO_EDGES } from './box.js';
 import { Color } from './colors.js';
 import { Document } from './document.js';
 import { createFrameGuides } from './guides.js';
-import { layoutColumns } from './layout-columns.js';
-import { ImageObject, layoutImage } from './layout-image.js';
-import { layoutRows } from './layout-rows.js';
-import { layoutParagraph } from './layout-text.js';
+import { layoutColumnsBlock } from './layout-columns.js';
+import { ImageObject, layoutImageBlock } from './layout-image.js';
+import { layoutRowsBlock } from './layout-rows.js';
+import { layoutTextBlock } from './layout-text.js';
 import { Page } from './page.js';
-import { Block, Columns, ImageBlock, Rows } from './read-block.js';
+import { Block, ColumnsBlock, ImageBlock, RowsBlock } from './read-block.js';
 import { DocumentDefinition } from './read-document.js';
 import { GraphicsObject } from './read-graphics.js';
 import { pickDefined } from './types.js';
@@ -19,7 +19,7 @@ const defaultPageMargin = parseEdges('2cm');
 /**
  * Frames are created during the layout process. They have a position relative to their parent,
  * a size, and drawable objects to be rendered.
- * Frames can contain children, e.g. for rows within a paragraph or in a column.
+ * Frames can contain children that represent nested blocks, e.g. in a row or column layout.
  */
 export type Frame = {
   x: number;
@@ -114,7 +114,7 @@ export function layoutPageContent(blocks: Block[], box: Box, doc: Document) {
     const nextPos = { x: pos.x + margin.left, y: pos.y + topMargin };
     const maxSize = { width: width - margin.left - margin.right, height: remainingHeight };
     const frame = layoutBlock(block, { ...nextPos, ...maxSize }, doc);
-    // If the first paragraph does not fit on the page, render it anyway.
+    // If the first block does not fit on the page, render it anyway.
     // It wouldn't fit on the next page as well, ending in an endless loop.
     if (remainingHeight < topMargin + frame.height && idx) {
       remainder = blocks.slice(idx);
@@ -138,16 +138,16 @@ export function layoutBlock(block: Block, box: Box, doc: Document): Frame {
 }
 
 function layoutBlockContent(block: Block, box: Box, doc: Document): Frame {
-  if ((block as Columns).columns) {
-    return layoutColumns(block as Columns, box, doc);
+  if ((block as ColumnsBlock).columns) {
+    return layoutColumnsBlock(block as ColumnsBlock, box, doc);
   }
-  if ((block as Rows).rows) {
-    return layoutRows(block as Rows, box, doc);
+  if ((block as RowsBlock).rows) {
+    return layoutRowsBlock(block as RowsBlock, box, doc);
   }
   if ((block as ImageBlock).image) {
-    return layoutImage(block as ImageBlock, box, doc);
+    return layoutImageBlock(block as ImageBlock, box, doc);
   }
-  return layoutParagraph(block as ImageBlock, box, doc);
+  return layoutTextBlock(block as ImageBlock, box, doc);
 }
 
 function addAnchor(frame: Frame, block: Block) {

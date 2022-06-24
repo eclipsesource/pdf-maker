@@ -1,9 +1,9 @@
 import { Box, ZERO_EDGES } from './box.js';
 import { Document } from './document.js';
 import { Frame, layoutBlock } from './layout.js';
-import { Rows } from './read-block.js';
+import { RowsBlock } from './read-block.js';
 
-export function layoutRows(block: Rows, box: Box, doc: Document): Frame {
+export function layoutRowsBlock(block: RowsBlock, box: Box, doc: Document): Frame {
   const padding = block.padding ?? ZERO_EDGES;
   const fixedWidth = block.width;
   const fixedHeight = block.height;
