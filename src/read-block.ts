@@ -32,13 +32,11 @@ export type Rows = {
 
 export type ImageBlock = {
   image?: string;
-  padding?: BoxEdges;
   imageAlign?: Alignment;
 } & BlockAttrs;
 
 export type Paragraph = {
   text?: TextSpan[];
-  padding?: BoxEdges;
 } & BlockAttrs &
   InheritableAttrs;
 
@@ -53,6 +51,7 @@ export type TextAttrs = {
 };
 
 type BlockAttrs = {
+  padding?: BoxEdges;
   margin?: BoxEdges;
   width?: number;
   height?: number;
@@ -107,7 +106,6 @@ const tAlignment = types.string({ enum: ['left', 'right', 'center'] }) as TypeDe
 export function readImage(input: Obj): Paragraph {
   return pickDefined({
     image: readFrom(input, 'image', optional(types.string())),
-    padding: readFrom(input, 'padding', optional(parseEdges)),
     imageAlign: readFrom(input, 'imageAlign', optional(tAlignment)),
     ...readBlockAttrs(input),
   });
@@ -120,7 +118,6 @@ export function readParagraph(input: Obj, defaultAttrs?: InheritableAttrs): Para
   return {
     ...readObject(input, {
       text: optional(parseTextWithAttrs),
-      padding: optional(parseEdges),
     }),
     textAlign: readFrom(mergedAttrs, 'textAlign', optional(tAlignment)),
     ...readBlockAttrs(input),
@@ -129,6 +126,7 @@ export function readParagraph(input: Obj, defaultAttrs?: InheritableAttrs): Para
 
 function readBlockAttrs(input: Obj): BlockAttrs {
   return readObject(input, {
+    padding: optional(parseEdges),
     margin: optional(parseEdges),
     width: optional(parseLength),
     height: optional(parseLength),

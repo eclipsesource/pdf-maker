@@ -4,10 +4,11 @@ import { Frame, layoutBlock } from './layout.js';
 import { Columns } from './read-block.js';
 
 export function layoutColumns(block: Columns, box: Box, doc: Document): Frame {
+  const padding = block.padding ?? ZERO_EDGES;
   const fixedWidth = block.width;
   const fixedHeight = block.height;
-  const maxWidth = fixedWidth ?? box.width;
-  const maxHeight = fixedHeight ?? box.height;
+  const maxWidth = (fixedWidth ?? box.width) - padding.left - padding.right;
+  const maxHeight = (fixedHeight ?? box.height) - padding.top - padding.bottom;
   const colWidths = block.columns.map((column) =>
     column.width == null
       ? undefined
@@ -17,13 +18,18 @@ export function layoutColumns(block: Columns, box: Box, doc: Document): Frame {
   const flexColCount = colWidths.reduce((p, c) => p + (c == null ? 1 : 0), 0);
   const flexColWidth = flexColCount ? Math.max(0, maxWidth - reservedWidth) / flexColCount : 0;
   const children = [];
-  let colX = 0;
+  let colX = padding.left;
   let maxColHeight = 0;
   block.columns.forEach((column) => {
     const margin = column.margin ?? ZERO_EDGES;
     colX += margin.left;
     const colWidth = column.width ?? flexColWidth - margin.left - margin.right;
-    const colBox = { x: colX, y: margin.top, width: colWidth, height: column.height ?? maxHeight };
+    const colBox = {
+      x: colX,
+      y: padding.top + margin.top,
+      width: colWidth,
+      height: column.height ?? maxHeight,
+    };
     colX += colWidth + margin.right;
     const block = layoutBlock(column, colBox, doc);
     children.push(block);
@@ -34,7 +40,7 @@ export function layoutColumns(block: Columns, box: Box, doc: Document): Frame {
     x: box.x,
     y: box.y,
     width: fixedWidth ?? box.width,
-    height: fixedHeight ?? maxColHeight,
+    height: fixedHeight ?? maxColHeight + padding.top + padding.bottom,
     children,
   };
 }

@@ -159,10 +159,6 @@ export type Image = {
    */
   image?: string;
   /**
-   * Space to leave between the image and the edges of this paragraph.
-   */
-  padding?: Length | BoxLengths;
-  /**
    * Align the image in this block. By default, it is center-aligned.
    */
   imageAlign?: Alignment;
@@ -173,14 +169,14 @@ export type Paragraph = {
    * Text to display in this paragraph.
    */
   text?: Text;
-  /**
-   * Space to leave between the text and the edges of the paragraph.
-   */
-  padding?: Length | BoxLengths;
 } & TextAttrs &
   BlockAttrs;
 
 export type BlockAttrs = {
+  /**
+   * Space to leave between the content and the edges of the block.
+   */
+  padding?: Length | BoxLengths;
   /**
    * Space to surround the block.
    * The `top` and `bottom` margins of adjacent blocks are collapsed into a single margin
