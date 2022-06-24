@@ -4,7 +4,7 @@ import { Box, Pos, Size, ZERO_EDGES } from './box.js';
 import { Alignment } from './content.js';
 import { Document } from './document.js';
 import { createRowGuides } from './guides.js';
-import { DrawableObject, Frame, LinkObject, TextRowObject } from './layout.js';
+import { Frame, LinkObject, RenderObject, TextRowObject } from './layout.js';
 import { TextBlock } from './read-block.js';
 import { breakLine, extractTextSegments, flattenTextSegments, TextSegment } from './text.js';
 
@@ -17,7 +17,7 @@ export function layoutTextBlock(block: TextBlock, box: Box, doc: Document): Fram
   const innerBox = { x: padding.left, y: padding.top, width: maxWidth, height: maxHeight };
   const text = layoutText(block, innerBox, doc);
   const contentHeight = text.size?.height ?? 0;
-  const objects: DrawableObject[] = [];
+  const objects: RenderObject[] = [];
   text.rows.length && objects.push({ type: 'text', rows: text.rows });
   text.objects?.length && objects.push(...text.objects);
   if (doc.guides) objects.push(...text.rows.map((row) => createRowGuides(row)));
@@ -35,7 +35,7 @@ function layoutText(block: TextBlock, box: Box, doc: Document) {
   const textSpans = text;
   const segments = extractTextSegments(textSpans, doc.fonts);
   const rows: TextRowObject[] = [];
-  const objects: DrawableObject[] = [];
+  const objects: RenderObject[] = [];
   let remainingSegments = segments;
   const remainingSpace = { ...box };
   const size: Size = { width: 0, height: 0 };

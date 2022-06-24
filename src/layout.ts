@@ -18,7 +18,7 @@ const defaultPageMargin = parseEdges('2cm');
 
 /**
  * Frames are created during the layout process. They have a position relative to their parent,
- * a size, and drawable objects to be rendered.
+ * a size, and render objects to be rendered.
  * Frames can contain children that represent nested blocks, e.g. in a row or column layout.
  */
 export type Frame = {
@@ -27,11 +27,11 @@ export type Frame = {
   width: number;
   height: number;
   type?: string;
-  objects?: DrawableObject[];
+  objects?: RenderObject[];
   children?: Frame[];
 };
 
-export type DrawableObject = TextObject | ImageObject | GraphicsObject | LinkObject | AnchorObject;
+export type RenderObject = TextObject | ImageObject | GraphicsObject | LinkObject | AnchorObject;
 
 export type TextObject = {
   type: 'text';
