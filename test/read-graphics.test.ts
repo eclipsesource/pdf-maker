@@ -14,7 +14,7 @@ describe('read-graphics', () => {
       const fn = () => readShape({ type: 'foo' });
 
       expect(fn).toThrowError(
-        `Invalid value for "type": Expected one of ('rect', 'line', 'polyline'), got: 'foo'`
+        `Invalid value for "type": Expected one of ('rect', 'circle', 'line', 'polyline'), got: 'foo'`
       );
     });
 
@@ -43,6 +43,36 @@ describe('read-graphics', () => {
         delete rect[name];
 
         const fn = () => readShape(rect);
+
+        expect(fn).toThrowError(`Missing value for "${name}"`);
+      });
+    });
+
+    it('parses circle object', () => {
+      const circle = {
+        ...{ type: 'circle', cx: 1, cy: 2, r: 3 },
+        lineWidth: 1.5,
+        lineColor: 'red',
+        fillColor: 'blue',
+        lineOpacity: 0.5,
+        fillOpacity: 0.3,
+      };
+
+      expect(readShape(circle)).toEqual({
+        ...circle,
+        lineColor: rgb(1, 0, 0),
+        fillColor: rgb(0, 0, 1),
+        lineOpacity: 0.5,
+        fillOpacity: 0.3,
+      });
+    });
+
+    ['cx', 'cy', 'r'].forEach((name) => {
+      it(`throws for missing circle attribute ${name}`, () => {
+        const circle = { type: 'circle', cx: 1, cy: 2, r: 3 };
+        delete circle[name];
+
+        const fn = () => readShape(circle);
 
         expect(fn).toThrowError(`Missing value for "${name}"`);
       });

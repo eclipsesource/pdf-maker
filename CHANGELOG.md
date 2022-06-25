@@ -5,12 +5,14 @@
 ### Breaking changes
 
 * Renamed block types `Paragraph` to `TextBlock`, `Image` to `ImageBlock`,
-  `Columns` to `ColumnsBlock`, and `Rows` to `RowsBlock`.
+  `Columns` to `ColumnsBlock`, and `Rows` to `RowsBlock`. Added `EmptyBlock` for blocks
+  that don't have any content.
 
 ### Added
 
 * Attributes `lineOpacity` and `fillOpacity` on graphics shapes.
-* Attribute `padding` on all block types.
+* Attribute `padding` on *all* block types.
+* Graphics shape type `circle`.
 
 ### Fixed
 

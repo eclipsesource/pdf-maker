@@ -242,7 +242,7 @@ export type BlockInfo = {
   readonly padding: { left: number; right: number; top: number; bottom: number };
 };
 
-export type Shape = Rect | Line | Polyline;
+export type Shape = Rect | Circle | Line | Polyline;
 
 export type Rect = {
   type: 'rect';
@@ -250,6 +250,19 @@ export type Rect = {
   y: number;
   width: number;
   height: number;
+  lineWidth?: number;
+  lineColor?: Color;
+  lineOpacity?: number;
+  lineJoin?: LineJoin;
+  fillColor?: Color;
+  fillOpacity?: number;
+};
+
+export type Circle = {
+  type: 'circle';
+  cx: number;
+  cy: number;
+  r: number;
   lineWidth?: number;
   lineColor?: Color;
   lineOpacity?: number;

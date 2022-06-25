@@ -1,4 +1,5 @@
 import {
+  appendBezierCurve,
   asPDFNumber,
   closePath,
   concatTransformationMatrix,
@@ -23,7 +24,17 @@ import {
 
 import { Pos } from './box.js';
 import { getPageGraphicsState, Page } from './page.js';
-import { GraphicsObject, LineObject, PolylineObject, RectObject, Shape } from './read-graphics.js';
+import {
+  CircleObject,
+  GraphicsObject,
+  LineObject,
+  PolylineObject,
+  RectObject,
+  Shape,
+} from './read-graphics.js';
+
+// See https://stackoverflow.com/a/27863181/247159
+const KAPPA = (4 * (Math.sqrt(2) - 1)) / 3;
 
 export function renderGraphics(object: GraphicsObject, page: Page, base: Pos) {
   const pos = tr(base, page);
@@ -31,11 +42,14 @@ export function renderGraphics(object: GraphicsObject, page: Page, base: Pos) {
   contentStream.push(pushGraphicsState(), concatTransformationMatrix(1, 0, 0, -1, pos.x, pos.y));
   object.shapes.forEach((shape) => {
     contentStream.push(pushGraphicsState(), ...setStyleAttrs(shape, page));
-    if (shape.type === 'line') {
-      contentStream.push(...drawLine(shape));
-    }
     if (shape.type === 'rect') {
       contentStream.push(...drawRect(shape));
+    }
+    if (shape.type === 'circle') {
+      contentStream.push(...drawCircle(shape));
+    }
+    if (shape.type === 'line') {
+      contentStream.push(...drawLine(shape));
     }
     if (shape.type === 'polyline') {
       contentStream.push(...drawPolyLine(shape));
@@ -43,10 +57,6 @@ export function renderGraphics(object: GraphicsObject, page: Page, base: Pos) {
     contentStream.push(popGraphicsState());
   });
   contentStream.push(popGraphicsState());
-}
-
-function drawLine(obj: LineObject): PDFOperator[] {
-  return [moveTo(obj.x1, obj.y1), lineTo(obj.x2, obj.y2), stroke()].filter(Boolean);
 }
 
 function drawRect(obj: RectObject): PDFOperator[] {
@@ -63,6 +73,23 @@ function createRect(x: number, y: number, width: number, height: number) {
     asPDFNumber(width),
     asPDFNumber(height),
   ]);
+}
+
+function drawCircle(obj: CircleObject): PDFOperator[] {
+  const { cx, cy, r } = obj;
+  const o = r * KAPPA;
+  return [
+    moveTo(cx - r, cy),
+    appendBezierCurve(cx - r, cy - o, cx - o, cy - r, cx, cy - r),
+    appendBezierCurve(cx + o, cy - r, cx + r, cy - o, cx + r, cy),
+    appendBezierCurve(cx + r, cy + o, cx + o, cy + r, cx, cy + r),
+    appendBezierCurve(cx - o, cy + r, cx - r, cy + o, cx - r, cy),
+    drawPath(!!obj.fillColor, !!obj.lineColor),
+  ].filter(Boolean);
+}
+
+function drawLine(obj: LineObject): PDFOperator[] {
+  return [moveTo(obj.x1, obj.y1), lineTo(obj.x2, obj.y2), stroke()].filter(Boolean);
 }
 
 function drawPolyLine(obj: PolylineObject): PDFOperator[] {

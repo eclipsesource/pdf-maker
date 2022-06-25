@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from '@jest/globals';
 import { rgb } from 'pdf-lib';
 
-import { LineObject, PolylineObject, RectObject } from '../src/read-graphics.js';
+import { CircleObject, LineObject, PolylineObject, RectObject } from '../src/read-graphics.js';
 import { renderGraphics } from '../src/render-graphics.js';
 import { fakePdfPage } from './test-utils.js';
 
@@ -20,169 +20,229 @@ describe('render-graphics', () => {
     const head = ['q', '1 0 0 -1 10 780 cm', 'q'];
     const tail = ['Q', 'Q'];
 
-    it('renders line without lineColor', () => {
-      const line: LineObject = { type: 'line', x1: 1, y1: 2, x2: 3, y2: 4 };
+    describe('with rect', () => {
+      it('renders rect without color attributes', () => {
+        const rect: RectObject = { type: 'rect', x: 1, y: 2, width: 3, height: 4 };
 
-      renderGraphics({ type: 'graphics', shapes: [line] }, page, pos);
+        renderGraphics({ type: 'graphics', shapes: [rect] }, page, pos);
 
-      expect(contentStream.map((o) => o?.toString())).toEqual([
-        ...head,
-        '1 2 m',
-        '3 4 l',
-        'S',
-        ...tail,
-      ]);
+        expect(contentStream.map((o) => o.toString())).toEqual([
+          ...head,
+          '1 2 3 4 re',
+          'f',
+          ...tail,
+        ]);
+      });
+
+      it('renders rect with fillColor', () => {
+        const rect: RectObject = {
+          ...{ type: 'rect', x: 1, y: 2, width: 3, height: 4 },
+          fillColor: rgb(1, 0, 0),
+        };
+
+        renderGraphics({ type: 'graphics', shapes: [rect] }, page, pos);
+
+        expect(contentStream.map((o) => o.toString())).toEqual([
+          ...head,
+          '1 0 0 rg',
+          '1 2 3 4 re',
+          'f',
+          ...tail,
+        ]);
+      });
+
+      it('renders rect with lineColor', () => {
+        const rect: RectObject = {
+          ...{ type: 'rect', x: 1, y: 2, width: 3, height: 4 },
+          lineColor: rgb(1, 0, 0),
+        };
+
+        renderGraphics({ type: 'graphics', shapes: [rect] }, page, pos);
+
+        expect(contentStream.map((o) => o.toString())).toEqual([
+          ...head,
+          '1 0 0 RG',
+          '1 2 3 4 re',
+          'S',
+          ...tail,
+        ]);
+      });
+
+      it('renders rect with all attributes', () => {
+        const rect: RectObject = {
+          ...{ type: 'rect', x: 1, y: 2, width: 3, height: 4 },
+          fillColor: rgb(0, 0, 1),
+          lineColor: rgb(1, 0, 0),
+          lineWidth: 1,
+          lineJoin: 'round',
+          fillOpacity: 0.5,
+          lineOpacity: 0.5,
+        };
+
+        renderGraphics({ type: 'graphics', shapes: [rect] }, page, pos);
+
+        expect(contentStream.map((o) => o.toString())).toEqual([
+          ...head,
+          '/GS-1 gs',
+          '0 0 1 rg',
+          '1 0 0 RG',
+          '1 w',
+          '1 j',
+          '1 2 3 4 re',
+          'B',
+          ...tail,
+        ]);
+      });
     });
 
-    it('renders line with all attributes', () => {
-      const line: LineObject = {
-        ...{ type: 'line', x1: 1, y1: 2, x2: 3, y2: 4 },
-        lineColor: rgb(1, 0, 0),
-        lineOpacity: 0.5,
-        lineWidth: 1,
-        lineCap: 'round',
-      };
+    describe('with circle', () => {
+      it('renders circle without style attributes', () => {
+        const circle: CircleObject = { type: 'circle', cx: 1, cy: 2, r: 3 };
 
-      renderGraphics({ type: 'graphics', shapes: [line] }, page, pos);
+        renderGraphics({ type: 'graphics', shapes: [circle] }, page, pos);
 
-      expect(contentStream.map((o) => o.toString())).toEqual([
-        ...head,
-        '/GS-1 gs',
-        '1 0 0 RG',
-        '1 w',
-        '1 J',
-        '1 2 m',
-        '3 4 l',
-        'S',
-        ...tail,
-      ]);
+        expect(contentStream.map((o) => o.toString())).toEqual([
+          ...head,
+          '-2 2 m',
+          '-2 0.3431457505076194 -0.6568542494923806 -1 1 -1 c',
+          '2.6568542494923806 -1 4 0.3431457505076194 4 2 c',
+          '4 3.6568542494923806 2.6568542494923806 5 1 5 c',
+          '-0.6568542494923806 5 -2 3.6568542494923806 -2 2 c',
+          'f',
+          ...tail,
+        ]);
+      });
+
+      it('renders circle with all attributes', () => {
+        const circle: CircleObject = {
+          ...{ type: 'circle', cx: 1, cy: 2, r: 3 },
+          fillColor: rgb(0, 0, 1),
+          lineColor: rgb(1, 0, 0),
+          lineWidth: 1,
+          lineJoin: 'round',
+          fillOpacity: 0.5,
+          lineOpacity: 0.5,
+        };
+
+        renderGraphics({ type: 'graphics', shapes: [circle] }, page, pos);
+
+        expect(contentStream.map((o) => o.toString())).toEqual([
+          ...head,
+          '/GS-1 gs',
+          '0 0 1 rg',
+          '1 0 0 RG',
+          '1 w',
+          '1 j',
+          '-2 2 m',
+          '-2 0.3431457505076194 -0.6568542494923806 -1 1 -1 c',
+          '2.6568542494923806 -1 4 0.3431457505076194 4 2 c',
+          '4 3.6568542494923806 2.6568542494923806 5 1 5 c',
+          '-0.6568542494923806 5 -2 3.6568542494923806 -2 2 c',
+          'B',
+          ...tail,
+        ]);
+      });
     });
 
-    it('renders rect without color attributes', () => {
-      const rect: RectObject = { type: 'rect', x: 1, y: 2, width: 3, height: 4 };
+    describe('with line', () => {
+      it('renders line without lineColor', () => {
+        const line: LineObject = { type: 'line', x1: 1, y1: 2, x2: 3, y2: 4 };
 
-      renderGraphics({ type: 'graphics', shapes: [rect] }, page, pos);
+        renderGraphics({ type: 'graphics', shapes: [line] }, page, pos);
 
-      expect(contentStream.map((o) => o.toString())).toEqual([...head, '1 2 3 4 re', 'f', ...tail]);
+        expect(contentStream.map((o) => o?.toString())).toEqual([
+          ...head,
+          '1 2 m',
+          '3 4 l',
+          'S',
+          ...tail,
+        ]);
+      });
+
+      it('renders line with all attributes', () => {
+        const line: LineObject = {
+          ...{ type: 'line', x1: 1, y1: 2, x2: 3, y2: 4 },
+          lineColor: rgb(1, 0, 0),
+          lineOpacity: 0.5,
+          lineWidth: 1,
+          lineCap: 'round',
+        };
+
+        renderGraphics({ type: 'graphics', shapes: [line] }, page, pos);
+
+        expect(contentStream.map((o) => o.toString())).toEqual([
+          ...head,
+          '/GS-1 gs',
+          '1 0 0 RG',
+          '1 w',
+          '1 J',
+          '1 2 m',
+          '3 4 l',
+          'S',
+          ...tail,
+        ]);
+      });
     });
 
-    it('renders rect with fillColor', () => {
-      const rect: RectObject = {
-        ...{ type: 'rect', x: 1, y: 2, width: 3, height: 4 },
-        fillColor: rgb(1, 0, 0),
-      };
+    describe('with polyline', () => {
+      it('renders polyline without color attributes', () => {
+        const polyline: PolylineObject = { type: 'polyline', points: [p(1, 2), p(3, 4)] };
 
-      renderGraphics({ type: 'graphics', shapes: [rect] }, page, pos);
+        renderGraphics({ type: 'graphics', shapes: [polyline] }, page, pos);
 
-      expect(contentStream.map((o) => o.toString())).toEqual([
-        ...head,
-        '1 0 0 rg',
-        '1 2 3 4 re',
-        'f',
-        ...tail,
-      ]);
-    });
+        expect(contentStream.map((o) => o.toString())).toEqual([
+          ...head,
+          '1 2 m',
+          '3 4 l',
+          'f',
+          ...tail,
+        ]);
+      });
 
-    it('renders rect with lineColor', () => {
-      const rect: RectObject = {
-        ...{ type: 'rect', x: 1, y: 2, width: 3, height: 4 },
-        lineColor: rgb(1, 0, 0),
-      };
+      it('renders polyline with closePath', () => {
+        const polyline: PolylineObject = {
+          type: 'polyline',
+          points: [p(1, 2), p(3, 4)],
+          closePath: true,
+        };
 
-      renderGraphics({ type: 'graphics', shapes: [rect] }, page, pos);
+        renderGraphics({ type: 'graphics', shapes: [polyline] }, page, pos);
 
-      expect(contentStream.map((o) => o.toString())).toEqual([
-        ...head,
-        '1 0 0 RG',
-        '1 2 3 4 re',
-        'S',
-        ...tail,
-      ]);
-    });
+        expect(contentStream.map((o) => o.toString())).toEqual([
+          ...head,
+          '1 2 m',
+          '3 4 l',
+          'h',
+          'f',
+          ...tail,
+        ]);
+      });
 
-    it('renders rect with all attributes', () => {
-      const rect: RectObject = {
-        ...{ type: 'rect', x: 1, y: 2, width: 3, height: 4 },
-        fillColor: rgb(0, 0, 1),
-        lineColor: rgb(1, 0, 0),
-        lineWidth: 1,
-        lineJoin: 'round',
-        fillOpacity: 0.5,
-        lineOpacity: 0.5,
-      };
+      it('renders polyline with all attributes', () => {
+        const polyline: PolylineObject = {
+          ...{ type: 'polyline', points: [p(1, 2), p(3, 4)] },
+          fillColor: rgb(0, 0, 1),
+          lineColor: rgb(1, 0, 0),
+          lineWidth: 1,
+          lineCap: 'round',
+          lineJoin: 'round',
+        };
 
-      renderGraphics({ type: 'graphics', shapes: [rect] }, page, pos);
+        renderGraphics({ type: 'graphics', shapes: [polyline] }, page, pos);
 
-      expect(contentStream.map((o) => o.toString())).toEqual([
-        ...head,
-        '/GS-1 gs',
-        '0 0 1 rg',
-        '1 0 0 RG',
-        '1 w',
-        '1 j',
-        '1 2 3 4 re',
-        'B',
-        ...tail,
-      ]);
-    });
-
-    it('renders polyline without color attributes', () => {
-      const polyline: PolylineObject = { type: 'polyline', points: [p(1, 2), p(3, 4)] };
-
-      renderGraphics({ type: 'graphics', shapes: [polyline] }, page, pos);
-
-      expect(contentStream.map((o) => o.toString())).toEqual([
-        ...head,
-        '1 2 m',
-        '3 4 l',
-        'f',
-        ...tail,
-      ]);
-    });
-
-    it('renders polyline with closePath', () => {
-      const polyline: PolylineObject = {
-        type: 'polyline',
-        points: [p(1, 2), p(3, 4)],
-        closePath: true,
-      };
-
-      renderGraphics({ type: 'graphics', shapes: [polyline] }, page, pos);
-
-      expect(contentStream.map((o) => o.toString())).toEqual([
-        ...head,
-        '1 2 m',
-        '3 4 l',
-        'h',
-        'f',
-        ...tail,
-      ]);
-    });
-
-    it('renders polyline with all attributes', () => {
-      const polyline: PolylineObject = {
-        ...{ type: 'polyline', points: [p(1, 2), p(3, 4)] },
-        fillColor: rgb(0, 0, 1),
-        lineColor: rgb(1, 0, 0),
-        lineWidth: 1,
-        lineCap: 'round',
-        lineJoin: 'round',
-      };
-
-      renderGraphics({ type: 'graphics', shapes: [polyline] }, page, pos);
-
-      expect(contentStream.map((o) => o.toString())).toEqual([
-        ...head,
-        '0 0 1 rg',
-        '1 0 0 RG',
-        '1 w',
-        '1 J',
-        '1 j',
-        '1 2 m',
-        '3 4 l',
-        'B',
-        ...tail,
-      ]);
+        expect(contentStream.map((o) => o.toString())).toEqual([
+          ...head,
+          '0 0 1 rg',
+          '1 0 0 RG',
+          '1 w',
+          '1 J',
+          '1 j',
+          '1 2 m',
+          '3 4 l',
+          'B',
+          ...tail,
+        ]);
+      });
     });
 
     it('renders multiple shapes', () => {

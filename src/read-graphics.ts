@@ -6,7 +6,7 @@ export type GraphicsObject = {
   shapes: Shape[];
 };
 
-export type Shape = RectObject | LineObject | PolylineObject;
+export type Shape = RectObject | CircleObject | LineObject | PolylineObject;
 
 export type RectObject = {
   type: 'rect';
@@ -17,6 +17,20 @@ export type RectObject = {
   lineWidth?: number;
   lineColor?: Color;
   lineOpacity?: number;
+  lineJoin?: LineJoin;
+  fillColor?: Color;
+  fillOpacity?: number;
+};
+
+export type CircleObject = {
+  type: 'circle';
+  cx: number;
+  cy: number;
+  r: number;
+  lineWidth?: number;
+  lineColor?: Color;
+  lineOpacity?: number;
+  lineCap?: LineCap;
   lineJoin?: LineJoin;
   fillColor?: Color;
   fillOpacity?: number;
@@ -55,7 +69,7 @@ const tLineJoin = types.string({ enum: ['miter', 'round', 'bevel'] });
 const tLineWidth = types.number({ minimum: 0 });
 const tOpacity = types.number({ minimum: 0, maximum: 1 });
 
-const shapeTypes = ['rect', 'line', 'polyline'];
+const shapeTypes = ['rect', 'circle', 'line', 'polyline'];
 
 export function readShape(input: unknown): Shape {
   const shape = readObject(input);
@@ -63,6 +77,8 @@ export function readShape(input: unknown): Shape {
   switch (type) {
     case 'rect':
       return readRect(shape);
+    case 'circle':
+      return readCircle(shape);
     case 'line':
       return readLine(shape);
     case 'polyline':
@@ -81,6 +97,20 @@ function readRect(input: Obj): RectObject {
     lineColor: optional(parseColor),
     lineOpacity: optional(tOpacity),
     lineJoin: optional(tLineJoin),
+    fillColor: optional(parseColor),
+    fillOpacity: optional(tOpacity),
+  }) as RectObject;
+}
+
+function readCircle(input: Obj): RectObject {
+  return readObject(input, {
+    type: () => 'circle',
+    cx: required(types.number()),
+    cy: required(types.number()),
+    r: required(types.number({ minimum: 0 })),
+    lineWidth: optional(tLineWidth),
+    lineColor: optional(parseColor),
+    lineOpacity: optional(tOpacity),
     fillColor: optional(parseColor),
     fillOpacity: optional(tOpacity),
   }) as RectObject;
