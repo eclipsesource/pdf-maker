@@ -36,7 +36,6 @@ export function layoutColumnsBlock(block: ColumnsBlock, box: Box, doc: Document)
     maxColHeight = Math.max(maxColHeight, block.height + margin.top + margin.bottom);
   });
   return {
-    type: 'columns',
     x: box.x,
     y: box.y,
     width: fixedWidth ?? box.width,

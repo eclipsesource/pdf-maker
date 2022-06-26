@@ -47,7 +47,6 @@ describe('layout', () => {
       expect(pages).toEqual([
         objectContaining({
           content: objectContaining({
-            type: 'page',
             x: 50,
             y: 50,
             width: pageWidth - 100,
@@ -72,7 +71,6 @@ describe('layout', () => {
 
       expect(pages[0].header).toEqual(
         objectContaining({
-          type: 'text',
           x: 20,
           y: 20,
           width: pageWidth - 40,
@@ -81,7 +79,6 @@ describe('layout', () => {
       );
       expect(pages[0].footer).toEqual(
         objectContaining({
-          type: 'text',
           x: 20,
           y: pageHeight - 20 - 12,
           width: pageWidth - 40,
@@ -114,7 +111,7 @@ describe('layout', () => {
     it('returns empty page frame for empty content', () => {
       const { frame } = layoutPageContent([], box, doc);
 
-      expect(frame).toEqual({ type: 'page', ...box, children: [] });
+      expect(frame).toEqual({ ...box, children: [] });
     });
 
     it('returns a frame with a single text row for single text content', () => {
@@ -123,9 +120,9 @@ describe('layout', () => {
       const { frame, remainder } = layoutPageContent([{ text }], box, doc) as any;
 
       expect(remainder).toBeUndefined();
-      expect(frame).toEqual(objectContaining({ type: 'page', ...box }));
+      expect(frame).toEqual(objectContaining(box));
       expect(frame.children).toEqual([
-        objectContaining({ type: 'text', x: 0, y: 0, width: 400, height: 18 * 1.2 }),
+        objectContaining({ x: 0, y: 0, width: 400, height: 18 * 1.2 }),
       ]);
       expect(frame.children[0].objects).toEqual([objectContaining({ type: 'text' })]);
       expect(frame.children[0].objects[0].rows).toEqual([
@@ -158,8 +155,8 @@ describe('layout', () => {
       const { frame } = layoutPageContent(blocks, box, doc);
 
       expect(frame.children).toEqual([
-        objectContaining({ type: 'text', x: 1, y: 3, width: 400 - 1 - 2, height: 12 }),
-        objectContaining({ type: 'text', x: 5, y: 3 + 12 + 7, width: 400 - 5 - 6 }),
+        objectContaining({ x: 1, y: 3, width: 400 - 1 - 2, height: 12 }),
+        objectContaining({ x: 5, y: 3 + 12 + 7, width: 400 - 5 - 6 }),
       ]);
     });
   });
@@ -184,7 +181,7 @@ describe('layout', () => {
 
       const frame = layoutBlock({ graphics } as any, box, doc);
 
-      expect(frame).toEqual(objectContaining({ type: 'empty', width: 400, height: 0 }));
+      expect(frame).toEqual(objectContaining({ width: 400, height: 0 }));
       expect(frame.objects).toEqual([
         {
           type: 'graphics',
@@ -207,7 +204,7 @@ describe('layout', () => {
 
       const frame = layoutBlock({ graphics, padding } as any, box, doc);
 
-      expect(frame).toEqual(objectContaining({ type: 'empty', width: 400, height: 10 }));
+      expect(frame).toEqual(objectContaining({ width: 400, height: 10 }));
       expect(frame.objects).toEqual([
         {
           type: 'graphics',

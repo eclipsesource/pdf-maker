@@ -22,7 +22,6 @@ export function layoutTextBlock(block: TextBlock, box: Box, doc: Document): Fram
   text.objects?.length && objects.push(...text.objects);
   if (doc.guides) objects.push(...text.rows.map((row) => createRowGuides(row)));
   return {
-    type: 'text',
     ...box,
     width: fixedWidth ?? box.width,
     height: fixedHeight ?? (contentHeight ?? 0) + padding.top + padding.bottom,

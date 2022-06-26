@@ -24,9 +24,7 @@ describe('layout', () => {
 
       const frame = layoutTextBlock(block, box, doc);
 
-      expect(frame).toEqual(
-        objectContaining({ type: 'text', x: 20, y: 30, width: 400, height: 22 })
-      );
+      expect(frame).toEqual(objectContaining({ x: 20, y: 30, width: 400, height: 22 }));
     });
 
     it('creates frame with fixed size', () => {
@@ -35,7 +33,7 @@ describe('layout', () => {
 
       const frame = layoutTextBlock(block, box, doc);
 
-      expect(frame).toEqual({ type: 'text', x: 20, y: 30, width: 80, height: 50 });
+      expect(frame).toEqual({ x: 20, y: 30, width: 80, height: 50 });
     });
 
     it('includes text baseline', () => {
@@ -90,7 +88,7 @@ describe('layout', () => {
 
       const frame = layoutTextBlock(block, box, doc);
 
-      expect(frame).toEqual(objectContaining({ type: 'text', width: 400, height: 12 + 3 + 4 }));
+      expect(frame).toEqual(objectContaining({ width: 400, height: 12 + 3 + 4 }));
       expect(frame.objects).toEqual([
         { type: 'text', rows: [objectContaining({ x: 1, y: 3, width: 30, height: 12 })] },
       ]);

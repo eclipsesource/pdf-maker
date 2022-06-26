@@ -16,12 +16,11 @@ describe('layout-rows', () => {
     it('creates empty frame for empty rows array', () => {
       const block = { rows: [] };
 
-      const result = layoutRowsBlock(block, box, doc);
+      const frame = layoutRowsBlock(block, box, doc);
 
-      expect(result).toEqual({
-        type: 'rows',
-        children: [],
+      expect(frame).toEqual({
         ...{ x: 20, y: 30, width: 400, height: 0 },
+        children: [],
       });
     });
 
@@ -29,36 +28,33 @@ describe('layout-rows', () => {
       const padding = { left: 1, right: 2, top: 3, bottom: 4 };
       const block = { rows: [], padding };
 
-      const result = layoutRowsBlock(block, box, doc);
+      const frame = layoutRowsBlock(block, box, doc);
 
-      expect(result).toEqual({
-        type: 'rows',
-        children: [],
+      expect(frame).toEqual({
         ...{ x: 20, y: 30, width: 400, height: 3 + 4 },
+        children: [],
       });
     });
 
     it('creates frame with fixed width and height', () => {
       const block = { rows: [], width: 200, height: 100 };
 
-      const result = layoutRowsBlock(block, box, doc);
+      const frame = layoutRowsBlock(block, box, doc);
 
-      expect(result).toEqual({
-        type: 'rows',
-        children: [],
+      expect(frame).toEqual({
         ...{ x: 20, y: 30, width: 200, height: 100 },
+        children: [],
       });
     });
 
     it('creates child for row with fixed width and height', () => {
       const block = { rows: [{ width: 100, height: 50 }] };
 
-      const result = layoutRowsBlock(block, box, doc);
+      const frame = layoutRowsBlock(block, box, doc);
 
-      expect(result).toEqual({
-        type: 'rows',
-        children: [{ type: 'empty', x: 0, y: 0, width: 100, height: 50 }],
+      expect(frame).toEqual({
         ...{ x: 20, y: 30, width: 400, height: 50 },
+        children: [{ x: 0, y: 0, width: 100, height: 50 }],
       });
     });
 
@@ -66,12 +62,11 @@ describe('layout-rows', () => {
       const margin = { left: 5, right: 6, top: 7, bottom: 8 };
       const block = { rows: [{ width: 100, height: 50, margin }] };
 
-      const result = layoutRowsBlock(block, box, doc);
+      const frame = layoutRowsBlock(block, box, doc);
 
-      expect(result).toEqual({
-        type: 'rows',
-        children: [{ type: 'empty', x: 5, y: 7, width: 100, height: 50 }],
+      expect(frame).toEqual({
         ...{ x: 20, y: 30, width: 400, height: 50 + 7 + 8 },
+        children: [{ x: 5, y: 7, width: 100, height: 50 }],
       });
     });
 
@@ -83,15 +78,14 @@ describe('layout-rows', () => {
       ];
       const block = { rows };
 
-      const result = layoutRowsBlock(block, box, doc);
+      const frame = layoutRowsBlock(block, box, doc);
 
-      expect(result).toEqual({
-        type: 'rows',
-        children: [
-          { type: 'empty', x: 5, y: 7, width: 100, height: 50 },
-          { type: 'empty', x: 5, y: 7 + 50 + 8, width: 100, height: 50 },
-        ],
+      expect(frame).toEqual({
         ...{ x: 20, y: 30, width: 400, height: 7 + 50 + 8 + 50 + 8 },
+        children: [
+          { x: 5, y: 7, width: 100, height: 50 },
+          { x: 5, y: 7 + 50 + 8, width: 100, height: 50 },
+        ],
       });
     });
 
@@ -104,15 +98,14 @@ describe('layout-rows', () => {
       ];
       const block = { rows, padding };
 
-      const result = layoutRowsBlock(block, box, doc);
+      const frame = layoutRowsBlock(block, box, doc);
 
-      expect(result).toEqual({
-        type: 'rows',
-        children: [
-          { type: 'empty', x: 1 + 5, y: 3 + 7, width: 100, height: 50 },
-          { type: 'empty', x: 1 + 5, y: 3 + 7 + 50 + 8, width: 100, height: 50 },
-        ],
+      expect(frame).toEqual({
         ...{ x: 20, y: 30, width: 400, height: 3 + 7 + 50 + 8 + 50 + 8 + 4 },
+        children: [
+          { x: 1 + 5, y: 3 + 7, width: 100, height: 50 },
+          { x: 1 + 5, y: 3 + 7 + 50 + 8, width: 100, height: 50 },
+        ],
       });
     });
   });

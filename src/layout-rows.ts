@@ -27,7 +27,6 @@ export function layoutRowsBlock(block: RowsBlock, box: Box, doc: Document): Fram
     aggregatedHeight += topMargin + frame.height;
   });
   return {
-    type: 'rows',
     x: box.x,
     y: box.y,
     width: fixedWidth ?? box.width,

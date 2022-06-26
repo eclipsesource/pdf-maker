@@ -47,7 +47,7 @@ export function layoutImageBlock(block: ImageBlock, box: Box, doc: Document): Fr
 
   const imageObj: ImageObject = createImageObject(image, imagePos, imageSize);
   const objects: RenderObject[] = [imageObj];
-  return { type: 'image', x: box.x, y: box.y, width, height, objects };
+  return { x: box.x, y: box.y, width, height, objects };
 }
 
 function align(alignment: string, box: Box, size: Size): Pos {

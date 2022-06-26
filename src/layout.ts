@@ -3,7 +3,7 @@ import { PDFFont } from 'pdf-lib';
 import { Box, parseEdges, subtractEdges, ZERO_EDGES } from './box.js';
 import { Color } from './colors.js';
 import { Document } from './document.js';
-import { createFrameGuides } from './guides.js';
+import { createFrameGuides, createPageGuides } from './guides.js';
 import { layoutColumnsBlock } from './layout-columns.js';
 import { ImageObject, layoutImageBlock } from './layout-image.js';
 import { layoutRowsBlock } from './layout-rows.js';
@@ -26,7 +26,6 @@ export type Frame = {
   y: number;
   width: number;
   height: number;
-  type?: string;
   objects?: RenderObject[];
   children?: Frame[];
 };
@@ -124,8 +123,8 @@ export function layoutPageContent(blocks: Block[], box: Box, doc: Document) {
     pos.y += topMargin + frame.height;
     remainingHeight = height - pos.y;
   }
-  const frame = { type: 'page', x, y, width, height, children };
-  doc.guides && addGuides(frame);
+  const frame: Frame = { x, y, width, height, children };
+  doc.guides && (frame.objects = [createPageGuides(frame)]);
   return { frame, remainder };
 }
 
@@ -158,7 +157,6 @@ function layoutEmptyBlock(block: EmptyBlock, box: Box): Frame {
   const fixedWidth = block.width;
   const fixedHeight = block.height;
   return {
-    type: 'empty',
     x: box.x,
     y: box.y,
     width: fixedWidth ?? box.width,
