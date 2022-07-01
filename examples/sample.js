@@ -232,7 +232,7 @@ export default {
     },
     {
       columns: [
-        { image: 'liberty' },
+        { image: 'liberty', padding: 5 },
         {
           rows: [
             { image: 'liberty', height: 75, imageAlign: 'left' },

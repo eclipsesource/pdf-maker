@@ -1,6 +1,6 @@
 import { PDFImage } from 'pdf-lib';
 
-import { Box, Pos, Size, subtractEdges, ZERO_EDGES } from './box.js';
+import { Box, Pos, Size } from './box.js';
 import { Document } from './document.js';
 import { Frame, RenderObject } from './layout.js';
 import { ImageBlock } from './read-block.js';
@@ -14,40 +14,27 @@ export type ImageObject = {
   image: PDFImage;
 };
 
-export function layoutImageBlock(block: ImageBlock, box: Box, doc: Document): Frame {
-  const padding = block.padding ?? ZERO_EDGES;
-  const paddingWidth = padding.left + padding.right;
-  const paddingHeight = padding.top + padding.bottom;
-  const fixedWidth = block.width;
-  const fixedHeight = block.height;
-
+export function layoutImageContent(block: ImageBlock, box: Box, doc: Document): Partial<Frame> {
   const image = doc.images.find((image) => image.name === block.image)?.pdfImage;
   if (!image) throw new Error(`Unknown image: ${block.image}`);
-
-  const xScale = ((fixedWidth ?? box.width) - paddingWidth) / image.width;
-  const yScale = (fixedHeight - paddingHeight) / image.height;
-  const hasFixedWidth = fixedWidth != null;
-  const hasFixedHeight = fixedHeight != null;
-
-  const scale = hasFixedWidth
-    ? hasFixedHeight
-      ? Math.min(xScale, yScale)
-      : xScale
-    : hasFixedHeight
-    ? yScale
-    : Math.min(xScale, 1);
-
+  const hasFixedWidth = block.width != null;
+  const hasFixedHeight = block.height != null;
+  const scale = getScale(image, box, hasFixedWidth, hasFixedHeight);
   const imageSize = { width: image.width * scale, height: image.height * scale };
-
-  const width = fixedWidth ?? box.width;
-  const height = fixedHeight ?? imageSize.height + paddingHeight;
-
-  const imageBox = subtractEdges({ x: 0, y: 0, width, height }, padding);
+  const imageBox = { x: box.x, y: box.y, width: box.width, height: imageSize.height };
   const imagePos = align(block.imageAlign, imageBox, imageSize);
-
   const imageObj: ImageObject = createImageObject(image, imagePos, imageSize);
   const objects: RenderObject[] = [imageObj];
-  return { x: box.x, y: box.y, width, height, objects };
+  return { objects, height: imageSize.height };
+}
+
+function getScale(image: Size, box: Size, fixedWidth: boolean, fixedHeight: boolean): number {
+  const xScale = box.width / image.width;
+  const yScale = box.height / image.height;
+  if (fixedWidth && fixedHeight) return Math.min(xScale, yScale);
+  if (fixedWidth) return xScale;
+  if (fixedHeight) return yScale;
+  return Math.min(xScale, 1);
 }
 
 function align(alignment: string, box: Box, size: Size): Pos {

@@ -162,6 +162,35 @@ describe('layout', () => {
   });
 
   describe('layoutBlock', () => {
+    it('creates frame with fixed width and height', () => {
+      const block = { rows: [], width: 200, height: 100 };
+
+      const frame = layoutBlock(block, box, doc);
+
+      expect(frame).toEqual({
+        x: 20,
+        y: 30,
+        width: 200,
+        height: 100,
+        children: [],
+      });
+    });
+
+    it('includes padding', () => {
+      const padding = { left: 5, right: 6, top: 7, bottom: 8 };
+      const block = { columns: [{ width: 100, height: 200 }], padding };
+
+      const frame = layoutBlock(block, box, doc);
+
+      expect(frame).toEqual({
+        x: 20,
+        y: 30,
+        width: 400,
+        height: 7 + 200 + 8,
+        children: [{ x: 5, y: 7, width: 100, height: 200 }],
+      });
+    });
+
     it('includes anchor object for id', () => {
       const block = { columns: [], id: 'test' };
 

@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from '@jest/globals';
 
-import { layoutTextBlock } from '../src/layout-text.js';
+import { layoutTextContent } from '../src/layout-text.js';
 import { paperSizes } from '../src/page-sizes.js';
 import { TextAttrs, TextSpan } from '../src/read-block.js';
 import { fakeFont } from './test-utils.js';
@@ -16,37 +16,37 @@ describe('layout', () => {
     doc = { fonts, pageSize: paperSizes.A4 };
   });
 
-  describe('layoutTextBlock', () => {
+  describe('layoutTextContent', () => {
     it('creates frame with intrinsic size', () => {
       const text = [{ text: 'foo', attrs: { fontSize: 10 } }];
-      const padding = { left: 5, right: 5, top: 5, bottom: 5 };
-      const block = { text, padding };
+      const block = { text };
 
-      const frame = layoutTextBlock(block, box, doc);
+      const frame = layoutTextContent(block, box, doc);
 
-      expect(frame).toEqual(objectContaining({ x: 20, y: 30, width: 400, height: 22 }));
+      expect(frame).toEqual(objectContaining({ height: 12 }));
     });
 
-    it('creates frame with fixed size', () => {
-      const padding = { left: 5, right: 5, top: 5, bottom: 5 };
-      const block = { text: [], padding, width: 80, height: 50 };
+    it('does not include padding in frame height', () => {
+      const text = [span('foo', { fontSize: 10 })];
+      const padding = { left: 1, right: 2, top: 3, bottom: 4 };
+      const block = { text, padding };
 
-      const frame = layoutTextBlock(block, box, doc);
+      const frame = layoutTextContent(block, box, doc);
 
-      expect(frame).toEqual({ x: 20, y: 30, width: 80, height: 50 });
+      expect(frame.height).toEqual(12);
     });
 
     it('includes text baseline', () => {
       const block = { text: [span('Test text', { fontSize: 10 })] };
 
-      const frame = layoutTextBlock(block, box, doc) as any;
+      const frame = layoutTextContent(block, box, doc) as any;
 
       expect(frame.objects).toEqual([
         {
           type: 'text',
           rows: [
             {
-              ...{ x: 0, y: 0, width: 90, height: 12, baseline: 9 },
+              ...{ x: 20, y: 30, width: 90, height: 12, baseline: 9 },
               segments: [{ font: doc.fonts[0].pdfFont, fontSize: 10, text: 'Test text' }],
             },
           ],
@@ -63,14 +63,14 @@ describe('layout', () => {
         ],
       };
 
-      const frame = layoutTextBlock(block, box, doc) as any;
+      const frame = layoutTextContent(block, box, doc) as any;
 
       expect(frame.objects).toEqual([
         {
           type: 'text',
           rows: [
             {
-              ...{ x: 0, y: 0, width: 270, height: 18, baseline: 13.5 },
+              ...{ x: 20, y: 30, width: 270, height: 18, baseline: 13.5 },
               segments: [
                 { font: doc.fonts[0].pdfFont, fontSize: 5, text: 'Text one' },
                 { font: doc.fonts[0].pdfFont, fontSize: 10, text: 'Text two' },
@@ -79,18 +79,6 @@ describe('layout', () => {
             },
           ],
         },
-      ]);
-    });
-
-    it('includes padding around text in block', () => {
-      const text = [span('foo', { fontSize: 10 })];
-      const block = { text, padding: { left: 1, right: 2, top: 3, bottom: 4 } };
-
-      const frame = layoutTextBlock(block, box, doc);
-
-      expect(frame).toEqual(objectContaining({ width: 400, height: 12 + 3 + 4 }));
-      expect(frame.objects).toEqual([
-        { type: 'text', rows: [objectContaining({ x: 1, y: 3, width: 30, height: 12 })] },
       ]);
     });
 
@@ -103,12 +91,12 @@ describe('layout', () => {
         padding: { left: 15, right: 25, top: 0, bottom: 0 },
       };
 
-      const frame = layoutTextBlock(block, box, doc);
+      const frame = layoutTextContent(block, box, doc);
 
       expect(frame.objects).toEqual([
         {
           type: 'text',
-          rows: [objectContaining({ x: 400 - 30 - 25, y: 0, width: 30, height: 12 })],
+          rows: [objectContaining({ x: 20 + 400 - 30, y: 30, width: 30, height: 12 })],
         },
       ]);
     });
@@ -122,12 +110,12 @@ describe('layout', () => {
         padding: { left: 15, right: 25, top: 0, bottom: 0 },
       };
 
-      const frame = layoutTextBlock(block, box, doc);
+      const frame = layoutTextContent(block, box, doc);
 
       expect(frame.objects).toEqual([
         {
           type: 'text',
-          rows: [objectContaining({ x: (400 - 30 - 25 + 15) / 2, y: 0, width: 30, height: 12 })],
+          rows: [objectContaining({ x: 20 + (400 - 30) / 2, y: 30, width: 30, height: 12 })],
         },
       ]);
     });
@@ -137,11 +125,11 @@ describe('layout', () => {
         text: [span('foo', { link: 'test-link', fontSize: 10 })],
       };
 
-      const frame = layoutTextBlock(block, box, doc);
+      const frame = layoutTextContent(block, box, doc);
 
       expect(frame.objects).toEqual([
-        { type: 'text', rows: [objectContaining({ x: 0, y: 0 })] },
-        objectContaining({ type: 'link', x: 0, y: 1, width: 30, height: 10, url: 'test-link' }),
+        { type: 'text', rows: [objectContaining({ x: 20, y: 30 })] },
+        { type: 'link', x: 20, y: 30 + 1, width: 30, height: 10, url: 'test-link' },
       ]);
     });
 
@@ -153,11 +141,11 @@ describe('layout', () => {
         ],
       };
 
-      const frame = layoutTextBlock(block, box, doc);
+      const frame = layoutTextContent(block, box, doc);
 
       expect(frame.objects).toEqual([
-        { type: 'text', rows: [objectContaining({ x: 0, y: 0 })] },
-        objectContaining({ type: 'link', x: 0, y: 1, width: 70, height: 10, url: 'test-link' }),
+        { type: 'text', rows: [objectContaining({ x: 20, y: 30 })] },
+        { type: 'link', x: 20, y: 30 + 1, width: 70, height: 10, url: 'test-link' },
       ]);
     });
   });

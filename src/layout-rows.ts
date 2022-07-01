@@ -3,23 +3,18 @@ import { Document } from './document.js';
 import { Frame, layoutBlock } from './layout.js';
 import { RowsBlock } from './read-block.js';
 
-export function layoutRowsBlock(block: RowsBlock, box: Box, doc: Document): Frame {
-  const padding = block.padding ?? ZERO_EDGES;
-  const fixedWidth = block.width;
-  const fixedHeight = block.height;
-  const maxWidth = (fixedWidth ?? box.width) - padding.left - padding.right;
-  const maxHeight = (fixedHeight ?? box.height) - padding.top - padding.bottom;
+export function layoutRowsContent(block: RowsBlock, box: Box, doc: Document): Partial<Frame> {
   const children = [];
-  let rowY = padding.top;
+  let rowY = box.y;
   let lastMargin = 0;
   let aggregatedHeight = 0;
-  let remainingHeight = maxHeight;
+  let remainingHeight = box.height;
   block.rows.forEach((row) => {
     const margin = row.margin ?? ZERO_EDGES;
     const topMargin = Math.max(lastMargin, margin.top);
     lastMargin = margin.bottom;
-    const nextPos = { x: padding.left + margin.left, y: rowY + topMargin };
-    const maxSize = { width: maxWidth - margin.left - margin.right, height: remainingHeight };
+    const nextPos = { x: box.x + margin.left, y: rowY + topMargin };
+    const maxSize = { width: box.width - margin.left - margin.right, height: remainingHeight };
     const frame = layoutBlock(row, { ...nextPos, ...maxSize }, doc);
     children.push(frame);
     rowY += topMargin + frame.height;
@@ -27,10 +22,7 @@ export function layoutRowsBlock(block: RowsBlock, box: Box, doc: Document): Fram
     aggregatedHeight += topMargin + frame.height;
   });
   return {
-    x: box.x,
-    y: box.y,
-    width: fixedWidth ?? box.width,
-    height: fixedHeight ?? aggregatedHeight + lastMargin + padding.top + padding.bottom,
     children,
+    height: aggregatedHeight + lastMargin,
   };
 }

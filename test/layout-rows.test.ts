@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from '@jest/globals';
 
-import { layoutRowsBlock } from '../src/layout-rows.js';
+import { layoutRowsContent } from '../src/layout-rows.js';
 import { fakeFont } from './test-utils.js';
 
 describe('layout-rows', () => {
@@ -12,61 +12,44 @@ describe('layout-rows', () => {
     box = { x: 20, y: 30, width: 400, height: 700 };
   });
 
-  describe('layoutRowsBlock', () => {
+  describe('layoutRowsContent', () => {
     it('creates empty frame for empty rows array', () => {
       const block = { rows: [] };
 
-      const frame = layoutRowsBlock(block, box, doc);
+      const frame = layoutRowsContent(block, box, doc);
 
-      expect(frame).toEqual({
-        ...{ x: 20, y: 30, width: 400, height: 0 },
-        children: [],
-      });
-    });
-
-    it('includes padding in height of empty frame', () => {
-      const padding = { left: 1, right: 2, top: 3, bottom: 4 };
-      const block = { rows: [], padding };
-
-      const frame = layoutRowsBlock(block, box, doc);
-
-      expect(frame).toEqual({
-        ...{ x: 20, y: 30, width: 400, height: 3 + 4 },
-        children: [],
-      });
-    });
-
-    it('creates frame with fixed width and height', () => {
-      const block = { rows: [], width: 200, height: 100 };
-
-      const frame = layoutRowsBlock(block, box, doc);
-
-      expect(frame).toEqual({
-        ...{ x: 20, y: 30, width: 200, height: 100 },
-        children: [],
-      });
+      expect(frame).toEqual({ children: [], height: 0 });
     });
 
     it('creates child for row with fixed width and height', () => {
       const block = { rows: [{ width: 100, height: 50 }] };
 
-      const frame = layoutRowsBlock(block, box, doc);
+      const frame = layoutRowsContent(block, box, doc);
 
       expect(frame).toEqual({
-        ...{ x: 20, y: 30, width: 400, height: 50 },
-        children: [{ x: 0, y: 0, width: 100, height: 50 }],
+        children: [{ x: 20, y: 30, width: 100, height: 50 }],
+        height: 50,
       });
+    });
+
+    it('does not include block padding in height of frame', () => {
+      const padding = { left: 1, right: 2, top: 3, bottom: 4 };
+      const block = { rows: [{ width: 100, height: 50 }], padding };
+
+      const frame = layoutRowsContent(block, box, doc);
+
+      expect(frame.height).toEqual(50);
     });
 
     it('respects row margin', () => {
       const margin = { left: 5, right: 6, top: 7, bottom: 8 };
       const block = { rows: [{ width: 100, height: 50, margin }] };
 
-      const frame = layoutRowsBlock(block, box, doc);
+      const frame = layoutRowsContent(block, box, doc);
 
       expect(frame).toEqual({
-        ...{ x: 20, y: 30, width: 400, height: 50 + 7 + 8 },
-        children: [{ x: 5, y: 7, width: 100, height: 50 }],
+        children: [{ x: 20 + 5, y: 30 + 7, width: 100, height: 50 }],
+        height: 50 + 7 + 8,
       });
     });
 
@@ -78,34 +61,14 @@ describe('layout-rows', () => {
       ];
       const block = { rows };
 
-      const frame = layoutRowsBlock(block, box, doc);
+      const frame = layoutRowsContent(block, box, doc);
 
       expect(frame).toEqual({
-        ...{ x: 20, y: 30, width: 400, height: 7 + 50 + 8 + 50 + 8 },
         children: [
-          { x: 5, y: 7, width: 100, height: 50 },
-          { x: 5, y: 7 + 50 + 8, width: 100, height: 50 },
+          { x: 20 + 5, y: 30 + 7, width: 100, height: 50 },
+          { x: 20 + 5, y: 30 + 7 + 50 + 8, width: 100, height: 50 },
         ],
-      });
-    });
-
-    it('surrounds multiple rows and their margins with block padding', () => {
-      const padding = { left: 1, right: 2, top: 3, bottom: 4 };
-      const margin = { left: 5, right: 6, top: 7, bottom: 8 };
-      const rows = [
-        { width: 100, height: 50, margin },
-        { width: 100, height: 50, margin },
-      ];
-      const block = { rows, padding };
-
-      const frame = layoutRowsBlock(block, box, doc);
-
-      expect(frame).toEqual({
-        ...{ x: 20, y: 30, width: 400, height: 3 + 7 + 50 + 8 + 50 + 8 + 4 },
-        children: [
-          { x: 1 + 5, y: 3 + 7, width: 100, height: 50 },
-          { x: 1 + 5, y: 3 + 7 + 50 + 8, width: 100, height: 50 },
-        ],
+        height: 7 + 50 + 8 + 50 + 8,
       });
     });
   });

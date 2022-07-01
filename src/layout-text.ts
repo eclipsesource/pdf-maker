@@ -1,6 +1,6 @@
 import { PDFFont } from 'pdf-lib';
 
-import { Box, Pos, Size, ZERO_EDGES } from './box.js';
+import { Box, Pos, Size } from './box.js';
 import { Alignment } from './content.js';
 import { Document } from './document.js';
 import { createRowGuides } from './guides.js';
@@ -8,24 +8,16 @@ import { Frame, LinkObject, RenderObject, TextRowObject } from './layout.js';
 import { TextBlock } from './read-block.js';
 import { breakLine, extractTextSegments, flattenTextSegments, TextSegment } from './text.js';
 
-export function layoutTextBlock(block: TextBlock, box: Box, doc: Document): Frame {
-  const padding = block.padding ?? ZERO_EDGES;
-  const fixedWidth = block.width;
-  const fixedHeight = block.height;
-  const maxWidth = (fixedWidth ?? box.width) - padding.left - padding.right;
-  const maxHeight = (fixedHeight ?? box.height) - padding.top - padding.bottom;
-  const innerBox = { x: padding.left, y: padding.top, width: maxWidth, height: maxHeight };
-  const text = layoutText(block, innerBox, doc);
+export function layoutTextContent(block: TextBlock, box: Box, doc: Document): Partial<Frame> {
+  const text = layoutText(block, box, doc);
   const contentHeight = text.size?.height ?? 0;
   const objects: RenderObject[] = [];
   text.rows.length && objects.push({ type: 'text', rows: text.rows });
   text.objects?.length && objects.push(...text.objects);
   if (doc.guides) objects.push(...text.rows.map((row) => createRowGuides(row)));
   return {
-    ...box,
-    width: fixedWidth ?? box.width,
-    height: fixedHeight ?? (contentHeight ?? 0) + padding.top + padding.bottom,
     ...(objects?.length ? { objects } : undefined),
+    height: contentHeight,
   };
 }
 

@@ -4,12 +4,12 @@ import { Box, parseEdges, subtractEdges, ZERO_EDGES } from './box.js';
 import { Color } from './colors.js';
 import { Document } from './document.js';
 import { createFrameGuides, createPageGuides } from './guides.js';
-import { layoutColumnsBlock } from './layout-columns.js';
-import { ImageObject, layoutImageBlock } from './layout-image.js';
-import { layoutRowsBlock } from './layout-rows.js';
-import { layoutTextBlock } from './layout-text.js';
+import { layoutColumnsContent } from './layout-columns.js';
+import { ImageObject, layoutImageContent } from './layout-image.js';
+import { layoutRowsContent } from './layout-rows.js';
+import { layoutTextContent } from './layout-text.js';
 import { Page } from './page.js';
-import { Block, EmptyBlock } from './read-block.js';
+import { Block } from './read-block.js';
 import { DocumentDefinition } from './read-document.js';
 import { GraphicsObject } from './read-graphics.js';
 import { pickDefined } from './types.js';
@@ -129,39 +129,38 @@ export function layoutPageContent(blocks: Block[], box: Box, doc: Document) {
 }
 
 export function layoutBlock(block: Block, box: Box, doc: Document): Frame {
-  const frame = layoutBlockContent(block, box, doc);
+  const padding = block.padding ?? ZERO_EDGES;
+  const contentBox = subtractEdges(
+    { x: 0, y: 0, width: block.width ?? box.width, height: block.height ?? box.height },
+    padding
+  );
+  const content = layoutBlockContent(block, contentBox, doc);
+  const frame = {
+    ...content,
+    x: box.x,
+    y: box.y,
+    width: block.width ?? box.width,
+    height: block.height ?? (content?.height ?? 0) + padding.top + padding.bottom,
+  };
   addAnchor(frame, block);
   addGraphics(frame, block);
   doc.guides && addGuides(frame);
   return frame;
 }
 
-function layoutBlockContent(block: Block, box: Box, doc: Document): Frame {
+function layoutBlockContent(block: Block, box: Box, doc: Document): Partial<Frame> {
   if ('text' in block) {
-    return layoutTextBlock(block, box, doc);
+    return layoutTextContent(block, box, doc);
   }
   if ('image' in block) {
-    return layoutImageBlock(block, box, doc);
+    return layoutImageContent(block, box, doc);
   }
   if ('columns' in block) {
-    return layoutColumnsBlock(block, box, doc);
+    return layoutColumnsContent(block, box, doc);
   }
   if ('rows' in block) {
-    return layoutRowsBlock(block, box, doc);
+    return layoutRowsContent(block, box, doc);
   }
-  return layoutEmptyBlock(block, box);
-}
-
-function layoutEmptyBlock(block: EmptyBlock, box: Box): Frame {
-  const padding = block.padding ?? ZERO_EDGES;
-  const fixedWidth = block.width;
-  const fixedHeight = block.height;
-  return {
-    x: box.x,
-    y: box.y,
-    width: fixedWidth ?? box.width,
-    height: fixedHeight ?? padding.top + padding.bottom,
-  };
 }
 
 function addAnchor(frame: Frame, block: Block) {
