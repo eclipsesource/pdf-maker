@@ -144,7 +144,7 @@ export function layoutBlock(block: Block, box: Box, doc: Document): Frame {
   };
   addAnchor(frame, block);
   addGraphics(frame, block);
-  doc.guides && addGuides(frame);
+  doc.guides && addGuides(frame, block);
   return frame;
 }
 
@@ -184,7 +184,7 @@ function addGraphics(frame: Frame, block: Block) {
   }
 }
 
-function addGuides(frame: Frame) {
-  const guides = createFrameGuides(frame);
+function addGuides(frame: Frame, block: Block) {
+  const guides = createFrameGuides(frame, block);
   (frame.objects ??= []).push(guides);
 }

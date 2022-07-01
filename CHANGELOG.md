@@ -10,9 +10,10 @@
 
 ### Added
 
+* Graphics shape type `circle`.
 * Attributes `lineOpacity` and `fillOpacity` on graphics shapes.
 * Attribute `padding` on *all* block types.
-* Graphics shape type `circle`.
+* Margins and paddings are highlighted when guides are enabled.
 
 ### Fixed
 
