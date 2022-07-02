@@ -13,6 +13,7 @@
 * Graphics shape type `circle`.
 * Attributes `lineOpacity` and `fillOpacity` on graphics shapes.
 * Attribute `padding` on *all* block types.
+* Attributes `breakBefore` and `breakAfter` on top-level blocks.
 * Margins and paddings are highlighted when guides are enabled.
 
 ### Fixed

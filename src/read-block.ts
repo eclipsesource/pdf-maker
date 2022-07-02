@@ -60,6 +60,8 @@ type BlockAttrs = {
   height?: number;
   id?: string;
   graphics?: (info: BlockInfo) => Shape[];
+  breakBefore?: 'auto' | 'always' | 'avoid';
+  breakAfter?: 'auto' | 'always' | 'avoid';
 };
 
 export type BlockInfo = {
@@ -144,7 +146,9 @@ function readBlockAttrs(input: Obj): BlockAttrs {
     height: optional(parseLength),
     id: optional(types.string()),
     graphics: optional(dynamic(types.array(readShape), 'graphics')),
-  });
+    breakBefore: optional(types.string({ enum: ['auto', 'always', 'avoid'] })),
+    breakAfter: optional(types.string({ enum: ['auto', 'always', 'avoid'] })),
+  }) as BlockAttrs;
 }
 
 export function readTextAttrs(input: Obj): TextAttrs {

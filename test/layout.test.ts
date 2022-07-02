@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it } from '@jest/globals';
 
 import { layoutBlock, layoutPageContent, layoutPages } from '../src/layout.js';
 import { paperSizes } from '../src/page-sizes.js';
-import { TextAttrs, TextSpan } from '../src/read-block.js';
+import { Block, TextAttrs, TextSpan } from '../src/read-block.js';
 import { readDocumentDefinition } from '../src/read-document.js';
 import { fakeFont, range } from './test-utils.js';
 
@@ -158,6 +158,164 @@ describe('layout', () => {
         objectContaining({ x: 1, y: 3, width: 400 - 1 - 2, height: 12 }),
         objectContaining({ x: 5, y: 3 + 12 + 7, width: 400 - 5 - 6 }),
       ]);
+    });
+
+    describe('page breaks', () => {
+      const makeBlocks = (n) => range(n).map((n) => ({ id: `${n}`, height: 100 } as Block));
+      const renderedIds = (frame) => frame.children?.map((c) => parseInt(c.objects?.[0]?.name));
+
+      it('includes page break after last fitting block', () => {
+        const blocks = makeBlocks(10);
+
+        const { frame, remainder } = layoutPageContent(blocks, box, doc);
+
+        expect(renderedIds(frame)).toEqual(range(7));
+        expect(remainder).toEqual(blocks.slice(7));
+      });
+
+      it('respects breakBefore = always', () => {
+        const blocks = makeBlocks(10);
+        blocks[3].breakBefore = 'always';
+
+        const { frame, remainder } = layoutPageContent(blocks, box, doc);
+
+        expect(renderedIds(frame)).toEqual(range(3));
+        expect(remainder).toEqual(blocks.slice(3));
+      });
+
+      it('ignores breakBefore = always on first block', () => {
+        const blocks = makeBlocks(10);
+        blocks[0].breakBefore = 'always';
+
+        const { frame, remainder } = layoutPageContent(blocks, box, doc);
+
+        expect(renderedIds(frame)).toEqual(range(7));
+        expect(remainder).toEqual(blocks.slice(7));
+      });
+
+      it('respects breakAfter = always', () => {
+        const blocks = makeBlocks(10);
+        blocks[3].breakAfter = 'always';
+
+        const { frame, remainder } = layoutPageContent(blocks, box, doc);
+
+        expect(renderedIds(frame)).toEqual(range(4));
+        expect(remainder).toEqual(blocks.slice(4));
+      });
+
+      it('ignores breakAfter = always on last block', () => {
+        const blocks = makeBlocks(7);
+        blocks[6].breakAfter = 'always';
+
+        const { frame, remainder } = layoutPageContent(blocks, box, doc);
+
+        expect(renderedIds(frame)).toEqual(range(7));
+        expect(remainder).toEqual([]);
+      });
+
+      it('respects breakBefore = avoid', () => {
+        const blocks = makeBlocks(10);
+        blocks[7].breakBefore = 'avoid';
+
+        const { frame, remainder } = layoutPageContent(blocks, box, doc);
+
+        expect(renderedIds(frame)).toEqual(range(6));
+        expect(remainder).toEqual(blocks.slice(6));
+      });
+
+      it('respects breakBefore = avoid on subsequent blocks', () => {
+        const blocks = makeBlocks(10);
+        blocks[6].breakBefore = 'avoid';
+        blocks[7].breakBefore = 'avoid';
+
+        const { frame, remainder } = layoutPageContent(blocks, box, doc);
+
+        expect(renderedIds(frame)).toEqual(range(5));
+        expect(remainder).toEqual(blocks.slice(5));
+      });
+
+      it('ignores breakBefore = avoid on first block', () => {
+        const blocks = makeBlocks(10);
+        blocks[0].breakBefore = 'avoid';
+
+        const { frame, remainder } = layoutPageContent(blocks, box, doc);
+
+        expect(renderedIds(frame)).toEqual(range(7));
+        expect(remainder).toEqual(blocks.slice(7));
+      });
+
+      it('ignores breakBefore = avoid if previous has breakAfter = always', () => {
+        const blocks = makeBlocks(10);
+        blocks[3].breakAfter = 'always';
+        blocks[4].breakBefore = 'avoid';
+
+        const { frame, remainder } = layoutPageContent(blocks, box, doc);
+
+        expect(renderedIds(frame)).toEqual(range(4));
+        expect(remainder).toEqual(blocks.slice(4));
+      });
+
+      it('ignores breakBefore = avoid if there is no previous block that allows a break', () => {
+        const blocks = makeBlocks(10);
+        blocks.forEach((b) => (b.breakBefore = 'avoid'));
+
+        const { frame, remainder } = layoutPageContent(blocks, box, doc);
+
+        expect(renderedIds(frame)).toEqual(range(7));
+        expect(remainder).toEqual(blocks.slice(7));
+      });
+
+      it('respects breakAfter = avoid', () => {
+        const blocks = makeBlocks(10);
+        blocks[6].breakAfter = 'avoid';
+
+        const { frame, remainder } = layoutPageContent(blocks, box, doc);
+
+        expect(renderedIds(frame)).toEqual(range(6));
+        expect(remainder).toEqual(blocks.slice(6));
+      });
+
+      it('respects breakAfter = avoid on subsequent blocks', () => {
+        const blocks = makeBlocks(10);
+        blocks[5].breakAfter = 'avoid';
+        blocks[6].breakAfter = 'avoid';
+
+        const { frame, remainder } = layoutPageContent(blocks, box, doc);
+
+        expect(renderedIds(frame)).toEqual(range(5));
+        expect(remainder).toEqual(blocks.slice(5));
+      });
+
+      it('ignores breakAfter = avoid on last blocks', () => {
+        const blocks = makeBlocks(7);
+        blocks[6].breakAfter = 'avoid';
+
+        const { frame, remainder } = layoutPageContent(blocks, box, doc);
+
+        expect(renderedIds(frame)).toEqual(range(7));
+        expect(remainder).toBeUndefined();
+      });
+
+      it('ignores breakAfter = avoid if next has breakBefore = always', () => {
+        const blocks = makeBlocks(10);
+        blocks[3].breakAfter = 'avoid';
+        blocks[4].breakBefore = 'always';
+
+        const { frame, remainder } = layoutPageContent(blocks, box, doc);
+
+        expect(renderedIds(frame)).toEqual(range(4));
+        expect(remainder).toEqual(blocks.slice(4));
+      });
+
+      it('ignores breakAfter = avoid if there is no previous block that allows a break', () => {
+        const blocks = makeBlocks(10);
+        blocks.forEach((b) => (b.breakAfter = 'avoid'));
+
+        const { frame, remainder } = layoutPageContent(blocks, box, doc);
+
+        expect(renderedIds(frame)).toEqual(range(7));
+        expect(remainder).toEqual(blocks.slice(7));
+      });
     });
   });
 

@@ -308,6 +308,7 @@ export default {
         })),
       ],
       margin: { bottom: 10 },
+      breakBefore: 'always',
     },
     ...range(10).map((n) => ({
       text:

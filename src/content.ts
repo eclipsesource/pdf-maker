@@ -210,6 +210,22 @@ export type BlockAttrs = {
    * A function can be passed to take the final size of the block into account.
    */
   graphics?: Shape[] | ((info: BlockInfo) => Shape[]);
+  /**
+   * Controls whether a page break may occur before the block. Since page breaks are only inserted
+   * between top-level blocks, this attribute is ignored on nested blocks.
+   * - `auto` (default): Insert a page break when needed.
+   * - `always`: Always insert a page break before this block.
+   * - `avoid`: Do not insert a page break before this block if it can be avoided.
+   */
+  breakBefore?: 'auto' | 'always' | 'avoid';
+  /**
+   * Controls whether a page break may occur after the block. Since page breaks are only inserted
+   * between top-level blocks, this attribute is ignored on nested blocks.
+   * - `auto` (default): Insert a page break when needed.
+   * - `always`: Always insert a page break after this block.
+   * - `avoid`: Do not insert a page break after this block if it can be avoided.
+   */
+  breakAfter?: 'auto' | 'always' | 'avoid';
 };
 
 export type PageInfo = {

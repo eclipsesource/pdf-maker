@@ -105,7 +105,7 @@ export function layoutPageContent(blocks: Block[], box: Box, doc: Document) {
   const pos = { x: 0, y: 0 };
   let lastMargin = 0;
   let remainingHeight = height;
-  let remainder;
+  let remainder: Block[];
   for (const [idx, block] of blocks.entries()) {
     const margin = block.margin ?? ZERO_EDGES;
     const topMargin = Math.max(lastMargin, margin.top);
@@ -122,7 +122,29 @@ export function layoutPageContent(blocks: Block[], box: Box, doc: Document) {
     children.push(frame);
     pos.y += topMargin + frame.height;
     remainingHeight = height - pos.y;
+    if (block.breakAfter === 'always' || blocks[idx + 1]?.breakBefore === 'always') {
+      remainder = blocks.slice(idx + 1);
+      break;
+    }
   }
+
+  // Handle break avoid
+  let lastIdx = children.length - 1;
+  // If the last block has breakAfter set to `avoid`, ignore it.
+  if (lastIdx < blocks.length - 1) {
+    // When `avoid` is in conflict with `always` on the next/previous block, ignore it.
+    while (
+      (blocks[lastIdx + 1]?.breakBefore === 'avoid' && blocks[lastIdx]?.breakAfter !== 'always') ||
+      (blocks[lastIdx]?.breakAfter === 'avoid' && blocks[lastIdx + 1]?.breakBefore !== 'always')
+    ) {
+      lastIdx--;
+    }
+    if (lastIdx >= 0) {
+      children.splice(lastIdx + 1);
+      remainder = blocks.slice(lastIdx + 1);
+    }
+  }
+
   const frame: Frame = { x, y, width, height, children };
   doc.guides && (frame.objects = [createPageGuides(frame)]);
   return { frame, remainder };
