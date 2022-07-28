@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.3.0]
+
 ### Breaking changes
 
 * Renamed block types `Paragraph` to `TextBlock`, `Image` to `ImageBlock`,
@@ -47,3 +49,4 @@ First public version.
 [Unreleased]: https://github.com/eclipsesource/pdf-maker
 [0.1.0]: https://github.com/eclipsesource/pdf-maker/releases/tag/v0.1.0
 [0.2.0]: https://github.com/eclipsesource/pdf-maker/releases/tag/v0.2.0
+[0.3.0]: https://github.com/eclipsesource/pdf-maker/releases/tag/v0.3.0
