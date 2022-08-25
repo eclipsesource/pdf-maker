@@ -1,5 +1,5 @@
 import { DocumentDefinition } from './content.js';
-import { createDocument } from './document.js';
+import { createDocument, finishDocument } from './document.js';
 import { layoutPages } from './layout.js';
 import { readDocumentDefinition } from './read-document.js';
 import { renderPage } from './render-page.js';
@@ -18,7 +18,5 @@ export async function makePdf(definition: DocumentDefinition): Promise<Uint8Arra
   const doc = await createDocument(def);
   const pages = layoutPages(def, doc);
   pages.forEach((page) => renderPage(page, doc));
-  const data = await doc.pdfDoc.save();
-  // add trailing newline
-  return new Uint8Array([...data, 10]);
+  return await finishDocument(def, doc);
 }

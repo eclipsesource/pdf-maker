@@ -26,6 +26,22 @@ export async function createDocument(def: DocumentDefinition): Promise<Document>
   return { fonts, images, pageSize, pdfDoc, guides };
 }
 
+export async function finishDocument(def: DocumentDefinition, doc: Document) {
+  const idInfo = {
+    creator: 'pdfmkr',
+    time: new Date().toISOString(),
+    info: def.info ?? null,
+  };
+  const fileId = await sha256Hex(JSON.stringify(idInfo));
+  doc.pdfDoc.context.trailerInfo.ID = doc.pdfDoc.context.obj([
+    PDFHexString.of(fileId.toUpperCase()),
+    PDFHexString.of(fileId.toUpperCase()),
+  ]);
+  const data = await doc.pdfDoc.save();
+  // add trailing newline
+  return new Uint8Array([...data, 10]);
+}
+
 function setMetadata(info: Metadata, doc: PDFDocument) {
   if (info?.title) {
     doc.setTitle(info.title);
@@ -54,4 +70,11 @@ function setMetadata(info: Metadata, doc: PDFDocument) {
       dict.set(PDFName.of(key), PDFHexString.fromText(value));
     }
   }
+}
+
+async function sha256Hex(input: string): Promise<string> {
+  const buffer = new TextEncoder().encode(input);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', buffer);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
 }

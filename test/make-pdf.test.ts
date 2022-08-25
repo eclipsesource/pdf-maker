@@ -1,6 +1,9 @@
 import { describe, expect, it } from '@jest/globals';
+import crypto from 'crypto';
 
 import { makePdf } from '../src/make-pdf.js';
+
+global.crypto = (crypto as any).webcrypto;
 
 describe('make-pdf', () => {
   describe('makePdf', () => {
@@ -16,6 +19,13 @@ describe('make-pdf', () => {
 
       const string = Buffer.from(pdf.buffer).toString();
       expect(string).toMatch(/[^\n]\n$/);
+    });
+
+    it('includes a trailer ID in the document', async () => {
+      const pdf = await makePdf({ content: [{}] });
+
+      const string = Buffer.from(pdf.buffer).toString();
+      expect(string).toMatch(/\/ID \[ <[0-9A-F]{64}> <[0-9A-F]{64}> \]/);
     });
   });
 });
