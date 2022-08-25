@@ -18,5 +18,7 @@ export async function makePdf(definition: DocumentDefinition): Promise<Uint8Arra
   const doc = await createDocument(def);
   const pages = layoutPages(def, doc);
   pages.forEach((page) => renderPage(page, doc));
-  return await doc.pdfDoc.save();
+  const data = await doc.pdfDoc.save();
+  // add trailing newline
+  return new Uint8Array([...data, 10]);
 }
