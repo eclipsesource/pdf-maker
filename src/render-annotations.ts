@@ -27,7 +27,7 @@ function createLinkAnnotation(page: PDFPage, box: Box, uri: string) {
       ? { A: { Type: 'Action', S: 'GoTo', D: PDFString.of(uri.slice(1)) } }
       : { A: { Type: 'Action', S: 'URI', URI: PDFString.of(uri) } }),
     C: page.doc.context.obj([]),
-    F: 0, // required for PDF/A
+    F: 4, // required for PDF/A
   });
   annots.push(page.doc.context.register(annot));
 }

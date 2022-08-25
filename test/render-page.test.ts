@@ -177,7 +177,7 @@ describe('render-page', () => {
           '/URI (test-url)',
           '>>',
           '/C [ ]',
-          '/F 0',
+          '/F 4',
           '>>',
         ].join('\n')
       );
@@ -208,7 +208,7 @@ describe('render-page', () => {
           '/D (test-id)',
           '>>',
           '/C [ ]',
-          '/F 0',
+          '/F 4',
           '>>',
         ].join('\n')
       );
