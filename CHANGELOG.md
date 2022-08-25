@@ -2,7 +2,15 @@
 
 ## [Unreleased]
 
-## [0.3.0]
+## [0.3.1] - 2022-08-25
+
+### Fixed
+
+* PDF now has a trailing newline
+* Link annotations are now compatible with PDF/A
+* The PDF trailer now has an ID (needed for PDF/A compatibility)
+
+## [0.3.0] - 2022-07-28
 
 ### Breaking changes
 
