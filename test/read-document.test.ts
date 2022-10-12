@@ -125,5 +125,21 @@ describe('read-document', () => {
         });
       });
     });
+
+    it('accepts customData', () => {
+      const customData = { foo: 'abc', bar: Uint8Array.of(1, 2, 3) };
+
+      const def = readDocumentDefinition({ ...input, customData });
+
+      expect(def.customData).toEqual(def.customData);
+    });
+
+    it('checks customData', () => {
+      const customData = { foo: 'abc', bar: 23 };
+
+      expect(() => readDocumentDefinition({ ...input, customData })).toThrowError(
+        'Invalid value for "customData/bar": Expected string or Uint8Array, got: 23'
+      );
+    });
   });
 });
