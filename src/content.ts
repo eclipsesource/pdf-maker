@@ -70,7 +70,7 @@ export type DocumentDefinition = {
 /**
  * Standard metadata attributes to include in the PDF's *document information dictionary*.
  */
-type InfoAttrs = {
+export type InfoAttrs = {
   /**
    * The document’s title.
    */
@@ -104,7 +104,7 @@ type InfoAttrs = {
 /**
  * Custom metadata attributes to include in the PDF's *document information dictionary*.
  */
-type CustomInfoAttrs = {
+export type CustomInfoAttrs = {
   [name: string]: string;
 };
 
@@ -320,8 +320,8 @@ export type Polyline = {
   fillOpacity?: number;
 };
 
-type LineCap = 'butt' | 'round' | 'square';
-type LineJoin = 'miter' | 'round' | 'bevel';
+export type LineCap = 'butt' | 'round' | 'square';
+export type LineJoin = 'miter' | 'round' | 'bevel';
 
 /**
  * A piece of inline text. A list can be used to apply different styles to individual ranges of a
