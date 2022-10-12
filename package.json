@@ -27,7 +27,7 @@
   "scripts": {
     "start": "rm -rf dist/ && tsc && concurrently -k -n build,example npm:watch:build npm:watch:example",
     "watch:build": "tsc -w",
-    "watch:example": "nodemon -w dist -w scripts -w examples scripts/make-examples.js",
+    "watch:example": "nodemon -w dist -w scripts -w examples --experimental-global-webcrypto scripts/make-examples.js",
     "build": "tsc",
     "lint": "eslint '{src,test}/**/*.{js,ts}' --max-warnings 0 --format visualstudio",
     "test": "jest"
