@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+* Attribute `customData` to include custom data in the PDF *document catalog*.
+
 ## [0.3.1] - 2022-08-25
 
 ### Fixed

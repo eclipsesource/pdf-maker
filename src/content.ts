@@ -51,6 +51,14 @@ export type DocumentDefinition = {
    * Metadata to include in the PDF's *document information dictionary*.
    */
   info?: InfoAttrs & CustomInfoAttrs;
+  /**
+   * Custom data to be added to the PDF *document catalog*. This attribute should only be used by
+   * PDF applications that need to include custom data in a PDF document.
+   * To avoid name collisions, keys should be prefixed with `XX`.
+   *
+   * See [PDF 1.7, Appendix E - PDF Name Registry](https://archive.org/details/pdf1.7/page/n1017/mode/2up)
+   */
+  customData?: Record<string, string | Uint8Array>;
   dev?: {
     /**
      * Whether to draw a thin colored rectangle around each rendered frame.

@@ -22,6 +22,9 @@ export async function createDocument(def: DocumentDefinition): Promise<Document>
   const images = await embedImages(def.images ?? [], pdfDoc);
   const pageSize = applyOrientation(def.pageSize ?? paperSizes.A4, def.pageOrientation);
   setMetadata(def.info, pdfDoc);
+  if (def.customData) {
+    setCustomData(def.customData, pdfDoc);
+  }
   const guides = !!def.dev?.guides;
   return { fonts, images, pageSize, pdfDoc, guides };
 }
@@ -69,6 +72,14 @@ function setMetadata(info: Metadata, doc: PDFDocument) {
     for (const [key, value] of Object.entries(info.custom)) {
       dict.set(PDFName.of(key), PDFHexString.fromText(value));
     }
+  }
+}
+
+function setCustomData(data: Record<string, string | Uint8Array>, doc: PDFDocument) {
+  for (const [key, value] of Object.entries(data)) {
+    const stream = doc.context.stream(value);
+    const ref = doc.context.register(stream);
+    doc.catalog.set(PDFName.of(key), ref);
   }
 }
 

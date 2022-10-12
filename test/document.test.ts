@@ -1,5 +1,5 @@
 import { describe, expect, it } from '@jest/globals';
-import { PDFDict, PDFHexString, PDFName, PDFString } from 'pdf-lib';
+import { PDFDict, PDFHexString, PDFName, PDFStream, PDFString } from 'pdf-lib';
 
 import { createDocument } from '../src/document.js';
 
@@ -37,6 +37,22 @@ describe('document', () => {
       expect(getInfo('CreationDate')).toEqual(PDFString.fromDate(new Date(23)));
       expect(getInfo('foo')).toEqual(PDFHexString.fromText('foo-value'));
       expect(getInfo('bar')).toEqual(PDFHexString.fromText('bar-value'));
+    });
+
+    it('renders custom data', async () => {
+      const def = {
+        content: [],
+        customData: {
+          XXFoo: 'Foo',
+          XXBar: Uint8Array.of(1, 2, 3),
+        },
+      };
+
+      const doc = await createDocument(def);
+
+      const lookup = (name: string) => doc.pdfDoc.catalog.lookup(PDFName.of(name)) as PDFStream;
+      expect(lookup('XXFoo').getContentsString()).toBe('Foo');
+      expect(lookup('XXBar').getContents()).toEqual(Uint8Array.of(1, 2, 3));
     });
   });
 });
