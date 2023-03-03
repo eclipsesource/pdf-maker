@@ -82,7 +82,7 @@ export function layoutPages(def: DocumentDefinition, doc: Document): Page[] {
   pages.forEach((page, idx) => {
     const pageInfo = { pageCount: pages.length, pageNumber: idx + 1, pageSize: doc.pageSize };
     page.header = def.header && layoutHeader(def.header(pageInfo), doc);
-    page.footer = def.header && layoutFooter(def.footer(pageInfo), doc);
+    page.footer = def.footer && layoutFooter(def.footer(pageInfo), doc);
   });
   return pages.map(pickDefined) as Page[];
 }
