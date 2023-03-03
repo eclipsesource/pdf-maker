@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+## [0.3.3] - 2022-03-03
+
+### Fixed
+
+* An error was thrown when rendering a document definition that includes
+  a `header` but no `footer`.
+
 ## [0.3.2] - 2022-10-12
 
 ### Added
