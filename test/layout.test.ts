@@ -57,6 +57,49 @@ describe('layout', () => {
       ]);
     });
 
+    it('lays out header', () => {
+      const def = readDocumentDefinition({
+        margin: 50,
+        content: [{ text: 'content' }],
+        header: { text: 'header', margin: 20, fontSize: 10 },
+      });
+      const pageWidth = doc.pageSize.width;
+
+      const pages = layoutPages(def, doc);
+
+      expect(pages[0].header).toEqual(
+        objectContaining({
+          x: 20,
+          y: 20,
+          width: pageWidth - 40,
+          height: 12,
+        })
+      );
+      expect(pages[0].footer).toBeUndefined();
+    });
+
+    it('lays out footer', () => {
+      const def = readDocumentDefinition({
+        margin: 50,
+        content: [{ text: 'content' }],
+        footer: { text: 'footer', margin: 20, fontSize: 10 },
+      });
+      const pageWidth = doc.pageSize.width;
+      const pageHeight = doc.pageSize.height;
+
+      const pages = layoutPages(def, doc);
+
+      expect(pages[0].header).toBeUndefined();
+      expect(pages[0].footer).toEqual(
+        objectContaining({
+          x: 20,
+          y: pageHeight - 20 - 12,
+          width: pageWidth - 40,
+          height: 12,
+        })
+      );
+    });
+
     it('lays out header and footer', () => {
       const def = readDocumentDefinition({
         margin: 50,
