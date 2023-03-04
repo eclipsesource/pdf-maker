@@ -1,18 +1,19 @@
 import { beforeEach, describe, expect, it } from '@jest/globals';
 import { rgb } from 'pdf-lib';
 
+import { Size } from '../src/box.js';
+import { Page } from '../src/page.js';
 import { CircleObject, LineObject, PolylineObject, RectObject } from '../src/read-graphics.js';
 import { renderGraphics } from '../src/render-graphics.js';
-import { fakePdfPage } from './test-utils.js';
+import { fakePdfPage, getContentStream, p } from './test-utils.js';
 
 describe('render-graphics', () => {
-  let page, size, pdfPage, contentStream;
+  let page: Page, size: Size;
 
   beforeEach(() => {
     size = { width: 500, height: 800 };
-    pdfPage = fakePdfPage();
-    contentStream = pdfPage.getContentStream();
-    page = { size, pdfPage };
+    const pdfPage = fakePdfPage();
+    page = { size, pdfPage } as Page;
   });
 
   describe('renderGraphics', () => {
@@ -26,12 +27,7 @@ describe('render-graphics', () => {
 
         renderGraphics({ type: 'graphics', shapes: [rect] }, page, pos);
 
-        expect(contentStream.map((o) => o.toString())).toEqual([
-          ...head,
-          '1 2 3 4 re',
-          'f',
-          ...tail,
-        ]);
+        expect(getContentStream(page)).toEqual([...head, '1 2 3 4 re', 'f', ...tail]);
       });
 
       it('renders rect with fillColor', () => {
@@ -42,13 +38,7 @@ describe('render-graphics', () => {
 
         renderGraphics({ type: 'graphics', shapes: [rect] }, page, pos);
 
-        expect(contentStream.map((o) => o.toString())).toEqual([
-          ...head,
-          '1 0 0 rg',
-          '1 2 3 4 re',
-          'f',
-          ...tail,
-        ]);
+        expect(getContentStream(page)).toEqual([...head, '1 0 0 rg', '1 2 3 4 re', 'f', ...tail]);
       });
 
       it('renders rect with lineColor', () => {
@@ -59,13 +49,7 @@ describe('render-graphics', () => {
 
         renderGraphics({ type: 'graphics', shapes: [rect] }, page, pos);
 
-        expect(contentStream.map((o) => o.toString())).toEqual([
-          ...head,
-          '1 0 0 RG',
-          '1 2 3 4 re',
-          'S',
-          ...tail,
-        ]);
+        expect(getContentStream(page)).toEqual([...head, '1 0 0 RG', '1 2 3 4 re', 'S', ...tail]);
       });
 
       it('renders rect with all attributes', () => {
@@ -81,7 +65,7 @@ describe('render-graphics', () => {
 
         renderGraphics({ type: 'graphics', shapes: [rect] }, page, pos);
 
-        expect(contentStream.map((o) => o.toString())).toEqual([
+        expect(getContentStream(page)).toEqual([
           ...head,
           '/GS-1 gs',
           '0 0 1 rg',
@@ -101,7 +85,7 @@ describe('render-graphics', () => {
 
         renderGraphics({ type: 'graphics', shapes: [circle] }, page, pos);
 
-        expect(contentStream.map((o) => o.toString())).toEqual([
+        expect(getContentStream(page)).toEqual([
           ...head,
           '-2 2 m',
           '-2 0.3431457505076194 -0.6568542494923806 -1 1 -1 c',
@@ -126,7 +110,7 @@ describe('render-graphics', () => {
 
         renderGraphics({ type: 'graphics', shapes: [circle] }, page, pos);
 
-        expect(contentStream.map((o) => o.toString())).toEqual([
+        expect(getContentStream(page)).toEqual([
           ...head,
           '/GS-1 gs',
           '0 0 1 rg',
@@ -150,13 +134,7 @@ describe('render-graphics', () => {
 
         renderGraphics({ type: 'graphics', shapes: [line] }, page, pos);
 
-        expect(contentStream.map((o) => o?.toString())).toEqual([
-          ...head,
-          '1 2 m',
-          '3 4 l',
-          'S',
-          ...tail,
-        ]);
+        expect(getContentStream(page)).toEqual([...head, '1 2 m', '3 4 l', 'S', ...tail]);
       });
 
       it('renders line with all attributes', () => {
@@ -170,7 +148,7 @@ describe('render-graphics', () => {
 
         renderGraphics({ type: 'graphics', shapes: [line] }, page, pos);
 
-        expect(contentStream.map((o) => o.toString())).toEqual([
+        expect(getContentStream(page)).toEqual([
           ...head,
           '/GS-1 gs',
           '1 0 0 RG',
@@ -190,13 +168,7 @@ describe('render-graphics', () => {
 
         renderGraphics({ type: 'graphics', shapes: [polyline] }, page, pos);
 
-        expect(contentStream.map((o) => o.toString())).toEqual([
-          ...head,
-          '1 2 m',
-          '3 4 l',
-          'f',
-          ...tail,
-        ]);
+        expect(getContentStream(page)).toEqual([...head, '1 2 m', '3 4 l', 'f', ...tail]);
       });
 
       it('renders polyline with closePath', () => {
@@ -208,14 +180,7 @@ describe('render-graphics', () => {
 
         renderGraphics({ type: 'graphics', shapes: [polyline] }, page, pos);
 
-        expect(contentStream.map((o) => o.toString())).toEqual([
-          ...head,
-          '1 2 m',
-          '3 4 l',
-          'h',
-          'f',
-          ...tail,
-        ]);
+        expect(getContentStream(page)).toEqual([...head, '1 2 m', '3 4 l', 'h', 'f', ...tail]);
       });
 
       it('renders polyline with all attributes', () => {
@@ -230,7 +195,7 @@ describe('render-graphics', () => {
 
         renderGraphics({ type: 'graphics', shapes: [polyline] }, page, pos);
 
-        expect(contentStream.map((o) => o.toString())).toEqual([
+        expect(getContentStream(page)).toEqual([
           ...head,
           '0 0 1 rg',
           '1 0 0 RG',
@@ -251,7 +216,7 @@ describe('render-graphics', () => {
 
       renderGraphics({ type: 'graphics', shapes: [line, rect] }, page, pos);
 
-      expect(contentStream.map((o) => o?.toString())).toEqual([
+      expect(getContentStream(page)).toEqual([
         ...head,
         '1 2 m',
         '3 4 l',
@@ -265,7 +230,3 @@ describe('render-graphics', () => {
     });
   });
 });
-
-function p(x, y) {
-  return { x, y };
-}

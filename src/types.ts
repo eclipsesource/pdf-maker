@@ -43,15 +43,16 @@ export function readFrom<T = unknown>(object: Obj, name: string, type?: TypeDef<
 export function readAs<T = unknown>(value: unknown, name: string, type?: TypeDef<T>): T {
   try {
     return asType(value, type);
-  } catch (error) {
-    if (error.message === 'Missing value') {
+  } catch (error: unknown) {
+    if (error instanceof Error && error.message === 'Missing value') {
       throw new TypeError(`Missing value for "${name}"`);
     }
-    if (error.message?.startsWith('Invalid value for "')) {
+    if (error instanceof Error && error.message?.startsWith('Invalid value for "')) {
       const tail = error.message.replace(/^Invalid value for "/, '');
       throw new TypeError(`Invalid value for "${name}/${tail}`);
     }
-    throw new TypeError(`Invalid value for "${name}": ${error.message}`);
+    const errorStr = error instanceof Error ? error.message : String(error);
+    throw new TypeError(`Invalid value for "${name}": ${errorStr}`);
   }
 }
 
@@ -95,21 +96,24 @@ export function dynamic<T = unknown>(
     }
     const subject = name ? `Supplied function for "${name}"` : 'Supplied function';
     return (...args) => {
-      const result = saveCall(value as (...params: unknown[]) => unknown, args, subject);
+      const result = safeCall(value as (...params: unknown[]) => unknown, args, subject);
       try {
         return asType(result, type);
       } catch (error) {
-        throw new Error(`${subject} returned invalid value: ${error.message}`);
+        const errorStr = error instanceof Error ? error.message ?? String(error) : String(error);
+        throw new Error(`${subject} returned invalid value: ${errorStr}`);
       }
     };
   };
 }
 
-function saveCall(fn: (...params: unknown[]) => unknown, args: unknown[], subject) {
+function safeCall(fn: (...params: unknown[]) => unknown, args: unknown[], subject: string) {
   try {
     return fn(...args);
-  } catch (error) {
-    throw new Error(`${subject} threw: ${error.stack ?? error.message ?? error}`);
+  } catch (error: unknown) {
+    const errorStr =
+      error instanceof Error ? error.stack ?? error.message ?? String(error) : String(error);
+    throw new Error(`${subject} threw: ${errorStr}`);
   }
 }
 

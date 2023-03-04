@@ -8,11 +8,12 @@
     "sourceMap": true,
     "declaration": true,
     "esModuleInterop": true,
-    "incremental": true
+    "incremental": true,
+    "strict": true,
   },
   "include": [
     "src/**/*.ts",
     "src/**/*.d.ts",
     "src/**/*.js"
-  ]
+  ],
 }

@@ -122,7 +122,7 @@ describe('types', () => {
   });
 
   describe('optional', () => {
-    const fn = (n) => `${n}`;
+    const fn = (n: unknown) => `${n}`;
 
     it('returns function that delegates to given function', () => {
       expect(optional(fn)(23)).toEqual('23');
@@ -144,7 +144,7 @@ describe('types', () => {
   });
 
   describe('required', () => {
-    const fn = (n) => `${n}`;
+    const fn = (n: unknown) => `${n}`;
 
     it('returns function that delegates to given function', () => {
       expect(required(fn)(23)).toEqual('23');
@@ -311,32 +311,32 @@ describe('types', () => {
     });
 
     it('accepts an array with a matching length', () => {
-      expect(readArray([1], null, { minItems: 1, maxItems: 3 })).toEqual([1]);
-      expect(readArray([1, 2, 3], null, { minItems: 1, maxItems: 3 })).toEqual([1, 2, 3]);
+      expect(readArray([1], undefined, { minItems: 1, maxItems: 3 })).toEqual([1]);
+      expect(readArray([1, 2, 3], undefined, { minItems: 1, maxItems: 3 })).toEqual([1, 2, 3]);
     });
 
     it('throws if array length exceeds given range', () => {
-      expect(() => readArray([], null, { minItems: 1 })).toThrowError(
+      expect(() => readArray([], undefined, { minItems: 1 })).toThrowError(
         'Expected array with minimum length 1, got: []'
       );
-      expect(() => readArray([1, 2, 3, 4], null, { maxItems: 3 })).toThrowError(
+      expect(() => readArray([1, 2, 3, 4], undefined, { maxItems: 3 })).toThrowError(
         'Expected array with maximum length 3, got: [1, 2, 3, 4]'
       );
     });
 
     it('accepts an array with unique items', () => {
-      expect(readArray([], null, { uniqueItems: true })).toEqual([]);
-      expect(readArray([1], null, { uniqueItems: true })).toEqual([1]);
-      expect(readArray(['foo'], null, { uniqueItems: true })).toEqual(['foo']);
-      expect(readArray([1, 2, 3], null, { uniqueItems: true })).toEqual([1, 2, 3]);
-      expect(readArray(['foo', 'bar'], null, { uniqueItems: true })).toEqual(['foo', 'bar']);
+      expect(readArray([], undefined, { uniqueItems: true })).toEqual([]);
+      expect(readArray([1], undefined, { uniqueItems: true })).toEqual([1]);
+      expect(readArray(['foo'], undefined, { uniqueItems: true })).toEqual(['foo']);
+      expect(readArray([1, 2, 3], undefined, { uniqueItems: true })).toEqual([1, 2, 3]);
+      expect(readArray(['foo', 'bar'], undefined, { uniqueItems: true })).toEqual(['foo', 'bar']);
     });
 
     it('throws if array has duplicates', () => {
-      expect(() => readArray([1, 2, 1], null, { uniqueItems: true })).toThrowError(
+      expect(() => readArray([1, 2, 1], undefined, { uniqueItems: true })).toThrowError(
         'Expected array with unique items, got: [1, 2, 1]'
       );
-      expect(() => readArray(['foo', 'bar', 'foo'], null, { uniqueItems: true })).toThrowError(
+      expect(() => readArray(['foo', 'bar', 'foo'], undefined, { uniqueItems: true })).toThrowError(
         "Expected array with unique items, got: ['foo', 'bar', 'foo']"
       );
     });

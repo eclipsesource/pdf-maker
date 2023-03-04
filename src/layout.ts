@@ -95,7 +95,7 @@ function layoutHeader(header: Block, doc: Document) {
 function layoutFooter(footer: Block, doc: Document) {
   const box = subtractEdges({ x: 0, y: 0, ...doc.pageSize }, footer.margin);
   const frame = layoutBlock(footer, box, doc);
-  frame.y = doc.pageSize.height - frame.height - footer.margin?.bottom ?? 0;
+  frame.y = doc.pageSize.height - frame.height - (footer.margin?.bottom ?? 0);
   return frame;
 }
 
@@ -105,7 +105,7 @@ export function layoutPageContent(blocks: Block[], box: Box, doc: Document) {
   const pos = { x: 0, y: 0 };
   let lastMargin = 0;
   let remainingHeight = height;
-  let remainder: Block[];
+  let remainder: Block[] = [];
   for (const [idx, block] of blocks.entries()) {
     const margin = block.margin ?? ZERO_EDGES;
     const topMargin = Math.max(lastMargin, margin.top);
@@ -183,6 +183,7 @@ function layoutBlockContent(block: Block, box: Box, doc: Document): Partial<Fram
   if ('rows' in block) {
     return layoutRowsContent(block, box, doc);
   }
+  return {};
 }
 
 function addAnchor(frame: Frame, block: Block) {

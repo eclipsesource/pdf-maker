@@ -67,7 +67,7 @@ describe('images', () => {
     });
 
     it('throws when embedding fails', async () => {
-      const embedJpg = (data) =>
+      const embedJpg = (data: any) =>
         data === 'Bad_Data' ? Promise.reject('Bad image') : Promise.resolve({ data });
       const doc = { embedJpg } as any;
       const imagesDef = [

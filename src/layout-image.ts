@@ -22,7 +22,7 @@ export function layoutImageContent(block: ImageBlock, box: Box, doc: Document): 
   const scale = getScale(image, box, hasFixedWidth, hasFixedHeight);
   const imageSize = { width: image.width * scale, height: image.height * scale };
   const imageBox = { x: box.x, y: box.y, width: box.width, height: imageSize.height };
-  const imagePos = align(block.imageAlign, imageBox, imageSize);
+  const imagePos = align(imageBox, imageSize, block.imageAlign);
   const imageObj: ImageObject = createImageObject(image, imagePos, imageSize);
   const objects: RenderObject[] = [imageObj];
   return { objects, height: imageSize.height };
@@ -37,7 +37,7 @@ function getScale(image: Size, box: Size, fixedWidth: boolean, fixedHeight: bool
   return Math.min(xScale, 1);
 }
 
-function align(alignment: string, box: Box, size: Size): Pos {
+function align(box: Box, size: Size, alignment?: string): Pos {
   const space = { width: box.width - size.width, height: box.height - size.height };
   const is = (a: string) => alignment === a;
   const xShift = is('left') ? 0 : is('right') ? space.width : space.width / 2;

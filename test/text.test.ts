@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it } from '@jest/globals';
-import { rgb } from 'pdf-lib';
+import { PDFFont, rgb } from 'pdf-lib';
 
+import { Font } from '../src/fonts.js';
 import {
   breakLine,
   extractTextSegments,
@@ -14,7 +15,7 @@ import { fakeFont } from './test-utils.js';
 const { objectContaining } = expect;
 
 describe('text', () => {
-  let fonts, normalFont;
+  let fonts: Font[], normalFont: PDFFont;
 
   beforeEach(() => {
     fonts = [fakeFont('Test'), fakeFont('Test', { italic: true })];
@@ -165,13 +166,16 @@ describe('text', () => {
     });
 
     it('does not merge adjacent segments if incompatible', () => {
-      const segments = [seg('foo', { color: 'red' }), seg(' '), seg('bar')];
+      const segments = [seg('foo', { color: rgb(1, 0, 0) }), seg(' '), seg('bar')];
 
-      expect(flattenTextSegments(segments)).toEqual([seg('foo', { color: 'red' }), seg(' bar')]);
+      expect(flattenTextSegments(segments)).toEqual([
+        seg('foo', { color: rgb(1, 0, 0) }),
+        seg(' bar'),
+      ]);
     });
 
     it('does not merge compatible segments if not adjacent', () => {
-      const segments = [seg('foo'), seg('-', { color: 'red' }), seg('bar')];
+      const segments = [seg('foo'), seg('-', { color: rgb(1, 0, 0) }), seg('bar')];
 
       expect(flattenTextSegments(segments)).toEqual(segments);
     });
@@ -221,8 +225,8 @@ describe('text', () => {
   });
 });
 
-function seg(text: string, attrs?): TextSegment {
+function seg(text: string, attrs?: Partial<TextSegment>): TextSegment {
   const { font, fontSize = 10, height = 12, lineHeight = 14, link, color } = attrs ?? {};
   const width = text.length * fontSize;
-  return { text, width, height, lineHeight, font, fontSize, link, color };
+  return { text, width, height, lineHeight, font, fontSize, link, color } as TextSegment;
 }

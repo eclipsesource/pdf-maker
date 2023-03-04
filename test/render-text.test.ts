@@ -1,17 +1,19 @@
 import { beforeEach, describe, expect, it } from '@jest/globals';
 
+import { Size } from '../src/box.js';
 import { TextObject } from '../src/layout.js';
+import { Page } from '../src/page.js';
 import { renderText } from '../src/render-text.js';
-import { fakePdfFont, fakePdfPage } from './test-utils.js';
+import { fakePdfFont, fakePdfPage, getContentStream } from './test-utils.js';
 
 describe('render-text', () => {
-  let page, size, pdfPage;
+  let page: Page, size: Size;
   const font = fakePdfFont('fontA');
 
   beforeEach(() => {
     size = { width: 500, height: 800 };
-    pdfPage = fakePdfPage();
-    page = { size, pdfPage };
+    const pdfPage = fakePdfPage();
+    page = { size, pdfPage } as Page;
   });
 
   describe('renderText', () => {
@@ -26,7 +28,7 @@ describe('render-text', () => {
 
       renderText(obj, page, pos);
 
-      expect(pdfPage.getContentStream().map((o) => o?.toString())).toEqual([
+      expect(getContentStream(page)).toEqual([
         'BT',
         '1 0 0 1 11 770 Tm',
         '0 0 0 rg',
@@ -49,7 +51,7 @@ describe('render-text', () => {
 
       renderText(obj, page, pos);
 
-      expect(pdfPage.getContentStream().map((o) => o?.toString())).toEqual([
+      expect(getContentStream(page)).toEqual([
         'BT',
         '1 0 0 1 11 770 Tm',
         '0 0 0 rg',

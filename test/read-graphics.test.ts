@@ -2,6 +2,7 @@ import { describe, expect, it } from '@jest/globals';
 import { rgb } from 'pdf-lib';
 
 import { readShape } from '../src/read-graphics.js';
+import { p } from './test-utils.js';
 
 describe('read-graphics', () => {
   describe('readShape', () => {
@@ -37,7 +38,7 @@ describe('read-graphics', () => {
       });
     });
 
-    ['x', 'y', 'width', 'height'].forEach((name) => {
+    (['x', 'y', 'width', 'height'] as const).forEach((name) => {
       it(`throws for missing rect attribute ${name}`, () => {
         const rect = { type: 'rect', x: 1, y: 2, width: 10, height: 20 };
         delete rect[name];
@@ -67,7 +68,7 @@ describe('read-graphics', () => {
       });
     });
 
-    ['cx', 'cy', 'r'].forEach((name) => {
+    (['cx', 'cy', 'r'] as const).forEach((name) => {
       it(`throws for missing circle attribute ${name}`, () => {
         const circle = { type: 'circle', cx: 1, cy: 2, r: 3 };
         delete circle[name];
@@ -93,7 +94,7 @@ describe('read-graphics', () => {
       });
     });
 
-    ['x1', 'y1', 'x2', 'y2'].forEach((name) => {
+    (['x1', 'y1', 'x2', 'y2'] as const).forEach((name) => {
       it(`throws for missing line attribute ${name}`, () => {
         const line = { type: 'line', x1: 1, y1: 2, x2: 11, y2: 12 };
         delete line[name];
@@ -173,7 +174,3 @@ describe('read-graphics', () => {
     });
   });
 });
-
-function p(x, y) {
-  return { x, y };
-}

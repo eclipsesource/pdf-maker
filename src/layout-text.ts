@@ -4,7 +4,7 @@ import { Box, Pos, Size } from './box.js';
 import { Alignment } from './content.js';
 import { Document } from './document.js';
 import { createRowGuides } from './guides.js';
-import { Frame, LinkObject, RenderObject, TextRowObject } from './layout.js';
+import { Frame, LinkObject, RenderObject, TextRowObject, TextSegmentObject } from './layout.js';
 import { TextBlock } from './read-block.js';
 import { breakLine, extractTextSegments, flattenTextSegments, TextSegment } from './text.js';
 
@@ -58,14 +58,14 @@ function layoutText(block: TextBlock, box: Box, doc: Document) {
  *                                                                    ˅
  * ---------------------------------------------------------------------
  */
-function layoutTextRow(segments: TextSegment[], box: Box, textAlign: Alignment) {
+function layoutTextRow(segments: TextSegment[], box: Box, textAlign?: Alignment) {
   const [lineSegments, remainder] = breakLine(segments, box.width);
   const pos = { x: 0, y: 0 };
   const size = { width: 0, height: 0 };
   let baseline = 0;
   let rowHeight = 0;
-  const links = [];
-  const segmentObjects = [];
+  const links: LinkObject[] = [];
+  const segmentObjects: TextSegmentObject[] = [];
   flattenTextSegments(lineSegments).forEach((seg) => {
     const { text, width, height, lineHeight, font, fontSize, link, color } = seg;
     segmentObjects.push({ text, font, fontSize, color });

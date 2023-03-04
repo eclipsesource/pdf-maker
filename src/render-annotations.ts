@@ -1,4 +1,4 @@
-import { PDFArray, PDFDict, PDFName, PDFObject, PDFPage, PDFString } from 'pdf-lib';
+import { PDFArray, PDFDict, PDFName, PDFPage, PDFString } from 'pdf-lib';
 
 import { Box, Pos } from './box.js';
 import { AnchorObject, LinkObject } from './layout.js';
@@ -7,6 +7,7 @@ import { Page } from './page.js';
 export function renderAnchor(obj: AnchorObject, page: Page, base: Pos) {
   const x = base.x + obj.x;
   const y = page.size.height - base.y - obj.y;
+  if (!page.pdfPage) throw new Error('Page not initialized');
   createNamedDest(page.pdfPage, obj.name, { x, y });
 }
 
@@ -14,6 +15,7 @@ export function renderLink(obj: LinkObject, page: Page, base: Pos) {
   const { width, height, url } = obj;
   const x = base.x + obj.x;
   const y = page.size.height - base.y - obj.y - height;
+  if (!page.pdfPage) throw new Error('Page not initialized');
   createLinkAnnotation(page.pdfPage, { x, y, width, height }, url);
 }
 
@@ -45,7 +47,7 @@ function createNamedDest(page: PDFPage, name: string, pos: Pos) {
   destNames.push(page.doc.context.obj([page.ref, 'XYZ', pos.x, pos.y, null]));
 }
 
-function getOrCreate(dict: PDFDict, name: string, creatorFn: () => any): PDFObject {
+function getOrCreate(dict: PDFDict, name: string, creatorFn: () => any): unknown {
   if (!dict.has(PDFName.of(name))) {
     dict.set(PDFName.of(name), dict.context.obj(creatorFn()));
   }

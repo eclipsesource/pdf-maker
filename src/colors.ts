@@ -12,7 +12,7 @@ export function parseColor(input: unknown): Color {
       const b = parseInt(input.slice(5, 7), 16) / 255;
       return rgb(r, g, b);
     }
-    const color = namedColors[input];
+    const color = namedColors[input as keyof typeof namedColors];
     if (color) return color;
     throw typeError('valid color name', input);
   }

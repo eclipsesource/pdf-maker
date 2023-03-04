@@ -75,7 +75,7 @@ export function splitChunks(text: string): string[] {
 
 export function breakLine(segments: TextSegment[], maxWidth: number) {
   const breakIdx = findLinebreak(segments, maxWidth);
-  if (breakIdx >= 0) {
+  if (breakIdx !== undefined && breakIdx >= 0) {
     const head = segments.slice(0, breakIdx);
     const tail = segments.slice(breakIdx + 1);
     return tail.length ? [head, tail] : [head];
@@ -83,7 +83,7 @@ export function breakLine(segments: TextSegment[], maxWidth: number) {
   return [segments];
 }
 
-function findLinebreak(segments, maxWidth): number {
+function findLinebreak(segments: TextSegment[], maxWidth: number): number | undefined {
   let x = 0;
   for (const [idx, segment] of segments.entries()) {
     const { text, width } = segment;
@@ -136,7 +136,7 @@ function isLineBreakOpportunity(segment: TextSegment): boolean {
  */
 export function flattenTextSegments(segments: TextSegment[]): TextSegment[] {
   const result: TextSegment[] = [];
-  let prev;
+  let prev: TextSegment;
   segments.forEach((segment) => {
     if (
       segment.font === prev?.font &&

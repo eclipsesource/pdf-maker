@@ -3,7 +3,7 @@ import { FontDef, readFonts } from './fonts.js';
 import { ImageDef, readImages } from './images.js';
 import { parseOrientation, parsePageSize } from './page-sizes.js';
 import { Block, readBlock, readInheritableAttrs, TextAttrs } from './read-block.js';
-import { dynamic, optional, readAs, readObject, required, typeError, types } from './types.js';
+import { dynamic, Obj, optional, readAs, readObject, required, typeError, types } from './types.js';
 
 export type DocumentDefinition = {
   fonts?: FontDef[];
@@ -70,7 +70,7 @@ function readInfo(input: unknown): Metadata {
   };
   const obj = readObject(input, properties);
   const custom = Object.fromEntries(
-    Object.entries(input)
+    Object.entries(input as Obj)
       .filter(([key]) => !(key in properties))
       .map(([key, value]) => [key, readAs(value, key, types.string())])
   );

@@ -1,19 +1,22 @@
 import { beforeEach, describe, expect, it } from '@jest/globals';
+import { PDFFont } from 'pdf-lib';
 
-import { layoutBlock, layoutPageContent, layoutPages } from '../src/layout.js';
+import { Box } from '../src/box.js';
+import { Document } from '../src/document.js';
+import { Frame, layoutBlock, layoutPageContent, layoutPages } from '../src/layout.js';
 import { paperSizes } from '../src/page-sizes.js';
 import { Block, TextAttrs, TextSpan } from '../src/read-block.js';
-import { readDocumentDefinition } from '../src/read-document.js';
-import { fakeFont, range } from './test-utils.js';
+import { PageInfo, readDocumentDefinition } from '../src/read-document.js';
+import { fakeFont, p, range } from './test-utils.js';
 
 const { objectContaining } = expect;
 
 describe('layout', () => {
-  let doc, normalFont, box;
+  let doc: Document, normalFont: PDFFont, box: Box;
 
   beforeEach(() => {
     const fonts = [fakeFont('Test'), fakeFont('Test', { italic: true })];
-    doc = { fonts, pageSize: paperSizes.A4 };
+    doc = { fonts, pageSize: paperSizes.A4 } as Document;
     [normalFont] = fonts.map((f) => f.pdfFont);
     box = { x: 20, y: 30, width: 400, height: 700 };
   });
@@ -137,8 +140,8 @@ describe('layout', () => {
           { text: 'content', height: 500 },
           { text: 'content', height: 500 },
         ],
-        header: ({ pageCount, pageNumber }) => ({ text: `${pageNumber}/${pageCount}` }),
-        footer: ({ pageCount, pageNumber }) => ({ text: `${pageNumber}/${pageCount}` }),
+        header: ({ pageCount, pageNumber }: PageInfo) => ({ text: `${pageNumber}/${pageCount}` }),
+        footer: ({ pageCount, pageNumber }: PageInfo) => ({ text: `${pageNumber}/${pageCount}` }),
       });
 
       const pages = layoutPages(def, doc) as any;
@@ -162,7 +165,7 @@ describe('layout', () => {
 
       const { frame, remainder } = layoutPageContent([{ text }], box, doc) as any;
 
-      expect(remainder).toBeUndefined();
+      expect(remainder).toEqual([]);
       expect(frame).toEqual(objectContaining(box));
       expect(frame.children).toEqual([
         objectContaining({ x: 0, y: 0, width: 400, height: 18 * 1.2 }),
@@ -204,8 +207,9 @@ describe('layout', () => {
     });
 
     describe('page breaks', () => {
-      const makeBlocks = (n) => range(n).map((n) => ({ id: `${n}`, height: 100 } as Block));
-      const renderedIds = (frame) => frame.children?.map((c) => parseInt(c.objects?.[0]?.name));
+      const makeBlocks = (n: number) => range(n).map((n) => ({ id: `${n}`, height: 100 } as Block));
+      const renderedIds = (frame: Frame) =>
+        frame.children?.map((c) => parseInt((c.objects?.[0] as any)?.name));
 
       it('includes page break after last fitting block', () => {
         const blocks = makeBlocks(10);
@@ -336,7 +340,7 @@ describe('layout', () => {
         const { frame, remainder } = layoutPageContent(blocks, box, doc);
 
         expect(renderedIds(frame)).toEqual(range(7));
-        expect(remainder).toBeUndefined();
+        expect(remainder).toEqual([]);
       });
 
       it('ignores breakAfter = avoid if next has breakBefore = always', () => {
@@ -451,8 +455,4 @@ describe('layout', () => {
 
 function span(text: string, attrs?: TextAttrs): TextSpan {
   return { text, attrs: { ...attrs } };
-}
-
-function p(x: number, y: number) {
-  return { x, y };
 }

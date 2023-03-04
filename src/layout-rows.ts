@@ -4,7 +4,7 @@ import { Frame, layoutBlock } from './layout.js';
 import { RowsBlock } from './read-block.js';
 
 export function layoutRowsContent(block: RowsBlock, box: Box, doc: Document): Partial<Frame> {
-  const children = [];
+  const children: Frame[] = [];
   let rowY = box.y;
   let lastMargin = 0;
   let aggregatedHeight = 0;

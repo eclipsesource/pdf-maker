@@ -21,7 +21,7 @@ export async function createDocument(def: DocumentDefinition): Promise<Document>
   const fonts = await embedFonts(def.fonts ?? [], pdfDoc);
   const images = await embedImages(def.images ?? [], pdfDoc);
   const pageSize = applyOrientation(def.pageSize ?? paperSizes.A4, def.pageOrientation);
-  setMetadata(def.info, pdfDoc);
+  setMetadata(pdfDoc, def.info);
   if (def.customData) {
     setCustomData(def.customData, pdfDoc);
   }
@@ -45,7 +45,7 @@ export async function finishDocument(def: DocumentDefinition, doc: Document) {
   return new Uint8Array([...data, 10]);
 }
 
-function setMetadata(info: Metadata, doc: PDFDocument) {
+function setMetadata(doc: PDFDocument, info?: Metadata) {
   if (info?.title) {
     doc.setTitle(info.title);
   }

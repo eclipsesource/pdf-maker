@@ -35,6 +35,7 @@ export function getPageImage(page: Page, image: PDFImage): PDFName {
 type GraphicsState = { ca: number; CA: number };
 
 export function getPageGraphicsState(page: Page, graphicsState: GraphicsState): PDFName {
+  if (!page.pdfPage) throw new Error('Page not initialized');
   page.extGStates ??= {};
   const key = `CA:${graphicsState.CA},ca:${graphicsState.ca}`;
   if (!(key in page.extGStates)) {

@@ -4,10 +4,10 @@ import { parseEdges, parseLength, subtractEdges } from '../src/box.js';
 
 describe('box', () => {
   describe('subtractEdges', () => {
-    it('returns the original box if edges are null', () => {
+    it('returns the original box if edges are undefined', () => {
       const box = { x: 10, y: 20, width: 300, height: 400 };
 
-      expect(subtractEdges(box, null)).toEqual(box);
+      expect(subtractEdges(box, undefined)).toEqual(box);
     });
 
     it('subtracts all edges correctly', () => {

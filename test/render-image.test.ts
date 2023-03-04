@@ -1,17 +1,20 @@
 import { beforeEach, describe, expect, it } from '@jest/globals';
+import { PDFImage } from 'pdf-lib';
 
+import { Size } from '../src/box.js';
 import { ImageObject } from '../src/layout-image.js';
+import { Page } from '../src/page.js';
 import { renderImage } from '../src/render-image.js';
-import { fakePdfPage } from './test-utils.js';
+import { fakePdfPage, getContentStream } from './test-utils.js';
 
 describe('render-image', () => {
-  let page, size, pdfPage, image;
+  let page: Page, size: Size, image: PDFImage;
 
   beforeEach(() => {
     size = { width: 500, height: 800 };
-    pdfPage = fakePdfPage();
-    page = { size, pdfPage };
-    image = { ref: 23 };
+    const pdfPage = fakePdfPage();
+    page = { size, pdfPage } as Page;
+    image = { ref: 23 } as unknown as PDFImage;
   });
 
   describe('renderImage', () => {
@@ -22,7 +25,7 @@ describe('render-image', () => {
 
       renderImage(obj, page, pos);
 
-      expect(pdfPage.getContentStream().map((o) => o?.toString())).toEqual([
+      expect(getContentStream(page)).toEqual([
         'q',
         '1 0 0 1 11 738 cm',
         '30 0 0 40 0 0 cm',

@@ -1,5 +1,7 @@
 import { beforeEach, describe, expect, it } from '@jest/globals';
 
+import { Box } from '../src/box.js';
+import { Document } from '../src/document.js';
 import { layoutTextContent } from '../src/layout-text.js';
 import { paperSizes } from '../src/page-sizes.js';
 import { TextAttrs, TextSpan } from '../src/read-block.js';
@@ -8,12 +10,12 @@ import { fakeFont } from './test-utils.js';
 const { objectContaining } = expect;
 
 describe('layout', () => {
-  let box, doc;
+  let box: Box, doc: Document;
 
   beforeEach(() => {
     const fonts = [fakeFont('Test'), fakeFont('Test', { italic: true })];
     box = { x: 20, y: 30, width: 400, height: 700 };
-    doc = { fonts, pageSize: paperSizes.A4 };
+    doc = { fonts, pageSize: paperSizes.A4 } as Document;
   });
 
   describe('layoutTextContent', () => {

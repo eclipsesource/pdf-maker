@@ -1,10 +1,10 @@
 import { beforeEach, describe, expect, it } from '@jest/globals';
 
-import { readDocumentDefinition } from '../src/read-document.js';
+import { PageInfo, readDocumentDefinition } from '../src/read-document.js';
 
 describe('read-document', () => {
   describe('readDocumentDefinition', () => {
-    let input;
+    let input: any;
 
     beforeEach(() => {
       input = { content: [] };
@@ -113,14 +113,14 @@ describe('read-document', () => {
       ]);
     });
 
-    ['header', 'footer'].forEach((name) => {
+    (['header', 'footer'] as const).forEach((name) => {
       it(`supports dynamic ${name}`, () => {
         const defaultStyle = { fontSize: 23 };
-        const fn = ({ pageNumber }) => ({ text: `Page ${pageNumber}` });
+        const fn = ({ pageNumber }: PageInfo) => ({ text: `Page ${pageNumber}` });
 
         const def = readDocumentDefinition({ ...input, defaultStyle, [name]: fn });
 
-        expect(def[name]({ pageNumber: 1, pageCount: 2, pageSize: null })).toEqual({
+        expect(def[name]?.({ pageNumber: 1, pageCount: 2 } as PageInfo)).toEqual({
           text: [{ text: 'Page 1', attrs: { fontSize: 23 } }],
         });
       });

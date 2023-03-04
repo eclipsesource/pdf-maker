@@ -83,6 +83,9 @@ export function readShape(input: unknown): Shape {
       return readLine(shape);
     case 'polyline':
       return readPolyline(shape);
+    default:
+      // should never happen since type is checked above
+      throw new Error('unknown shape type');
   }
 }
 

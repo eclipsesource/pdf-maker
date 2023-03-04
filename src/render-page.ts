@@ -14,7 +14,7 @@ export function renderPage(page: Page, doc: Document) {
   page.footer && renderFrame(page.footer, page);
 }
 
-export function renderFrame(frame: Frame, page: Page, base: Pos = null) {
+export function renderFrame(frame: Frame, page: Page, base?: Pos) {
   const topLeft = { x: frame.x + (base?.x ?? 0), y: frame.y + (base?.y ?? 0) };
   frame.objects?.forEach((object) => {
     if (object.type === 'graphics') {

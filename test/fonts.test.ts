@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, jest } from '@jest/globals';
+import { PDFDocument, PDFFont } from 'pdf-lib';
 
-import { embedFonts, readFonts, selectFont } from '../src/fonts.js';
+import { embedFonts, Font, readFonts, selectFont } from '../src/fonts.js';
 import { fakeFont } from './test-utils.js';
 
 describe('fonts', () => {
@@ -93,9 +94,9 @@ describe('fonts', () => {
     });
 
     it('throws when embedding fails', async () => {
-      const embedFont = (data) =>
+      const embedFont = (data: any) =>
         data === 'Bad_Data' ? Promise.reject('Bad font') : Promise.resolve(data);
-      const doc = { embedFont } as any;
+      const doc = { embedFont } as PDFDocument;
       const fontsDef = [
         { name: 'Good', data: 'Good_Data' },
         { name: 'Bad', data: 'Bad_Data' },
@@ -108,7 +109,12 @@ describe('fonts', () => {
   });
 
   describe('selectFont', () => {
-    let fonts, normalFont, italicFont, boldFont, italicBoldFont, otherFont;
+    let fonts: Font[];
+    let normalFont: PDFFont;
+    let italicFont: PDFFont;
+    let boldFont: PDFFont;
+    let italicBoldFont: PDFFont;
+    let otherFont: PDFFont;
 
     beforeEach(() => {
       fonts = [

@@ -1,14 +1,16 @@
 import { beforeEach, describe, expect, it } from '@jest/globals';
 
+import { Box } from '../src/box.js';
+import { Document } from '../src/document.js';
 import { layoutRowsContent } from '../src/layout-rows.js';
 import { fakeFont } from './test-utils.js';
 
 describe('layout-rows', () => {
-  let doc, box;
+  let doc: Document, box: Box;
 
   beforeEach(() => {
     const fonts = [fakeFont('Test')];
-    doc = { fonts };
+    doc = { fonts } as Document;
     box = { x: 20, y: 30, width: 400, height: 700 };
   });
 

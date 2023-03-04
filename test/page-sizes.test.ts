@@ -97,12 +97,12 @@ describe('page-sizes', () => {
       });
     });
 
-    it('returns unmodified size if orientation is null', () => {
-      expect(applyOrientation({ width: 23, height: 42 }, null)).toEqual({
+    it('returns unmodified size if orientation is undefined', () => {
+      expect(applyOrientation({ width: 23, height: 42 }, undefined)).toEqual({
         width: 23,
         height: 42,
       });
-      expect(applyOrientation({ width: 42, height: 23 }, null)).toEqual({
+      expect(applyOrientation({ width: 42, height: 23 }, undefined)).toEqual({
         width: 42,
         height: 23,
       });

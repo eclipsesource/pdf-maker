@@ -1,24 +1,26 @@
 import { beforeEach, describe, expect, it, jest } from '@jest/globals';
-import { PDFArray, PDFDict, PDFName, PDFRef } from 'pdf-lib';
+import { PDFArray, PDFDict, PDFFont, PDFName, PDFPage, PDFRef } from 'pdf-lib';
 
+import { Size } from '../src/box.js';
+import { Document } from '../src/document.js';
 import { Frame } from '../src/layout.js';
+import { Page } from '../src/page.js';
 import { renderFrame, renderPage } from '../src/render-page.js';
-import { fakePdfFont, fakePdfPage } from './test-utils.js';
+import { fakePdfFont, fakePdfPage, getContentStream } from './test-utils.js';
 
 describe('render-page', () => {
-  let pdfPage, contentStream;
+  let pdfPage: PDFPage;
 
   beforeEach(() => {
     pdfPage = fakePdfPage();
-    contentStream = pdfPage.getContentStream();
   });
 
   describe('renderPage', () => {
-    let size, doc;
+    let size: Size, doc: Document;
 
     beforeEach(() => {
       size = { width: 300, height: 400 };
-      doc = { pdfDoc: { addPage: jest.fn().mockReturnValue(pdfPage) } as any };
+      doc = { pdfDoc: { addPage: jest.fn().mockReturnValue(pdfPage) } as any } as Document;
     });
 
     it('renders content', () => {
@@ -32,7 +34,7 @@ describe('render-page', () => {
 
       renderPage(page, doc);
 
-      expect(contentStream.toString()).toEqual('q,1 0 0 -1 50 350 cm,q,0 0 280 300 re,f,Q,Q');
+      expect(getContentStream(page).join()).toEqual('q,1 0 0 -1 50 350 cm,q,0 0 280 300 re,f,Q,Q');
     });
 
     it('renders header', () => {
@@ -47,7 +49,7 @@ describe('render-page', () => {
 
       renderPage(page, doc);
 
-      expect(contentStream.toString()).toEqual('q,1 0 0 -1 50 380 cm,q,0 0 280 30 re,f,Q,Q');
+      expect(getContentStream(page).join()).toEqual('q,1 0 0 -1 50 380 cm,q,0 0 280 30 re,f,Q,Q');
     });
 
     it('renders footer', () => {
@@ -62,16 +64,16 @@ describe('render-page', () => {
 
       renderPage(page, doc);
 
-      expect(contentStream.toString()).toEqual('q,1 0 0 -1 50 50 cm,q,0 0 280 30 re,f,Q,Q');
+      expect(getContentStream(page).join()).toEqual('q,1 0 0 -1 50 50 cm,q,0 0 280 30 re,f,Q,Q');
     });
   });
 
   describe('renderFrame', () => {
-    let page, size, font;
+    let page: Page, size: Size, font: PDFFont;
 
     beforeEach(() => {
       size = { width: 500, height: 800 };
-      page = { size, pdfPage };
+      page = { size, pdfPage } as Page;
       font = fakePdfFont('Test');
     });
 
@@ -97,7 +99,7 @@ describe('render-page', () => {
 
       renderFrame(frame, page);
 
-      expect(contentStream.toString()).toEqual(
+      expect(getContentStream(page).join()).toEqual(
         'BT,1 0 0 1 15 762 Tm,0 0 0 rg,/Test-1 12 Tf,Test text Tj,ET'
       );
     });
@@ -130,7 +132,7 @@ describe('render-page', () => {
       renderFrame(frame, page);
 
       // text rendered at (25, 750) + (10, 20)
-      expect(contentStream.toString()).toEqual(
+      expect(getContentStream(page).join()).toEqual(
         'BT,1 0 0 1 25 742 Tm,0 0 0 rg,/Test-1 12 Tf,Test text Tj,ET'
       );
     });
@@ -143,7 +145,7 @@ describe('render-page', () => {
 
       renderFrame(frame, page);
 
-      const names = pdfPage.doc.catalog
+      const names = (pdfPage.doc.catalog as any)
         .get(PDFName.of('Names'))
         .get(PDFName.of('Dests'))
         .get(PDFName.of('Names'));
@@ -159,12 +161,12 @@ describe('render-page', () => {
 
       renderFrame(frame, page);
 
-      const pageAnnotations = pdfPage.node.get(PDFName.of('Annots'));
+      const pageAnnotations = pdfPage.node.get(PDFName.of('Annots')) as PDFArray;
       expect(pageAnnotations).toBeInstanceOf(PDFArray);
       expect(pageAnnotations.size()).toBe(1);
       const ref = pageAnnotations.get(0);
       expect(ref).toBeInstanceOf(PDFRef);
-      const annotation = pdfPage.doc.context.indirectObjects.get(ref);
+      const annotation = (pdfPage.doc.context as any).indirectObjects.get(ref);
       expect(annotation.toString()).toEqual(
         [
           '<<',
@@ -191,7 +193,7 @@ describe('render-page', () => {
 
       renderFrame(frame, page);
 
-      const pageAnnotations = pdfPage.node.get(PDFName.of('Annots'));
+      const pageAnnotations = pdfPage.node.get(PDFName.of('Annots')) as PDFArray;
       expect(pageAnnotations).toBeInstanceOf(PDFArray);
       expect(pageAnnotations.size()).toBe(1);
       const annotation = pdfPage.doc.context.lookup(pageAnnotations.get(0)) as PDFDict;

@@ -3,7 +3,7 @@ import { rgb } from 'pdf-lib';
 import { ZERO_EDGES } from './box.js';
 import { Frame, TextRowObject } from './layout.js';
 import { Block } from './read-block.js';
-import { CircleObject, GraphicsObject, LineObject, RectObject } from './read-graphics.js';
+import { CircleObject, GraphicsObject, LineObject, RectObject, Shape } from './read-graphics.js';
 
 export function createPageGuides(frame: Frame): GraphicsObject {
   const { width, height } = frame;
@@ -35,7 +35,7 @@ export function createFrameGuides(frame: Frame, block: Block): GraphicsObject {
     bb === 'always' && rect({ x: 0, y: -3, width: 30, height: 3, ...fill }),
     ba === 'avoid' && circle({ cx: w - 5, cy: h, r: 3, ...fill }),
     ba === 'always' && rect({ x: w - 30, y: h, width: 30, height: 3, ...fill }),
-  ].filter(Boolean);
+  ].filter(Boolean) as Shape[];
   return { type: 'graphics', shapes };
 }
 

@@ -1,5 +1,7 @@
 import { beforeEach, describe, expect, it } from '@jest/globals';
 
+import { Box } from '../src/box.js';
+import { Document } from '../src/document.js';
 import { layoutImageContent } from '../src/layout-image.js';
 import { ImageBlock } from '../src/read-block.js';
 import { fakeImage } from './test-utils.js';
@@ -7,12 +9,12 @@ import { fakeImage } from './test-utils.js';
 const { objectContaining } = expect;
 
 describe('layout-image', () => {
-  let box, doc;
+  let box: Box, doc: Document;
 
   beforeEach(() => {
     const images = [fakeImage('img-720-480', 720, 480), fakeImage('img-72-48', 72, 48)];
     box = { x: 20, y: 30, width: 400, height: 700 };
-    doc = { images };
+    doc = { images } as Document;
   });
 
   describe('layoutImageContent', () => {

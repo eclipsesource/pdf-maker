@@ -9,10 +9,10 @@ export function layoutColumnsContent(block: ColumnsBlock, box: Box, doc: Documen
       ? undefined
       : column.width + (column.margin?.left ?? 0) + (column.margin?.right ?? 0)
   );
-  const reservedWidth = colWidths.reduce((p, c) => p + (c ?? 0), 0);
-  const flexColCount = colWidths.reduce((p, c) => p + (c == null ? 1 : 0), 0);
+  const reservedWidth = colWidths.reduce((p: number, c) => p + (c ?? 0), 0);
+  const flexColCount = colWidths.reduce((p: number, c) => p + (c == null ? 1 : 0), 0);
   const flexColWidth = flexColCount ? Math.max(0, box.width - reservedWidth) / flexColCount : 0;
-  const children = [];
+  const children: Frame[] = [];
   let colX = box.x;
   let maxColHeight = 0;
   block.columns.forEach((column) => {
