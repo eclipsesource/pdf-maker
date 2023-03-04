@@ -5,5 +5,6 @@ module.exports = {
     // ts-jest does not seem to handle .js extensions in relative imports
     '^(\\.\\.?\\/.*)\\.js': '$1',
   },
-  coveragePathIgnorePatterns: ['/node_modules/', '/test'],
+  modulePathIgnorePatterns: ['<rootDir>/dist/'],
+  coveragePathIgnorePatterns: ['<rootDir>/node_modules/', '<rootDir>/test'],
 };
