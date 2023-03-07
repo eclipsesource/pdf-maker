@@ -9,6 +9,7 @@ import {
   setFillingColor,
   setFontAndSize,
   setTextMatrix,
+  setTextRise,
   showText,
 } from 'pdf-lib';
 
@@ -28,8 +29,9 @@ export function renderText(object: TextObject, page: Page, base: Pos) {
       const fontKey = getPageFont(page, seg.font);
       const encodedText = seg.font.encodeText(seg.text);
       const operators = [
-        setTextColor(state, seg.color),
-        setTextFontAndSize(state, fontKey, seg.fontSize),
+        setTextColorOp(state, seg.color),
+        setTextFontAndSizeOp(state, fontKey, seg.fontSize),
+        setTextRiseOp(state, seg.rise),
         showText(encodedText),
       ].filter(Boolean) as PDFOperator[];
       contentStream.push(...operators);
@@ -38,9 +40,9 @@ export function renderText(object: TextObject, page: Page, base: Pos) {
   contentStream.push(endText());
 }
 
-type TextState = { color?: Color; font?: string; size?: number };
+type TextState = { color?: Color; font?: string; size?: number; rise?: number };
 
-function setTextColor(state: TextState, color?: Color): PDFOperator | undefined {
+function setTextColorOp(state: TextState, color?: Color): PDFOperator | undefined {
   const effectiveColor = color ?? rgb(0, 0, 0);
   if (!equalsColor(state.color, effectiveColor)) {
     state.color = effectiveColor;
@@ -48,7 +50,7 @@ function setTextColor(state: TextState, color?: Color): PDFOperator | undefined 
   }
 }
 
-function setTextFontAndSize(
+function setTextFontAndSizeOp(
   state: TextState,
   font: PDFName,
   size: number
@@ -57,6 +59,13 @@ function setTextFontAndSize(
     state.font = font?.toString();
     state.size = size;
     return setFontAndSize(font, size);
+  }
+}
+
+function setTextRiseOp(state: TextState, rise?: number): PDFOperator | undefined {
+  if ((state.rise ?? 0) !== (rise ?? 0)) {
+    state.rise = rise;
+    return setTextRise(rise ?? 0);
   }
 }
 

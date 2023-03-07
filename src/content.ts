@@ -363,6 +363,12 @@ export type TextAttrs = {
    * element in the document.
    */
   link?: string;
+  /**
+   * A vertical offset in pt that shifts the text baseline up (if the value is positive) or down
+   * (if negative). Shifting the baseline can be useful for superscripts and subscripts.
+   * This setting does not affect the line height.
+   */
+  rise?: number;
 };
 
 /**

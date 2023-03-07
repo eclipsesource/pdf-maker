@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+* Text attribute `rise` for superscripts and subscripts.
+
 ## [0.3.3] - 2022-03-03
 
 ### Fixed

@@ -51,6 +51,7 @@ export type TextAttrs = {
   italic?: boolean;
   color?: Color;
   link?: string;
+  rise?: number;
 };
 
 type BlockAttrs = {
@@ -160,6 +161,7 @@ export function readTextAttrs(input: Obj): TextAttrs {
     italic: optional(types.boolean()),
     color: optional(parseColor),
     link: optional(types.string()),
+    rise: optional(types.number()),
   });
 }
 

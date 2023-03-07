@@ -67,8 +67,8 @@ function layoutTextRow(segments: TextSegment[], box: Box, textAlign?: Alignment)
   const links: LinkObject[] = [];
   const segmentObjects: TextSegmentObject[] = [];
   flattenTextSegments(lineSegments).forEach((seg) => {
-    const { text, width, height, lineHeight, font, fontSize, link, color } = seg;
-    segmentObjects.push({ text, font, fontSize, color });
+    const { text, width, height, lineHeight, font, fontSize, link, color, rise } = seg;
+    segmentObjects.push({ text, font, fontSize, color, rise });
     const offset = (height * lineHeight - height) / 2;
     if (link) {
       const linkPos = { x: box.x + pos.x, y: box.y - pos.y + offset };

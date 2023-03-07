@@ -38,6 +38,31 @@ describe('render-text', () => {
       ]);
     });
 
+    it('renders text rise', () => {
+      const seg1 = { text: 'foo', font, fontSize: 10 };
+      const seg2 = { text: 'bar', font, fontSize: 10, rise: 3 };
+      const seg3 = { text: 'baz', font, fontSize: 10 };
+      const obj: TextObject = {
+        type: 'text',
+        rows: [{ segments: [seg1, seg2, seg3], x: 1, y: 2, width: 60, height: 12, baseline: 8 }],
+      };
+
+      renderText(obj, page, pos);
+
+      expect(getContentStream(page)).toEqual([
+        'BT',
+        '1 0 0 1 11 770 Tm',
+        '0 0 0 rg',
+        '/fontA-1 10 Tf',
+        'foo Tj',
+        '3 Ts',
+        'bar Tj',
+        '0 Ts',
+        'baz Tj',
+        'ET',
+      ]);
+    });
+
     it('renders multiple rows with multiple text segments', () => {
       const seg1 = { text: 'foo', font, fontSize: 10 };
       const seg2 = { text: 'bar', font, fontSize: 10 };

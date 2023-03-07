@@ -51,6 +51,7 @@ export type TextSegmentObject = {
   font: PDFFont;
   fontSize: number;
   color?: Color;
+  rise?: number;
 };
 
 export type LinkObject = {
