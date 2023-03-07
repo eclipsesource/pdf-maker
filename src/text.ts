@@ -16,12 +16,13 @@ export type TextSegment = {
   fontSize: number;
   color?: Color;
   link?: string;
+  rise?: number;
 };
 
 export function extractTextSegments(textSpans: TextSpan[], fonts: Font[]): TextSegment[] {
   return textSpans.flatMap((span) => {
     const { text, attrs } = span;
-    const { fontSize = defaultFontSize, lineHeight = defaultLineHeight, color, link } = attrs;
+    const { fontSize = defaultFontSize, lineHeight = defaultLineHeight, color, link, rise } = attrs;
     const font = selectFont(fonts, attrs);
     const height = font.heightAtSize(fontSize);
     return splitChunks(text).map(
@@ -35,6 +36,7 @@ export function extractTextSegments(textSpans: TextSpan[], fonts: Font[]): TextS
           fontSize,
           color,
           link,
+          rise,
         } as TextSegment)
     );
   });
@@ -143,7 +145,8 @@ export function flattenTextSegments(segments: TextSegment[]): TextSegment[] {
       segment.fontSize === prev?.fontSize &&
       segment.lineHeight === prev?.lineHeight &&
       segment.color === prev?.color &&
-      segment.link === prev?.link
+      segment.link === prev?.link &&
+      segment.rise === prev?.rise
     ) {
       prev.text += segment.text;
       prev.width += segment.width;
