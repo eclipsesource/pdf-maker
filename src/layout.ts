@@ -3,7 +3,7 @@ import { PDFFont } from 'pdf-lib';
 import { Box, parseEdges, subtractEdges, ZERO_EDGES } from './box.js';
 import { Color } from './colors.js';
 import { Document } from './document.js';
-import { createFrameGuides, createPageGuides } from './guides.js';
+import { createFrameGuides } from './guides.js';
 import { layoutColumnsContent } from './layout-columns.js';
 import { ImageObject, layoutImageContent } from './layout-image.js';
 import { layoutRowsContent } from './layout-rows.js';
@@ -72,18 +72,33 @@ export type AnchorObject = {
 
 export function layoutPages(def: DocumentDefinition, doc: Document): Page[] {
   const pageMargin = def.margin ?? defaultPageMargin;
-  const contentBox = subtractEdges({ x: 0, y: 0, ...doc.pageSize }, pageMargin);
   const pages: Page[] = [];
   let remainingBlocks = def.content;
+  let pageNumber = 1;
   while (remainingBlocks?.length) {
+    const pageInfo = { pageNumber: pageNumber++, pageSize: doc.pageSize };
+    const header = def.header && layoutHeader(def.header(pageInfo), doc);
+    const footer = def.footer && layoutFooter(def.footer(pageInfo), doc);
+
+    const x = 0;
+    const y = (header?.y ?? 0) + (header?.height ?? 0);
+    const width = doc.pageSize.width;
+    const height = (footer?.y ?? doc.pageSize.height) - y;
+    const contentBox = subtractEdges({ x, y, width, height }, pageMargin);
+
     const { frame, remainder } = layoutPageContent(remainingBlocks, contentBox, doc);
+    if (doc.guides) {
+      frame.objects = [createFrameGuides(frame, { margin: def.margin, isPage: true })];
+    }
     remainingBlocks = remainder;
-    pages.push({ size: doc.pageSize, content: frame });
+    pages.push({ size: doc.pageSize, content: frame, header, footer });
   }
+
+  //Re-layout headers and footers to provide them with the final page count.
   pages.forEach((page, idx) => {
     const pageInfo = { pageCount: pages.length, pageNumber: idx + 1, pageSize: doc.pageSize };
-    page.header = def.header && layoutHeader(def.header(pageInfo), doc);
-    page.footer = def.footer && layoutFooter(def.footer(pageInfo), doc);
+    typeof def.header === 'function' && (page.header = layoutHeader(def.header(pageInfo), doc));
+    typeof def.footer === 'function' && (page.footer = layoutFooter(def.footer(pageInfo), doc));
   });
   return pages.map(pickDefined) as Page[];
 }
@@ -147,7 +162,6 @@ export function layoutPageContent(blocks: Block[], box: Box, doc: Document) {
   }
 
   const frame: Frame = { x, y, width, height, children };
-  doc.guides && (frame.objects = [createPageGuides(frame)]);
   return { frame, remainder };
 }
 

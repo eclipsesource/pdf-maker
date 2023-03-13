@@ -1,6 +1,11 @@
 # Changelog
 
-## [Unreleased]
+## [0.4.0] - Unreleased
+
+### Breaking changes
+
+* Page margins are now relative to the header and footer to let the
+  contents adjust to a dynamic header and footer height.
 
 ### Added
 
@@ -75,3 +80,8 @@ First public version.
 [0.1.0]: https://github.com/eclipsesource/pdf-maker/releases/tag/v0.1.0
 [0.2.0]: https://github.com/eclipsesource/pdf-maker/releases/tag/v0.2.0
 [0.3.0]: https://github.com/eclipsesource/pdf-maker/releases/tag/v0.3.0
+[0.3.0]: https://github.com/eclipsesource/pdf-maker/releases/tag/v0.3.0
+[0.3.1]: https://github.com/eclipsesource/pdf-maker/releases/tag/v0.3.1
+[0.3.2]: https://github.com/eclipsesource/pdf-maker/releases/tag/v0.3.2
+[0.3.3]: https://github.com/eclipsesource/pdf-maker/releases/tag/v0.3.3
+[0.4.0]: https://github.com/eclipsesource/pdf-maker/releases/tag/v0.4.0
