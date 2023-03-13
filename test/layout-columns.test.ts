@@ -135,6 +135,28 @@ describe('layout-columns', () => {
         height: 27,
       });
     });
+
+    it('respects vertical alignment', () => {
+      const columns: Block[] = [
+        { text: [span('Column 1')], height: 100 },
+        { text: [span('Column 2')], verticalAlign: 'top' },
+        { text: [span('Column 3')], verticalAlign: 'middle' },
+        { text: [span('Column 4')], verticalAlign: 'bottom' },
+      ];
+      const block = { columns };
+
+      const frame = layoutColumnsContent(block, box, doc);
+
+      expect(frame).toEqual({
+        children: [
+          objectContaining({ y: box.y, height: 100 }),
+          objectContaining({ y: box.y, height: 12 }),
+          objectContaining({ y: box.y + (100 - 12) / 2, height: 12 }),
+          objectContaining({ y: box.y + 100 - 12, height: 12 }),
+        ],
+        height: 100,
+      });
+    });
   });
 });
 

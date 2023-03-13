@@ -33,7 +33,13 @@ export type DocumentDefinition = {
    */
   pageOrientation?: Orientation;
   /**
-   * The page margins. Defaults to 50pt on each side.
+   * The margin to leave around the page content area, relative to header and footer.
+   * That is, if a header is specified, the top margin defines the vertical distance from the
+   * header, otherwise from the top of the page.
+   * The bottom margin defines the vertical distance from the footer or, if there is no footer,
+   * from the bottom of the page.
+   *
+   * Defaults to `50pt` on each side.
    */
   margin?: Length | BoxLengths;
   /**
@@ -61,7 +67,9 @@ export type DocumentDefinition = {
   customData?: Record<string, string | Uint8Array>;
   dev?: {
     /**
-     * Whether to draw a thin colored rectangle around each rendered frame.
+     * When set to true, additional guides are drawn to help analyzing the layout.
+     * A thin rectangle is drawn around each rendered frame. Margins are given a semi-transparent
+     * yellow background and padding areas are shown in blue.
      */
     guides?: boolean;
   };
@@ -207,6 +215,10 @@ export type BlockAttrs = {
    */
   textAlign?: Alignment;
   /**
+   * Aligns this block vertically within a columns block.
+   */
+  verticalAlign?: 'top' | 'middle' | 'bottom';
+  /**
    * An optional *unique* id for the element. When an `id` is specified, an anchor with this id
    * will be included in the PDF document that can be used to refer to this element using the text
    * attribute `link`.
@@ -238,17 +250,19 @@ export type BlockAttrs = {
 
 export type PageInfo = {
   /**
+   * The size of the current page in pt.
+   */
+  readonly pageSize: { width: number; height: number };
+  /**
    * The number of the current page, starting at 1.
    */
   readonly pageNumber: number;
   /**
    * The total number of pages.
+   * This value is only available after the layout of the entire document has finished.
+   * Before that, it is `undefined`.
    */
-  readonly pageCount: number;
-  /**
-   * The size of the current page in pt.
-   */
-  readonly pageSize: { width: number; height: number };
+  readonly pageCount?: number;
 };
 
 export type BlockInfo = {

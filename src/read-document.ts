@@ -32,9 +32,9 @@ export type Metadata = {
 };
 
 export type PageInfo = {
-  pageNumber: number;
-  pageCount: number;
   pageSize: { width: number; height: number };
+  pageNumber: number;
+  pageCount?: number;
 };
 
 export function readDocumentDefinition(input: unknown): DocumentDefinition {

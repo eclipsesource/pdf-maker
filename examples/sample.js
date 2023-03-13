@@ -24,7 +24,7 @@ export default {
     liberty: { data: readFileSync('examples/liberty.jpg') },
   },
   pageSize: 'A4',
-  margin: { x: '2.5cm', top: '2.5cm', bottom: '2cm' },
+  margin: { x: '2.5cm', y: '0.5cm' },
   defaultStyle: {
     fontSize: 14,
   },
@@ -33,7 +33,7 @@ export default {
     margin: { x: '2.5cm', top: '1cm' },
   },
   footer: ({ pageNumber, pageCount }) => ({
-    text: `${pageNumber}/${pageCount}`,
+    text: `${pageNumber}/${pageCount ?? 0}`,
     textAlign: 'right',
     margin: { x: '2.5cm', bottom: '1cm' },
   }),
@@ -296,7 +296,7 @@ export default {
     },
     {
       columns: [
-        { image: 'liberty', padding: 5 },
+        { image: 'liberty', padding: 5, width: 100, verticalAlign: 'middle' },
         {
           rows: [
             { image: 'liberty', height: 75, imageAlign: 'left' },

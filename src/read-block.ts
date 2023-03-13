@@ -61,6 +61,7 @@ type BlockAttrs = {
   height?: number;
   id?: string;
   graphics?: (info: BlockInfo) => Shape[];
+  verticalAlign?: 'top' | 'middle' | 'bottom';
   breakBefore?: 'auto' | 'always' | 'avoid';
   breakAfter?: 'auto' | 'always' | 'avoid';
 };
@@ -147,6 +148,7 @@ function readBlockAttrs(input: Obj): BlockAttrs {
     height: optional(parseLength),
     id: optional(types.string()),
     graphics: optional(dynamic(types.array(readShape), 'graphics')),
+    verticalAlign: optional(types.string({ enum: ['top', 'middle', 'bottom'] })),
     breakBefore: optional(types.string({ enum: ['auto', 'always', 'avoid'] })),
     breakAfter: optional(types.string({ enum: ['auto', 'always', 'avoid'] })),
   }) as BlockAttrs;

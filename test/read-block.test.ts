@@ -20,6 +20,7 @@ describe('read-block', () => {
         margin: 5,
         width: '50pt',
         height: '80pt',
+        verticalAlign: 'middle',
         graphics: [{ type: 'rect', x: 1, y: 2, width: 3, height: 4 }],
       };
 
@@ -30,6 +31,7 @@ describe('read-block', () => {
         margin: { left: 5, right: 5, top: 5, bottom: 5 },
         width: 50,
         height: 80,
+        verticalAlign: 'middle',
         graphics: expect.any(Function),
       });
     });
@@ -94,7 +96,7 @@ describe('read-block', () => {
   });
 
   describe('readTextBlock', () => {
-    it('includes all properties of a blocks', () => {
+    it('includes all block attributes', () => {
       const input = {
         text: 'foo',
         graphics: [{ type: 'rect', x: 1, y: 2, width: 3, height: 4 }],
@@ -102,6 +104,7 @@ describe('read-block', () => {
         padding: 6,
         width: '50pt',
         height: '80pt',
+        verticalAlign: 'middle',
       };
 
       const result = readTextBlock(input);
@@ -113,6 +116,7 @@ describe('read-block', () => {
         padding: { left: 6, right: 6, top: 6, bottom: 6 },
         width: 50,
         height: 80,
+        verticalAlign: 'middle',
       });
     });
 
@@ -159,6 +163,12 @@ describe('read-block', () => {
       const input = { text: [], height: 'foo' };
 
       expect(() => readTextBlock(input)).toThrowError('Invalid value for "height":');
+    });
+
+    it('checks verticalAlign', () => {
+      const input = { text: [], verticalAlign: 'foo' };
+
+      expect(() => readTextBlock(input)).toThrowError('Invalid value for "verticalAlign":');
     });
   });
 
