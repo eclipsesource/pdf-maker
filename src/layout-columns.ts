@@ -26,9 +26,17 @@ export function layoutColumnsContent(block: ColumnsBlock, box: Box, doc: Documen
       height: column.height ?? box.height,
     };
     colX += colWidth + margin.right;
-    const block = layoutBlock(column, colBox, doc);
-    children.push(block);
-    maxColHeight = Math.max(maxColHeight, block.height + margin.top + margin.bottom);
+    const frame = layoutBlock(column, colBox, doc);
+    children.push(frame);
+    maxColHeight = Math.max(maxColHeight, frame.height + margin.top + margin.bottom);
+  });
+  block.columns.forEach((column, idx) => {
+    const child = children[idx];
+    if (column.verticalAlign === 'middle') {
+      child.y += (maxColHeight - child.height) / 2;
+    } else if (column.verticalAlign === 'bottom') {
+      child.y += maxColHeight - child.height;
+    }
   });
   return {
     children,

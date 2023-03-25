@@ -296,7 +296,7 @@ export default {
     },
     {
       columns: [
-        { image: 'liberty', padding: 5 },
+        { image: 'liberty', padding: 5, width: 100, verticalAlign: 'middle' },
         {
           rows: [
             { image: 'liberty', height: 75, imageAlign: 'left' },
