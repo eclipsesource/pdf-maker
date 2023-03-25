@@ -215,6 +215,10 @@ export type BlockAttrs = {
    */
   textAlign?: Alignment;
   /**
+   * Aligns this block vertically within a columns block.
+   */
+  verticalAlign?: 'top' | 'middle' | 'bottom';
+  /**
    * An optional *unique* id for the element. When an `id` is specified, an anchor with this id
    * will be included in the PDF document that can be used to refer to this element using the text
    * attribute `link`.
