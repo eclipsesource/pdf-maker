@@ -13,6 +13,7 @@ import {
   PDFOperator,
   popGraphicsState,
   pushGraphicsState,
+  setDashPattern,
   setFillingColor,
   setGraphicsState,
   setLineCap,
@@ -134,6 +135,7 @@ function setStyleAttrs(shape: Shape, page: Page): PDFOperator[] {
     'lineWidth' in shape && setLineWidth(shape.lineWidth as any),
     'lineCap' in shape && setLineCap(trLineCap(shape.lineCap as any)),
     'lineJoin' in shape && setLineJoin(trLineJoin(shape.lineJoin as any)),
+    'lineDash' in shape && setDashPattern(shape.lineDash as any, 0),
   ].filter(Boolean) as PDFOperator[];
 }
 

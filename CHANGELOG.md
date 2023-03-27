@@ -10,6 +10,8 @@
 ### Added
 
 * Text attribute `rise` for superscripts and subscripts.
+* Block attribute `verticalAlign` for vertical alignment of columns.
+* Attribute `lineDash` for graphics shapes.
 
 ## [0.3.3] - 2022-03-03
 

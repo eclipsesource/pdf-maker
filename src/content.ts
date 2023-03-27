@@ -288,26 +288,16 @@ export type Rect = {
   y: number;
   width: number;
   height: number;
-  lineWidth?: number;
-  lineColor?: Color;
-  lineOpacity?: number;
-  lineJoin?: LineJoin;
-  fillColor?: Color;
-  fillOpacity?: number;
-};
+} & Omit<LineAttrs, 'lineCap'> &
+  FillAttrs;
 
 export type Circle = {
   type: 'circle';
   cx: number;
   cy: number;
   r: number;
-  lineWidth?: number;
-  lineColor?: Color;
-  lineOpacity?: number;
-  lineJoin?: LineJoin;
-  fillColor?: Color;
-  fillOpacity?: number;
-};
+} & Omit<LineAttrs, 'lineCap'> &
+  FillAttrs;
 
 export type Line = {
   type: 'line';
@@ -315,27 +305,73 @@ export type Line = {
   y1: number;
   x2: number;
   y2: number;
-  lineWidth?: number;
-  lineColor?: Color;
-  lineOpacity?: number;
-  lineCap?: LineCap;
-};
+} & Omit<LineAttrs, 'lineJoin'>;
 
 export type Polyline = {
   type: 'polyline';
   points: { x: number; y: number }[];
   closePath?: boolean;
-  lineWidth?: number;
-  lineColor?: Color;
-  lineOpacity?: number;
-  lineCap?: LineCap;
-  lineJoin?: LineJoin;
-  fillColor?: Color;
-  fillOpacity?: number;
-};
+} & LineAttrs &
+  FillAttrs;
 
 export type LineCap = 'butt' | 'round' | 'square';
 export type LineJoin = 'miter' | 'round' | 'bevel';
+
+type LineAttrs = {
+  /**
+   * The width of stroked lines in pt.
+   */
+  lineWidth?: number;
+  /**
+   * The color of stroked lines in pt.
+   */
+  lineColor?: Color;
+  /**
+   * The opacity of stroked lines as a number between `0` and `1`.
+   */
+  lineOpacity?: number;
+  /**
+   * The shape at the end of open paths when they are stroked.
+   * * `butt`: indicates that the stroke for each subpath does not extend beyond its two endpoints.
+   *   On a zero length subpath, the path will not be rendered at all.
+   * * `round`: indicates that at the end of each subpath the stroke will be extended by a half circle
+   *   with a diameter equal to the stroke width.
+   *   On a zero length subpath, the stroke consists of a full circle centered at the subpath's point.
+   * * `square`: indicates that at the end of each subpath the stroke will be extended by a rectangle
+   *   with a width equal to half the width of the stroke and a height equal to the width of the stroke.
+   *   On a zero length subpath, the stroke consists of a square with its width equal to the stroke
+   *   width, centered at the subpath's point.
+   */
+  lineCap?: LineCap;
+  /**
+   * The shape to be used at the corners of paths or basic shapes when they are stroked.
+   * * `miter`: indicates that the outer edges of the strokes for the two segments should be extended
+   *   until they meet at an angle, as in a picture frame.
+   * * `round`: indicates that the outer edges of the strokes for the two segments should be rounded off
+   *   by a circular arc with a radius equal to half the line width.
+   * * `bevel`: indicates that the two segments should be finished with butt caps and the resulting
+   *   notch should be filled with a triangle.
+   */
+  lineJoin?: LineJoin;
+  /**
+   * The dash pattern to use for drawing paths, expressed as array of numbers. Each element defines
+   * the length of a dash or a gap, in pt, starting with the first dash. If the array contains an odd
+   * number of elements, then the elements are repeated to yield an even number of elements.
+   * An empty array stands for no dash pattern, i.e. a continuous line.
+   */
+  lineDash?: number[];
+};
+
+type FillAttrs = {
+  /**
+   * The color to use for filling the shape.
+   */
+  fillColor?: Color;
+  /**
+   * The opacity to use for filling the shape.
+   */
+  fillOpacity?: number;
+};
 
 /**
  * A piece of inline text. A list can be used to apply different styles to individual ranges of a
