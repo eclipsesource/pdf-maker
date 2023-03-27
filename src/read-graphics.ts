@@ -18,6 +18,7 @@ export type RectObject = {
   lineColor?: Color;
   lineOpacity?: number;
   lineJoin?: LineJoin;
+  lineDash?: number[];
   fillColor?: Color;
   fillOpacity?: number;
 };
@@ -32,6 +33,7 @@ export type CircleObject = {
   lineOpacity?: number;
   lineCap?: LineCap;
   lineJoin?: LineJoin;
+  lineDash?: number[];
   fillColor?: Color;
   fillOpacity?: number;
 };
@@ -46,6 +48,7 @@ export type LineObject = {
   lineColor?: Color;
   lineOpacity?: number;
   lineCap?: LineCap;
+  lineDash?: number[];
 };
 
 export type PolylineObject = {
@@ -57,6 +60,7 @@ export type PolylineObject = {
   lineOpacity?: number;
   lineCap?: LineCap;
   lineJoin?: LineJoin;
+  lineDash?: number[];
   fillColor?: Color;
   fillOpacity?: number;
 };
@@ -67,6 +71,7 @@ type LineJoin = 'miter' | 'round' | 'bevel';
 const tLineCap = types.string({ enum: ['butt', 'round', 'square'] });
 const tLineJoin = types.string({ enum: ['miter', 'round', 'bevel'] });
 const tLineWidth = types.number({ minimum: 0 });
+const tLineDash = types.array(types.number({ minimum: 0 }));
 const tOpacity = types.number({ minimum: 0, maximum: 1 });
 
 const shapeTypes = ['rect', 'circle', 'line', 'polyline'];
@@ -100,6 +105,7 @@ function readRect(input: Obj): RectObject {
     lineColor: optional(parseColor),
     lineOpacity: optional(tOpacity),
     lineJoin: optional(tLineJoin),
+    lineDash: optional(tLineDash),
     fillColor: optional(parseColor),
     fillOpacity: optional(tOpacity),
   }) as RectObject;
@@ -114,6 +120,7 @@ function readCircle(input: Obj): RectObject {
     lineWidth: optional(tLineWidth),
     lineColor: optional(parseColor),
     lineOpacity: optional(tOpacity),
+    lineDash: optional(tLineDash),
     fillColor: optional(parseColor),
     fillOpacity: optional(tOpacity),
   }) as RectObject;
@@ -130,6 +137,7 @@ function readLine(input: Obj): LineObject {
     lineColor: optional(parseColor),
     lineOpacity: optional(tOpacity),
     lineCap: optional(tLineCap),
+    lineDash: optional(tLineDash),
   }) as LineObject;
 }
 
@@ -143,6 +151,7 @@ function readPolyline(input: Obj): PolylineObject {
     lineOpacity: optional(tOpacity),
     lineCap: optional(tLineCap),
     lineJoin: optional(tLineJoin),
+    lineDash: optional(tLineDash),
     fillColor: optional(parseColor),
     fillOpacity: optional(tOpacity),
   }) as PolylineObject;

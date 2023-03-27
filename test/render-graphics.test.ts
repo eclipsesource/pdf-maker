@@ -59,6 +59,7 @@ describe('render-graphics', () => {
           lineColor: rgb(1, 0, 0),
           lineWidth: 1,
           lineJoin: 'round',
+          lineDash: [1, 2],
           fillOpacity: 0.5,
           lineOpacity: 0.5,
         };
@@ -72,6 +73,7 @@ describe('render-graphics', () => {
           '1 0 0 RG',
           '1 w',
           '1 j',
+          '[1 2] 0 d',
           '1 2 3 4 re',
           'B',
           ...tail,
@@ -104,6 +106,7 @@ describe('render-graphics', () => {
           lineColor: rgb(1, 0, 0),
           lineWidth: 1,
           lineJoin: 'round',
+          lineDash: [1, 2],
           fillOpacity: 0.5,
           lineOpacity: 0.5,
         };
@@ -117,6 +120,7 @@ describe('render-graphics', () => {
           '1 0 0 RG',
           '1 w',
           '1 j',
+          '[1 2] 0 d',
           '-2 2 m',
           '-2 0.3431457505076194 -0.6568542494923806 -1 1 -1 c',
           '2.6568542494923806 -1 4 0.3431457505076194 4 2 c',
@@ -144,6 +148,7 @@ describe('render-graphics', () => {
           lineOpacity: 0.5,
           lineWidth: 1,
           lineCap: 'round',
+          lineDash: [1, 2],
         };
 
         renderGraphics({ type: 'graphics', shapes: [line] }, page, pos);
@@ -154,6 +159,7 @@ describe('render-graphics', () => {
           '1 0 0 RG',
           '1 w',
           '1 J',
+          '[1 2] 0 d',
           '1 2 m',
           '3 4 l',
           'S',
@@ -191,6 +197,7 @@ describe('render-graphics', () => {
           lineWidth: 1,
           lineCap: 'round',
           lineJoin: 'round',
+          lineDash: [1, 2],
         };
 
         renderGraphics({ type: 'graphics', shapes: [polyline] }, page, pos);
@@ -202,6 +209,7 @@ describe('render-graphics', () => {
           '1 w',
           '1 J',
           '1 j',
+          '[1 2] 0 d',
           '1 2 m',
           '3 4 l',
           'B',

@@ -98,8 +98,18 @@ export default {
       columns: [
         {
           graphics: [
-            { type: 'line', x1: 10, y1: 10, x2: 80, y2: 10 },
-            { type: 'line', x1: 10, y1: 17, x2: 80, y2: 17, lineColor: '#4488cc' },
+            { type: 'line', x1: 10, y1: 10, x2: 80, y2: 10, lineDash: [5, 2, 1, 2] },
+            {
+              type: 'line',
+              x1: 10,
+              y1: 17,
+              x2: 80,
+              y2: 17,
+              lineWidth: 2,
+              lineCap: 'round',
+              lineDash: [0, 4],
+              lineColor: '#4488cc',
+            },
             { type: 'line', x1: 10, y1: 27, x2: 80, y2: 27, lineWidth: 7 },
             { type: 'line', x1: 10, y1: 39, x2: 80, y2: 39, lineWidth: 7, lineCap: 'round' },
             { type: 'line', x1: 10, y1: 51, x2: 80, y2: 51, lineWidth: 7, lineCap: 'square' },
@@ -150,8 +160,8 @@ export default {
               closePath: true,
               fillColor: '#cccccc',
               lineColor: '#4488cc',
-              lineWidth: 2,
               lineJoin: 'round',
+              lineDash: [4, 2],
             },
           ],
           width: '3in',
