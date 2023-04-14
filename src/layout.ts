@@ -94,7 +94,7 @@ export function layoutPages(def: DocumentDefinition, doc: Document): Page[] {
     pages.push({ size: doc.pageSize, content: frame, header, footer });
   }
 
-  //Re-layout headers and footers to provide them with the final page count.
+  // Re-layout headers and footers to provide them with the final page count.
   pages.forEach((page, idx) => {
     const pageInfo = { pageCount: pages.length, pageNumber: idx + 1, pageSize: doc.pageSize };
     typeof def.header === 'function' && (page.header = layoutHeader(def.header(pageInfo), doc));

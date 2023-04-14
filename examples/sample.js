@@ -70,15 +70,7 @@ export default {
         { text: 'cillum dolore', color: 'red' },
         ' eu fugiat nulla pariatur: ',
         {
-          text: [
-            'x',
-            { text: 'ⁿ⁻¹', rise: 3 },
-            ' 10',
-            { text: '³', rise: 3 },
-            ' H',
-            { text: '₂', rise: -3 },
-            'O',
-          ],
+          text: ['H', { text: '₂', rise: -3 }, 'O  10', { text: '⁻³', rise: 3 }],
           color: '#0066cc',
         },
       ],

@@ -15,11 +15,11 @@ import {
 
 import { Pos } from './box.js';
 import { TextObject } from './layout.js';
-import { getPageFont, Page } from './page.js';
+import { getPageFont, Page, TextState } from './page.js';
 
 export function renderText(object: TextObject, page: Page, base: Pos) {
   const contentStream: PDFContentStream = (page.pdfPage as any).getContentStream();
-  const state: TextState = {};
+  const state = (page.textState ??= {});
   const x = base.x;
   const y = page.size.height - base.y;
   contentStream.push(beginText());
@@ -39,8 +39,6 @@ export function renderText(object: TextObject, page: Page, base: Pos) {
   });
   contentStream.push(endText());
 }
-
-type TextState = { color?: Color; font?: string; size?: number; rise?: number };
 
 function setTextColorOp(state: TextState, color?: Color): PDFOperator | undefined {
   const effectiveColor = color ?? rgb(0, 0, 0);
