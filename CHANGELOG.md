@@ -1,6 +1,13 @@
 # Changelog
 
-## [0.4.0] - Unreleased
+## [0.4.1] - Unreleased
+
+### Fixed
+
+* Text rise is now reset properly and does not affect subsequent text
+  elements anymore.
+
+## [0.4.0] - 2023-03-27
 
 ### Breaking changes
 
@@ -13,7 +20,7 @@
 * Block attribute `verticalAlign` for vertical alignment of columns.
 * Attribute `lineDash` for graphics shapes.
 
-## [0.3.3] - 2022-03-03
+## [0.3.3] - 2023-03-03
 
 ### Fixed
 

@@ -63,6 +63,45 @@ describe('render-text', () => {
       ]);
     });
 
+    it('maintains text state throughout page', () => {
+      const obj1: TextObject = {
+        type: 'text',
+        rows: [
+          {
+            segments: [{ text: 'foo', font, fontSize: 10, rise: 3 }],
+            ...{ x: 1, y: 2, width: 60, height: 12, baseline: 8 },
+          },
+        ],
+      };
+      const obj2: TextObject = {
+        type: 'text',
+        rows: [
+          {
+            segments: [{ text: 'bar', font, fontSize: 10 }],
+            ...{ x: 3, y: 4, width: 60, height: 12, baseline: 8 },
+          },
+        ],
+      };
+
+      renderText(obj1, page, pos);
+      renderText(obj2, page, pos);
+
+      expect(getContentStream(page)).toEqual([
+        'BT',
+        '1 0 0 1 11 770 Tm',
+        '0 0 0 rg',
+        '/fontA-1 10 Tf',
+        '3 Ts',
+        'foo Tj',
+        'ET',
+        'BT',
+        '1 0 0 1 13 768 Tm',
+        '0 Ts', // reset text rise
+        'bar Tj',
+        'ET',
+      ]);
+    });
+
     it('renders multiple rows with multiple text segments', () => {
       const seg1 = { text: 'foo', font, fontSize: 10 };
       const seg2 = { text: 'bar', font, fontSize: 10 };
