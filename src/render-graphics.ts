@@ -25,7 +25,7 @@ import {
 
 import { Pos } from './box.js';
 import { LineCap, LineJoin } from './content.js';
-import { getPageGraphicsState, Page } from './page.js';
+import { getExtGraphicsState, Page } from './page.js';
 import {
   CircleObject,
   GraphicsObject,
@@ -106,9 +106,9 @@ function pathOperations(points: { x: number; y: number }[]): PDFOperator[] {
   return points.reduce((a: PDFOperator[], p) => [...a, (a.length ? lineTo : moveTo)(p.x, p.y)], []);
 }
 
-function drawPath(hasFillColor: boolean, haslineColor: boolean) {
-  if (hasFillColor && haslineColor) return fillAndStroke();
-  if (haslineColor) return stroke();
+function drawPath(hasFillColor: boolean, hasLineColor: boolean) {
+  if (hasFillColor && hasLineColor) return fillAndStroke();
+  if (hasLineColor) return stroke();
   return fill(); // fall back to a black shape
 }
 
@@ -127,9 +127,9 @@ const lineJoinTr = {
 const trLineJoin = (lineJoin: LineJoin) => lineJoinTr[lineJoin];
 
 function setStyleAttrs(shape: Shape, page: Page): PDFOperator[] {
-  const graphicsState = getGraphicsState(shape, page);
+  const extGraphicsState = getExtGraphicsStateForShape(page, shape);
   return [
-    graphicsState && setGraphicsState(graphicsState),
+    extGraphicsState && setGraphicsState(extGraphicsState),
     'fillColor' in shape && setFillingColor(shape.fillColor as any),
     'lineColor' in shape && setStrokingColor(shape.lineColor as any),
     'lineWidth' in shape && setLineWidth(shape.lineWidth as any),
@@ -143,13 +143,13 @@ function tr(pos: Pos, page: Page): Pos {
   return { x: pos.x, y: page.size.height - pos.y };
 }
 
-function getGraphicsState(shape: Shape, page: Page): PDFName | undefined {
+function getExtGraphicsStateForShape(page: Page, shape: Shape): PDFName | undefined {
   const { lineOpacity, fillOpacity } = shape as { lineOpacity: number; fillOpacity: number };
   if (lineOpacity != null || fillOpacity != null) {
-    const graphicsState = {
+    const graphicsParams = {
       CA: lineOpacity ?? 1,
       ca: fillOpacity ?? 1,
     };
-    return getPageGraphicsState(page, graphicsState);
+    return getExtGraphicsState(page, graphicsParams);
   }
 }
