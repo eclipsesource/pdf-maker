@@ -35,14 +35,14 @@ export function getPageImage(page: Page, image: PDFImage): PDFName {
   return page.images[key];
 }
 
-type GraphicsState = { ca: number; CA: number };
+type ExtGraphicsParams = { ca: number; CA: number };
 
-export function getPageGraphicsState(page: Page, graphicsState: GraphicsState): PDFName {
+export function getExtGraphicsState(page: Page, params: ExtGraphicsParams): PDFName {
   if (!page.pdfPage) throw new Error('Page not initialized');
   page.extGStates ??= {};
-  const key = `CA:${graphicsState.CA},ca:${graphicsState.ca}`;
+  const key = `CA:${params.CA},ca:${params.ca}`;
   if (!(key in page.extGStates)) {
-    const dict = page.pdfPage.doc.context.obj({ Type: 'ExtGState', ...graphicsState });
+    const dict = page.pdfPage.doc.context.obj({ Type: 'ExtGState', ...params });
     page.extGStates[key] = (page.pdfPage as any).node.newExtGState('GS', dict);
   }
   return page.extGStates[key];
