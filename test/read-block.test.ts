@@ -120,6 +120,21 @@ describe('read-block', () => {
       });
     });
 
+    it('includes text attributes', () => {
+      const input = {
+        text: ['foo', 'bar'],
+        rise: 3,
+        letterSpacing: 5,
+      };
+
+      const result = readTextBlock(input);
+
+      expect(result.text).toEqual([
+        { text: 'foo', attrs: { rise: 3, letterSpacing: 5 } },
+        { text: 'bar', attrs: { rise: 3, letterSpacing: 5 } },
+      ]);
+    });
+
     it('includes default attrs in text', () => {
       const input = { text: 'foo' };
       const defaultAttrs = { fontSize: 14, lineHeight: 1.5 };

@@ -1,6 +1,16 @@
 # Changelog
 
-## [0.4.1] - Unreleased
+## [0.4.2] - 2023-04-16
+
+### Added
+
+* Text attribute `letterSpacing`.
+
+## [0.4.1] - 2023-04-15 (not available)
+
+Note: This npm package `pdfmkr@0.4.1` had to be unpublished because of
+an error in the built package. Do to npm's policy, the version number
+cannot be reused.
 
 ### Fixed
 

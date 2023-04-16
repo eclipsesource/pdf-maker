@@ -41,17 +41,25 @@ describe('text', () => {
     });
 
     it('respects global text attrs', () => {
-      const attrs = { fontSize: 10, lineHeight: 1.5, color: rgb(1, 0, 0) };
+      const attrs = {
+        fontSize: 10,
+        lineHeight: 1.5,
+        color: rgb(1, 0, 0),
+        rise: 3,
+        letterSpacing: 5,
+      };
 
       const segments = extractTextSegments([{ text: 'foo', attrs }], fonts);
 
       expect(segments).toEqual([
         objectContaining({
-          width: 3 * 10,
+          width: 3 * (10 + 5), // 3 chars * 10pt + 5pt letterSpacing
           height: 10,
           fontSize: 10,
           lineHeight: 1.5,
           color: rgb(1, 0, 0),
+          rise: 3,
+          letterSpacing: 5,
         }),
       ]);
     });

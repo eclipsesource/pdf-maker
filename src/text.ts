@@ -17,19 +17,27 @@ export type TextSegment = {
   color?: Color;
   link?: string;
   rise?: number;
+  letterSpacing?: number;
 };
 
 export function extractTextSegments(textSpans: TextSpan[], fonts: Font[]): TextSegment[] {
   return textSpans.flatMap((span) => {
     const { text, attrs } = span;
-    const { fontSize = defaultFontSize, lineHeight = defaultLineHeight, color, link, rise } = attrs;
+    const {
+      fontSize = defaultFontSize,
+      lineHeight = defaultLineHeight,
+      color,
+      link,
+      rise,
+      letterSpacing,
+    } = attrs;
     const font = selectFont(fonts, attrs);
     const height = font.heightAtSize(fontSize);
     return splitChunks(text).map(
       (text) =>
         ({
           text,
-          width: font.widthOfTextAtSize(text, fontSize),
+          width: font.widthOfTextAtSize(text, fontSize) + text.length * (letterSpacing ?? 0),
           height,
           lineHeight,
           font,
@@ -37,6 +45,7 @@ export function extractTextSegments(textSpans: TextSpan[], fonts: Font[]): TextS
           color,
           link,
           rise,
+          letterSpacing,
         } as TextSegment)
     );
   });
@@ -146,7 +155,8 @@ export function flattenTextSegments(segments: TextSegment[]): TextSegment[] {
       segment.lineHeight === prev?.lineHeight &&
       segment.color === prev?.color &&
       segment.link === prev?.link &&
-      segment.rise === prev?.rise
+      segment.rise === prev?.rise &&
+      segment.letterSpacing === prev?.letterSpacing
     ) {
       prev.text += segment.text;
       prev.width += segment.width;

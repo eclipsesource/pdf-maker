@@ -52,6 +52,7 @@ export type TextSegmentObject = {
   fontSize: number;
   color?: Color;
   rise?: number;
+  letterSpacing?: number;
 };
 
 export type LinkObject = {

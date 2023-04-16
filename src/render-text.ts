@@ -6,6 +6,7 @@ import {
   PDFName,
   PDFOperator,
   rgb,
+  setCharacterSpacing,
   setFillingColor,
   setFontAndSize,
   setTextMatrix,
@@ -32,6 +33,7 @@ export function renderText(object: TextObject, page: Page, base: Pos) {
         setTextColorOp(state, seg.color),
         setTextFontAndSizeOp(state, fontKey, seg.fontSize),
         setTextRiseOp(state, seg.rise),
+        setLetterSpacingOp(state, seg.letterSpacing),
         showText(encodedText),
       ].filter(Boolean) as PDFOperator[];
       contentStream.push(...operators);
@@ -64,6 +66,13 @@ function setTextRiseOp(state: TextState, rise?: number): PDFOperator | undefined
   if ((state.rise ?? 0) !== (rise ?? 0)) {
     state.rise = rise;
     return setTextRise(rise ?? 0);
+  }
+}
+
+function setLetterSpacingOp(state: TextState, charSpace?: number): PDFOperator | undefined {
+  if ((state.charSpace ?? 0) !== (charSpace ?? 0)) {
+    state.charSpace = charSpace;
+    return setCharacterSpacing(charSpace ?? 0);
   }
 }
 

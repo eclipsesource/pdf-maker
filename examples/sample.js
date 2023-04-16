@@ -58,7 +58,7 @@ export default {
       text: [
         'Ut enim ',
         { text: 'ad minim veniam,', italic: true },
-        { text: ' quis nostrud', fontSize: 28 },
+        { text: ' quis nostrud', fontSize: 24, letterSpacing: 2.5 },
         ' exercitation ullamco laboris nisi ',
         {
           text: ['ut aliquip ', { text: 'ex ea commodo', italic: true }],

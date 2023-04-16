@@ -52,6 +52,7 @@ export type TextAttrs = {
   color?: Color;
   link?: string;
   rise?: number;
+  letterSpacing?: number;
 };
 
 type BlockAttrs = {
@@ -164,6 +165,7 @@ export function readTextAttrs(input: Obj): TextAttrs {
     color: optional(parseColor),
     link: optional(types.string()),
     rise: optional(types.number()),
+    letterSpacing: optional(types.number()),
   });
 }
 
