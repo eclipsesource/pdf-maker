@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it } from '@jest/globals';
+import { rgb } from 'pdf-lib';
 
 import { Box } from '../src/box.js';
 import { Document } from '../src/document.js';
@@ -148,6 +149,33 @@ describe('layout', () => {
       expect(frame.objects).toEqual([
         { type: 'text', rows: [objectContaining({ x: 20, y: 30 })] },
         { type: 'link', x: 20, y: 30 + 1, width: 70, height: 10, url: 'test-link' },
+      ]);
+    });
+
+    it('includes extra text attrs in segments', () => {
+      const block = {
+        text: [
+          span('foo', {
+            fontSize: 10,
+            lineHeight: 1.2,
+            color: rgb(0, 0.5, 1),
+            rise: 3,
+            letterSpacing: 5,
+          }),
+        ],
+      };
+
+      const frame = layoutTextContent(block, box, doc);
+
+      expect((frame.objects?.[0] as any).rows[0].segments).toEqual([
+        {
+          font: doc.fonts[0].pdfFont,
+          fontSize: 10,
+          text: 'foo',
+          color: { type: 'RGB', blue: 1, green: 0.5, red: 0 },
+          rise: 3,
+          letterSpacing: 5,
+        },
       ]);
     });
   });

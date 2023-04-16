@@ -3,7 +3,13 @@ import { Color, PDFFont, PDFImage, PDFName, PDFPage } from 'pdf-lib';
 import { Size } from './box.js';
 import { Frame } from './layout.js';
 
-export type TextState = { color?: Color; font?: string; size?: number; rise?: number };
+export type TextState = {
+  color?: Color;
+  font?: string;
+  size?: number;
+  rise?: number;
+  charSpace?: number;
+};
 
 export type Page = {
   size: Size;

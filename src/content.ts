@@ -419,6 +419,11 @@ export type TextAttrs = {
    * This setting does not affect the line height.
    */
   rise?: number;
+  /**
+   * The character spacing in pt. Positive values increase the space between characters, negative
+   * values decrease it.
+   */
+  letterSpacing?: number;
 };
 
 /**
