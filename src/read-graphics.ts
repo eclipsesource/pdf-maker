@@ -1,4 +1,5 @@
 import { Color, parseColor } from './colors.js';
+import { parseSvgPath, PathCommand } from './svg-paths.js';
 import { Obj, optional, readFrom, readObject, required, types } from './types.js';
 
 export type GraphicsObject = {
@@ -6,7 +7,7 @@ export type GraphicsObject = {
   shapes: Shape[];
 };
 
-export type Shape = RectObject | CircleObject | LineObject | PolylineObject;
+export type Shape = RectObject | CircleObject | LineObject | PolylineObject | PathObject;
 
 export type RectObject = {
   type: 'rect';
@@ -65,6 +66,19 @@ export type PolylineObject = {
   fillOpacity?: number;
 };
 
+export type PathObject = {
+  type: 'path';
+  commands: PathCommand[];
+  lineWidth?: number;
+  lineColor?: Color;
+  lineOpacity?: number;
+  lineCap?: LineCap;
+  lineJoin?: LineJoin;
+  lineDash?: number[];
+  fillColor?: Color;
+  fillOpacity?: number;
+};
+
 type LineCap = 'butt' | 'round' | 'square';
 type LineJoin = 'miter' | 'round' | 'bevel';
 
@@ -74,7 +88,7 @@ const tLineWidth = types.number({ minimum: 0 });
 const tLineDash = types.array(types.number({ minimum: 0 }));
 const tOpacity = types.number({ minimum: 0, maximum: 1 });
 
-const shapeTypes = ['rect', 'circle', 'line', 'polyline'];
+const shapeTypes = ['rect', 'circle', 'line', 'polyline', 'path'];
 
 export function readShape(input: unknown): Shape {
   const shape = readObject(input);
@@ -88,6 +102,8 @@ export function readShape(input: unknown): Shape {
       return readLine(shape);
     case 'polyline':
       return readPolyline(shape);
+    case 'path':
+      return readPath(shape);
     default:
       // should never happen since type is checked above
       throw new Error('unknown shape type');
@@ -155,6 +171,23 @@ function readPolyline(input: Obj): PolylineObject {
     fillColor: optional(parseColor),
     fillOpacity: optional(tOpacity),
   }) as PolylineObject;
+}
+
+function readPath(input: Obj): PathObject {
+  const obj = readObject(input, {
+    type: () => 'path',
+    d: required(types.string()),
+    lineWidth: optional(tLineWidth),
+    lineColor: optional(parseColor),
+    lineOpacity: optional(tOpacity),
+    lineCap: optional(tLineCap),
+    lineJoin: optional(tLineJoin),
+    lineDash: optional(tLineDash),
+    fillColor: optional(parseColor),
+    fillOpacity: optional(tOpacity),
+  });
+  const commands = parseSvgPath(obj.d as string);
+  return { ...obj, commands } as PathObject;
 }
 
 function readPoint(input: unknown): { x: number; y: number } {

@@ -30,10 +30,12 @@ import {
   CircleObject,
   GraphicsObject,
   LineObject,
+  PathObject,
   PolylineObject,
   RectObject,
   Shape,
 } from './read-graphics.js';
+import { svgPathToPdfOps } from './svg-paths.js';
 
 // See https://stackoverflow.com/a/27863181/247159
 const KAPPA = (4 * (Math.sqrt(2) - 1)) / 3;
@@ -56,6 +58,9 @@ export function renderGraphics(object: GraphicsObject, page: Page, base: Pos) {
     if (shape.type === 'polyline') {
       contentStream.push(...drawPolyLine(shape));
     }
+    if (shape.type === 'path') {
+      contentStream.push(...drawPath(shape));
+    }
     contentStream.push(popGraphicsState());
   });
   contentStream.push(popGraphicsState());
@@ -64,7 +69,7 @@ export function renderGraphics(object: GraphicsObject, page: Page, base: Pos) {
 function drawRect(obj: RectObject): PDFOperator[] {
   return [
     createRect(obj.x, obj.y, obj.width, obj.height),
-    drawPath(!!obj.fillColor, !!obj.lineColor),
+    fillAndStrokePath(!!obj.fillColor, !!obj.lineColor),
   ].filter(Boolean);
 }
 
@@ -86,7 +91,7 @@ function drawCircle(obj: CircleObject): PDFOperator[] {
     appendBezierCurve(cx + o, cy - r, cx + r, cy - o, cx + r, cy),
     appendBezierCurve(cx + r, cy + o, cx + o, cy + r, cx, cy + r),
     appendBezierCurve(cx - o, cy + r, cx - r, cy + o, cx - r, cy),
-    drawPath(!!obj.fillColor, !!obj.lineColor),
+    fillAndStrokePath(!!obj.fillColor, !!obj.lineColor),
   ].filter(Boolean);
 }
 
@@ -98,7 +103,14 @@ function drawPolyLine(obj: PolylineObject): PDFOperator[] {
   return [
     ...pathOperations(obj.points),
     obj.closePath && closePath(),
-    drawPath(!!obj.fillColor, !!obj.lineColor),
+    fillAndStrokePath(!!obj.fillColor, !!obj.lineColor),
+  ].filter(Boolean) as PDFOperator[];
+}
+
+function drawPath(obj: PathObject): PDFOperator[] {
+  return [
+    ...svgPathToPdfOps(obj.commands),
+    fillAndStrokePath(!!obj.fillColor, !!obj.lineColor),
   ].filter(Boolean) as PDFOperator[];
 }
 
@@ -106,7 +118,7 @@ function pathOperations(points: { x: number; y: number }[]): PDFOperator[] {
   return points.reduce((a: PDFOperator[], p) => [...a, (a.length ? lineTo : moveTo)(p.x, p.y)], []);
 }
 
-function drawPath(hasFillColor: boolean, hasLineColor: boolean) {
+function fillAndStrokePath(hasFillColor: boolean, hasLineColor: boolean) {
   if (hasFillColor && hasLineColor) return fillAndStroke();
   if (hasLineColor) return stroke();
   return fill(); // fall back to a black shape

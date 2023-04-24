@@ -5,12 +5,12 @@
 ### Added
 
 * Text attribute `letterSpacing`.
+* Support for SVG paths in `graphics` using `Path` elements.
 
 ## [0.4.1] - 2023-04-15 (not available)
 
 Note: This npm package `pdfmkr@0.4.1` had to be unpublished because of
-an error in the built package. Do to npm's policy, the version number
-cannot be reused.
+a build error. Do to npm's policy, the version number cannot be reused.
 
 ### Fixed
 
@@ -104,3 +104,4 @@ First public version.
 [0.3.2]: https://github.com/eclipsesource/pdf-maker/releases/tag/v0.3.2
 [0.3.3]: https://github.com/eclipsesource/pdf-maker/releases/tag/v0.3.3
 [0.4.0]: https://github.com/eclipsesource/pdf-maker/releases/tag/v0.4.0
+[0.4.2]: https://github.com/eclipsesource/pdf-maker/releases/tag/v0.4.0

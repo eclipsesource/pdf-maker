@@ -15,7 +15,7 @@ describe('read-graphics', () => {
       const fn = () => readShape({ type: 'foo' });
 
       expect(fn).toThrowError(
-        `Invalid value for "type": Expected one of ('rect', 'circle', 'line', 'polyline'), got: 'foo'`
+        `Invalid value for "type": Expected one of ('rect', 'circle', 'line', 'polyline', 'path'), got: 'foo'`
       );
     });
 
@@ -134,6 +134,31 @@ describe('read-graphics', () => {
       const fn = () => readShape({ type: 'polyline', points: [{ x: 1, y: 'a' }] });
 
       expect(fn).toThrowError(`Invalid value for "points/0/y": Expected number, got: 'a'`);
+    });
+
+    it('parses path object', () => {
+      const path = {
+        ...{ type: 'path', d: 'M 1 2 c 3 4 5 6 7 8 s 9 10 11 12 z' },
+        lineWidth: 1.5,
+        lineColor: 'red',
+        fillColor: 'blue',
+        lineOpacity: 0.5,
+        fillOpacity: 0.3,
+      };
+
+      expect(readShape(path)).toEqual({
+        ...path,
+        commands: [
+          { op: 'M', params: [1, 2] },
+          { op: 'c', params: [3, 4, 5, 6, 7, 8] },
+          { op: 's', params: [9, 10, 11, 12] },
+          { op: 'z' },
+        ],
+        lineColor: rgb(1, 0, 0),
+        fillColor: rgb(0, 0, 1),
+        lineOpacity: 0.5,
+        fillOpacity: 0.3,
+      });
     });
 
     ['lineColor', 'fillColor'].forEach((name) => {

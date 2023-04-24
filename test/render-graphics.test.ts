@@ -3,7 +3,13 @@ import { rgb } from 'pdf-lib';
 
 import { Size } from '../src/box.js';
 import { Page } from '../src/page.js';
-import { CircleObject, LineObject, PolylineObject, RectObject } from '../src/read-graphics.js';
+import {
+  CircleObject,
+  LineObject,
+  PathObject,
+  PolylineObject,
+  RectObject,
+} from '../src/read-graphics.js';
 import { renderGraphics } from '../src/render-graphics.js';
 import { fakePdfPage, getContentStream, p } from './test-utils.js';
 
@@ -213,6 +219,65 @@ describe('render-graphics', () => {
           '1 2 m',
           '3 4 l',
           'B',
+          ...tail,
+        ]);
+      });
+    });
+
+    describe('with path', () => {
+      it('renders moveto and lineto', () => {
+        const path: PathObject = {
+          type: 'path',
+          commands: [
+            { op: 'M', params: [0, 20] },
+            { op: 'L', params: [20, 0] },
+          ],
+        } as any;
+
+        renderGraphics({ type: 'graphics', shapes: [path] }, page, pos);
+
+        expect(getContentStream(page)).toEqual([...head, '0 20 m', '20 0 l', 'f', ...tail]);
+      });
+
+      it('renders curve', () => {
+        const path: PathObject = {
+          type: 'path',
+          commands: [
+            { op: 'M', params: [0, 20] },
+            { op: 'Q', params: [20, 0, 40, 20] },
+            { op: 't', params: [40, 0] },
+          ],
+        } as any;
+
+        renderGraphics({ type: 'graphics', shapes: [path] }, page, pos);
+
+        expect(getContentStream(page)).toEqual([
+          ...head,
+          '0 20 m',
+          '20 0 40 20 v',
+          '60 40 80 20 v',
+          'f',
+          ...tail,
+        ]);
+      });
+
+      it('renders arc', () => {
+        const path: PathObject = {
+          type: 'path',
+          commands: [
+            { op: 'M', params: [10, 20] },
+            { op: 'A', params: [3, 4, 0, 0, 1, 30, 40] },
+          ],
+        } as any;
+
+        renderGraphics({ type: 'graphics', shapes: [path] }, page, pos);
+
+        expect(getContentStream(page)).toEqual([
+          ...head,
+          '10 20 m',
+          expect.stringMatching(/^14\.\d+ 12\.\d+ 21\.\d+ 11\.\d+ 27\.\d+ 16\.\d+ c$/),
+          expect.stringMatching(/^33\.\d+ 22\.\d+ 34\.\d+ 32\.\d+ 30 40 c$/),
+          'f',
           ...tail,
         ]);
       });

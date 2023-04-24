@@ -280,37 +280,100 @@ export type BlockInfo = {
   readonly padding: { left: number; right: number; top: number; bottom: number };
 };
 
-export type Shape = Rect | Circle | Line | Polyline;
+export type Shape = Rect | Circle | Line | Polyline | Path;
 
+/**
+ * A rectangle.
+ */
 export type Rect = {
   type: 'rect';
+  /**
+   * The x coordinate of the top left corner of the rectangle.
+   */
   x: number;
+  /**
+   * The y coordinate of the top left corner of the rectangle.
+   */
   y: number;
+  /**
+   * The width of the rectangle.
+   */
   width: number;
+  /**
+   * The height of the rectangle.
+   */
   height: number;
 } & Omit<LineAttrs, 'lineCap'> &
   FillAttrs;
 
+/**
+ * A circle.
+ */
 export type Circle = {
   type: 'circle';
+  /**
+   * The x coordinate of the center of the circle.
+   */
   cx: number;
+  /**
+   * The y coordinate of the center of the circle.
+   */
   cy: number;
+  /**
+   * The radius of the circle.
+   */
   r: number;
 } & Omit<LineAttrs, 'lineCap'> &
   FillAttrs;
 
+/**
+ * A straight line.
+ */
 export type Line = {
   type: 'line';
+  /**
+   * The x coordinate of the start point of the line.
+   */
   x1: number;
+  /**
+   * The y coordinate of the start point of the line.
+   */
   y1: number;
+  /**
+   * The x coordinate of the end point of the line.
+   */
   x2: number;
+  /**
+   * The y coordinate of the end point of the line.
+   */
   y2: number;
 } & Omit<LineAttrs, 'lineJoin'>;
 
+/**
+ * A polyline, i.e. a line consisting of multiple segments.
+ */
 export type Polyline = {
   type: 'polyline';
+  /**
+   * The points of the polyline, each point as an object with `x` and `y` coordinates.
+   */
   points: { x: number; y: number }[];
+  /**
+   * Whether to close the path by drawing a line from the last point to the first point.
+   */
   closePath?: boolean;
+} & LineAttrs &
+  FillAttrs;
+
+/**
+ * An SVG path element.
+ */
+export type Path = {
+  type: 'path';
+  /**
+   * An SVG path. See https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/d for details.
+   */
+  d: string;
 } & LineAttrs &
   FillAttrs;
 
