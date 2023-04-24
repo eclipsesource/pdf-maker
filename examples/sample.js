@@ -129,6 +129,12 @@ export default {
               lineWidth: 2,
             },
             {
+              type: 'path',
+              d: 'M 10,40 c 20,0 20,-30 40,-30 s 20,30 40,30 s 20,-30 40,-30 s 20,30 40,30',
+              lineWidth: 1,
+              lineColor: 'red',
+            },
+            {
               type: 'polyline',
               points: [
                 { x: 50, y: 76 },
