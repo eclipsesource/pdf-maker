@@ -36,6 +36,7 @@ import {
   Shape,
 } from './read-graphics.js';
 import { svgPathToPdfOps } from './svg-paths.js';
+import { compact } from './utils.js';
 
 // See https://stackoverflow.com/a/27863181/247159
 const KAPPA = (4 * (Math.sqrt(2) - 1)) / 3;
@@ -67,10 +68,10 @@ export function renderGraphics(object: GraphicsObject, page: Page, base: Pos) {
 }
 
 function drawRect(obj: RectObject): PDFOperator[] {
-  return [
+  return compact([
     createRect(obj.x, obj.y, obj.width, obj.height),
     fillAndStrokePath(!!obj.fillColor, !!obj.lineColor),
-  ].filter(Boolean);
+  ]);
 }
 
 function createRect(x: number, y: number, width: number, height: number) {
@@ -85,33 +86,33 @@ function createRect(x: number, y: number, width: number, height: number) {
 function drawCircle(obj: CircleObject): PDFOperator[] {
   const { cx, cy, r } = obj;
   const o = r * KAPPA;
-  return [
+  return compact([
     moveTo(cx - r, cy),
     appendBezierCurve(cx - r, cy - o, cx - o, cy - r, cx, cy - r),
     appendBezierCurve(cx + o, cy - r, cx + r, cy - o, cx + r, cy),
     appendBezierCurve(cx + r, cy + o, cx + o, cy + r, cx, cy + r),
     appendBezierCurve(cx - o, cy + r, cx - r, cy + o, cx - r, cy),
     fillAndStrokePath(!!obj.fillColor, !!obj.lineColor),
-  ].filter(Boolean);
+  ]);
 }
 
 function drawLine(obj: LineObject): PDFOperator[] {
-  return [moveTo(obj.x1, obj.y1), lineTo(obj.x2, obj.y2), stroke()].filter(Boolean);
+  return compact([moveTo(obj.x1, obj.y1), lineTo(obj.x2, obj.y2), stroke()]);
 }
 
 function drawPolyLine(obj: PolylineObject): PDFOperator[] {
-  return [
+  return compact([
     ...pathOperations(obj.points),
     obj.closePath && closePath(),
     fillAndStrokePath(!!obj.fillColor, !!obj.lineColor),
-  ].filter(Boolean) as PDFOperator[];
+  ]);
 }
 
 function drawPath(obj: PathObject): PDFOperator[] {
-  return [
+  return compact([
     ...svgPathToPdfOps(obj.commands),
     fillAndStrokePath(!!obj.fillColor, !!obj.lineColor),
-  ].filter(Boolean) as PDFOperator[];
+  ]);
 }
 
 function pathOperations(points: { x: number; y: number }[]): PDFOperator[] {
@@ -140,7 +141,7 @@ const trLineJoin = (lineJoin: LineJoin) => lineJoinTr[lineJoin];
 
 function setStyleAttrs(shape: Shape, page: Page): PDFOperator[] {
   const extGraphicsState = getExtGraphicsStateForShape(page, shape);
-  return [
+  return compact([
     extGraphicsState && setGraphicsState(extGraphicsState),
     'fillColor' in shape && setFillingColor(shape.fillColor as any),
     'lineColor' in shape && setStrokingColor(shape.lineColor as any),
@@ -148,7 +149,7 @@ function setStyleAttrs(shape: Shape, page: Page): PDFOperator[] {
     'lineCap' in shape && setLineCap(trLineCap(shape.lineCap as any)),
     'lineJoin' in shape && setLineJoin(trLineJoin(shape.lineJoin as any)),
     'lineDash' in shape && setDashPattern(shape.lineDash as any, 0),
-  ].filter(Boolean) as PDFOperator[];
+  ]);
 }
 
 function tr(pos: Pos, page: Page): Pos {

@@ -1,7 +1,6 @@
 import {
   drawObject,
   PDFContentStream,
-  PDFOperator,
   popGraphicsState,
   pushGraphicsState,
   scale,
@@ -11,6 +10,7 @@ import {
 import { Pos } from './box.js';
 import { ImageObject } from './layout-image.js';
 import { getPageImage, Page } from './page.js';
+import { compact } from './utils.js';
 
 export function renderImage(object: ImageObject, page: Page, base: Pos) {
   const x = base.x + object.x;
@@ -19,12 +19,12 @@ export function renderImage(object: ImageObject, page: Page, base: Pos) {
   const contentStream: PDFContentStream = (page.pdfPage as any).getContentStream();
   const name = getPageImage(page, object.image);
   contentStream.push(
-    ...([
+    ...compact([
       pushGraphicsState(),
       translate(x, y),
       scale(width, height),
       drawObject(name),
       popGraphicsState(),
-    ].filter(Boolean) as PDFOperator[])
+    ])
   );
 }

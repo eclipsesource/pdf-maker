@@ -17,6 +17,7 @@ import {
 import { Pos } from './box.js';
 import { TextObject } from './layout.js';
 import { getPageFont, Page, TextState } from './page.js';
+import { compact } from './utils.js';
 
 export function renderText(object: TextObject, page: Page, base: Pos) {
   const contentStream: PDFContentStream = (page.pdfPage as any).getContentStream();
@@ -29,13 +30,13 @@ export function renderText(object: TextObject, page: Page, base: Pos) {
     row.segments?.forEach((seg) => {
       const fontKey = getPageFont(page, seg.font);
       const encodedText = seg.font.encodeText(seg.text);
-      const operators = [
+      const operators = compact([
         setTextColorOp(state, seg.color),
         setTextFontAndSizeOp(state, fontKey, seg.fontSize),
         setTextRiseOp(state, seg.rise),
         setLetterSpacingOp(state, seg.letterSpacing),
         showText(encodedText),
-      ].filter(Boolean) as PDFOperator[];
+      ]);
       contentStream.push(...operators);
     });
   });
