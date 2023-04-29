@@ -34,7 +34,7 @@ describe('render-page', () => {
 
       renderPage(page, doc);
 
-      expect(getContentStream(page).join()).toEqual('q,1 0 0 -1 50 350 cm,q,0 0 280 300 re,f,Q,Q');
+      expect(getContentStream(page).join()).toEqual('q,1 0 0 -1 50 350 cm,q,0 0 280 300 re,S,Q,Q');
     });
 
     it('renders header', () => {
@@ -49,7 +49,7 @@ describe('render-page', () => {
 
       renderPage(page, doc);
 
-      expect(getContentStream(page).join()).toEqual('q,1 0 0 -1 50 380 cm,q,0 0 280 30 re,f,Q,Q');
+      expect(getContentStream(page).join()).toEqual('q,1 0 0 -1 50 380 cm,q,0 0 280 30 re,S,Q,Q');
     });
 
     it('renders footer', () => {
@@ -64,7 +64,7 @@ describe('render-page', () => {
 
       renderPage(page, doc);
 
-      expect(getContentStream(page).join()).toEqual('q,1 0 0 -1 50 50 cm,q,0 0 280 30 re,f,Q,Q');
+      expect(getContentStream(page).join()).toEqual('q,1 0 0 -1 50 50 cm,q,0 0 280 30 re,S,Q,Q');
     });
   });
 

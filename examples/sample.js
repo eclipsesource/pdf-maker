@@ -279,7 +279,6 @@ export default {
                   cx: 155,
                   cy: 45,
                   r: 5,
-                  lineWidth: 5,
                   fillColor: '#eecc55',
                   fillOpacity: 0.5,
                 },
