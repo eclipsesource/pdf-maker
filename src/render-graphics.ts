@@ -68,10 +68,7 @@ export function renderGraphics(object: GraphicsObject, page: Page, base: Pos) {
 }
 
 function drawRect(obj: RectObject): PDFOperator[] {
-  return compact([
-    createRect(obj.x, obj.y, obj.width, obj.height),
-    fillAndStrokePath(!!obj.fillColor, !!obj.lineColor),
-  ]);
+  return compact([createRect(obj.x, obj.y, obj.width, obj.height), fillAndStrokePath(obj)]);
 }
 
 function createRect(x: number, y: number, width: number, height: number) {
@@ -92,7 +89,7 @@ function drawCircle(obj: CircleObject): PDFOperator[] {
     appendBezierCurve(cx + o, cy - r, cx + r, cy - o, cx + r, cy),
     appendBezierCurve(cx + r, cy + o, cx + o, cy + r, cx, cy + r),
     appendBezierCurve(cx - o, cy + r, cx - r, cy + o, cx - r, cy),
-    fillAndStrokePath(!!obj.fillColor, !!obj.lineColor),
+    fillAndStrokePath(obj),
   ]);
 }
 
@@ -104,25 +101,24 @@ function drawPolyLine(obj: PolylineObject): PDFOperator[] {
   return compact([
     ...pathOperations(obj.points),
     obj.closePath && closePath(),
-    fillAndStrokePath(!!obj.fillColor, !!obj.lineColor),
+    fillAndStrokePath(obj),
   ]);
 }
 
 function drawPath(obj: PathObject): PDFOperator[] {
-  return compact([
-    ...svgPathToPdfOps(obj.commands),
-    fillAndStrokePath(!!obj.fillColor, !!obj.lineColor),
-  ]);
+  return compact([...svgPathToPdfOps(obj.commands), fillAndStrokePath(obj)]);
 }
 
 function pathOperations(points: { x: number; y: number }[]): PDFOperator[] {
   return points.reduce((a: PDFOperator[], p) => [...a, (a.length ? lineTo : moveTo)(p.x, p.y)], []);
 }
 
-function fillAndStrokePath(hasFillColor: boolean, hasLineColor: boolean) {
-  if (hasFillColor && hasLineColor) return fillAndStroke();
-  if (hasLineColor) return stroke();
-  return fill(); // fall back to a black shape
+function fillAndStrokePath(obj: Shape): PDFOperator {
+  const hasFill = !!(obj as any).fillColor;
+  const hasStroke = !!(obj as any).lineColor || !!(obj as any).lineWidth;
+  if (hasFill && hasStroke) return fillAndStroke();
+  if (hasFill) return fill();
+  return stroke(); // fall back to stroke to avoid invisible shapes
 }
 
 const lineCapTr = {

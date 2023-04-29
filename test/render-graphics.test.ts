@@ -33,7 +33,7 @@ describe('render-graphics', () => {
 
         renderGraphics({ type: 'graphics', shapes: [rect] }, page, pos);
 
-        expect(getContentStream(page)).toEqual([...head, '1 2 3 4 re', 'f', ...tail]);
+        expect(getContentStream(page)).toEqual([...head, '1 2 3 4 re', 'S', ...tail]);
       });
 
       it('renders rect with fillColor', () => {
@@ -100,7 +100,7 @@ describe('render-graphics', () => {
           '2.6568542494923806 -1 4 0.3431457505076194 4 2 c',
           '4 3.6568542494923806 2.6568542494923806 5 1 5 c',
           '-0.6568542494923806 5 -2 3.6568542494923806 -2 2 c',
-          'f',
+          'S',
           ...tail,
         ]);
       });
@@ -180,7 +180,7 @@ describe('render-graphics', () => {
 
         renderGraphics({ type: 'graphics', shapes: [polyline] }, page, pos);
 
-        expect(getContentStream(page)).toEqual([...head, '1 2 m', '3 4 l', 'f', ...tail]);
+        expect(getContentStream(page)).toEqual([...head, '1 2 m', '3 4 l', 'S', ...tail]);
       });
 
       it('renders polyline with closePath', () => {
@@ -192,7 +192,7 @@ describe('render-graphics', () => {
 
         renderGraphics({ type: 'graphics', shapes: [polyline] }, page, pos);
 
-        expect(getContentStream(page)).toEqual([...head, '1 2 m', '3 4 l', 'h', 'f', ...tail]);
+        expect(getContentStream(page)).toEqual([...head, '1 2 m', '3 4 l', 'h', 'S', ...tail]);
       });
 
       it('renders polyline with all attributes', () => {
@@ -236,7 +236,7 @@ describe('render-graphics', () => {
 
         renderGraphics({ type: 'graphics', shapes: [path] }, page, pos);
 
-        expect(getContentStream(page)).toEqual([...head, '0 20 m', '20 0 l', 'f', ...tail]);
+        expect(getContentStream(page)).toEqual([...head, '0 20 m', '20 0 l', 'S', ...tail]);
       });
 
       it('renders curve', () => {
@@ -256,7 +256,7 @@ describe('render-graphics', () => {
           '0 20 m',
           '20 0 40 20 v',
           '60 40 80 20 v',
-          'f',
+          'S',
           ...tail,
         ]);
       });
@@ -277,7 +277,7 @@ describe('render-graphics', () => {
           '10 20 m',
           expect.stringMatching(/^14\.\d+ 12\.\d+ 21\.\d+ 11\.\d+ 27\.\d+ 16\.\d+ c$/),
           expect.stringMatching(/^33\.\d+ 22\.\d+ 34\.\d+ 32\.\d+ 30 40 c$/),
-          'f',
+          'S',
           ...tail,
         ]);
       });
@@ -297,7 +297,7 @@ describe('render-graphics', () => {
         'Q',
         'q',
         '1 2 3 4 re',
-        'f',
+        'S',
         ...tail,
       ]);
     });

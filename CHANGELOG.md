@@ -1,6 +1,15 @@
 # Changelog
 
-## [0.4.2] - 2023-04-16
+## [0.5.0] - Unreleased
+
+### Breaking changes
+
+* When a graphics element has neither `lineColor` nor `fillColor` set,
+  it is stroked by default. If a `lineWidth` but no `lineColor` is set
+  on an element that also has a `fillColor`, the element is now stroked
+  with a black line.
+
+## [0.4.2] - 2023-04-29
 
 ### Added
 
