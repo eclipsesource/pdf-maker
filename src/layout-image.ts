@@ -2,7 +2,7 @@ import { PDFImage } from 'pdf-lib';
 
 import { Box, Pos, Size } from './box.js';
 import { Document } from './document.js';
-import { FrameContent, RenderObject } from './layout.js';
+import { LayoutContent, RenderObject } from './layout.js';
 import { ImageBlock } from './read-block.js';
 
 export type ImageObject = {
@@ -14,7 +14,7 @@ export type ImageObject = {
   image: PDFImage;
 };
 
-export function layoutImageContent(block: ImageBlock, box: Box, doc: Document): FrameContent {
+export function layoutImageContent(block: ImageBlock, box: Box, doc: Document): LayoutContent {
   const image = doc.images.find((image) => image.name === block.image)?.pdfImage;
   if (!image) throw new Error(`Unknown image: ${block.image}`);
   const hasFixedWidth = block.width != null;
@@ -26,8 +26,10 @@ export function layoutImageContent(block: ImageBlock, box: Box, doc: Document): 
   const imageObj: ImageObject = createImageObject(image, imagePos, imageSize);
   const objects: RenderObject[] = [imageObj];
   return {
-    objects,
-    height: imageSize.height,
+    frame: {
+      objects,
+      height: imageSize.height,
+    },
   };
 }
 

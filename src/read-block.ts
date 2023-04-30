@@ -34,6 +34,7 @@ export type ColumnsBlock = {
 
 export type RowsBlock = {
   rows: Block[];
+  breakInside?: 'auto' | 'avoid';
 } & BlockAttrs;
 
 export type EmptyBlock = BlockAttrs;
@@ -123,18 +124,23 @@ export function readColumnsBlock(input: Obj, defaultAttrs?: InheritableAttrs): C
   const mergedAttrs = { ...defaultAttrs, ...readInheritableAttrs(input) };
   const readColumn = (el: unknown) => readBlock(el, mergedAttrs);
   return pickDefined({
-    columns: readFrom(input, 'columns', types.array(readColumn)),
+    ...readObject(input, {
+      columns: types.array(readColumn),
+    }),
     ...readBlockAttrs(input),
-  });
+  }) as ColumnsBlock;
 }
 
 export function readRowsBlock(input: Obj, defaultAttrs?: InheritableAttrs): RowsBlock {
   const mergedAttrs = { ...defaultAttrs, ...readInheritableAttrs(input) };
   const readRow = (el: unknown) => readBlock(el, mergedAttrs);
   return pickDefined({
-    rows: readFrom(input, 'rows', types.array(readRow)),
+    ...readObject(input, {
+      rows: types.array(readRow),
+      breakInside: optional(types.string({ enum: ['auto', 'avoid'] })),
+    }),
     ...readBlockAttrs(input),
-  });
+  }) as RowsBlock;
 }
 
 export function readEmptyBlock(input: Obj): EmptyBlock {

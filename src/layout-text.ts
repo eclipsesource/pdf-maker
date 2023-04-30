@@ -5,7 +5,7 @@ import { Alignment } from './content.js';
 import { Document } from './document.js';
 import { createRowGuides } from './guides.js';
 import {
-  FrameContent,
+  LayoutContent,
   LinkObject,
   RenderObject,
   TextRowObject,
@@ -14,15 +14,18 @@ import {
 import { TextBlock } from './read-block.js';
 import { breakLine, extractTextSegments, flattenTextSegments, TextSegment } from './text.js';
 
-export function layoutTextContent(block: TextBlock, box: Box, doc: Document): FrameContent {
+export function layoutTextContent(block: TextBlock, box: Box, doc: Document): LayoutContent {
   const text = layoutText(block, box, doc);
   const objects: RenderObject[] = [];
-  if (text.rows.length) objects.push({ type: 'text', rows: text.rows });
-  if (text.objects?.length) objects.push(...text.objects);
+  text.rows.length && objects.push({ type: 'text', rows: text.rows });
+  text.objects?.length && objects.push(...text.objects);
   if (doc.guides) objects.push(...text.rows.map((row) => createRowGuides(row)));
+
   return {
-    ...(objects?.length ? { objects } : undefined),
-    height: text.size.height,
+    frame: {
+      ...(objects?.length ? { objects } : undefined),
+      height: text.size.height,
+    },
   };
 }
 

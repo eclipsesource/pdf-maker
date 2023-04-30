@@ -9,7 +9,7 @@ import { ImageObject, layoutImageContent } from './layout-image.js';
 import { layoutRowsContent } from './layout-rows.js';
 import { layoutTextContent } from './layout-text.js';
 import { Page } from './page.js';
-import { Block } from './read-block.js';
+import { Block, RowsBlock } from './read-block.js';
 import { DocumentDefinition } from './read-document.js';
 import { GraphicsObject } from './read-graphics.js';
 import { pickDefined } from './types.js';
@@ -31,11 +31,22 @@ export type Frame = {
 };
 
 /**
- * Functions that layout the *content* of a block do not need to return its position.
+ * Result of the layout of a block.
+ */
+export type LayoutResult = {
+  frame: Frame;
+  remainder?: Block;
+};
+
+/**
+ * Result of laying out the *content* of a block.
  * The position is fixed to the top left padding border by now.
  * Also, the width is currently fixed to the available width.
  */
-export type FrameContent = Omit<Frame, 'x' | 'y' | 'width'>;
+export type LayoutContent = {
+  frame: Omit<Frame, 'x' | 'y' | 'width'>;
+  remainder?: Block;
+};
 
 export type RenderObject = TextObject | ImageObject | GraphicsObject | LinkObject | AnchorObject;
 
@@ -83,7 +94,7 @@ export function layoutPages(def: DocumentDefinition, doc: Document): Page[] {
   const pages: Page[] = [];
   let remainingBlocks = def.content;
   let pageNumber = 1;
-  while (remainingBlocks?.length) {
+  const makePage = () => {
     const pageInfo = { pageNumber: pageNumber++, pageSize: doc.pageSize };
     const header = def.header && layoutHeader(def.header(pageInfo), doc);
     const footer = def.footer && layoutFooter(def.footer(pageInfo), doc);
@@ -100,6 +111,14 @@ export function layoutPages(def: DocumentDefinition, doc: Document): Page[] {
     }
     remainingBlocks = remainder;
     pages.push({ size: doc.pageSize, content: frame, header, footer });
+  };
+
+  while (remainingBlocks?.length) {
+    makePage();
+  }
+  // If there are no content blocks, insert an empty block to create a single page.
+  if (pages.length === 0) {
+    makePage();
   }
 
   // Re-layout headers and footers to provide them with the final page count.
@@ -113,87 +132,48 @@ export function layoutPages(def: DocumentDefinition, doc: Document): Page[] {
 
 function layoutHeader(header: Block, doc: Document) {
   const box = subtractEdges({ x: 0, y: 0, ...doc.pageSize }, header.margin);
-  return layoutBlock(header, box, doc);
+  return layoutBlock({ ...header, breakInside: 'avoid' }, box, doc).frame;
 }
 
 function layoutFooter(footer: Block, doc: Document) {
   const box = subtractEdges({ x: 0, y: 0, ...doc.pageSize }, footer.margin);
-  const frame = layoutBlock(footer, box, doc);
+  const { frame } = layoutBlock({ ...footer, breakInside: 'avoid' }, box, doc);
   frame.y = doc.pageSize.height - frame.height - (footer.margin?.bottom ?? 0);
   return frame;
 }
 
-export function layoutPageContent(blocks: Block[], box: Box, doc: Document) {
-  const { x, y, width, height } = box;
-  const children = [];
-  const pos = { x: 0, y: 0 };
-  let lastMargin = 0;
-  let remainingHeight = height;
-  let remainder: Block[] = [];
-  for (const [idx, block] of blocks.entries()) {
-    const margin = block.margin ?? ZERO_EDGES;
-    const topMargin = Math.max(lastMargin, margin.top);
-    lastMargin = margin.bottom;
-    const nextPos = { x: pos.x + margin.left, y: pos.y + topMargin };
-    const maxSize = { width: width - margin.left - margin.right, height: remainingHeight };
-    const frame = layoutBlock(block, { ...nextPos, ...maxSize }, doc);
-    // If the first block does not fit on the page, render it anyway.
-    // It wouldn't fit on the next page as well, ending in an endless loop.
-    if (remainingHeight < topMargin + frame.height && idx) {
-      remainder = blocks.slice(idx);
-      break;
-    }
-    children.push(frame);
-    pos.y += topMargin + frame.height;
-    remainingHeight = height - pos.y;
-    if (block.breakAfter === 'always' || blocks[idx + 1]?.breakBefore === 'always') {
-      remainder = blocks.slice(idx + 1);
-      break;
-    }
-  }
-
-  // Handle break avoid
-  let lastIdx = children.length - 1;
-  // If the last block has breakAfter set to `avoid`, ignore it.
-  if (lastIdx < blocks.length - 1) {
-    // When `avoid` is in conflict with `always` on the next/previous block, ignore it.
-    while (
-      (blocks[lastIdx + 1]?.breakBefore === 'avoid' && blocks[lastIdx]?.breakAfter !== 'always') ||
-      (blocks[lastIdx]?.breakAfter === 'avoid' && blocks[lastIdx + 1]?.breakBefore !== 'always')
-    ) {
-      lastIdx--;
-    }
-    if (lastIdx >= 0) {
-      children.splice(lastIdx + 1);
-      remainder = blocks.slice(lastIdx + 1);
-    }
-  }
-
-  const frame: Frame = { x, y, width, height, children };
-  return { frame, remainder };
+function layoutPageContent(blocks: Block[], box: Box, doc: Document) {
+  // We create a dummy rows block and enforce a page break if the content does not fit
+  const block = { rows: blocks, breakInside: 'enforce-auto' as any };
+  const { frame, remainder } = layoutBlock(block, box, doc);
+  return {
+    frame: { ...frame, ...box },
+    remainder: (remainder as RowsBlock)?.rows ?? [],
+  };
 }
 
-export function layoutBlock(block: Block, box: Box, doc: Document): Frame {
+export function layoutBlock(block: Block, box: Box, doc: Document): LayoutResult {
   const padding = block.padding ?? ZERO_EDGES;
   const contentBox = subtractEdges(
     { x: 0, y: 0, width: block.width ?? box.width, height: block.height ?? box.height },
     padding
   );
-  const content = layoutBlockContent(block, contentBox, doc);
+  const result = layoutBlockContent(block, contentBox, doc);
+  const content = result.frame;
   const frame = {
     ...content,
     x: box.x,
     y: box.y,
     width: block.width ?? box.width,
-    height: block.height ?? content.height + padding.top + padding.bottom,
+    height: block.height ?? (content?.height ?? 0) + padding.top + padding.bottom,
   };
   addAnchor(frame, block);
   addGraphics(frame, block);
   doc.guides && addGuides(frame, block);
-  return frame;
+  return { frame, remainder: result.remainder };
 }
 
-function layoutBlockContent(block: Block, box: Box, doc: Document): FrameContent {
+function layoutBlockContent(block: Block, box: Box, doc: Document): LayoutContent {
   if ('text' in block) {
     return layoutTextContent(block, box, doc);
   }
@@ -206,7 +186,7 @@ function layoutBlockContent(block: Block, box: Box, doc: Document): FrameContent
   if ('rows' in block) {
     return layoutRowsContent(block, box, doc);
   }
-  return { height: 0 };
+  return { frame: { height: 0 } };
 }
 
 function addAnchor(frame: Frame, block: Block) {
@@ -233,4 +213,18 @@ function addGraphics(frame: Frame, block: Block) {
 function addGuides(frame: Frame, block: Block) {
   const guides = createFrameGuides(frame, block);
   (frame.objects ??= []).push(guides);
+}
+
+export function isBreakPossible(blocks: Block[], idx: number) {
+  if (!blocks[idx]) return false;
+  // Allow break after the last block
+  if (idx === blocks.length - 1) return true;
+  // Ignore `avoid` where it is in conflict with `always` on the next/previous block.
+  if (
+    (blocks[idx]?.breakAfter === 'avoid' && blocks[idx + 1].breakBefore !== 'always') ||
+    (blocks[idx + 1].breakBefore === 'avoid' && blocks[idx].breakAfter !== 'always')
+  ) {
+    return false;
+  }
+  return true;
 }

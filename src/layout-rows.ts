@@ -1,28 +1,79 @@
 import { Box, ZERO_EDGES } from './box.js';
 import { Document } from './document.js';
-import { Frame, FrameContent, layoutBlock } from './layout.js';
-import { RowsBlock } from './read-block.js';
+import { Frame, isBreakPossible, layoutBlock, LayoutContent } from './layout.js';
+import { Block, RowsBlock } from './read-block.js';
+import { omit } from './utils.js';
 
-export function layoutRowsContent(block: RowsBlock, box: Box, doc: Document): FrameContent {
-  const children: Frame[] = [];
+export function layoutRowsContent(block: RowsBlock, box: Box, doc: Document): LayoutContent {
   let rowY = box.y;
   let lastMargin = 0;
-  let aggregatedHeight = 0;
   let remainingHeight = box.height;
-  block.rows.forEach((row) => {
+  let aggregatedHeight = 0;
+  // collect heights of partial results in case we need to break
+  const aggregatedHeights: number[] = [];
+  // keep track of the last break opportunity
+  let lastBreakOpportunity = -1;
+  const frames: Frame[] = [];
+  let remainingRows: Block[] = [];
+
+  for (const [rowIdx, row] of block.rows.entries()) {
     const margin = row.margin ?? ZERO_EDGES;
     const topMargin = Math.max(lastMargin, margin.top);
-    lastMargin = margin.bottom;
     const nextPos = { x: box.x + margin.left, y: rowY + topMargin };
-    const maxSize = { width: box.width - margin.left - margin.right, height: remainingHeight };
-    const frame = layoutBlock(row, { ...nextPos, ...maxSize }, doc);
-    children.push(frame);
+    const maxSize = {
+      width: box.width - margin.left - margin.right,
+      height: remainingHeight - topMargin - margin.bottom,
+    };
+
+    const { frame, remainder } = layoutBlock(row, { ...nextPos, ...maxSize }, doc);
+
+    if (frame.height + topMargin + margin.bottom > remainingHeight) {
+      // This row does not fit in the remaining height. Break here if possible.
+      if (lastBreakOpportunity >= 0) {
+        frames.splice(lastBreakOpportunity + 1);
+        remainingRows = block.rows.slice(lastBreakOpportunity + 1);
+        break;
+      } else if (block.breakInside === ('enforce-auto' as any)) {
+        // There is no break opportunity, but the caller requested an auto break
+        // Break here, but only if the result won't be empty
+        if (rowIdx > 0) {
+          frames.splice(rowIdx);
+          remainingRows = block.rows.slice(rowIdx);
+          break;
+        }
+      }
+    }
+
+    frames.push(frame);
+    lastMargin = margin.bottom;
+    aggregatedHeight += topMargin + frame.height;
+    aggregatedHeights.push(aggregatedHeight + lastMargin);
+
+    if (remainder) {
+      // This row was split. Break here and include the remainder in the result.
+      remainingRows = [remainder, ...block.rows.slice(rowIdx + 1)];
+      break;
+    }
+
+    if (row.breakAfter === 'always' || block.rows[rowIdx + 1]?.breakBefore === 'always') {
+      // A break is forced after this row. Break here.
+      remainingRows = block.rows.slice(rowIdx + 1);
+      break;
+    }
+
     rowY += topMargin + frame.height;
     remainingHeight -= topMargin + frame.height;
-    aggregatedHeight += topMargin + frame.height;
-  });
+    if (block.breakInside !== 'avoid' && isBreakPossible(block.rows, rowIdx)) {
+      lastBreakOpportunity = rowIdx;
+    }
+  }
+
+  const remainder = remainingRows.length
+    ? // do not include the id in the remainder to avoid duplicate anchors
+      { ...omit(block, 'id', 'breakInside'), rows: remainingRows }
+    : undefined;
   return {
-    children,
-    height: aggregatedHeight + lastMargin,
+    frame: { height: aggregatedHeights[frames.length - 1] ?? 0, children: frames },
+    remainder,
   };
 }
