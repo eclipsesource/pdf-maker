@@ -1,9 +1,9 @@
 import { Box, ZERO_EDGES } from './box.js';
 import { Document } from './document.js';
-import { Frame, FrameContent, layoutBlock } from './layout.js';
+import { Frame, layoutBlock, LayoutContent } from './layout.js';
 import { ColumnsBlock } from './read-block.js';
 
-export function layoutColumnsContent(block: ColumnsBlock, box: Box, doc: Document): FrameContent {
+export function layoutColumnsContent(block: ColumnsBlock, box: Box, doc: Document): LayoutContent {
   const colWidths = block.columns.map((column) =>
     column.width == null
       ? undefined
@@ -26,7 +26,7 @@ export function layoutColumnsContent(block: ColumnsBlock, box: Box, doc: Documen
       height: column.height ?? box.height,
     };
     colX += colWidth + margin.right;
-    const frame = layoutBlock(column, colBox, doc);
+    const { frame } = layoutBlock({ ...column, breakInside: 'avoid' }, colBox, doc);
     children.push(frame);
     maxColHeight = Math.max(maxColHeight, frame.height + margin.top + margin.bottom);
   });
@@ -39,7 +39,9 @@ export function layoutColumnsContent(block: ColumnsBlock, box: Box, doc: Documen
     }
   });
   return {
-    children,
-    height: maxColHeight,
+    frame: {
+      children,
+      height: maxColHeight,
+    },
   };
 }

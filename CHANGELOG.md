@@ -9,6 +9,14 @@
   on an element that also has a `fillColor`, the element is now stroked
   with a black line.
 
+* Rows in a `RowsBlock` will now break and continue on the next page
+  when they do not fit. To prevent this, set `breakInside` to `avoid`.
+
+### Added
+
+* Attribute `breakInside` to control page breaks inside a rows block.
+  The default is `auto`.
+
 ## [0.4.2] - 2023-04-29
 
 ### Added

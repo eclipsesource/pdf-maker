@@ -330,15 +330,29 @@ export default {
       breakBefore: 'always',
     },
     ...range(10).map((n) => ({
-      text:
-        `(${n + 1})` +
-        ' Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor' +
-        ' incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud' +
-        ' exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure' +
-        ' dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.' +
-        ' Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt' +
-        ' mollit anim id est laborum.',
+      rows: [
+        {
+          text: `Paragraph ${n + 1}`,
+          breakAfter: 'avoid',
+        },
+        { text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor' },
+        {
+          text: 'incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud',
+        },
+        {
+          text: 'exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure',
+        },
+        {
+          text: 'dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.',
+        },
+        {
+          text: 'Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt',
+        },
+        { text: 'mollit anim id est laborum.' },
+      ],
       id: `par:${n + 1}`,
+      margin: { top: 5 },
+      fontSize: 10,
     })),
   ],
 };

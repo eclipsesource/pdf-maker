@@ -24,7 +24,7 @@ describe('layout', () => {
       const text = [{ text: 'foo', attrs: { fontSize: 10 } }];
       const block = { text };
 
-      const frame = layoutTextContent(block, box, doc);
+      const { frame } = layoutTextContent(block, box, doc);
 
       expect(frame).toEqual(objectContaining({ height: 12 }));
     });
@@ -34,7 +34,7 @@ describe('layout', () => {
       const padding = { left: 1, right: 2, top: 3, bottom: 4 };
       const block = { text, padding };
 
-      const frame = layoutTextContent(block, box, doc);
+      const { frame } = layoutTextContent(block, box, doc);
 
       expect(frame.height).toEqual(12);
     });
@@ -42,7 +42,7 @@ describe('layout', () => {
     it('includes text baseline', () => {
       const block = { text: [span('Test text', { fontSize: 10 })] };
 
-      const frame = layoutTextContent(block, box, doc) as any;
+      const { frame } = layoutTextContent(block, box, doc) as any;
 
       expect(frame.objects).toEqual([
         {
@@ -66,7 +66,7 @@ describe('layout', () => {
         ],
       };
 
-      const frame = layoutTextContent(block, box, doc) as any;
+      const { frame } = layoutTextContent(block, box, doc) as any;
 
       expect(frame.objects).toEqual([
         {
@@ -94,7 +94,7 @@ describe('layout', () => {
         padding: { left: 15, right: 25, top: 0, bottom: 0 },
       };
 
-      const frame = layoutTextContent(block, box, doc);
+      const { frame } = layoutTextContent(block, box, doc);
 
       expect(frame.objects).toEqual([
         {
@@ -113,7 +113,7 @@ describe('layout', () => {
         padding: { left: 15, right: 25, top: 0, bottom: 0 },
       };
 
-      const frame = layoutTextContent(block, box, doc);
+      const { frame } = layoutTextContent(block, box, doc);
 
       expect(frame.objects).toEqual([
         {
@@ -128,7 +128,7 @@ describe('layout', () => {
         text: [span('foo', { link: 'test-link', fontSize: 10 })],
       };
 
-      const frame = layoutTextContent(block, box, doc);
+      const { frame } = layoutTextContent(block, box, doc);
 
       expect(frame.objects).toEqual([
         { type: 'text', rows: [objectContaining({ x: 20, y: 30 })] },
@@ -144,7 +144,7 @@ describe('layout', () => {
         ],
       };
 
-      const frame = layoutTextContent(block, box, doc);
+      const { frame } = layoutTextContent(block, box, doc);
 
       expect(frame.objects).toEqual([
         { type: 'text', rows: [objectContaining({ x: 20, y: 30 })] },
@@ -165,7 +165,7 @@ describe('layout', () => {
         ],
       };
 
-      const frame = layoutTextContent(block, box, doc);
+      const { frame } = layoutTextContent(block, box, doc);
 
       expect((frame.objects?.[0] as any).rows[0].segments).toEqual([
         {

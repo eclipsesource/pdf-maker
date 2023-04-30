@@ -185,6 +185,12 @@ export type RowsBlock = {
    * Content blocks to arrange vertically.
    */
   rows: Block[];
+  /**
+   * Controls whether a page break may occur inside the block.
+   * - `auto` (default): Insert a page break when needed.
+   * - `avoid`: Do not insert a page break inside this block if it can be avoided.
+   */
+  breakInside?: 'auto' | 'avoid';
 } & TextAttrs &
   BlockAttrs;
 
@@ -231,16 +237,14 @@ export type BlockAttrs = {
    */
   graphics?: Shape[] | ((info: BlockInfo) => Shape[]);
   /**
-   * Controls whether a page break may occur before the block. Since page breaks are only inserted
-   * between top-level blocks, this attribute is ignored on nested blocks.
+   * Controls whether a page break may occur before the block.
    * - `auto` (default): Insert a page break when needed.
    * - `always`: Always insert a page break before this block.
    * - `avoid`: Do not insert a page break before this block if it can be avoided.
    */
   breakBefore?: 'auto' | 'always' | 'avoid';
   /**
-   * Controls whether a page break may occur after the block. Since page breaks are only inserted
-   * between top-level blocks, this attribute is ignored on nested blocks.
+   * Controls whether a page break may occur after the block.
    * - `auto` (default): Insert a page break when needed.
    * - `always`: Always insert a page break after this block.
    * - `avoid`: Do not insert a page break after this block if it can be avoided.

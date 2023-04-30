@@ -5,3 +5,14 @@
 export function compact<T>(array: T[]) {
   return array.filter(Boolean) as Exclude<T, null | undefined | false>[];
 }
+
+/**
+ * Returns a copy of the given object with the given keys removed.
+ */
+export function omit(obj: Record<string, unknown>, ...keys: string[]) {
+  const result = { ...obj };
+  for (const key of keys) {
+    delete result[key];
+  }
+  return result;
+}
