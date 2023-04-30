@@ -53,7 +53,7 @@ export async function embedFonts(fontDefs: FontDef[], doc: PDFDocument): Promise
       const pdfFont = await doc.embedFont(def.data, { subset: true }).catch((error) => {
         throw new Error(`Could not embed font "${def.name}": ${error.message ?? error}`);
       });
-      return pickDefined({ name: def.name, italic: def.italic, bold: def.bold, pdfFont }) as Font;
+      return pickDefined({ name: def.name, italic: def.italic, bold: def.bold, pdfFont });
     })
   );
 }

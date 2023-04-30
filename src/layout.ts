@@ -101,7 +101,7 @@ export function layoutPages(def: DocumentDefinition, doc: Document): Page[] {
     typeof def.header === 'function' && (page.header = layoutHeader(def.header(pageInfo), doc));
     typeof def.footer === 'function' && (page.footer = layoutFooter(def.footer(pageInfo), doc));
   });
-  return pages.map(pickDefined) as Page[];
+  return pages.map(pickDefined);
 }
 
 function layoutHeader(header: Block, doc: Document) {

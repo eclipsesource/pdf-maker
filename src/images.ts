@@ -30,7 +30,7 @@ export async function embedImages(imageDefs: ImageDef[], doc: PDFDocument): Prom
       const pdfImage = await doc.embedJpg(def.data).catch((error) => {
         throw new Error(`Could not embed image "${def.name}": ${error.message ?? error}`);
       });
-      return pickDefined({ name: def.name, pdfImage }) as Image;
+      return pickDefined({ name: def.name, pdfImage });
     })
   );
 }
