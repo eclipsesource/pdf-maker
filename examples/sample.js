@@ -80,7 +80,7 @@ export default {
     {
       text: 'Text and graphics',
       graphics: ({ width, height }) => [
-        { type: 'rect', x: 0, y: 0, width: 10, height: 20, fillColor: 'red' },
+        { type: 'rect', x: 0, y: 0, width: 20, height: 20, fillColor: 'red' },
         { type: 'line', x1: 0, y1: height, x2: width, y2: height, lineWidth: 0.5 },
       ],
       padding: { left: 15, y: 5 },

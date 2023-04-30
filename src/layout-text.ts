@@ -4,20 +4,25 @@ import { Box, Pos, Size } from './box.js';
 import { Alignment } from './content.js';
 import { Document } from './document.js';
 import { createRowGuides } from './guides.js';
-import { Frame, LinkObject, RenderObject, TextRowObject, TextSegmentObject } from './layout.js';
+import {
+  FrameContent,
+  LinkObject,
+  RenderObject,
+  TextRowObject,
+  TextSegmentObject,
+} from './layout.js';
 import { TextBlock } from './read-block.js';
 import { breakLine, extractTextSegments, flattenTextSegments, TextSegment } from './text.js';
 
-export function layoutTextContent(block: TextBlock, box: Box, doc: Document): Partial<Frame> {
+export function layoutTextContent(block: TextBlock, box: Box, doc: Document): FrameContent {
   const text = layoutText(block, box, doc);
-  const contentHeight = text.size?.height ?? 0;
   const objects: RenderObject[] = [];
-  text.rows.length && objects.push({ type: 'text', rows: text.rows });
-  text.objects?.length && objects.push(...text.objects);
+  if (text.rows.length) objects.push({ type: 'text', rows: text.rows });
+  if (text.objects?.length) objects.push(...text.objects);
   if (doc.guides) objects.push(...text.rows.map((row) => createRowGuides(row)));
   return {
     ...(objects?.length ? { objects } : undefined),
-    height: contentHeight,
+    height: text.size.height,
   };
 }
 

@@ -1,9 +1,9 @@
 import { Box, ZERO_EDGES } from './box.js';
 import { Document } from './document.js';
-import { Frame, layoutBlock } from './layout.js';
+import { Frame, FrameContent, layoutBlock } from './layout.js';
 import { RowsBlock } from './read-block.js';
 
-export function layoutRowsContent(block: RowsBlock, box: Box, doc: Document): Partial<Frame> {
+export function layoutRowsContent(block: RowsBlock, box: Box, doc: Document): FrameContent {
   const children: Frame[] = [];
   let rowY = box.y;
   let lastMargin = 0;
