@@ -1,9 +1,9 @@
 import { Box, ZERO_EDGES } from './box.js';
 import { Document } from './document.js';
-import { Frame, layoutBlock } from './layout.js';
+import { Frame, FrameContent, layoutBlock } from './layout.js';
 import { ColumnsBlock } from './read-block.js';
 
-export function layoutColumnsContent(block: ColumnsBlock, box: Box, doc: Document): Partial<Frame> {
+export function layoutColumnsContent(block: ColumnsBlock, box: Box, doc: Document): FrameContent {
   const colWidths = block.columns.map((column) =>
     column.width == null
       ? undefined

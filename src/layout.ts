@@ -30,6 +30,13 @@ export type Frame = {
   children?: Frame[];
 };
 
+/**
+ * Functions that layout the *content* of a block do not need to return its position.
+ * The position is fixed to the top left padding border by now.
+ * Also, the width is currently fixed to the available width.
+ */
+export type FrameContent = Omit<Frame, 'x' | 'y' | 'width'>;
+
 export type RenderObject = TextObject | ImageObject | GraphicsObject | LinkObject | AnchorObject;
 
 export type TextObject = {
@@ -178,7 +185,7 @@ export function layoutBlock(block: Block, box: Box, doc: Document): Frame {
     x: box.x,
     y: box.y,
     width: block.width ?? box.width,
-    height: block.height ?? (content?.height ?? 0) + padding.top + padding.bottom,
+    height: block.height ?? content.height + padding.top + padding.bottom,
   };
   addAnchor(frame, block);
   addGraphics(frame, block);
@@ -186,7 +193,7 @@ export function layoutBlock(block: Block, box: Box, doc: Document): Frame {
   return frame;
 }
 
-function layoutBlockContent(block: Block, box: Box, doc: Document): Partial<Frame> {
+function layoutBlockContent(block: Block, box: Box, doc: Document): FrameContent {
   if ('text' in block) {
     return layoutTextContent(block, box, doc);
   }
@@ -199,7 +206,7 @@ function layoutBlockContent(block: Block, box: Box, doc: Document): Partial<Fram
   if ('rows' in block) {
     return layoutRowsContent(block, box, doc);
   }
-  return {};
+  return { height: 0 };
 }
 
 function addAnchor(frame: Frame, block: Block) {
