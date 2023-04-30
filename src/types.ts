@@ -10,7 +10,7 @@ export type TypeDef<T> = (input: unknown) => T;
  * @param obj The input object.
  * @returns A copy of the input object with all undefined values removed.
  */
-export function pickDefined<T extends Obj>(obj: T): Partial<T> {
+export function pickDefined<T extends Obj>(obj: T): T {
   const result = {} as T;
   for (const key in obj) {
     if (typeof obj[key] !== 'undefined') {

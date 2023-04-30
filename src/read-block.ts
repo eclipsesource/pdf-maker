@@ -125,20 +125,20 @@ export function readColumnsBlock(input: Obj, defaultAttrs?: InheritableAttrs): C
   return pickDefined({
     columns: readFrom(input, 'columns', types.array(readColumn)),
     ...readBlockAttrs(input),
-  }) as ColumnsBlock;
+  });
 }
 
-export function readRowsBlock(input: Obj, defaultAttrs?: InheritableAttrs): ColumnsBlock {
+export function readRowsBlock(input: Obj, defaultAttrs?: InheritableAttrs): RowsBlock {
   const mergedAttrs = { ...defaultAttrs, ...readInheritableAttrs(input) };
   const readRow = (el: unknown) => readBlock(el, mergedAttrs);
   return pickDefined({
     rows: readFrom(input, 'rows', types.array(readRow)),
     ...readBlockAttrs(input),
-  }) as ColumnsBlock;
+  });
 }
 
 export function readEmptyBlock(input: Obj): EmptyBlock {
-  return pickDefined(readBlockAttrs(input)) as EmptyBlock;
+  return pickDefined(readBlockAttrs(input));
 }
 
 function readBlockAttrs(input: Obj): BlockAttrs {
