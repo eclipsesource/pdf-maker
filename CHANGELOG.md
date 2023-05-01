@@ -20,6 +20,9 @@
 * Attribute `breakInside` to control page breaks inside a block on
   `TextBlock` and `RowsBlock`. The default is `auto`.
 
+* Attribute `insertAfterBreak` on `RowsBlock` to insert an extra block
+  after a page break.
+
 ## [0.4.2] - 2023-04-29
 
 ### Added

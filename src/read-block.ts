@@ -36,6 +36,7 @@ export type ColumnsBlock = {
 export type RowsBlock = {
   rows: Block[];
   breakInside?: 'auto' | 'avoid';
+  insertAfterBreak?: () => Block;
 } & BlockAttrs;
 
 export type EmptyBlock = BlockAttrs;
@@ -140,6 +141,7 @@ export function readRowsBlock(input: Obj, defaultAttrs?: InheritableAttrs): Rows
     ...readObject(input, {
       rows: types.array(readRow),
       breakInside: optional(types.string({ enum: ['auto', 'avoid'] })),
+      insertAfterBreak: optional(dynamic(readBlock, 'insertAfterBreak')),
     }),
     ...readBlockAttrs(input),
   }) as RowsBlock;
