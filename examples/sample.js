@@ -349,6 +349,7 @@ export default {
       id: `par:${n + 1}`,
       margin: { top: 5 },
       fontSize: 10,
+      insertAfterBreak: () => ({ text: '…continued', fontSize: 8, margin: { bottom: 2 } }),
     })),
   ],
 };

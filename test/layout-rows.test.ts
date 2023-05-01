@@ -91,13 +91,26 @@ describe('layout-rows', () => {
         frame?.children?.map((c) => (c.objects?.[0] as any)?.name);
       const box = { x: 20, y: 30, width: 400, height: 700 };
 
-      it('includes page break after last fitting block', () => {
+      it('creates page break after last fitting block', () => {
         const rows = makeBlocks(10);
 
         const { frame, remainder } = layoutRowsContent({ rows }, box, doc);
 
         expect(renderedIds(frame)).toEqual(range(7).map(String));
         expect(remainder).toEqual({ rows: rows.slice(7) });
+      });
+
+      it('includes extra block after page break', () => {
+        const rows = makeBlocks(10);
+        const insertAfterBreak = () => ({ text: 'contd', id: 'extra' });
+
+        const { frame, remainder } = layoutRowsContent({ rows, insertAfterBreak }, box, doc);
+
+        expect(renderedIds(frame)).toEqual(range(7).map(String));
+        expect(remainder).toEqual({
+          rows: [{ text: 'contd', id: 'extra' }, ...rows.slice(7)],
+          insertAfterBreak,
+        });
       });
 
       it('supports nested rows blocks', () => {

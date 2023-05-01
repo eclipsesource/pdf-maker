@@ -197,6 +197,10 @@ export type RowsBlock = {
    * - `avoid`: Do not insert a page break inside this block if it can be avoided.
    */
   breakInside?: 'auto' | 'avoid';
+  /**
+   * Allows to insert an extra block after a page break.
+   */
+  insertAfterBreak?: Block | (() => Block);
 } & TextAttrs &
   BlockAttrs;
 
