@@ -20,6 +20,7 @@ export type Block = TextBlock | ImageBlock | ColumnsBlock | RowsBlock | EmptyBlo
 
 export type TextBlock = {
   text: TextSpan[];
+  breakInside?: 'auto' | 'avoid';
 } & BlockAttrs &
   InheritableAttrs;
 
@@ -104,6 +105,7 @@ export function readTextBlock(input: Obj, defaultAttrs?: InheritableAttrs): Text
   return pickDefined({
     ...readObject(input, {
       text: required(parseTextWithAttrs),
+      breakInside: optional(types.string({ enum: ['auto', 'avoid'] })),
     }),
     textAlign: readFrom(mergedAttrs, 'textAlign', optional(tAlignment)),
     ...readBlockAttrs(input),

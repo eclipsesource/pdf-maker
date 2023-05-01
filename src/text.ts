@@ -14,6 +14,9 @@ export type TextSegment = {
   lineHeight: number;
   font: PDFFont;
   fontSize: number;
+  fontFamily: string;
+  italic?: boolean;
+  bold?: boolean;
   color?: Color;
   link?: string;
   rise?: number;
@@ -25,6 +28,9 @@ export function extractTextSegments(textSpans: TextSpan[], fonts: Font[]): TextS
     const { text, attrs } = span;
     const {
       fontSize = defaultFontSize,
+      fontFamily,
+      italic,
+      bold,
       lineHeight = defaultLineHeight,
       color,
       link,
@@ -41,6 +47,9 @@ export function extractTextSegments(textSpans: TextSpan[], fonts: Font[]): TextS
           height,
           lineHeight,
           font,
+          fontFamily,
+          italic,
+          bold,
           fontSize,
           color,
           link,
@@ -49,6 +58,15 @@ export function extractTextSegments(textSpans: TextSpan[], fonts: Font[]): TextS
         } as TextSegment)
     );
   });
+}
+
+export function convertToTextSpan(segment: TextSegment): TextSpan {
+  const { text, fontSize, fontFamily, italic, bold, lineHeight, color, link, rise, letterSpacing } =
+    segment;
+  return {
+    text,
+    attrs: { fontSize, fontFamily, italic, bold, lineHeight, color, link, rise, letterSpacing },
+  };
 }
 
 /**

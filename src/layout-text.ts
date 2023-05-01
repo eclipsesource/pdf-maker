@@ -12,7 +12,14 @@ import {
   TextSegmentObject,
 } from './layout.js';
 import { TextBlock } from './read-block.js';
-import { breakLine, extractTextSegments, flattenTextSegments, TextSegment } from './text.js';
+import {
+  breakLine,
+  convertToTextSpan,
+  extractTextSegments,
+  flattenTextSegments,
+  TextSegment,
+} from './text.js';
+import { omit } from './utils.js';
 
 export function layoutTextContent(block: TextBlock, box: Box, doc: Document): LayoutContent {
   const text = layoutText(block, box, doc);
@@ -21,34 +28,50 @@ export function layoutTextContent(block: TextBlock, box: Box, doc: Document): La
   text.objects?.length && objects.push(...text.objects);
   if (doc.guides) objects.push(...text.rows.map((row) => createRowGuides(row)));
 
+  const remainder = text.remainder ? { ...omit(block, 'id'), text: text.remainder } : undefined;
+
   return {
     frame: {
       ...(objects?.length ? { objects } : undefined),
       height: text.size.height,
     },
+    remainder,
   };
 }
 
 function layoutText(block: TextBlock, box: Box, doc: Document) {
   const { text, textAlign } = block;
-  const textSpans = text;
-  const segments = extractTextSegments(textSpans, doc.fonts);
+  const segments = extractTextSegments(text, doc.fonts);
   const rows: TextRowObject[] = [];
   const objects: RenderObject[] = [];
   let remainingSegments = segments;
   const remainingSpace = { ...box };
   const size: Size = { width: 0, height: 0 };
   while (remainingSegments?.length) {
-    const line = layoutTextRow(remainingSegments, remainingSpace, textAlign);
-    objects.push(...(line.objects ?? []));
-    rows.push(line.row);
-    remainingSegments = line.remainder;
-    remainingSpace.height -= line.row.height;
-    remainingSpace.y += line.row.height;
-    size.width = Math.max(size.width, line.row.width);
-    size.height += line.row.height;
+    const layoutResult = layoutTextRow(remainingSegments, remainingSpace, textAlign);
+    const { row, objects: rowObjects, remainder } = layoutResult;
+
+    if (row.height > remainingSpace.height) {
+      // This row doesn't fit in the remaining space. Break here if possible.
+      if (block.breakInside !== 'avoid') {
+        break;
+      }
+    }
+
+    if (rowObjects.length) objects.push(...rowObjects);
+    rows.push(row);
+    remainingSegments = remainder;
+    remainingSpace.height -= row.height;
+    remainingSpace.y += row.height;
+    size.width = Math.max(size.width, row.width);
+    size.height += row.height;
   }
-  return { rows, objects, size };
+
+  const remainder = remainingSegments?.length
+    ? flattenTextSegments(remainingSegments).map((s) => convertToTextSpan(s))
+    : undefined;
+
+  return { rows, objects, size, remainder };
 }
 
 /*
@@ -57,8 +80,8 @@ function layoutText(block: TextBlock, box: Box, doc: Document) {
  * ---------------------------------------------------------------    |
  *                                                              ˄     |
  *       /\     |                                               |     |
- *      /  \    |       ___                                     |     |
- *     /----\   |---,  /   \  \  /                             row   line
+ *      /  \    |___    ___                                     |     |
+ *     /----\   |   |  /   \  \  /                             row   line
  *    /      \  |   |  \___/   \/                               |     |
  * ----------------------------/------baseline--------˅---------|     |
  *                            /                    descent      ˅     |
