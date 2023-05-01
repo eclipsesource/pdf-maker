@@ -152,6 +152,12 @@ export type TextBlock = {
    * Text to display in this block.
    */
   text: Text;
+  /**
+   * Controls whether a page break may occur inside the block.
+   * - `auto` (default): Insert a page break when needed.
+   * - `avoid`: Do not insert a page break inside this block if it can be avoided.
+   */
+  breakInside?: 'auto' | 'avoid';
 } & TextAttrs &
   BlockAttrs;
 

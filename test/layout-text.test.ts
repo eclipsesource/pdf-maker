@@ -6,7 +6,7 @@ import { Document } from '../src/document.js';
 import { layoutTextContent } from '../src/layout-text.js';
 import { paperSizes } from '../src/page-sizes.js';
 import { TextAttrs, TextSpan } from '../src/read-block.js';
-import { fakeFont } from './test-utils.js';
+import { fakeFont, range } from './test-utils.js';
 
 const { objectContaining } = expect;
 
@@ -177,6 +177,39 @@ describe('layout', () => {
           letterSpacing: 5,
         },
       ]);
+    });
+
+    it('breaks text if it does not fit', () => {
+      box.height = 100;
+      const longText = range(100)
+        .map(() => 'foo')
+        .join(' ');
+      const text = [span(longText, { fontSize: 20, italic: true })];
+      const block = { text };
+
+      const { remainder } = layoutTextContent(block, box, doc);
+
+      expect(remainder).toEqual({
+        text: [
+          {
+            text: expect.stringMatching(/^foo.*foo$/),
+            attrs: expect.objectContaining({ fontSize: 20, italic: true }),
+          },
+        ],
+      });
+    });
+
+    it('does not break if breakInside = avoid', () => {
+      box.height = 100;
+      const longText = range(100)
+        .map(() => 'foo')
+        .join(' ');
+      const text = [span(longText, { fontSize: 20, italic: true })];
+      const block = { text, breakInside: 'avoid' as const };
+
+      const { remainder } = layoutTextContent(block, box, doc);
+
+      expect(remainder).toBeUndefined();
     });
   });
 });
