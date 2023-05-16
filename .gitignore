@@ -1,7 +1,5 @@
 # VSCode
-/.vscode/**/*
-!/.vscode/extensions.json
-!/.vscode/*-template.json
+*.code-workspace
 
 # dependencies
 node_modules/
