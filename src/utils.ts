@@ -19,3 +19,23 @@ export function omit<T extends Record<string, unknown>>(
   }
   return result;
 }
+
+export function multiplyMatrices(matrix1: number[], matrix2: number[]): number[] {
+  const result = [];
+  const [a, b, c, d, e, f] = matrix1;
+  const [g, h, i, j, k, l] = matrix2;
+
+  result[0] = a * g + c * h;
+  result[1] = b * g + d * h;
+  result[2] = a * i + c * j;
+  result[3] = b * i + d * j;
+  result[4] = a * k + c * l + e;
+  result[5] = b * k + d * l + f;
+
+  return result;
+}
+
+export function round(n: number, precision = 6): number {
+  const factor = Math.pow(10, precision);
+  return Math.round(n * factor) / factor;
+}

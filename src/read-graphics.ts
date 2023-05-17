@@ -13,7 +13,7 @@ export type Shape = RectObject | CircleObject | LineObject | PolylineObject | Pa
 type LineCap = 'butt' | 'round' | 'square';
 type LineJoin = 'miter' | 'round' | 'bevel';
 
-type LineAttrs = {
+export type LineAttrs = {
   lineWidth?: number;
   lineColor?: Color;
   lineOpacity?: number;
@@ -22,9 +22,17 @@ type LineAttrs = {
   lineDash?: number[];
 };
 
-type FillAttrs = {
+export type FillAttrs = {
   fillColor?: Color;
   fillOpacity?: number;
+};
+
+type TransformAttrs = {
+  translate?: { x?: number; y?: number };
+  scale?: { x?: number; y?: number };
+  rotate?: { angle: number; cx?: number; cy?: number };
+  skew?: { x?: number; y?: number };
+  matrix?: number[];
 };
 
 export type RectObject = {
@@ -34,7 +42,8 @@ export type RectObject = {
   width: number;
   height: number;
 } & Omit<LineAttrs, 'lineCap'> &
-  FillAttrs;
+  FillAttrs &
+  TransformAttrs;
 
 export type CircleObject = {
   type: 'circle';
@@ -42,7 +51,8 @@ export type CircleObject = {
   cy: number;
   r: number;
 } & Omit<LineAttrs, 'lineCap' | 'lineJoin'> &
-  FillAttrs;
+  FillAttrs &
+  TransformAttrs;
 
 export type LineObject = {
   type: 'line';
@@ -50,20 +60,23 @@ export type LineObject = {
   y1: number;
   x2: number;
   y2: number;
-} & Omit<LineAttrs, 'lineJoin'>;
+} & Omit<LineAttrs, 'lineJoin'> &
+  TransformAttrs;
 
 export type PolylineObject = {
   type: 'polyline';
   points: { x: number; y: number }[];
   closePath?: boolean;
 } & LineAttrs &
-  FillAttrs;
+  FillAttrs &
+  TransformAttrs;
 
 export type PathObject = {
   type: 'path';
   commands: PathCommand[];
 } & LineAttrs &
-  FillAttrs;
+  FillAttrs &
+  TransformAttrs;
 
 const tLineCap = types.string({ enum: ['butt', 'round', 'square'] });
 const tLineJoin = types.string({ enum: ['miter', 'round', 'bevel'] });
@@ -102,6 +115,7 @@ function readRect(input: Obj): RectObject {
     height: required(types.number()),
     ...omit(lineAttrs, 'lineCap'),
     ...fillAttrs,
+    ...transformAttrs,
   }) as RectObject;
 }
 
@@ -113,6 +127,7 @@ function readCircle(input: Obj): CircleObject {
     r: required(types.number({ minimum: 0 })),
     ...omit(lineAttrs, 'lineCap', 'lineJoin'),
     ...fillAttrs,
+    ...transformAttrs,
   }) as CircleObject;
 }
 
@@ -124,6 +139,7 @@ function readLine(input: Obj): LineObject {
     y1: required(types.number()),
     y2: required(types.number()),
     ...omit(lineAttrs, 'lineJoin'),
+    ...transformAttrs,
   }) as LineObject;
 }
 
@@ -134,6 +150,7 @@ function readPolyline(input: Obj): PolylineObject {
     closePath: optional(types.boolean()),
     ...lineAttrs,
     ...fillAttrs,
+    ...transformAttrs,
   }) as PolylineObject;
 }
 
@@ -143,6 +160,7 @@ function readPath(input: Obj): PathObject {
     d: required(types.string()),
     ...lineAttrs,
     ...fillAttrs,
+    ...transformAttrs,
   });
   const commands = parseSvgPath(obj.d as string);
   return { ...obj, commands } as PathObject;
@@ -160,6 +178,20 @@ const lineAttrs = {
 const fillAttrs = {
   fillColor: optional(parseColor),
   fillOpacity: optional(tOpacity),
+};
+
+const transformAttrs = {
+  translate: optional(types.object({ x: optional(types.number()), y: optional(types.number()) })),
+  scale: optional(types.object({ x: optional(types.number()), y: optional(types.number()) })),
+  rotate: optional(
+    types.object({
+      cx: optional(types.number()),
+      cy: optional(types.number()),
+      angle: types.number(),
+    })
+  ),
+  skew: optional(types.object({ x: optional(types.number()), y: optional(types.number()) })),
+  matrix: optional(types.array(types.number(), { minItems: 6, maxItems: 6 })),
 };
 
 function readPoint(input: unknown): { x: number; y: number } {

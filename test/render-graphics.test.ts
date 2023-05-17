@@ -299,5 +299,112 @@ describe('render-graphics', () => {
         ...tail,
       ]);
     });
+
+    describe('transformations', () => {
+      const rect = { type: 'rect' as const, x: 1, y: 2, width: 3, height: 4 };
+      it('supports translate', () => {
+        const shape = {
+          ...rect,
+          translate: { x: 1, y: 2 },
+        };
+
+        renderGraphics({ type: 'graphics', shapes: [shape] }, page, pos);
+
+        expect(getContentStream(page)).toEqual([
+          ...head,
+          '1 0 0 1 1 2 cm',
+          '1 2 3 4 re',
+          'S',
+          ...tail,
+        ]);
+      });
+
+      it('supports scale', () => {
+        const shape = {
+          ...rect,
+          scale: { x: 3, y: 4 },
+        };
+
+        renderGraphics({ type: 'graphics', shapes: [shape] }, page, pos);
+
+        expect(getContentStream(page)).toEqual([
+          ...head,
+          '3 0 0 4 0 0 cm',
+          '1 2 3 4 re',
+          'S',
+          ...tail,
+        ]);
+      });
+
+      it('supports rotate', () => {
+        const shape = {
+          ...rect,
+          rotate: { angle: 5, cx: 6, cy: 7 },
+        };
+
+        renderGraphics({ type: 'graphics', shapes: [shape] }, page, pos);
+
+        expect(getContentStream(page)).toEqual([
+          ...head,
+          '0.996195 0.087156 -0.087156 0.996195 0.632922 -0.496297 cm',
+          '1 2 3 4 re',
+          'S',
+          ...tail,
+        ]);
+      });
+
+      it('supports skew', () => {
+        const shape = {
+          ...rect,
+          skew: { x: 8, y: 9 },
+        };
+
+        renderGraphics({ type: 'graphics', shapes: [shape] }, page, pos);
+
+        expect(getContentStream(page)).toEqual([
+          ...head,
+          '1 0.158384 0.140541 1 0 0 cm',
+          '1 2 3 4 re',
+          'S',
+          ...tail,
+        ]);
+      });
+
+      it('supports matrix', () => {
+        const shape = {
+          ...rect,
+          matrix: [1, 2, 3, 4, 5, 6],
+        };
+
+        renderGraphics({ type: 'graphics', shapes: [shape] }, page, pos);
+
+        expect(getContentStream(page)).toEqual([
+          ...head,
+          '1 2 3 4 5 6 cm',
+          '1 2 3 4 re',
+          'S',
+          ...tail,
+        ]);
+      });
+
+      it('supports multiple transformations', () => {
+        const shape = {
+          ...rect,
+          translate: { x: 1, y: 2 },
+          scale: { x: 3, y: 4 },
+          skew: { x: 8, y: 9 },
+        };
+
+        renderGraphics({ type: 'graphics', shapes: [shape] }, page, pos);
+
+        expect(getContentStream(page)).toEqual([
+          ...head,
+          '3 0.633538 0.421623 4 1 2 cm',
+          '1 2 3 4 re',
+          'S',
+          ...tail,
+        ]);
+      });
+    });
   });
 });
