@@ -337,7 +337,7 @@ export type Circle = {
    * The radius of the circle.
    */
   r: number;
-} & Omit<LineAttrs, 'lineCap'> &
+} & Omit<LineAttrs, 'lineCap' | 'lineJoin'> &
   FillAttrs;
 
 /**
