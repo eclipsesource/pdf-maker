@@ -9,7 +9,10 @@ export function compact<T>(array: T[]) {
 /**
  * Returns a copy of the given object with the given keys removed.
  */
-export function omit(obj: Record<string, unknown>, ...keys: string[]) {
+export function omit<T extends Record<string, unknown>>(
+  obj: T,
+  ...keys: string[]
+): Omit<T, (typeof keys)[number]> {
   const result = { ...obj };
   for (const key of keys) {
     delete result[key];

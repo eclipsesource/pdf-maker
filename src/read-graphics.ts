@@ -1,6 +1,7 @@
 import { Color, parseColor } from './colors.js';
 import { parseSvgPath, PathCommand } from './svg-paths.js';
 import { Obj, optional, readFrom, readObject, required, types } from './types.js';
+import { omit } from './utils.js';
 
 export type GraphicsObject = {
   type: 'graphics';
@@ -9,35 +10,39 @@ export type GraphicsObject = {
 
 export type Shape = RectObject | CircleObject | LineObject | PolylineObject | PathObject;
 
-export type RectObject = {
-  type: 'rect';
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-  lineWidth?: number;
-  lineColor?: Color;
-  lineOpacity?: number;
-  lineJoin?: LineJoin;
-  lineDash?: number[];
-  fillColor?: Color;
-  fillOpacity?: number;
-};
+type LineCap = 'butt' | 'round' | 'square';
+type LineJoin = 'miter' | 'round' | 'bevel';
 
-export type CircleObject = {
-  type: 'circle';
-  cx: number;
-  cy: number;
-  r: number;
+type LineAttrs = {
   lineWidth?: number;
   lineColor?: Color;
   lineOpacity?: number;
   lineCap?: LineCap;
   lineJoin?: LineJoin;
   lineDash?: number[];
+};
+
+type FillAttrs = {
   fillColor?: Color;
   fillOpacity?: number;
 };
+
+export type RectObject = {
+  type: 'rect';
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+} & Omit<LineAttrs, 'lineCap'> &
+  FillAttrs;
+
+export type CircleObject = {
+  type: 'circle';
+  cx: number;
+  cy: number;
+  r: number;
+} & Omit<LineAttrs, 'lineCap' | 'lineJoin'> &
+  FillAttrs;
 
 export type LineObject = {
   type: 'line';
@@ -45,42 +50,20 @@ export type LineObject = {
   y1: number;
   x2: number;
   y2: number;
-  lineWidth?: number;
-  lineColor?: Color;
-  lineOpacity?: number;
-  lineCap?: LineCap;
-  lineDash?: number[];
-};
+} & Omit<LineAttrs, 'lineJoin'>;
 
 export type PolylineObject = {
   type: 'polyline';
   points: { x: number; y: number }[];
   closePath?: boolean;
-  lineWidth?: number;
-  lineColor?: Color;
-  lineOpacity?: number;
-  lineCap?: LineCap;
-  lineJoin?: LineJoin;
-  lineDash?: number[];
-  fillColor?: Color;
-  fillOpacity?: number;
-};
+} & LineAttrs &
+  FillAttrs;
 
 export type PathObject = {
   type: 'path';
   commands: PathCommand[];
-  lineWidth?: number;
-  lineColor?: Color;
-  lineOpacity?: number;
-  lineCap?: LineCap;
-  lineJoin?: LineJoin;
-  lineDash?: number[];
-  fillColor?: Color;
-  fillOpacity?: number;
-};
-
-type LineCap = 'butt' | 'round' | 'square';
-type LineJoin = 'miter' | 'round' | 'bevel';
+} & LineAttrs &
+  FillAttrs;
 
 const tLineCap = types.string({ enum: ['butt', 'round', 'square'] });
 const tLineJoin = types.string({ enum: ['miter', 'round', 'bevel'] });
@@ -117,29 +100,20 @@ function readRect(input: Obj): RectObject {
     y: required(types.number()),
     width: required(types.number()),
     height: required(types.number()),
-    lineWidth: optional(tLineWidth),
-    lineColor: optional(parseColor),
-    lineOpacity: optional(tOpacity),
-    lineJoin: optional(tLineJoin),
-    lineDash: optional(tLineDash),
-    fillColor: optional(parseColor),
-    fillOpacity: optional(tOpacity),
+    ...omit(lineAttrs, 'lineCap'),
+    ...fillAttrs,
   }) as RectObject;
 }
 
-function readCircle(input: Obj): RectObject {
+function readCircle(input: Obj): CircleObject {
   return readObject(input, {
     type: () => 'circle',
     cx: required(types.number()),
     cy: required(types.number()),
     r: required(types.number({ minimum: 0 })),
-    lineWidth: optional(tLineWidth),
-    lineColor: optional(parseColor),
-    lineOpacity: optional(tOpacity),
-    lineDash: optional(tLineDash),
-    fillColor: optional(parseColor),
-    fillOpacity: optional(tOpacity),
-  }) as RectObject;
+    ...omit(lineAttrs, 'lineCap', 'lineJoin'),
+    ...fillAttrs,
+  }) as CircleObject;
 }
 
 function readLine(input: Obj): LineObject {
@@ -149,11 +123,7 @@ function readLine(input: Obj): LineObject {
     x2: required(types.number()),
     y1: required(types.number()),
     y2: required(types.number()),
-    lineWidth: optional(tLineWidth),
-    lineColor: optional(parseColor),
-    lineOpacity: optional(tOpacity),
-    lineCap: optional(tLineCap),
-    lineDash: optional(tLineDash),
+    ...omit(lineAttrs, 'lineJoin'),
   }) as LineObject;
 }
 
@@ -162,14 +132,8 @@ function readPolyline(input: Obj): PolylineObject {
     type: () => 'polyline',
     points: required(types.array(readPoint)),
     closePath: optional(types.boolean()),
-    lineWidth: optional(tLineWidth),
-    lineColor: optional(parseColor),
-    lineOpacity: optional(tOpacity),
-    lineCap: optional(tLineCap),
-    lineJoin: optional(tLineJoin),
-    lineDash: optional(tLineDash),
-    fillColor: optional(parseColor),
-    fillOpacity: optional(tOpacity),
+    ...lineAttrs,
+    ...fillAttrs,
   }) as PolylineObject;
 }
 
@@ -177,18 +141,26 @@ function readPath(input: Obj): PathObject {
   const obj = readObject(input, {
     type: () => 'path',
     d: required(types.string()),
-    lineWidth: optional(tLineWidth),
-    lineColor: optional(parseColor),
-    lineOpacity: optional(tOpacity),
-    lineCap: optional(tLineCap),
-    lineJoin: optional(tLineJoin),
-    lineDash: optional(tLineDash),
-    fillColor: optional(parseColor),
-    fillOpacity: optional(tOpacity),
+    ...lineAttrs,
+    ...fillAttrs,
   });
   const commands = parseSvgPath(obj.d as string);
   return { ...obj, commands } as PathObject;
 }
+
+const lineAttrs = {
+  lineWidth: optional(tLineWidth),
+  lineColor: optional(parseColor),
+  lineOpacity: optional(tOpacity),
+  lineCap: optional(tLineCap),
+  lineJoin: optional(tLineJoin),
+  lineDash: optional(tLineDash),
+};
+
+const fillAttrs = {
+  fillColor: optional(parseColor),
+  fillOpacity: optional(tOpacity),
+};
 
 function readPoint(input: unknown): { x: number; y: number } {
   return readObject(input, {

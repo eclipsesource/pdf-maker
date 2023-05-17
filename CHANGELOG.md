@@ -15,6 +15,9 @@
 * Lines in a `TextBlock` will now break and continue on the next page
   when they do not fit. To prevent this, set `breakInside` to `avoid`.
 
+* The `lineJoin` attribute is no longer supported by the graphics type
+  `Circle`.
+
 ### Added
 
 * Attribute `breakInside` to control page breaks inside a block on
