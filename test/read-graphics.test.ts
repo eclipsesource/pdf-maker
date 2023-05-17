@@ -4,6 +4,14 @@ import { rgb } from 'pdf-lib';
 import { readShape } from '../src/read-graphics.js';
 import { p } from './test-utils.js';
 
+const transformAttrs = {
+  translate: { x: 1, y: 2 },
+  scale: { x: 3, y: 4 },
+  rotate: { angle: 5, cx: 6, cy: 7 },
+  skew: { x: 8, y: 9 },
+  matrix: [10, 11, 12, 13, 14, 15],
+};
+
 describe('read-graphics', () => {
   describe('readShape', () => {
     it('throws for invalid types', () => {
@@ -27,6 +35,7 @@ describe('read-graphics', () => {
         fillColor: 'blue',
         lineOpacity: 0.5,
         fillOpacity: 0.3,
+        ...transformAttrs,
       };
 
       expect(readShape(rect)).toEqual({
@@ -57,6 +66,7 @@ describe('read-graphics', () => {
         fillColor: 'blue',
         lineOpacity: 0.5,
         fillOpacity: 0.3,
+        ...transformAttrs,
       };
 
       expect(readShape(circle)).toEqual({
@@ -85,6 +95,7 @@ describe('read-graphics', () => {
         lineWidth: 1.5,
         lineColor: 'red',
         lineOpacity: 0.5,
+        ...transformAttrs,
       };
 
       expect(readShape(line)).toEqual({
@@ -113,6 +124,7 @@ describe('read-graphics', () => {
         fillColor: 'blue',
         lineOpacity: 0.5,
         fillOpacity: 0.3,
+        ...transformAttrs,
       };
 
       expect(readShape(polyline)).toEqual({
@@ -144,6 +156,7 @@ describe('read-graphics', () => {
         fillColor: 'blue',
         lineOpacity: 0.5,
         fillOpacity: 0.3,
+        ...transformAttrs,
       };
 
       expect(readShape(path)).toEqual({

@@ -318,7 +318,8 @@ export type Rect = {
    */
   height: number;
 } & Omit<LineAttrs, 'lineCap'> &
-  FillAttrs;
+  FillAttrs &
+  TransformAttrs;
 
 /**
  * A circle.
@@ -338,7 +339,8 @@ export type Circle = {
    */
   r: number;
 } & Omit<LineAttrs, 'lineCap' | 'lineJoin'> &
-  FillAttrs;
+  FillAttrs &
+  TransformAttrs;
 
 /**
  * A straight line.
@@ -361,7 +363,8 @@ export type Line = {
    * The y coordinate of the end point of the line.
    */
   y2: number;
-} & Omit<LineAttrs, 'lineJoin'>;
+} & Omit<LineAttrs, 'lineJoin'> &
+  TransformAttrs;
 
 /**
  * A polyline, i.e. a line consisting of multiple segments.
@@ -377,7 +380,8 @@ export type Polyline = {
    */
   closePath?: boolean;
 } & LineAttrs &
-  FillAttrs;
+  FillAttrs &
+  TransformAttrs;
 
 /**
  * An SVG path element.
@@ -389,7 +393,8 @@ export type Path = {
    */
   d: string;
 } & LineAttrs &
-  FillAttrs;
+  FillAttrs &
+  TransformAttrs;
 
 export type LineCap = 'butt' | 'round' | 'square';
 export type LineJoin = 'miter' | 'round' | 'bevel';
@@ -448,6 +453,39 @@ type FillAttrs = {
    * The opacity to use for filling the shape.
    */
   fillOpacity?: number;
+};
+
+type TransformAttrs = {
+  /**
+   * Moves the element by `x` and `y`.
+   */
+  translate?: { x?: number; y?: number };
+  /**
+   * Stretches the element by `x` and `y`.
+   */
+  scale?: { x?: number; y?: number };
+  /**
+   * Rotates the element by `angle` degrees clockwise about the point
+   * `[cx,cy]`. If `cx` and `cy` are omitted, the rotation is about the
+   * origin of the coordinate system.
+   */
+  rotate?: { angle: number; cx?: number; cy?: number };
+  /**
+   * Skews the element by `x` degrees along the x axis and by `y`
+   * degrees along the y axis.
+   */
+  skew?: { x?: number; y?: number };
+  /**
+   * A custom transformation matrix to apply to the element. The matrix
+   * is given as an array of six values `[a, b, c, d, e, f]` that
+   * represent the transformation matrix:
+   * ```
+   * | a c e |
+   * | b d f |
+   * | 0 0 1 |
+   * ```
+   */
+  matrix?: number[];
 };
 
 /**

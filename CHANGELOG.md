@@ -26,6 +26,9 @@
 * Attribute `insertAfterBreak` on `RowsBlock` to insert an extra block
   after a page break.
 
+* Attributes `translate`, `scale`, `rotate`, `skew` and `matrix` on all
+  graphics elements to apply transformations.
+
 ## [0.4.2] - 2023-04-29
 
 ### Added

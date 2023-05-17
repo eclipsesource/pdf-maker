@@ -28,7 +28,9 @@ import { LineCap, LineJoin } from './content.js';
 import { getExtGraphicsState, Page } from './page.js';
 import {
   CircleObject,
+  FillAttrs,
   GraphicsObject,
+  LineAttrs,
   LineObject,
   PathObject,
   PolylineObject,
@@ -36,7 +38,7 @@ import {
   Shape,
 } from './read-graphics.js';
 import { svgPathToPdfOps } from './svg-paths.js';
-import { compact } from './utils.js';
+import { compact, multiplyMatrices, round } from './utils.js';
 
 // See https://stackoverflow.com/a/27863181/247159
 const KAPPA = (4 * (Math.sqrt(2) - 1)) / 3;
@@ -113,9 +115,9 @@ function pathOperations(points: { x: number; y: number }[]): PDFOperator[] {
   return points.reduce((a: PDFOperator[], p) => [...a, (a.length ? lineTo : moveTo)(p.x, p.y)], []);
 }
 
-function fillAndStrokePath(obj: Shape): PDFOperator {
-  const hasFill = !!(obj as any).fillColor;
-  const hasStroke = !!(obj as any).lineColor || !!(obj as any).lineWidth;
+function fillAndStrokePath(obj: LineAttrs & FillAttrs): PDFOperator {
+  const hasFill = !!obj.fillColor;
+  const hasStroke = !!obj.lineColor || !!obj.lineWidth;
   if (hasFill && hasStroke) return fillAndStroke();
   if (hasFill) return fill();
   return stroke(); // fall back to stroke to avoid invisible shapes
@@ -137,23 +139,66 @@ const trLineJoin = (lineJoin: LineJoin) => lineJoinTr[lineJoin];
 
 function setStyleAttrs(shape: Shape, page: Page): PDFOperator[] {
   const extGraphicsState = getExtGraphicsStateForShape(page, shape);
+  const attrs = shape as LineAttrs & FillAttrs;
   return compact([
+    createMatrix(shape),
     extGraphicsState && setGraphicsState(extGraphicsState),
-    'fillColor' in shape && setFillingColor(shape.fillColor as any),
-    'lineColor' in shape && setStrokingColor(shape.lineColor as any),
-    'lineWidth' in shape && setLineWidth(shape.lineWidth as any),
-    'lineCap' in shape && setLineCap(trLineCap(shape.lineCap as any)),
-    'lineJoin' in shape && setLineJoin(trLineJoin(shape.lineJoin as any)),
-    'lineDash' in shape && setDashPattern(shape.lineDash as any, 0),
+    attrs.fillColor !== undefined && setFillingColor(attrs.fillColor),
+    attrs.lineColor !== undefined && setStrokingColor(attrs.lineColor),
+    attrs.lineWidth !== undefined && setLineWidth(attrs.lineWidth),
+    attrs.lineCap !== undefined && setLineCap(trLineCap(attrs.lineCap)),
+    attrs.lineJoin !== undefined && setLineJoin(trLineJoin(attrs.lineJoin)),
+    attrs.lineDash !== undefined && setDashPattern(attrs.lineDash, 0),
   ]);
+}
+
+function createMatrix(shape: Shape) {
+  const matrices = [];
+  if ('translate' in shape && (shape.translate?.x || shape.translate?.y)) {
+    const x = shape.translate.x ?? 0;
+    const y = shape.translate.y ?? 0;
+    matrices.push([1, 0, 0, 1, x, y]);
+  }
+  if ('scale' in shape && (shape.scale?.x || shape.scale?.y)) {
+    const x = shape.scale.x ?? 1;
+    const y = shape.scale.y ?? 1;
+    matrices.push([x, 0, 0, y, 0, 0]);
+  }
+  if ('rotate' in shape && shape.rotate) {
+    const cx = shape.rotate.cx ?? 0;
+    const cy = shape.rotate.cy ?? 0;
+    const angle = shape.rotate.angle * (Math.PI / 180);
+    const cos = Math.cos(angle);
+    const sin = Math.sin(angle);
+    const dx = cx - cx * cos + cy * sin;
+    const dy = cy - cx * sin - cy * cos;
+    matrices.push([cos, sin, -sin, cos, dx, dy]);
+  }
+  if ('skew' in shape && (shape.skew?.x || shape.skew?.y)) {
+    const angleX = (shape.skew.x ?? 0) * (Math.PI / 180);
+    const angleY = (shape.skew.y ?? 0) * (Math.PI / 180);
+    const tanX = Math.tan(angleX);
+    const tanY = Math.tan(angleY);
+    matrices.push([1, tanY, tanX, 1, 0, 0]);
+  }
+  if ('matrix' in shape && shape.matrix) {
+    matrices.push(shape.matrix);
+  }
+  if (matrices.length) {
+    const [a, b, c, d, e, f] = matrices.reduce(multiplyMatrices, [1, 0, 0, 1, 0, 0]);
+    return concatTransformationMatrix(round(a), round(b), round(c), round(d), round(e), round(f));
+  }
 }
 
 function tr(pos: Pos, page: Page): Pos {
   return { x: pos.x, y: page.size.height - pos.y };
 }
 
-function getExtGraphicsStateForShape(page: Page, shape: Shape): PDFName | undefined {
-  const { lineOpacity, fillOpacity } = shape as { lineOpacity: number; fillOpacity: number };
+function getExtGraphicsStateForShape(
+  page: Page,
+  shape: { lineOpacity?: number; fillOpacity?: number }
+): PDFName | undefined {
+  const { lineOpacity, fillOpacity } = shape;
   if (lineOpacity != null || fillOpacity != null) {
     const graphicsParams = {
       CA: lineOpacity ?? 1,
