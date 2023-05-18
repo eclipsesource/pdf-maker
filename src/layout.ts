@@ -90,12 +90,12 @@ export type AnchorObject = {
 };
 
 export function layoutPages(def: DocumentDefinition, doc: Document): Page[] {
-  const pageMargin = def.margin ?? defaultPageMargin;
   const pages: Page[] = [];
   let remainingBlocks = def.content;
   let pageNumber = 1;
   const makePage = () => {
     const pageInfo = { pageNumber: pageNumber++, pageSize: doc.pageSize };
+    const pageMargin = def.margin?.(pageInfo) ?? defaultPageMargin;
     const header = def.header && layoutHeader(def.header(pageInfo), doc);
     const footer = def.footer && layoutFooter(def.footer(pageInfo), doc);
 
@@ -107,7 +107,7 @@ export function layoutPages(def: DocumentDefinition, doc: Document): Page[] {
 
     const { frame, remainder } = layoutPageContent(remainingBlocks, contentBox, doc);
     if (doc.guides) {
-      frame.objects = [createFrameGuides(frame, { margin: def.margin, isPage: true })];
+      frame.objects = [createFrameGuides(frame, { margin: pageMargin, isPage: true })];
     }
     remainingBlocks = remainder;
     pages.push({ size: doc.pageSize, content: frame, header, footer });

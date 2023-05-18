@@ -1,6 +1,13 @@
 # Changelog
 
-## [0.5.0] - Unreleased
+## [0.5.1] - Unreleased
+
+### Added
+
+* The attribute `margin` in a document definition now supports a
+  function that returns the margin for a given page.
+
+## [0.5.0] - 2023-05-18
 
 ### Breaking changes
 

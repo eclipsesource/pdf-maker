@@ -38,10 +38,11 @@ export type DocumentDefinition = {
    * header, otherwise from the top of the page.
    * The bottom margin defines the vertical distance from the footer or, if there is no footer,
    * from the bottom of the page.
+   * A function can be passed to create page-specific margins.
    *
    * Defaults to `50pt` on each side.
    */
-  margin?: Length | BoxLengths;
+  margin?: Length | BoxLengths | ((info: PageInfo) => Length | BoxLengths);
   /**
    * The fonts to use in the document. There is no default. Each font that is used in the document
    * must be registered. Not needed for documents that contain only graphics.

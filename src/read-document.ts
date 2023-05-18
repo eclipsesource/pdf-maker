@@ -12,8 +12,8 @@ export type DocumentDefinition = {
   pageOrientation?: 'portrait' | 'landscape';
   info?: Metadata;
   defaultStyle?: TextAttrs;
-  margin?: BoxEdges;
   dev?: { guides?: boolean };
+  margin?: (info: PageInfo) => BoxEdges;
   header?: (info: PageInfo) => Block;
   footer?: (info: PageInfo) => Block;
   content: Block[];
@@ -45,12 +45,12 @@ export function readDocumentDefinition(input: unknown): DocumentDefinition {
     pageOrientation: optional(parseOrientation),
     info: optional(readInfo),
     defaultStyle: optional(readInheritableAttrs),
-    margin: optional(parseEdges),
     dev: optional(types.object({ guides: optional(types.boolean()) })),
     customData: optional(readCustomData),
   });
   const tBlock = (block: unknown) => readBlock(block, def1.defaultStyle);
   const def2 = readObject(input, {
+    margin: optional(dynamic(parseEdges)),
     header: optional(dynamic(tBlock)),
     footer: optional(dynamic(tBlock)),
     content: required(types.array(tBlock)),
