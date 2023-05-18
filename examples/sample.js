@@ -24,18 +24,27 @@ export default {
     liberty: { data: readFileSync('examples/liberty.jpg') },
   },
   pageSize: 'A4',
-  margin: { x: '2.5cm', y: '0.5cm' },
+  margin: ({ pageNumber }) =>
+    pageNumber % 2
+      ? { left: '25mm', right: '15mm', y: '0.5cm' }
+      : { left: '15mm', right: '25mm', y: '0.5cm' },
   defaultStyle: {
     fontSize: 14,
   },
-  header: {
+  header: ({ pageNumber }) => ({
     columns: [{ text: 'PDF Maker' }, { text: 'sample', textAlign: 'right' }],
-    margin: { x: '2.5cm', top: '1cm' },
-  },
+    margin:
+      pageNumber % 2
+        ? { left: '25mm', right: '15mm', top: '1cm' }
+        : { left: '15mm', right: '25mm', top: '1cm' },
+  }),
   footer: ({ pageNumber, pageCount }) => ({
     text: `${pageNumber}/${pageCount ?? 0}`,
     textAlign: 'right',
-    margin: { x: '2.5cm', bottom: '1cm' },
+    margin:
+      pageNumber % 2
+        ? { left: '25mm', right: '15mm', bottom: '1cm' }
+        : { left: '15mm', right: '25mm', bottom: '1cm' },
   }),
   content: [
     {
