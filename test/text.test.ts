@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from '@jest/globals';
-import { PDFFont, rgb } from 'pdf-lib';
+import { rgb } from 'pdf-lib';
 
 import { Font } from '../src/fonts.js';
 import {
@@ -15,11 +15,11 @@ import { fakeFont } from './test-utils.js';
 const { objectContaining } = expect;
 
 describe('text', () => {
-  let fonts: Font[], normalFont: PDFFont;
+  let fonts: Font[], normalFont: Font;
 
   beforeEach(() => {
     fonts = [fakeFont('Test'), fakeFont('Test', { italic: true })];
-    [normalFont] = fonts.map((f) => f.pdfFont);
+    [normalFont] = fonts;
   });
 
   describe('extractTextSegments', () => {

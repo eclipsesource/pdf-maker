@@ -1,20 +1,20 @@
 import { beforeEach, describe, expect, it } from '@jest/globals';
-import { PDFImage } from 'pdf-lib';
 
 import { Size } from '../src/box.js';
+import { Image } from '../src/images.js';
 import { ImageObject } from '../src/layout-image.js';
 import { Page } from '../src/page.js';
 import { renderImage } from '../src/render-image.js';
-import { fakePdfPage, getContentStream } from './test-utils.js';
+import { fakePDFPage, getContentStream } from './test-utils.js';
 
 describe('render-image', () => {
-  let page: Page, size: Size, image: PDFImage;
+  let page: Page, size: Size, image: Image;
 
   beforeEach(() => {
     size = { width: 500, height: 800 };
-    const pdfPage = fakePdfPage();
+    const pdfPage = fakePDFPage();
     page = { size, pdfPage } as Page;
-    image = { ref: 23 } as unknown as PDFImage;
+    image = { pdfRef: 23 } as unknown as Image;
   });
 
   describe('renderImage', () => {

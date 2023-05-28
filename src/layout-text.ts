@@ -1,8 +1,7 @@
-import { PDFFont } from 'pdf-lib';
-
 import { Box, Pos, Size } from './box.js';
 import { Alignment } from './content.js';
 import { Document } from './document.js';
+import { Font } from './fonts.js';
 import { createRowGuides } from './guides.js';
 import {
   LayoutContent,
@@ -123,9 +122,8 @@ function layoutTextRow(segments: TextSegment[], box: Box, textAlign?: Alignment)
   return { row, objects, remainder };
 }
 
-function getDescent(font: PDFFont, fontSize: number) {
-  const fontkitFont = (font as any).embedder.font;
-  return Math.abs(((fontkitFont.descent ?? 0) * fontSize) / fontkitFont.unitsPerEm);
+function getDescent(font: Font, fontSize: number) {
+  return Math.abs(((font.fkFont.descent ?? 0) * fontSize) / font.fkFont.unitsPerEm);
 }
 
 /**

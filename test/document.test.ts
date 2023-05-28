@@ -1,10 +1,20 @@
-import { describe, expect, it } from '@jest/globals';
+import { beforeEach, describe, expect, it } from '@jest/globals';
 import { PDFDict, PDFHexString, PDFName, PDFStream, PDFString } from 'pdf-lib';
 
-import { createDocument } from '../src/document.js';
+import { Document, renderDocument } from '../src/document.js';
 
 describe('document', () => {
-  describe('createDocument', () => {
+  let doc: Document;
+
+  beforeEach(() => {
+    doc = {
+      fonts: [],
+      images: [],
+      pageSize: { width: 100, height: 200 },
+    };
+  });
+
+  describe('renderDocument', () => {
     it('renders all info attributes', async () => {
       const def = {
         content: [],
@@ -23,9 +33,9 @@ describe('document', () => {
         },
       };
 
-      const doc = await createDocument(def);
+      const pdfDoc = await renderDocument(def, doc);
 
-      const infoDict = doc.pdfDoc.context.lookup(doc.pdfDoc.context.trailerInfo.Info) as PDFDict;
+      const infoDict = pdfDoc.context.lookup(pdfDoc.context.trailerInfo.Info) as PDFDict;
       const getInfo = (name: string) => infoDict.get(PDFName.of(name));
       expect(infoDict).toBeInstanceOf(PDFDict);
       expect(getInfo('Title')).toEqual(PDFHexString.fromText('test-title'));
@@ -48,9 +58,9 @@ describe('document', () => {
         },
       };
 
-      const doc = await createDocument(def);
+      const pdfDoc = await renderDocument(def, doc);
 
-      const lookup = (name: string) => doc.pdfDoc.catalog.lookup(PDFName.of(name)) as PDFStream;
+      const lookup = (name: string) => pdfDoc.catalog.lookup(PDFName.of(name)) as PDFStream;
       expect(lookup('XXFoo').getContentsString()).toBe('Foo');
       expect(lookup('XXBar').getContents()).toEqual(Uint8Array.of(1, 2, 3));
     });

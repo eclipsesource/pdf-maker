@@ -1,23 +1,24 @@
 import { beforeEach, describe, expect, it } from '@jest/globals';
-import { PDFFont, PDFPage } from 'pdf-lib';
+import { PDFPage } from 'pdf-lib';
 
+import { Font } from '../src/fonts.js';
 import { getExtGraphicsState, getPageFont, Page } from '../src/page.js';
-import { fakePdfFont, fakePdfPage } from './test-utils.js';
+import { fakeFont, fakePDFPage } from './test-utils.js';
 
 describe('page', () => {
   let page: Page, pdfPage: PDFPage;
 
   beforeEach(() => {
-    pdfPage = fakePdfPage();
+    pdfPage = fakePDFPage();
     page = { pdfPage } as Page;
   });
 
   describe('getPageFont', () => {
-    let fontA: PDFFont, fontB: PDFFont;
+    let fontA: Font, fontB: Font;
 
     beforeEach(() => {
-      fontA = fakePdfFont('fontA');
-      fontB = fakePdfFont('fontB');
+      fontA = fakeFont('fontA', { doc: pdfPage.doc });
+      fontB = fakeFont('fontB', { doc: pdfPage.doc });
     });
 
     it('returns same font for same input', () => {

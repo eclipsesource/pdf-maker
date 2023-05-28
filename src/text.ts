@@ -1,6 +1,5 @@
-import { PDFFont } from 'pdf-lib';
-
 import { Color } from './colors.js';
+import { getTextHeight, getTextWidth } from './font-metrics.js';
 import { Font, selectFont } from './fonts.js';
 import { TextSpan } from './read-block.js';
 
@@ -12,7 +11,7 @@ export type TextSegment = {
   width: number;
   height: number;
   lineHeight: number;
-  font: PDFFont;
+  font: Font;
   fontSize: number;
   fontFamily: string;
   italic?: boolean;
@@ -38,12 +37,13 @@ export function extractTextSegments(textSpans: TextSpan[], fonts: Font[]): TextS
       letterSpacing,
     } = attrs;
     const font = selectFont(fonts, attrs);
-    const height = font.heightAtSize(fontSize);
+    const height = getTextHeight(font.fkFont, fontSize);
+
     return splitChunks(text).map(
       (text) =>
         ({
           text,
-          width: font.widthOfTextAtSize(text, fontSize) + text.length * (letterSpacing ?? 0),
+          width: getTextWidth(text, font.fkFont, fontSize) + text.length * (letterSpacing ?? 0),
           height,
           lineHeight,
           font,

@@ -50,7 +50,7 @@ describe('layout', () => {
           rows: [
             {
               ...{ x: 20, y: 30, width: 90, height: 12, baseline: 9 },
-              segments: [{ font: doc.fonts[0].pdfFont, fontSize: 10, text: 'Test text' }],
+              segments: [{ font: doc.fonts[0], fontSize: 10, text: 'Test text' }],
             },
           ],
         },
@@ -75,9 +75,9 @@ describe('layout', () => {
             {
               ...{ x: 20, y: 30, width: 270, height: 18, baseline: 13.5 },
               segments: [
-                { font: doc.fonts[0].pdfFont, fontSize: 5, text: 'Text one' },
-                { font: doc.fonts[0].pdfFont, fontSize: 10, text: 'Text two' },
-                { font: doc.fonts[0].pdfFont, fontSize: 15, text: 'Text three' },
+                { font: doc.fonts[0], fontSize: 5, text: 'Text one' },
+                { font: doc.fonts[0], fontSize: 10, text: 'Text two' },
+                { font: doc.fonts[0], fontSize: 15, text: 'Text three' },
               ],
             },
           ],
@@ -169,7 +169,7 @@ describe('layout', () => {
 
       expect((frame.objects?.[0] as any).rows[0].segments).toEqual([
         {
-          font: doc.fonts[0].pdfFont,
+          font: doc.fonts[0],
           fontSize: 10,
           text: 'foo',
           color: { type: 'RGB', blue: 1, green: 0.5, red: 0 },

@@ -1,4 +1,5 @@
-import { PDFDocument, PDFFont } from 'pdf-lib';
+import fontkit from '@pdf-lib/fontkit';
+import { CustomFontSubsetEmbedder, PDFDocument, PDFFont, PDFRef, toUint8Array } from 'pdf-lib';
 
 import { parseBinaryData } from './binary-data.js';
 import {
@@ -22,7 +23,9 @@ export type Font = {
   name: string;
   italic?: boolean;
   bold?: boolean;
-  pdfFont: PDFFont;
+  data: Uint8Array;
+  fkFont: fontkit.Font;
+  pdfRef?: PDFRef;
 };
 
 export type FontSelector = {
@@ -47,20 +50,33 @@ export function readFont(input: unknown): Partial<FontDef> {
   }) as FontDef;
 }
 
-export async function embedFonts(fontDefs: FontDef[], doc: PDFDocument): Promise<Font[]> {
-  return await Promise.all(
-    fontDefs.map(async (def) => {
-      const pdfFont = await doc.embedFont(def.data, { subset: true }).catch((error) => {
-        throw new Error(`Could not embed font "${def.name}": ${error.message ?? error}`);
-      });
-      return pickDefined({ name: def.name, italic: def.italic, bold: def.bold, pdfFont });
-    })
-  );
+export function loadFonts(fontDefs: FontDef[]): Font[] {
+  return fontDefs.map((def) => {
+    const data = toUint8Array(def.data);
+    const fkFont = fontkit.create(data);
+    return pickDefined({
+      name: def.name,
+      italic: def.italic,
+      bold: def.bold,
+      fkFont,
+      data,
+    });
+  });
 }
 
-export function selectFont(fonts: Font[], attrs: FontSelector): PDFFont {
+export async function embedFonts(fonts: Font[], pdfDoc: PDFDocument): Promise<void> {
+  for (const font of fonts) {
+    const ref = pdfDoc.context.nextRef();
+    font.pdfRef = ref;
+    const embedder = new (CustomFontSubsetEmbedder as any)(font.fkFont, font.data);
+    const pdfFont = PDFFont.of(ref, pdfDoc, embedder);
+    (pdfDoc as any).fonts.push(pdfFont);
+  }
+}
+
+export function selectFont(fonts: Font[], attrs: FontSelector): Font {
   const { fontFamily, italic, bold } = attrs;
-  const font = fonts.find((font) => match(font, { fontFamily, italic, bold }))?.pdfFont;
+  const font = fonts.find((font) => match(font, { fontFamily, italic, bold }));
   if (!font) {
     const style = italic ? (bold ? 'bold italic' : 'italic') : bold ? 'bold' : 'normal';
     throw new Error(`No font found for "${fontFamily} ${style}"`);

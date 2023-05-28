@@ -1,8 +1,7 @@
-import { PDFFont } from 'pdf-lib';
-
 import { Box, parseEdges, subtractEdges, ZERO_EDGES } from './box.js';
 import { Color } from './colors.js';
 import { Document } from './document.js';
+import { Font } from './fonts.js';
 import { createFrameGuides } from './guides.js';
 import { layoutColumnsContent } from './layout-columns.js';
 import { ImageObject, layoutImageContent } from './layout-image.js';
@@ -66,7 +65,7 @@ export type TextRowObject = {
 
 export type TextSegmentObject = {
   text: string;
-  font: PDFFont;
+  font: Font;
   fontSize: number;
   color?: Color;
   rise?: number;
