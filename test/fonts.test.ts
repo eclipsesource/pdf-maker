@@ -1,7 +1,6 @@
-import { beforeEach, describe, expect, it, jest } from '@jest/globals';
-import { PDFDocument, PDFFont } from 'pdf-lib';
+import { beforeEach, describe, expect, it } from '@jest/globals';
 
-import { embedFonts, Font, readFonts, selectFont } from '../src/fonts.js';
+import { Font, loadFonts, readFonts, selectFont } from '../src/fonts.js';
 import { fakeFont } from './test-utils.js';
 
 describe('fonts', () => {
@@ -64,57 +63,21 @@ describe('fonts', () => {
     });
   });
 
-  describe('embedFont', () => {
+  describe('loadFont', () => {
     it('returns an empty array for empty fonts definition', async () => {
-      const fonts = await embedFonts([], {} as any);
+      const fonts = loadFonts([]);
 
       expect(fonts).toEqual([]);
-    });
-
-    it('embeds fonts in PDF document and returns fonts array', async () => {
-      const embedFont = jest.fn().mockImplementation((font) => Promise.resolve(`PDF_${font}`));
-      const doc = { embedFont } as any;
-      const fontsDef = [
-        { name: 'Test', data: 'Test_Sans_Normal' },
-        { name: 'Test', data: 'Test_Sans_Italic', italic: true },
-        { name: 'Test', data: 'Test_Sans_Bold', bold: true },
-        { name: 'Test', data: 'Test_Sans_BoldItalic', italic: true, bold: true },
-        { name: 'Other', data: 'Other_Normal' },
-      ];
-
-      const fonts = await embedFonts(fontsDef, doc);
-
-      expect(fonts).toEqual([
-        { name: 'Test', pdfFont: 'PDF_Test_Sans_Normal' },
-        { name: 'Test', pdfFont: 'PDF_Test_Sans_Italic', italic: true },
-        { name: 'Test', pdfFont: 'PDF_Test_Sans_Bold', bold: true },
-        { name: 'Test', pdfFont: 'PDF_Test_Sans_BoldItalic', italic: true, bold: true },
-        { name: 'Other', pdfFont: 'PDF_Other_Normal' },
-      ]);
-    });
-
-    it('throws when embedding fails', async () => {
-      const embedFont = (data: any) =>
-        data === 'Bad_Data' ? Promise.reject('Bad font') : Promise.resolve(data);
-      const doc = { embedFont } as PDFDocument;
-      const fontsDef = [
-        { name: 'Good', data: 'Good_Data' },
-        { name: 'Bad', data: 'Bad_Data' },
-      ];
-
-      const promise = embedFonts(fontsDef, doc);
-
-      await expect(promise).rejects.toThrowError('Could not embed font "Bad": Bad font');
     });
   });
 
   describe('selectFont', () => {
     let fonts: Font[];
-    let normalFont: PDFFont;
-    let italicFont: PDFFont;
-    let boldFont: PDFFont;
-    let italicBoldFont: PDFFont;
-    let otherFont: PDFFont;
+    let normalFont: Font;
+    let italicFont: Font;
+    let boldFont: Font;
+    let italicBoldFont: Font;
+    let otherFont: Font;
 
     beforeEach(() => {
       fonts = [
@@ -124,7 +87,7 @@ describe('fonts', () => {
         fakeFont('Test', { italic: true, bold: true }),
         fakeFont('Other'),
       ];
-      [normalFont, italicFont, boldFont, italicBoldFont, otherFont] = fonts.map((f) => f.pdfFont);
+      [normalFont, italicFont, boldFont, italicBoldFont, otherFont] = fonts;
     });
 
     it('selects different font variants', () => {

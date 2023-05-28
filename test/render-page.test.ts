@@ -1,26 +1,26 @@
 import { beforeEach, describe, expect, it, jest } from '@jest/globals';
-import { PDFArray, PDFDict, PDFFont, PDFName, PDFPage, PDFRef } from 'pdf-lib';
+import { PDFArray, PDFDict, PDFDocument, PDFName, PDFPage, PDFRef } from 'pdf-lib';
 
 import { Size } from '../src/box.js';
-import { Document } from '../src/document.js';
+import { Font } from '../src/fonts.js';
 import { Frame } from '../src/layout.js';
 import { Page } from '../src/page.js';
 import { renderFrame, renderPage } from '../src/render-page.js';
-import { fakePdfFont, fakePdfPage, getContentStream } from './test-utils.js';
+import { fakeFont, fakePDFPage, getContentStream } from './test-utils.js';
 
 describe('render-page', () => {
   let pdfPage: PDFPage;
 
   beforeEach(() => {
-    pdfPage = fakePdfPage();
+    pdfPage = fakePDFPage();
   });
 
   describe('renderPage', () => {
-    let size: Size, doc: Document;
+    let size: Size, pdfDoc: PDFDocument;
 
     beforeEach(() => {
       size = { width: 300, height: 400 };
-      doc = { pdfDoc: { addPage: jest.fn().mockReturnValue(pdfPage) } as any } as Document;
+      pdfDoc = { addPage: jest.fn().mockReturnValue(pdfPage) } as unknown as PDFDocument;
     });
 
     it('renders content', () => {
@@ -32,7 +32,7 @@ describe('render-page', () => {
       };
       const page = { size, content };
 
-      renderPage(page, doc);
+      renderPage(page, pdfDoc);
 
       expect(getContentStream(page).join()).toEqual('q,1 0 0 -1 50 350 cm,q,0 0 280 300 re,S,Q,Q');
     });
@@ -47,7 +47,7 @@ describe('render-page', () => {
       };
       const page = { size, content, header };
 
-      renderPage(page, doc);
+      renderPage(page, pdfDoc);
 
       expect(getContentStream(page).join()).toEqual('q,1 0 0 -1 50 380 cm,q,0 0 280 30 re,S,Q,Q');
     });
@@ -62,19 +62,19 @@ describe('render-page', () => {
       };
       const page = { size, content, footer };
 
-      renderPage(page, doc);
+      renderPage(page, pdfDoc);
 
       expect(getContentStream(page).join()).toEqual('q,1 0 0 -1 50 50 cm,q,0 0 280 30 re,S,Q,Q');
     });
   });
 
   describe('renderFrame', () => {
-    let page: Page, size: Size, font: PDFFont;
+    let page: Page, size: Size, font: Font;
 
     beforeEach(() => {
       size = { width: 500, height: 800 };
       page = { size, pdfPage } as Page;
-      font = fakePdfFont('Test');
+      font = fakeFont('Test', { doc: pdfPage.doc });
     });
 
     it('renders text objects', () => {

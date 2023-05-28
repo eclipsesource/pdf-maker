@@ -11,14 +11,14 @@ import {
   RectObject,
 } from '../src/read-graphics.js';
 import { renderGraphics } from '../src/render-graphics.js';
-import { fakePdfPage, getContentStream, p } from './test-utils.js';
+import { fakePDFPage, getContentStream, p } from './test-utils.js';
 
 describe('render-graphics', () => {
   let page: Page, size: Size;
 
   beforeEach(() => {
     size = { width: 500, height: 800 };
-    const pdfPage = fakePdfPage();
+    const pdfPage = fakePDFPage();
     page = { size, pdfPage } as Page;
   });
 

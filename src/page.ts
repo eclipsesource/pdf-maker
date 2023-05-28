@@ -1,6 +1,8 @@
-import { Color, PDFFont, PDFImage, PDFName, PDFPage } from 'pdf-lib';
+import { Color, PDFName, PDFPage } from 'pdf-lib';
 
 import { Size } from './box.js';
+import { Font } from './fonts.js';
+import { Image } from './images.js';
 import { Frame } from './layout.js';
 
 export type TextState = {
@@ -23,20 +25,22 @@ export type Page = {
   extGStates?: { [ref: string]: PDFName };
 };
 
-export function getPageFont(page: Page, font: PDFFont): PDFName {
+export function getPageFont(page: Page, font: Font): PDFName {
+  if (!font.pdfRef) throw new Error('Font not initialized: ' + font.name);
   page.fonts ??= {};
-  const key = font.ref.toString();
+  const key = font.pdfRef.toString();
   if (!(key in page.fonts)) {
-    page.fonts[key] = (page.pdfPage as any).node.newFontDictionary(font.name, font.ref);
+    page.fonts[key] = (page.pdfPage as any).node.newFontDictionary(font.name, font.pdfRef);
   }
   return page.fonts[key];
 }
 
-export function getPageImage(page: Page, image: PDFImage): PDFName {
+export function getPageImage(page: Page, image: Image): PDFName {
+  if (!image.pdfRef) throw new Error('Image not initialized: ' + image.name);
   page.images ??= {};
-  const key = image.ref.toString();
+  const key = image.pdfRef.toString();
   if (!(key in page.images)) {
-    page.images[key] = (page.pdfPage as any).node.newXObject('Image', image.ref);
+    page.images[key] = (page.pdfPage as any).node.newXObject('Image', image.pdfRef);
   }
   return page.images[key];
 }

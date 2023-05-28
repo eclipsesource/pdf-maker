@@ -3,6 +3,7 @@ import {
   Color,
   endText,
   PDFContentStream,
+  PDFFont,
   PDFName,
   PDFOperator,
   rgb,
@@ -28,8 +29,11 @@ export function renderText(object: TextObject, page: Page, base: Pos) {
   object.rows?.forEach((row) => {
     contentStream.push(setTextMatrix(1, 0, 0, 1, x + row.x, y - row.y - row.baseline));
     row.segments?.forEach((seg) => {
+      const pdfFont = (page.pdfPage as any)?.doc?.fonts?.find(
+        (font: PDFFont) => font.ref === seg.font.pdfRef
+      );
       const fontKey = getPageFont(page, seg.font);
-      const encodedText = seg.font.encodeText(seg.text);
+      const encodedText = pdfFont.encodeText(seg.text);
       const operators = compact([
         setTextColorOp(state, seg.color),
         setTextFontAndSizeOp(state, fontKey, seg.fontSize),

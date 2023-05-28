@@ -1,6 +1,8 @@
 import { describe, expect, it, jest } from '@jest/globals';
+import { PDFRef } from 'pdf-lib';
 
-import { embedImages, readImages } from '../src/images.js';
+import { embedImages, Image, loadImages, readImages } from '../src/images.js';
+import { mkData } from './test-utils.js';
 
 describe('images', () => {
   describe('readImages', () => {
@@ -43,45 +45,47 @@ describe('images', () => {
     });
   });
 
-  describe('embedImages', () => {
+  describe('loadImages', () => {
     it('returns an empty array for empty images definition', async () => {
-      const images = await embedImages([], {} as any);
+      const images = await loadImages([]);
 
       expect(images).toEqual([]);
     });
+  });
 
-    it('embeds images in PDF document and returns images array', async () => {
-      const embedJpg = jest.fn().mockImplementation((data) => Promise.resolve({ data }));
+  describe('embedImages', () => {
+    it('embeds images in PDF document and attaches ref', async () => {
+      let n = 1;
+      const embedJpg = jest.fn().mockImplementation(() => Promise.resolve({ ref: PDFRef.of(n++) }));
       const doc = { embedJpg } as any;
-      const imageDefs = [
-        { name: 'foo', data: mkData('Foo') },
-        { name: 'bar', data: mkData('Bar') },
+      const images: Image[] = [
+        { name: 'foo', data: mkData('Foo'), width: 100, height: 200 },
+        { name: 'bar', data: mkData('Bar'), width: 100, height: 200 },
       ];
 
-      const images = await embedImages(imageDefs, doc);
+      await embedImages(images, doc);
 
-      expect(images).toEqual([
-        { name: 'foo', pdfImage: { data: mkData('Foo') } },
-        { name: 'bar', pdfImage: { data: mkData('Bar') } },
-      ]);
+      expect(images[0].pdfRef?.toString()).toEqual('1 0 R');
+      expect(images[1].pdfRef?.toString()).toEqual('2 0 R');
     });
 
     it('throws when embedding fails', async () => {
-      const embedJpg = (data: any) =>
-        data === 'Bad_Data' ? Promise.reject('Bad image') : Promise.resolve({ data });
+      const embedJpg = (data: Uint8Array) =>
+        str(data) === 'Bad' ? Promise.reject('Bad image') : Promise.resolve({ data });
+
       const doc = { embedJpg } as any;
-      const imagesDef = [
-        { name: 'good', data: 'Good_Data' },
-        { name: 'bad', data: 'Bad_Data' },
+      const images = [
+        { name: 'good', data: mkData('Good'), width: 100, height: 200 },
+        { name: 'bad', data: mkData('Bad'), width: 100, height: 200 },
       ];
 
-      const promise = embedImages(imagesDef, doc);
+      const promise = embedImages(images, doc);
 
       await expect(promise).rejects.toThrowError('Could not embed image "bad": Bad image');
     });
   });
 });
 
-function mkData(value: string) {
-  return new Uint8Array(value.split('').map((c) => c.charCodeAt(0)));
+function str(data: Uint8Array): string {
+  return String.fromCharCode(...data);
 }
