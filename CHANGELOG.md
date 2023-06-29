@@ -7,6 +7,10 @@
 * The attribute `margin` in a document definition now supports a
   function that returns the margin for a given page.
 
+* Support for PNG images. A new, optional property `format` is added to
+  image definitions. For PNG images, it must be set to `png` (defaults
+  to `jpeg`).
+
 ### Fixed
 
 * In the PDF metadata, the fields "Creator" and "Producer" are no longer

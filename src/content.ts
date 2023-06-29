@@ -51,7 +51,6 @@ export type DocumentDefinition = {
   /**
    * The images to use in the document. Each image in the document needs to be registered.
    * Once registered, an image can be reused without multiplying its footprint.
-   * Only JPEG images are supported.
    */
   images?: ImagesDefinition;
   /**
@@ -141,9 +140,13 @@ export type ImagesDefinition = { [name: string]: ImageDefinition };
 export type ImageDefinition = {
   /**
    * The image data, as a Uint8Array, ArrayBuffer, or a base64-encoded string.
-   * Only JPEG images are supported.
+   * Supported image formats are PNG and JPEG.
    */
   data: string | Uint8Array | ArrayBuffer;
+  /**
+   * The image format. Defaults to `jpeg`.
+   */
+  format?: 'jpeg' | 'png';
 };
 
 export type Block = TextBlock | ImageBlock | ColumnsBlock | RowsBlock | EmptyBlock;
