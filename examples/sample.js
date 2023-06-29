@@ -21,7 +21,8 @@ export default {
     ],
   },
   images: {
-    liberty: { data: readFileSync('examples/liberty.jpg') },
+    liberty: { data: readFileSync('examples/liberty.jpg'), format: 'jpeg' },
+    torus: { data: readFileSync('examples/torus.png'), format: 'png' },
   },
   pageSize: 'A4',
   margin: ({ pageNumber }) =>
@@ -320,7 +321,7 @@ export default {
           rows: [
             { image: 'liberty', height: 75, imageAlign: 'left' },
             { image: 'liberty', height: 75, imageAlign: 'center' },
-            { image: 'liberty', height: 75, imageAlign: 'right' },
+            { image: 'torus', height: 75, imageAlign: 'right' },
           ],
           padding: 5,
         },

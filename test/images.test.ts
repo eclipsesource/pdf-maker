@@ -19,14 +19,16 @@ describe('images', () => {
     it('returns images array', () => {
       const imagesDef = {
         foo: { data: mkData('Foo') },
-        bar: { data: mkData('Bar') },
+        bar: { data: mkData('Bar'), format: 'jpeg' },
+        baz: { data: mkData('Baz'), format: 'png' },
       };
 
       const images = readImages(imagesDef);
 
       expect(images).toEqual([
-        { name: 'foo', data: mkData('Foo') },
-        { name: 'bar', data: mkData('Bar') },
+        { name: 'foo', data: mkData('Foo'), format: 'jpeg' },
+        { name: 'bar', data: mkData('Bar'), format: 'jpeg' },
+        { name: 'baz', data: mkData('Baz'), format: 'png' },
       ]);
     });
 
@@ -56,12 +58,20 @@ describe('images', () => {
       expect(images).toEqual([]);
     });
 
-    it('reads width and height from image', async () => {
+    it('reads width and height from JPEG image', async () => {
       const data = readFileSync(join(__dirname, 'resources/liberty.jpg'));
 
-      const images = await loadImages([{ name: 'liberty', data }]);
+      const images = await loadImages([{ name: 'liberty', data, format: 'jpeg' }]);
 
-      expect(images).toEqual([{ name: 'liberty', data, width: 160, height: 240 }]);
+      expect(images).toEqual([{ name: 'liberty', data, format: 'jpeg', width: 160, height: 240 }]);
+    });
+
+    it('reads width and height from PNG image', async () => {
+      const data = readFileSync(join(__dirname, 'resources/torus.png'));
+
+      const images = await loadImages([{ name: 'torus', data, format: 'png' }]);
+
+      expect(images).toEqual([{ name: 'torus', data, format: 'png', width: 256, height: 192 }]);
     });
   });
 
@@ -69,7 +79,7 @@ describe('images', () => {
     it('embeds image in PDF document and attaches ref', () => {
       const doc = fakePDFDocument();
       const data = readFileSync(join(__dirname, 'resources/liberty.jpg'));
-      const image: Image = { name: 'foo', data, width: 100, height: 200 };
+      const image: Image = { name: 'foo', format: 'jpeg', data, width: 100, height: 200 };
 
       const pdfRef = registerImage(image, doc);
 
