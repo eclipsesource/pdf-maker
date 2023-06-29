@@ -179,12 +179,45 @@ describe('layout', () => {
       ]);
     });
 
+    it('includes blank line for consecutive newlines', () => {
+      const text = [span('foo\n\nbar', { fontSize: 10, lineHeight: 1 })];
+      const block = { text };
+
+      const { frame } = layoutTextContent(block, box, doc);
+
+      expect(frame.height).toEqual(3 * 10);
+    });
+
+    it('includes blank line with height of previous line', () => {
+      const text = [
+        span('foo\n\n', { fontSize: 10, lineHeight: 1 }),
+        span('bar', { fontSize: 20, lineHeight: 1 }),
+      ];
+      const block = { text };
+
+      const { frame } = layoutTextContent(block, box, doc);
+
+      expect(frame.height).toEqual(10 + 10 + 20);
+    });
+
+    it('includes blank line with height of next line', () => {
+      const text = [
+        span('foo\n', { fontSize: 10, lineHeight: 1 }),
+        span('\nbar', { fontSize: 20, lineHeight: 1 }),
+      ];
+      const block = { text };
+
+      const { frame } = layoutTextContent(block, box, doc);
+
+      expect(frame.height).toEqual(10 + 20 + 20);
+    });
+
     it('breaks text if it does not fit', () => {
       box.height = 100;
       const longText = range(100)
         .map(() => 'foo')
         .join(' ');
-      const text = [span(longText, { fontSize: 20, italic: true })];
+      const text = [span(longText, { fontSize: 20 })];
       const block = { text };
 
       const { remainder } = layoutTextContent(block, box, doc);
@@ -193,7 +226,7 @@ describe('layout', () => {
         text: [
           {
             text: expect.stringMatching(/^foo.*foo$/),
-            attrs: expect.objectContaining({ fontSize: 20, italic: true }),
+            attrs: expect.objectContaining({ fontSize: 20 }),
           },
         ],
       });
@@ -204,7 +237,7 @@ describe('layout', () => {
       const longText = range(100)
         .map(() => 'foo')
         .join(' ');
-      const text = [span(longText, { fontSize: 20, italic: true })];
+      const text = [span(longText, { fontSize: 20 })];
       const block = { text, breakInside: 'avoid' as const };
 
       const { remainder } = layoutTextContent(block, box, doc);

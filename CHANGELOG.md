@@ -12,6 +12,9 @@
 * In the PDF metadata, the fields "Creator" and "Producer" are no longer
   set to default values.
 
+* Consecutive newlines in texts are no longer collapsed. Blank lines are
+  now rendered as expected.
+
 ## [0.5.0] - 2023-05-18
 
 ### Breaking changes

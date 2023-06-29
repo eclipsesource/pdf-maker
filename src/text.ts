@@ -102,9 +102,16 @@ export function splitChunks(text: string): string[] {
   return segments;
 }
 
-export function breakLine(segments: TextSegment[], maxWidth: number) {
+export function breakLine(segments: TextSegment[], maxWidth: number): TextSegment[][] {
   const breakIdx = findLinebreak(segments, maxWidth);
-  if (breakIdx !== undefined && breakIdx >= 0) {
+  if (breakIdx === 0) {
+    // A line break is required before the first segment. Insert an
+    // empty segment with the text height of the first segment to
+    // represent a blank line and prevent collapsing of newlines.
+    const head = [{ ...segments[0], text: '', width: 0 }];
+    const tail = segments.slice(breakIdx + 1);
+    return tail.length ? [head, tail] : [head];
+  } else if (breakIdx !== undefined) {
     const head = segments.slice(0, breakIdx);
     const tail = segments.slice(breakIdx + 1);
     return tail.length ? [head, tail] : [head];

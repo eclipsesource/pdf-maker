@@ -210,6 +210,12 @@ describe('text', () => {
       expect(breakLine(segments, 80)).toEqual([[seg('aaa')], [seg('bbb')]]);
     });
 
+    it('breaks at leading newline segment', () => {
+      const segments = [seg('\n'), seg('aaa')];
+
+      expect(breakLine(segments, 20)).toEqual([[seg('')], [seg('aaa')]]);
+    });
+
     it('keeps unbreakable text on same line', () => {
       const segments = [seg('aaa'), seg(' '), seg('bbb')];
 
@@ -225,9 +231,9 @@ describe('text', () => {
     it('removes leading whitespace before line break', () => {
       const segments = [seg(' '), seg('aaa')];
 
-      expect(breakLine(segments, 0)).toEqual([[], [seg('aaa')]]);
-      expect(breakLine(segments, 10)).toEqual([[], [seg('aaa')]]);
-      expect(breakLine(segments, 30)).toEqual([[], [seg('aaa')]]);
+      expect(breakLine(segments, 0)).toEqual([[seg('')], [seg('aaa')]]);
+      expect(breakLine(segments, 10)).toEqual([[seg('')], [seg('aaa')]]);
+      expect(breakLine(segments, 30)).toEqual([[seg('')], [seg('aaa')]]);
       expect(breakLine(segments, 40)).toEqual([[seg(' '), seg('aaa')]]);
     });
   });
