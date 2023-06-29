@@ -64,7 +64,7 @@ export function fakeFkFont(name: string): fontkit.Font {
 export function fakePDFDocument(): PDFDocument {
   const context = PDFContext.create();
   const catalog = context.obj({});
-  const doc = { context, catalog, fonts: [] };
+  const doc = { context, catalog, fonts: [], images: [] };
   return doc as any;
 }
 

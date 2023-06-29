@@ -1,19 +1,12 @@
-import { beforeEach, describe, expect, it } from '@jest/globals';
-import { PDFDict, PDFHexString, PDFName, PDFStream, PDFString } from 'pdf-lib';
+import { describe, expect, it } from '@jest/globals';
+import crypto from 'crypto';
+import { PDFDict, PDFDocument, PDFHexString, PDFName, PDFStream, PDFString } from 'pdf-lib';
 
-import { Document, renderDocument } from '../src/document.js';
+import { renderDocument } from '../src/document.js';
+
+global.crypto ??= (crypto as any).webcrypto;
 
 describe('document', () => {
-  let doc: Document;
-
-  beforeEach(() => {
-    doc = {
-      fonts: [],
-      images: [],
-      pageSize: { width: 100, height: 200 },
-    };
-  });
-
   describe('renderDocument', () => {
     it('renders all info attributes', async () => {
       const def = {
@@ -33,8 +26,9 @@ describe('document', () => {
         },
       };
 
-      const pdfDoc = await renderDocument(def, doc);
+      const pdfData = await renderDocument(def, []);
 
+      const pdfDoc = await PDFDocument.load(pdfData, { updateMetadata: false });
       const infoDict = pdfDoc.context.lookup(pdfDoc.context.trailerInfo.Info) as PDFDict;
       const getInfo = (name: string) => infoDict.get(PDFName.of(name));
       expect(infoDict).toBeInstanceOf(PDFDict);
@@ -58,8 +52,9 @@ describe('document', () => {
         },
       };
 
-      const pdfDoc = await renderDocument(def, doc);
+      const pdfData = await renderDocument(def, []);
 
+      const pdfDoc = await PDFDocument.load(pdfData, { updateMetadata: false });
       const lookup = (name: string) => pdfDoc.catalog.lookup(PDFName.of(name)) as PDFStream;
       expect(lookup('XXFoo').getContentsString()).toBe('Foo');
       expect(lookup('XXBar').getContents()).toEqual(Uint8Array.of(1, 2, 3));

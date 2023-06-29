@@ -3,7 +3,7 @@ import crypto from 'crypto';
 
 import { makePdf } from '../src/make-pdf.js';
 
-global.crypto = (crypto as any).webcrypto;
+global.crypto ??= (crypto as any).webcrypto;
 
 describe('make-pdf', () => {
   describe('makePdf', () => {

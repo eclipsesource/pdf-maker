@@ -1,11 +1,12 @@
-import fontkit from '@pdf-lib/fontkit';
 import { PDFDict, PDFDocument, PDFHexString, PDFName } from 'pdf-lib';
 
 import { Size } from './box.js';
-import { embedFonts, Font, loadFonts } from './fonts.js';
-import { embedImages, Image, loadImages } from './images.js';
+import { Font, loadFonts } from './fonts.js';
+import { Image, loadImages } from './images.js';
+import { Page } from './page.js';
 import { applyOrientation, paperSizes } from './page-sizes.js';
 import { DocumentDefinition, Metadata } from './read-document.js';
+import { renderPage } from './render-page.js';
 
 export type Document = {
   fonts: Font[];
@@ -22,19 +23,13 @@ export async function createDocument(def: DocumentDefinition): Promise<Document>
   return { fonts, images, pageSize, guides };
 }
 
-export async function renderDocument(def: DocumentDefinition, doc: Document): Promise<PDFDocument> {
+export async function renderDocument(def: DocumentDefinition, pages: Page[]): Promise<Uint8Array> {
   const pdfDoc = await PDFDocument.create({ updateMetadata: false });
-  pdfDoc.registerFontkit(fontkit);
-  await embedFonts(doc.fonts ?? [], pdfDoc);
-  await embedImages(doc.images ?? [], pdfDoc);
   setMetadata(pdfDoc, def.info);
   if (def.customData) {
     setCustomData(def.customData, pdfDoc);
   }
-  return pdfDoc;
-}
-
-export async function finishDocument(def: DocumentDefinition, pdfDoc: PDFDocument) {
+  pages.forEach((page) => renderPage(page, pdfDoc));
   const idInfo = {
     creator: 'pdfmkr',
     time: new Date().toISOString(),

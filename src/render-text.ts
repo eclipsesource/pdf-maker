@@ -17,7 +17,7 @@ import {
 
 import { Pos } from './box.js';
 import { TextObject } from './layout.js';
-import { getPageFont, Page, TextState } from './page.js';
+import { addPageFont, Page, TextState } from './page.js';
 import { compact } from './utils.js';
 
 export function renderText(object: TextObject, page: Page, base: Pos) {
@@ -29,10 +29,10 @@ export function renderText(object: TextObject, page: Page, base: Pos) {
   object.rows?.forEach((row) => {
     contentStream.push(setTextMatrix(1, 0, 0, 1, x + row.x, y - row.y - row.baseline));
     row.segments?.forEach((seg) => {
+      const fontKey = addPageFont(page, seg.font);
       const pdfFont = (page.pdfPage as any)?.doc?.fonts?.find(
         (font: PDFFont) => font.ref === seg.font.pdfRef
       );
-      const fontKey = getPageFont(page, seg.font);
       const encodedText = pdfFont.encodeText(seg.text);
       const operators = compact([
         setTextColorOp(state, seg.color),

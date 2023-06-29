@@ -64,14 +64,12 @@ export function loadFonts(fontDefs: FontDef[]): Font[] {
   });
 }
 
-export async function embedFonts(fonts: Font[], pdfDoc: PDFDocument): Promise<void> {
-  for (const font of fonts) {
-    const ref = pdfDoc.context.nextRef();
-    font.pdfRef = ref;
-    const embedder = new (CustomFontSubsetEmbedder as any)(font.fkFont, font.data);
-    const pdfFont = PDFFont.of(ref, pdfDoc, embedder);
-    (pdfDoc as any).fonts.push(pdfFont);
-  }
+export function registerFont(font: Font, pdfDoc: PDFDocument) {
+  const ref = pdfDoc.context.nextRef();
+  const embedder = new (CustomFontSubsetEmbedder as any)(font.fkFont, font.data);
+  const pdfFont = PDFFont.of(ref, pdfDoc, embedder);
+  (pdfDoc as any).fonts.push(pdfFont);
+  return ref;
 }
 
 export function selectFont(fonts: Font[], attrs: FontSelector): Font {

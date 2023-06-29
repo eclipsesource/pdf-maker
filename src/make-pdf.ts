@@ -1,8 +1,7 @@
 import { DocumentDefinition } from './content.js';
-import { createDocument, finishDocument, renderDocument } from './document.js';
+import { createDocument, renderDocument } from './document.js';
 import { layoutPages } from './layout.js';
 import { readDocumentDefinition } from './read-document.js';
-import { renderPage } from './render-page.js';
 import { readAs } from './types.js';
 
 export * from './content.js';
@@ -17,7 +16,5 @@ export async function makePdf(definition: DocumentDefinition): Promise<Uint8Arra
   const def = readAs(definition, 'definition', readDocumentDefinition);
   const doc = await createDocument(def);
   const pages = layoutPages(def, doc);
-  const pdfDoc = await renderDocument(def, doc);
-  pages.forEach((page) => renderPage(page, pdfDoc));
-  return await finishDocument(def, pdfDoc);
+  return await renderDocument(def, pages);
 }

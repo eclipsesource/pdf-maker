@@ -37,17 +37,19 @@ export async function loadImages(imageDefs: ImageDef[]): Promise<Image[]> {
   );
 }
 
-export async function embedImages(images: Image[], pdfDoc: PDFDocument): Promise<void> {
-  await Promise.all(
-    images.map(async (image) => {
+export function registerImage(image: Image, pdfDoc: PDFDocument) {
+  const ref = pdfDoc.context.nextRef();
+  (pdfDoc as any).images.push({
+    async embed() {
       try {
-        const pdfImage = await pdfDoc.embedJpg(image.data);
-        image.pdfRef = pdfImage.ref;
+        const embedder = await JpegEmbedder.for(image.data);
+        embedder.embedIntoContext(pdfDoc.context, ref);
       } catch (error) {
         throw new Error(
           `Could not embed image "${image.name}": ${(error as Error)?.message ?? error}`
         );
       }
-    })
-  );
+    },
+  });
+  return ref;
 }
