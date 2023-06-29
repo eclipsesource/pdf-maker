@@ -7,6 +7,11 @@
 * The attribute `margin` in a document definition now supports a
   function that returns the margin for a given page.
 
+### Fixed
+
+* In the PDF metadata, the fields "Creator" and "Producer" are no longer
+  set to default values.
+
 ## [0.5.0] - 2023-05-18
 
 ### Breaking changes

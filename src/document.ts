@@ -23,7 +23,7 @@ export async function createDocument(def: DocumentDefinition): Promise<Document>
 }
 
 export async function renderDocument(def: DocumentDefinition, doc: Document): Promise<PDFDocument> {
-  const pdfDoc = await PDFDocument.create();
+  const pdfDoc = await PDFDocument.create({ updateMetadata: false });
   pdfDoc.registerFontkit(fontkit);
   await embedFonts(doc.fonts ?? [], pdfDoc);
   await embedImages(doc.images ?? [], pdfDoc);
@@ -51,6 +51,9 @@ export async function finishDocument(def: DocumentDefinition, pdfDoc: PDFDocumen
 }
 
 function setMetadata(doc: PDFDocument, info?: Metadata) {
+  const now = new Date();
+  doc.setCreationDate(now);
+  doc.setModificationDate(now);
   if (info?.title) {
     doc.setTitle(info.title);
   }
