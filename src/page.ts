@@ -1,8 +1,8 @@
 import { Color, PDFName, PDFPage } from 'pdf-lib';
 
 import { Size } from './box.js';
-import { Font } from './fonts.js';
-import { Image } from './images.js';
+import { Font, registerFont } from './fonts.js';
+import { Image, registerImage } from './images.js';
 import { Frame } from './layout.js';
 
 export type TextState = {
@@ -25,8 +25,11 @@ export type Page = {
   extGStates?: { [ref: string]: PDFName };
 };
 
-export function getPageFont(page: Page, font: Font): PDFName {
-  if (!font.pdfRef) throw new Error('Font not initialized: ' + font.name);
+export function addPageFont(page: Page, font: Font): PDFName {
+  if (!page.pdfPage) throw new Error('Page not initialized');
+  if (!font.pdfRef) {
+    font.pdfRef = registerFont(font, page.pdfPage.doc);
+  }
   page.fonts ??= {};
   const key = font.pdfRef.toString();
   if (!(key in page.fonts)) {
@@ -35,8 +38,11 @@ export function getPageFont(page: Page, font: Font): PDFName {
   return page.fonts[key];
 }
 
-export function getPageImage(page: Page, image: Image): PDFName {
-  if (!image.pdfRef) throw new Error('Image not initialized: ' + image.name);
+export function addPageImage(page: Page, image: Image): PDFName {
+  if (!page.pdfPage) throw new Error('Page not initialized');
+  if (!image.pdfRef) {
+    image.pdfRef = registerImage(image, page.pdfPage.doc);
+  }
   page.images ??= {};
   const key = image.pdfRef.toString();
   if (!(key in page.images)) {

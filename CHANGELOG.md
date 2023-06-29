@@ -15,6 +15,9 @@
 * Consecutive newlines in texts are no longer collapsed. Blank lines are
   now rendered as expected.
 
+* Images registered in the document definition are now only included in
+  the PDF when they are used in the document.
+
 ## [0.5.0] - 2023-05-18
 
 ### Breaking changes

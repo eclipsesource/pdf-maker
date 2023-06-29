@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it } from '@jest/globals';
 import { PDFPage } from 'pdf-lib';
 
 import { Font } from '../src/fonts.js';
-import { getExtGraphicsState, getPageFont, Page } from '../src/page.js';
+import { addPageFont, getExtGraphicsState, Page } from '../src/page.js';
 import { fakeFont, fakePDFPage } from './test-utils.js';
 
 describe('page', () => {
@@ -13,7 +13,7 @@ describe('page', () => {
     page = { pdfPage } as Page;
   });
 
-  describe('getPageFont', () => {
+  describe('addPageFont', () => {
     let fontA: Font, fontB: Font;
 
     beforeEach(() => {
@@ -22,16 +22,16 @@ describe('page', () => {
     });
 
     it('returns same font for same input', () => {
-      const font1 = getPageFont(page, fontA);
-      const font2 = getPageFont(page, fontA);
+      const font1 = addPageFont(page, fontA);
+      const font2 = addPageFont(page, fontA);
 
       expect(font1.toString()).toBe('/fontA-1');
       expect(font2).toEqual(font1);
     });
 
     it('returns different fonts for different inputs', () => {
-      const font1 = getPageFont(page, fontA);
-      const font2 = getPageFont(page, fontB);
+      const font1 = addPageFont(page, fontA);
+      const font2 = addPageFont(page, fontB);
 
       expect(font1.toString()).toBe('/fontA-1');
       expect(font2).not.toEqual(font1);
