@@ -19,13 +19,15 @@ describe('layout-image', () => {
 
   describe('layoutImageContent', () => {
     it('respects fixed width and height', () => {
-      const block = { image: 'img-720-480', width: 1, height: 1 }; // indicate fixed width and height
+      // width=1 and height=1 only *indicate* fixed width and height, the value should be ignored
+      const block = { image: 'img-720-480', width: 1, height: 1 };
       box = { x: 20, y: 30, width: 200, height: 100 };
 
       const { frame } = layoutImageContent(block, box, doc);
 
       expect(frame).toEqual({
         objects: [objectContaining({ x: 20 + (200 - 150) / 2, y: 30, width: 150, height: 100 })],
+        width: 200,
         height: 100,
       });
     });
@@ -34,24 +36,26 @@ describe('layout-image', () => {
       describe(`with ${image}`, () => {
         it('scales image to fixed width', () => {
           const block = { image, width: 1 };
-          box = { x: 20, y: 30, width: 300, height: 200 };
+          box = { x: 20, y: 30, width: 300, height: 500 };
 
           const { frame } = layoutImageContent(block, box, doc);
 
           expect(frame).toEqual({
-            objects: [objectContaining({ type: 'image', height: 200 })],
+            objects: [objectContaining({ type: 'image', width: 300, height: 200 })],
+            width: 300,
             height: 200,
           });
         });
 
         it('scales image to fixed height', () => {
           const block = { image, height: 1 };
-          box = { x: 20, y: 30, width: 300, height: 200 };
+          box = { x: 20, y: 30, width: 500, height: 200 };
 
           const { frame } = layoutImageContent(block, box, doc);
 
           expect(frame).toEqual({
             objects: [objectContaining({ type: 'image', width: 300, height: 200 })],
+            width: box.width,
             height: 200,
           });
         });
@@ -76,6 +80,7 @@ describe('layout-image', () => {
 
       expect(frame).toEqual({
         objects: [objectContaining({ type: 'image', width: 72, height: 48 })],
+        width: box.width,
         height: 48,
       });
     });
@@ -87,6 +92,7 @@ describe('layout-image', () => {
 
       expect(frame).toEqual({
         objects: [objectContaining({ type: 'image', width: 400, height: (400 * 2) / 3 })],
+        width: box.width,
         height: (400 * 2) / 3,
       });
     });
@@ -115,6 +121,14 @@ describe('layout-image', () => {
       const { frame } = layoutImageContent(block, box, doc);
 
       expect(frame.objects).toEqual([objectContaining({ type: 'image', x: 20 + 400 - 72, y: 30 })]);
+    });
+
+    it('does not aligns image in block with auto width', () => {
+      const block: ImageBlock = { image: 'img-72-48', imageAlign: 'right', autoWidth: true };
+
+      const { frame } = layoutImageContent(block, box, doc);
+
+      expect(frame.objects).toEqual([objectContaining({ type: 'image', x: 20, y: 30 })]);
     });
   });
 });

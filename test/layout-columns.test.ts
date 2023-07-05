@@ -3,8 +3,8 @@ import { beforeEach, describe, expect, it } from '@jest/globals';
 import { Box } from '../src/box.js';
 import { Document } from '../src/document.js';
 import { layoutColumnsContent } from '../src/layout-columns.js';
-import { Block, TextAttrs, TextSpan } from '../src/read-block.js';
-import { fakeFont } from './test-utils.js';
+import { Block } from '../src/read-block.js';
+import { fakeFont, span } from './test-utils.js';
 
 const { objectContaining } = expect;
 
@@ -23,7 +23,7 @@ describe('layout-columns', () => {
 
       const { frame } = layoutColumnsContent(block, box, doc);
 
-      expect(frame).toEqual({ children: [], height: 0 });
+      expect(frame).toEqual({ children: [], width: box.width, height: 0 });
     });
 
     it('creates child for column with fixed width and height', () => {
@@ -33,17 +33,46 @@ describe('layout-columns', () => {
 
       expect(frame).toEqual({
         children: [{ x: 20, y: 30, width: 100, height: 50 }],
+        width: box.width,
         height: 50,
       });
     });
 
-    it('does not include padding in height of frame', () => {
+    it('does not include block padding in height of frame', () => {
       const padding = { left: 1, right: 2, top: 3, bottom: 4 };
       const block = { columns: [{ width: 100, height: 50 }], padding };
 
       const { frame } = layoutColumnsContent(block, box, doc);
 
       expect(frame.height).toEqual(50);
+    });
+
+    it('returns frame with fixed width for block with auto width', () => {
+      const block = { columns: [{ width: 100, height: 50 }], autoWidth: true };
+
+      const { frame, remainder } = layoutColumnsContent(block, box, doc);
+
+      expect(frame).toEqual(expect.objectContaining({ width: 100, height: 50 }));
+      expect(remainder).toBeUndefined();
+    });
+
+    it("passes auto width down to children that don't have a fixed width", () => {
+      const block = {
+        columns: [
+          { text: [span('foo')], width: 50 }, // column with fixed width
+          { text: [span('bar')] }, // flexible column
+        ],
+        autoWidth: true,
+      };
+
+      const { frame, remainder } = layoutColumnsContent(block, box, doc);
+
+      expect(frame.children).toEqual([
+        expect.objectContaining({ width: 50 }), // keeps fixed width
+        expect.objectContaining({ width: 30 }), // intrinsic width
+      ]);
+      expect(frame.width).toEqual(30 + 50);
+      expect(remainder).toBeUndefined();
     });
 
     it('respects column margin', () => {
@@ -54,6 +83,7 @@ describe('layout-columns', () => {
 
       expect(frame).toEqual({
         children: [{ x: 20 + 5, y: 30 + 7, width: 100, height: 50 }],
+        width: box.width,
         height: 50 + 7 + 8,
       });
     });
@@ -73,6 +103,7 @@ describe('layout-columns', () => {
           { x: 20 + 5, y: 30 + 7, width: 100, height: 50 },
           { x: 20 + 5 + 100 + 6 + 5, y: 30 + 7, width: 100, height: 50 },
         ],
+        width: box.width,
         height: 50 + 7 + 8,
       });
     });
@@ -92,6 +123,7 @@ describe('layout-columns', () => {
           objectContaining({ x: 20 + 5, y: 30 + 7, width: 200 - 5 - 6, height: 12 }),
           objectContaining({ x: 20 + 200 + 5, y: 30 + 7, width: 200 - 5 - 6, height: 12 }),
         ],
+        width: box.width,
         height: 12 + 7 + 8,
       });
     });
@@ -113,6 +145,7 @@ describe('layout-columns', () => {
           objectContaining({ x: 20 + 100 + 5, y: 30 + 7, width: 150 - 5 - 6, height: 12 }),
           objectContaining({ x: 20 + 250 + 5, y: 30 + 7, width: 150 - 5 - 6, height: 12 }),
         ],
+        width: box.width,
         height: 25 + 7 + 8,
       });
     });
@@ -132,6 +165,7 @@ describe('layout-columns', () => {
           objectContaining({ x: 20 + 5, y: 30 + 7, width: 200 - 5 - 6, height: 12 }),
           objectContaining({ x: 20 + 200 + 5, y: 30 + 7, width: 200 - 5 - 6, height: 12 }),
         ],
+        width: box.width,
         height: 27,
       });
     });
@@ -152,12 +186,9 @@ describe('layout-columns', () => {
           objectContaining({ y: box.y + (100 - 12) / 2, height: 12 }),
           objectContaining({ y: box.y + 100 - 12, height: 12 }),
         ],
+        width: box.width,
         height: 100,
       });
     });
   });
 });
-
-function span(text: string, attrs?: TextAttrs): TextSpan {
-  return { text, attrs: { fontSize: 10, ...attrs } };
-}

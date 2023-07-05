@@ -1,5 +1,4 @@
-import { Box, Pos, Size } from './box.js';
-import { Alignment } from './content.js';
+import { Box, Size } from './box.js';
 import { Document } from './document.js';
 import { Font } from './fonts.js';
 import { createRowGuides } from './guides.js';
@@ -32,6 +31,7 @@ export function layoutTextContent(block: TextBlock, box: Box, doc: Document): La
   return {
     frame: {
       ...(objects?.length ? { objects } : undefined),
+      width: block.autoWidth ? text.size.width : box.width,
       height: text.size.height,
     },
     remainder,
@@ -39,15 +39,15 @@ export function layoutTextContent(block: TextBlock, box: Box, doc: Document): La
 }
 
 function layoutText(block: TextBlock, box: Box, doc: Document) {
-  const { text, textAlign } = block;
+  const { text } = block;
   const segments = extractTextSegments(text, doc.fonts);
   const rows: TextRowObject[] = [];
-  const objects: RenderObject[] = [];
+  const objects: LinkObject[] = [];
   let remainingSegments = segments;
   const remainingSpace = { ...box };
   const size: Size = { width: 0, height: 0 };
   while (remainingSegments?.length) {
-    const layoutResult = layoutTextRow(remainingSegments, remainingSpace, textAlign);
+    const layoutResult = layoutTextRow(remainingSegments, remainingSpace);
     const { row, objects: rowObjects, remainder } = layoutResult;
 
     if (row.height > remainingSpace.height) {
@@ -64,6 +64,24 @@ function layoutText(block: TextBlock, box: Box, doc: Document) {
     remainingSpace.y += row.height;
     size.width = Math.max(size.width, row.width);
     size.height += row.height;
+  }
+
+  // align rows and link objects
+  const width = block.autoWidth ? size.width : box.width;
+  if (block.textAlign === 'right') {
+    rows.forEach((row) => {
+      row.x += width - row.width;
+    });
+    objects.forEach((obj) => {
+      obj.x += width - obj.width;
+    });
+  } else if (block.textAlign === 'center') {
+    rows.forEach((row) => {
+      row.x += (width - row.width) / 2;
+    });
+    objects.forEach((obj) => {
+      obj.x += (width - obj.width) / 2;
+    });
   }
 
   const remainder = remainingSegments?.length
@@ -88,7 +106,7 @@ function layoutText(block: TextBlock, box: Box, doc: Document) {
  *                                                                    ˅
  * ---------------------------------------------------------------------
  */
-function layoutTextRow(segments: TextSegment[], box: Box, textAlign?: Alignment) {
+function layoutTextRow(segments: TextSegment[], box: Box) {
   const [lineSegments, remainder] = breakLine(segments, box.width);
   const pos = { x: 0, y: 0 };
   const size = { width: 0, height: 0 };
@@ -113,7 +131,7 @@ function layoutTextRow(segments: TextSegment[], box: Box, textAlign?: Alignment)
   });
   const objects = flattenLinks(links);
   const row: TextRowObject = {
-    ...alignRow(box, size, textAlign),
+    ...box,
     width: size.width,
     height: rowHeight,
     baseline: rowHeight - baseline,
@@ -147,20 +165,4 @@ function flattenLinks(links: LinkObject[]): LinkObject[] {
     }
   });
   return result;
-}
-
-function alignRow(box: Box, textSize: Size, textAlign?: Alignment): Pos {
-  if (textAlign === 'right') {
-    return {
-      x: box.x + box.width - textSize.width,
-      y: box.y,
-    };
-  }
-  if (textAlign === 'center') {
-    return {
-      x: box.x + (box.width - textSize.width) / 2,
-      y: box.y,
-    };
-  }
-  return { x: box.x, y: box.y };
 }

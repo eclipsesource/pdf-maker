@@ -62,6 +62,7 @@ type BlockAttrs = {
   padding?: BoxEdges;
   margin?: BoxEdges;
   width?: number;
+  autoWidth?: boolean;
   height?: number;
   id?: string;
   graphics?: (info: BlockInfo) => Shape[];
@@ -152,17 +153,30 @@ export function readEmptyBlock(input: Obj): EmptyBlock {
 }
 
 function readBlockAttrs(input: Obj): BlockAttrs {
-  return readObject(input, {
+  const result = readObject(input, {
     padding: optional(parseEdges),
     margin: optional(parseEdges),
-    width: optional(parseLength),
+    width: optional(parseWidth),
     height: optional(parseLength),
     id: optional(types.string()),
     graphics: optional(dynamic(types.array(readShape), 'graphics')),
     verticalAlign: optional(types.string({ enum: ['top', 'middle', 'bottom'] })),
     breakBefore: optional(types.string({ enum: ['auto', 'always', 'avoid'] })),
     breakAfter: optional(types.string({ enum: ['auto', 'always', 'avoid'] })),
-  }) as BlockAttrs;
+  });
+  const autoWidth = result.width === 'auto';
+  if (autoWidth) {
+    delete result.width;
+    return { ...result, autoWidth } as BlockAttrs;
+  }
+  return result as BlockAttrs;
+}
+
+function parseWidth(input: unknown): number | 'auto' {
+  if (input === 'auto') {
+    return input;
+  }
+  return parseLength(input);
 }
 
 export function readTextAttrs(input: Obj): TextAttrs {

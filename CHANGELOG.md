@@ -1,6 +1,14 @@
 # Changelog
 
-## [0.5.1] - Unreleased
+## [0.5.2] - Unreleased
+
+### Added
+
+* The `width` attribute of a `Block` now supports the value `auto` on
+  all block types. When set to `auto`, the block will shrink to the
+  width of its contents.
+
+## [0.5.1] - 2023-06-29
 
 ### Added
 

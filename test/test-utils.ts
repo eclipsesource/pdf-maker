@@ -3,6 +3,7 @@ import { PDFContext, PDFDocument, PDFFont, PDFName, PDFPage, PDFRef } from 'pdf-
 import { Font } from '../src/fonts.js';
 import { Image } from '../src/images.js';
 import { Page } from '../src/page.js';
+import { TextAttrs, TextSpan } from '../src/read-block.js';
 
 export function fakeFont(
   name: string,
@@ -83,6 +84,10 @@ export function fakePDFPage(document?: PDFDocument): PDFPage {
     getContentStream: () => contentStream,
     node,
   } as unknown as PDFPage;
+}
+
+export function span(text: string, attrs?: TextAttrs): TextSpan {
+  return { text, attrs: { fontSize: 10, ...attrs } };
 }
 
 export function range(n: number): number[] {

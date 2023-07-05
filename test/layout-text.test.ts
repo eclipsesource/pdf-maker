@@ -5,8 +5,7 @@ import { Box } from '../src/box.js';
 import { Document } from '../src/document.js';
 import { layoutTextContent } from '../src/layout-text.js';
 import { paperSizes } from '../src/page-sizes.js';
-import { TextAttrs, TextSpan } from '../src/read-block.js';
-import { fakeFont, range } from './test-utils.js';
+import { fakeFont, range, span } from './test-utils.js';
 
 const { objectContaining } = expect;
 
@@ -20,13 +19,22 @@ describe('layout', () => {
   });
 
   describe('layoutTextContent', () => {
-    it('creates frame with intrinsic size', () => {
+    it('creates frame with full width and intrinsic height', () => {
       const text = [{ text: 'foo', attrs: { fontSize: 10 } }];
       const block = { text };
 
       const { frame } = layoutTextContent(block, box, doc);
 
-      expect(frame).toEqual(objectContaining({ height: 12 }));
+      expect(frame).toEqual(objectContaining({ width: box.width, height: 12 }));
+    });
+
+    it('creates frame with intrinsic width for block with autoWidth', () => {
+      const text = [{ text: 'foo', attrs: { fontSize: 10 } }];
+      const block = { text, autoWidth: true };
+
+      const { frame } = layoutTextContent(block, box, doc);
+
+      expect(frame).toEqual(objectContaining({ width: 30, height: 12 }));
     });
 
     it('does not include padding in frame height', () => {
@@ -85,44 +93,6 @@ describe('layout', () => {
       ]);
     });
 
-    it('align texts in block to the right', () => {
-      const text = [span('foo', { fontSize: 10 })];
-      const block = {
-        text,
-        textAlign: 'right' as const,
-        margin: { left: 10, right: 20, top: 0, bottom: 0 },
-        padding: { left: 15, right: 25, top: 0, bottom: 0 },
-      };
-
-      const { frame } = layoutTextContent(block, box, doc);
-
-      expect(frame.objects).toEqual([
-        {
-          type: 'text',
-          rows: [objectContaining({ x: 20 + 400 - 30, y: 30, width: 30, height: 12 })],
-        },
-      ]);
-    });
-
-    it('align texts in blocks to the center', () => {
-      const text = [span('foo', { fontSize: 10 })];
-      const block = {
-        text,
-        textAlign: 'center' as const,
-        margin: { left: 10, right: 20, top: 0, bottom: 0 },
-        padding: { left: 15, right: 25, top: 0, bottom: 0 },
-      };
-
-      const { frame } = layoutTextContent(block, box, doc);
-
-      expect(frame.objects).toEqual([
-        {
-          type: 'text',
-          rows: [objectContaining({ x: 20 + (400 - 30) / 2, y: 30, width: 30, height: 12 })],
-        },
-      ]);
-    });
-
     it('creates link objects', () => {
       const block = {
         text: [span('foo', { link: 'test-link', fontSize: 10 })],
@@ -176,6 +146,64 @@ describe('layout', () => {
           rise: 3,
           letterSpacing: 5,
         },
+      ]);
+    });
+
+    it('aligns rows and link objects in block to the right', () => {
+      const text = [span('foo', { fontSize: 10, link: 'test-link' })];
+      const margin = { left: 10, right: 20, top: 0, bottom: 0 };
+      const block = { text, textAlign: 'right' as const, margin };
+
+      const { frame } = layoutTextContent(block, box, doc);
+
+      expect(frame.objects).toEqual([
+        {
+          type: 'text',
+          rows: [objectContaining({ x: margin.right + box.width - 30, width: 30 })],
+        },
+        expect.objectContaining({ type: 'link', x: margin.right + box.width - 30, width: 30 }),
+      ]);
+    });
+
+    it('aligns rows and link objects in blocks to the center', () => {
+      const text = [span('foo', { fontSize: 10, link: 'test-link' })];
+      const margin = { left: 10, right: 20, top: 0, bottom: 0 };
+      const block = { text, textAlign: 'center' as const, margin };
+
+      const { frame } = layoutTextContent(block, box, doc);
+
+      expect(frame.objects).toEqual([
+        {
+          type: 'text',
+          rows: [
+            objectContaining({ x: margin.right + (box.width - 30) / 2, width: 30, height: 12 }),
+          ],
+        },
+        expect.objectContaining({
+          type: 'link',
+          x: margin.right + (box.width - 30) / 2,
+          width: 30,
+        }),
+      ]);
+    });
+
+    it('aligns rows and link objects when width is auto', () => {
+      const text = [span('foo\nline 2', { fontSize: 10, link: 'test-link' })];
+      const margin = { left: 10, right: 20, top: 0, bottom: 0 };
+      const block = { text, textAlign: 'right' as const, margin, autoWidth: true };
+
+      const { frame } = layoutTextContent(block, box, doc);
+
+      expect(frame.objects).toEqual([
+        {
+          type: 'text',
+          rows: [
+            objectContaining({ x: margin.right + 30, width: 30 }),
+            objectContaining({ x: margin.right, width: 60 }),
+          ],
+        },
+        expect.objectContaining({ type: 'link', x: margin.right + 30, width: 30 }),
+        expect.objectContaining({ type: 'link', x: margin.right, width: 60 }),
       ]);
     });
 
@@ -246,7 +274,3 @@ describe('layout', () => {
     });
   });
 });
-
-function span(text: string, attrs?: TextAttrs): TextSpan {
-  return { text, attrs: { ...attrs } };
-}

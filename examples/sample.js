@@ -33,7 +33,7 @@ export default {
     fontSize: 14,
   },
   header: ({ pageNumber }) => ({
-    columns: [{ text: 'PDF Maker' }, { text: 'sample', textAlign: 'right' }],
+    columns: [{ text: 'PDF Maker' }, { text: 'sample', textAlign: 'right', width: 'auto' }],
     margin:
       pageNumber % 2
         ? { left: '25mm', right: '15mm', top: '1cm' }

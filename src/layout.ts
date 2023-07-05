@@ -15,10 +15,40 @@ import { pickDefined } from './types.js';
 
 const defaultPageMargin = parseEdges('2cm');
 
+// Layout principles
+// =================
+//
+// 1. The document content consists of *blocks*.
+// 2. The layout process creates a render *frame* for each block. This
+//    frame contains the position and size of the block on screen, and
+//    *objects* that describe the contents to render.
+// 3. To layout a block, the function `layoutBlock()` is called with a
+//    block and the box it needs to fit in. This function subtracts the
+//    padding from this box and calls `layoutBlockContent()` to layout
+//    the *content* of the block inside the resulting content box.
+// 4. When the `width` of a block is set to a fixed value, the frame
+//    should take this exact width and the horizontal padding should be
+//    included in this width. When the width is set to 'auto', the frame
+//    should take the width needed to display its content plus the
+//    horizontal padding. This requires that the auto width property is
+//    propagated to the children of this block. When the width is
+//    neither set to a fixed value nor 'auto', the frame should take the
+//    full width of the content box.
+// 6. When the `height` of a block is set to a fixed value, the frame
+//    should take this exact height and the vertical padding should be
+//    included in this height. Otherwise, the frame should take the
+//    height needed to display its content plus the vertical padding.
+// 7. The individual content layout functions for text, images, columns,
+//    etc. must not use the `width` and `height` properties of the block
+//    to layout the contents for a block with fixed width or height.
+//    Instead, they must use the width and height of the content box
+//    that is passed to them which already has the padding subtracted.
+
 /**
- * Frames are created during the layout process. They have a position relative to their parent,
- * a size, and render objects to be rendered.
- * Frames can contain children that represent nested blocks, e.g. in a row or column layout.
+ * Frames are created during the layout process. They have a position
+ * relative to their parent, a size, and render objects to be rendered.
+ * Frames can contain children that represent nested blocks, e.g. in a
+ * row or column layout.
  */
 export type Frame = {
   x: number;
@@ -39,11 +69,10 @@ export type LayoutResult = {
 
 /**
  * Result of laying out the *content* of a block.
- * The position is fixed to the top left padding border by now.
- * Also, the width is currently fixed to the available width.
+ * The position is fixed to the top left edge of the padding.
  */
 export type LayoutContent = {
-  frame: Omit<Frame, 'x' | 'y' | 'width'>;
+  frame: Omit<Frame, 'x' | 'y'>;
   remainder?: Block;
 };
 
@@ -153,18 +182,21 @@ function layoutPageContent(blocks: Block[], box: Box, doc: Document) {
 
 export function layoutBlock(block: Block, box: Box, doc: Document): LayoutResult {
   const padding = block.padding ?? ZERO_EDGES;
+  // Subtract the padding from the box to get the content box.
   const contentBox = subtractEdges(
     { x: 0, y: 0, width: block.width ?? box.width, height: block.height ?? box.height },
     padding
   );
+  // Layout the *content* of the block, i.e. what's inside the padding.
   const result = layoutBlockContent(block, contentBox, doc);
-  const content = result.frame;
+  // Finally, add the padding back to the frame size.
+  // When the width/height is fixed, the padding must not be added.
   const frame = {
-    ...content,
+    ...result.frame,
     x: box.x,
     y: box.y,
-    width: block.width ?? box.width,
-    height: block.height ?? (content?.height ?? 0) + padding.top + padding.bottom,
+    width: block.width ?? result.frame.width + padding.left + padding.right,
+    height: block.height ?? result.frame.height + padding.top + padding.bottom,
   };
   addAnchor(frame, block);
   addGraphics(frame, block);
@@ -185,7 +217,12 @@ function layoutBlockContent(block: Block, box: Box, doc: Document): LayoutConten
   if ('rows' in block) {
     return layoutRowsContent(block, box, doc);
   }
-  return { frame: { height: 0 } };
+  return {
+    frame: {
+      height: block.height ?? 0,
+      width: block.width ?? (block.autoWidth ? 0 : box.width),
+    },
+  };
 }
 
 function addAnchor(frame: Frame, block: Block) {
