@@ -222,11 +222,16 @@ export type BlockAttrs = {
    */
   margin?: Length | BoxLengths;
   /**
-   * A fixed width for the block. If left out, the block uses the available width.
+   * The width of the block. If this property is set to `auto`, the
+   * block will use the width of the widest element in the block. In
+   * this case, all children that don't have a fixed width will inherit
+   * the `auto` width. If this property is not set, the block uses the
+   * available width.
    */
-  width?: Length;
+  width?: Length | 'auto';
   /**
-   * A fixed height for the block. If left out, the height is defined by the included text.
+   * The height of the block. If this property is not set, the block
+   * uses the height of its content.
    */
   height?: Length;
   /**

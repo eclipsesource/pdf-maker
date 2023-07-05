@@ -25,7 +25,12 @@ export function layoutRowsContent(block: RowsBlock, box: Box, doc: Document): La
       height: remainingHeight - topMargin - margin.bottom,
     };
 
-    const { frame, remainder } = layoutBlock(row, { ...nextPos, ...maxSize }, doc);
+    const autoWidth = row.width == null && (row.autoWidth || block.autoWidth);
+    const { frame, remainder } = layoutBlock(
+      { ...row, autoWidth },
+      { ...nextPos, ...maxSize },
+      doc
+    );
 
     const performBreakAt = (breakIdx: number) => {
       frames.splice(breakIdx);
@@ -77,8 +82,23 @@ export function layoutRowsContent(block: RowsBlock, box: Box, doc: Document): La
       { ...omit(block, 'id', 'breakInside'), rows: remainingRows }
     : undefined;
 
+  // compute max row width only if needed
+  const width = block.autoWidth
+    ? Math.max(
+        ...frames.map((frame, idx) => {
+          const row = block.rows[idx];
+          const marginX = row.margin ? row.margin.left + row.margin.right : 0;
+          return frame.width + marginX;
+        })
+      )
+    : box.width;
+
   return {
-    frame: { height: aggregatedHeights[frames.length - 1] ?? 0, children: frames },
+    frame: {
+      width,
+      height: aggregatedHeights[frames.length - 1] ?? 0,
+      children: frames,
+    },
     remainder,
   };
 }

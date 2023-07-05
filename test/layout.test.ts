@@ -197,24 +197,51 @@ describe('layout', () => {
       const { frame } = layoutBlock(block, box, doc);
 
       expect(frame).toEqual({
-        x: 20,
-        y: 30,
+        x: box.x,
+        y: box.y,
         width: 200,
         height: 100,
         children: [],
       });
     });
 
-    it('includes padding', () => {
+    it('creates frame for empty block', () => {
+      const padding = { left: 5, right: 6, top: 7, bottom: 8 };
+      const block = { padding };
+
+      const { frame } = layoutBlock(block, box, doc);
+
+      expect(frame).toEqual({ x: box.x, y: box.y, width: box.width, height: 7 + 8 });
+    });
+
+    it('creates frame for empty block with auto width', () => {
+      const padding = { left: 5, right: 6, top: 7, bottom: 8 };
+      const block = { padding, autoWidth: true };
+
+      const { frame } = layoutBlock(block, box, doc);
+
+      expect(frame).toEqual({ x: box.x, y: box.y, width: 5 + 6, height: 7 + 8 });
+    });
+
+    it('creates frame for empty block with fixed width and height', () => {
+      const padding = { left: 5, right: 6, top: 7, bottom: 8 };
+      const block = { padding, width: 100, height: 200 };
+
+      const { frame } = layoutBlock(block, box, doc);
+
+      expect(frame).toEqual({ x: box.x, y: box.y, width: 100, height: 200 });
+    });
+
+    it('includes padding around children', () => {
       const padding = { left: 5, right: 6, top: 7, bottom: 8 };
       const block = { columns: [{ width: 100, height: 200 }], padding };
 
       const { frame } = layoutBlock(block, box, doc);
 
       expect(frame).toEqual({
-        x: 20,
-        y: 30,
-        width: 400,
+        x: box.x,
+        y: box.y,
+        width: box.width,
         height: 7 + 200 + 8,
         children: [{ x: 5, y: 7, width: 100, height: 200 }],
       });

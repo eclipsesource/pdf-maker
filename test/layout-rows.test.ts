@@ -5,7 +5,7 @@ import { Document } from '../src/document.js';
 import { Frame } from '../src/layout.js';
 import { layoutRowsContent } from '../src/layout-rows.js';
 import { Block } from '../src/read-block.js';
-import { fakeFont, range } from './test-utils.js';
+import { fakeFont, range, span } from './test-utils.js';
 
 describe('layout-rows', () => {
   let doc: Document, box: Box;
@@ -22,7 +22,7 @@ describe('layout-rows', () => {
 
       const { frame, remainder } = layoutRowsContent(block, box, doc);
 
-      expect(frame).toEqual({ children: [], height: 0 });
+      expect(frame).toEqual({ children: [], width: box.width, height: 0 });
       expect(remainder).toBeUndefined();
     });
 
@@ -33,6 +33,7 @@ describe('layout-rows', () => {
 
       expect(frame).toEqual({
         children: [{ x: 20, y: 30, width: 100, height: 50 }],
+        width: box.width,
         height: 50,
       });
       expect(remainder).toBeUndefined();
@@ -48,6 +49,31 @@ describe('layout-rows', () => {
       expect(remainder).toBeUndefined();
     });
 
+    it('returns frame with fixed width for block with auto width', () => {
+      const block = { rows: [{ width: 100, height: 50 }], autoWidth: true };
+
+      const { frame, remainder } = layoutRowsContent(block, box, doc);
+
+      expect(frame).toEqual(expect.objectContaining({ width: 100, height: 50 }));
+      expect(remainder).toBeUndefined();
+    });
+
+    it("passes auto width down to children that don't have a fixed width", () => {
+      const block = {
+        rows: [{ text: [span('foo')] }, { text: [span('bar')], width: 50 }],
+        autoWidth: true,
+      };
+
+      const { frame, remainder } = layoutRowsContent(block, box, doc);
+
+      expect(frame.children).toEqual([
+        expect.objectContaining({ width: 30 }), // intrinsic width
+        expect.objectContaining({ width: 50 }), // keeps fixed width
+      ]);
+      expect(frame.width).toEqual(50); // max width of children
+      expect(remainder).toBeUndefined();
+    });
+
     it('respects row margin', () => {
       const margin = { left: 5, right: 6, top: 7, bottom: 8 };
       const block = { rows: [{ width: 100, height: 50, margin }] };
@@ -56,6 +82,7 @@ describe('layout-rows', () => {
 
       expect(frame).toEqual({
         children: [{ x: 20 + 5, y: 30 + 7, width: 100, height: 50 }],
+        width: box.width,
         height: 50 + 7 + 8,
       });
       expect(remainder).toBeUndefined();
@@ -76,6 +103,7 @@ describe('layout-rows', () => {
           { x: 20 + 5, y: 30 + 7, width: 100, height: 50 },
           { x: 20 + 5, y: 30 + 7 + 50 + 8, width: 100, height: 50 },
         ],
+        width: box.width,
         height: 7 + 50 + 8 + 50 + 8,
       });
       expect(remainder).toBeUndefined();

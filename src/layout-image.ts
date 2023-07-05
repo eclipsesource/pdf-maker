@@ -20,13 +20,15 @@ export function layoutImageContent(block: ImageBlock, box: Box, doc: Document): 
   const hasFixedHeight = block.height != null;
   const scale = getScale(image, box, hasFixedWidth, hasFixedHeight);
   const imageSize = { width: image.width * scale, height: image.height * scale };
-  const imageBox = { x: box.x, y: box.y, width: box.width, height: imageSize.height };
+  const width = block.autoWidth ? imageSize.width : box.width;
+  const imageBox = { x: box.x, y: box.y, width, height: imageSize.height };
   const imagePos = align(imageBox, imageSize, block.imageAlign);
   const imageObj: ImageObject = createImageObject(image, imagePos, imageSize);
   const objects: RenderObject[] = [imageObj];
   return {
     frame: {
       objects,
+      width,
       height: imageSize.height,
     },
   };
