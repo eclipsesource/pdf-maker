@@ -1,6 +1,6 @@
 {
   "name": "pdfmkr",
-  "version": "0.5.2",
+  "version": "0.5.3",
   "description": "Generate PDF documents from JavaScript objects",
   "license": "MIT",
   "repository": {
@@ -37,18 +37,18 @@
     "pdf-lib": "^1.17.1"
   },
   "devDependencies": {
-    "@fontsource/dejavu-sans": "^5.0.4",
-    "@types/node": "^18.16.19",
-    "@typescript-eslint/eslint-plugin": "^5.61.0",
-    "concurrently": "^8.2.0",
-    "eslint-config-prettier": "^8.8.0",
-    "eslint-plugin-import": "^2.27.5",
+    "@fontsource/dejavu-sans": "^5.0.7",
+    "@types/node": "^18.18.0",
+    "@typescript-eslint/eslint-plugin": "^6.7.3",
+    "concurrently": "^8.2.1",
+    "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-import": "^2.28.1",
     "eslint-plugin-simple-import-sort": "^10.0.0",
-    "jest": "^29.6.0",
-    "nodemon": "^2.0.22",
+    "jest": "^29.7.0",
+    "nodemon": "^3.0.1",
     "prettier": "^2.8.8",
     "ts-jest": "^29.1.1",
-    "typescript": "^5.1.6",
+    "typescript": "^5.2.2",
     "wawoff2": "^2.0.1"
   }
 }

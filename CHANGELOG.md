@@ -1,6 +1,13 @@
 # Changelog
 
-## [0.5.2] - Unreleased
+## [0.5.3]
+
+### Fixed
+
+- An edge case that could lead to a duplicated row after a page break
+  has been fixed.
+
+## [0.5.2] - 2023-07-06
 
 ### Added
 
@@ -8,12 +15,7 @@
   all block types. When set to `auto`, the block will shrink to the
   width of its contents.
 
-### Fixed
-
-- An edge case that could lead to a duplicated row after a page break
-  has been fixed.
-
-## [0.5.1] - 2023-06-29
+## [0.5.1] - 2023-06-30
 
 ### Added
 
@@ -168,4 +170,9 @@ First public version.
 [0.3.2]: https://github.com/eclipsesource/pdf-maker/releases/tag/v0.3.2
 [0.3.3]: https://github.com/eclipsesource/pdf-maker/releases/tag/v0.3.3
 [0.4.0]: https://github.com/eclipsesource/pdf-maker/releases/tag/v0.4.0
-[0.4.2]: https://github.com/eclipsesource/pdf-maker/releases/tag/v0.4.0
+[0.4.1]: https://github.com/eclipsesource/pdf-maker/releases/tag/v0.4.1
+[0.4.2]: https://github.com/eclipsesource/pdf-maker/releases/tag/v0.4.2
+[0.5.0]: https://github.com/eclipsesource/pdf-maker/releases/tag/v0.5.0
+[0.5.1]: https://github.com/eclipsesource/pdf-maker/releases/tag/v0.5.1
+[0.5.2]: https://github.com/eclipsesource/pdf-maker/releases/tag/v0.5.2
+[0.5.3]: https://github.com/eclipsesource/pdf-maker/releases/tag/v0.5.3
