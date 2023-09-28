@@ -12,14 +12,13 @@ coverage/
 
 # temp files
 *~
+*.local
 
 # generated
 generated/
 
 # local files
 .DS_Store
-.env.local
-.env.*.local
 .eslintcache
 
 # log files
