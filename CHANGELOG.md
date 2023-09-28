@@ -8,6 +8,11 @@
   all block types. When set to `auto`, the block will shrink to the
   width of its contents.
 
+### Fixed
+
+* An edge case that could lead to a duplicated row after a page break
+  has been fixed.
+
 ## [0.5.1] - 2023-06-29
 
 ### Added

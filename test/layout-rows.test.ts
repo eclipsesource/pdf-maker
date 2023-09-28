@@ -5,7 +5,7 @@ import { Document } from '../src/document.js';
 import { Frame } from '../src/layout.js';
 import { layoutRowsContent } from '../src/layout-rows.js';
 import { Block } from '../src/read-block.js';
-import { fakeFont, range, span } from './test-utils.js';
+import { extractTextRows, fakeFont, range, span } from './test-utils.js';
 
 describe('layout-rows', () => {
   let doc: Document, box: Box;
@@ -116,7 +116,7 @@ describe('layout-rows', () => {
         );
       };
       const renderedIds = (frame?: Pick<Frame, 'children'>) =>
-        frame?.children?.map((c) => (c.objects?.[0] as any)?.name);
+        frame?.children?.map((c) => (c.objects?.find((o) => o.type === 'anchor') as any)?.name);
       const box = { x: 20, y: 30, width: 400, height: 700 };
 
       it('creates page break after last fitting block', () => {
@@ -302,6 +302,44 @@ describe('layout-rows', () => {
 
         expect(renderedIds(frame)).toEqual(range(7).map(String));
         expect(remainder).toEqual({ rows: rows.slice(7) });
+      });
+
+      it('includes partial remainder', () => {
+        const rows = makeBlocks(6);
+        rows.push({ id: '6', height: 70 }); // leave just enough space for a single line of text
+        rows.push({ id: 'extra', text: [{ text: 'line1\nline2', attrs: {} }] });
+
+        const { frame, remainder } = layoutRowsContent(
+          { rows, breakInside: 'enforce-auto' as any },
+          box,
+          doc
+        );
+
+        expect(renderedIds(frame)).toEqual(['0', '1', '2', '3', '4', '5', '6', 'extra']);
+        expect(extractTextRows(frame)).toEqual(['line1']);
+        expect(remainder).toEqual({
+          rows: [expect.objectContaining({ text: [expect.objectContaining({ text: 'line2' })] })],
+        });
+      });
+
+      it('skips remainder if frame empty', () => {
+        const rows = makeBlocks(6);
+        rows.push({ id: '6', height: 90 }); // leave some space, but not enough for a line of text
+        rows.push({
+          id: 'extra',
+          text: [{ text: 'line1\nline2', attrs: {} }],
+          margin: { top: 10, left: 0, right: 0, bottom: 10 },
+        });
+
+        const { frame, remainder } = layoutRowsContent(
+          { rows, breakInside: 'enforce-auto' as any },
+          box,
+          doc
+        );
+
+        expect(renderedIds(frame)).toEqual(['0', '1', '2', '3', '4', '5', '6']);
+        expect(extractTextRows(frame)).toEqual([]);
+        expect(remainder).toEqual({ rows: rows.slice(-1) });
       });
     });
   });

@@ -32,7 +32,7 @@ export function layoutRowsContent(block: RowsBlock, box: Box, doc: Document): La
       doc
     );
 
-    const performBreakAt = (breakIdx: number) => {
+    const performBreakAt = (breakIdx: number, remainder?: Block) => {
       frames.splice(breakIdx);
       const insertedBlock = block.insertAfterBreak?.();
       remainingRows = compact([insertedBlock, remainder, ...block.rows.slice(breakIdx)]);
@@ -60,7 +60,7 @@ export function layoutRowsContent(block: RowsBlock, box: Box, doc: Document): La
 
     if (remainder) {
       // This row was split. Break here and include the remainder in the result.
-      performBreakAt(rowIdx + 1);
+      performBreakAt(rowIdx + 1, remainder);
       break;
     }
 

@@ -2,6 +2,7 @@ import { PDFContext, PDFDocument, PDFFont, PDFName, PDFPage, PDFRef } from 'pdf-
 
 import { Font } from '../src/fonts.js';
 import { Image } from '../src/images.js';
+import { Frame } from '../src/layout.js';
 import { Page } from '../src/page.js';
 import { TextAttrs, TextSpan } from '../src/read-block.js';
 
@@ -84,6 +85,20 @@ export function fakePDFPage(document?: PDFDocument): PDFPage {
     getContentStream: () => contentStream,
     node,
   } as unknown as PDFPage;
+}
+
+export function extractTextRows(frame: Partial<Frame>) {
+  const lines = [] as string[];
+  frame.children?.forEach((child) => {
+    child.objects?.forEach((obj) => {
+      if (obj.type === 'text') {
+        obj.rows.forEach((row) => {
+          lines.push(row.segments.map((s) => s.text).join(', '));
+        });
+      }
+    });
+  });
+  return lines;
 }
 
 export function span(text: string, attrs?: TextAttrs): TextSpan {
