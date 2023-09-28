@@ -2,9 +2,9 @@
 
 PDF Maker is a library for generating PDF documents in JavaScript.
 
-* Easy to use: document contents are defined in plain objects.
-* Works anywhere: Browser, Node.js, Deno.
-* TypeScript support: types included in the npm package.
+- Easy to use: document contents are defined in plain objects.
+- Works anywhere: Browser, Node.js, Deno.
+- TypeScript support: types included in the npm package.
 
 This project is heavily inspired by [pdfmake] and builds on [pdf-lib] and [fontkit].
 It would not exist without the great work and the profound knowledge contributed by the authors of
@@ -22,10 +22,7 @@ const fontDataBold = await readFile('Roboto-Medium.ttf');
 const pdfData = await makePdf({
   // Fonts must be registered (see below)
   fonts: {
-    Roboto: [
-      { data: fontData },
-      { data: fontDataBold, bold: true },
-    ],
+    Roboto: [{ data: fontData }, { data: fontDataBold, bold: true }],
   },
   // Page margins (`x` is a shorthand for left and right)
   margin: { x: '2.5cm', top: '2cm', bottom: '1.5cm' },
@@ -34,11 +31,12 @@ const pdfData = await makePdf({
     // Blocks can contain text and text attributes
     { text: 'Lorem ipsum', bold: true, textAlign: 'center', fontSize: 24 },
     // Text can also be an array of text ranges with different attributes
-    { text: [
+    {
+      text: [
         'dolor sit amet, consectetur adipiscing elit ',
         { text: 'sed do eiusmod', italic: true },
         ' tempor, incididunt ut labore et dolore magna aliqua.',
-      ]
+      ],
     },
   ],
 });
@@ -64,15 +62,12 @@ const documentDefinition = {
       { data: fontDataDejaVuSansItalic, italic: true },
       { data: fontDataDejaVuSansBoldItalic, bold: true, italic: true },
     ],
-    'Roboto': [
-      { data: fontDataRobotoNormal },
-      { data: fontDataRobotoMedium, bold: true },
-    ]
+    Roboto: [{ data: fontDataRobotoNormal }, { data: fontDataRobotoMedium, bold: true }],
   },
   content: [
     { text: 'lorem ipsum', fontFamily: 'Roboto', bold: true }, // will use Roboto Medium
     { text: 'dolor sit amet' }, // will use DejaVu-Sans (the font registered first), normal
-  ]
+  ],
 };
 ```
 
@@ -98,7 +93,7 @@ const documentDefinition = {
 
 ### Content
 
-The `content` attribute of the document definition accepts an array of top-level *blocks* that can
+The `content` attribute of the document definition accepts an array of top-level _blocks_ that can
 be text blocks, image blocks, column or row layout blocks.
 Page breaks will only occur between top-level blocks.
 

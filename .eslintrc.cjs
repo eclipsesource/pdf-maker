@@ -11,12 +11,8 @@ module.exports = {
     ecmaVersion: 2020,
     sourceType: 'module',
   },
-  extends: [
-    'eslint:recommended',
-    'plugin:@typescript-eslint/recommended',
-    'plugin:prettier/recommended',
-  ],
-  plugins: ['import', 'simple-import-sort', 'prettier'],
+  extends: ['eslint:recommended', 'plugin:@typescript-eslint/recommended', 'prettier'],
+  plugins: ['@typescript-eslint', 'import', 'simple-import-sort'],
   rules: {
     eqeqeq: ['error', 'always', { null: 'ignore' }],
     // TODO disable console again, only the CLI should print to the console
