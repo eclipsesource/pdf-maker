@@ -1,7 +1,8 @@
 import { beforeEach, describe, expect, it } from '@jest/globals';
 import { rgb } from 'pdf-lib';
 
-import { Font } from '../src/fonts.js';
+import { Font } from './fonts.js';
+import { fakeFont } from './test/test-utils.js';
 import {
   breakLine,
   extractTextSegments,
@@ -9,8 +10,7 @@ import {
   flattenTextSegments,
   splitChunks,
   TextSegment,
-} from '../src/text.js';
-import { fakeFont } from './test-utils.js';
+} from './text.js';
 
 const { objectContaining } = expect;
 

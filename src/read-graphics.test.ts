@@ -1,8 +1,8 @@
 import { describe, expect, it } from '@jest/globals';
 import { rgb } from 'pdf-lib';
 
-import { readShape } from '../src/read-graphics.js';
-import { p } from './test-utils.js';
+import { readShape } from './read-graphics.js';
+import { p } from './test/test-utils.js';
 
 const transformAttrs = {
   translate: { x: 1, y: 2 },

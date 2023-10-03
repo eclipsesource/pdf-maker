@@ -1,10 +1,10 @@
 import { PDFContext, PDFDocument, PDFFont, PDFName, PDFPage, PDFRef } from 'pdf-lib';
 
-import { Font } from '../src/fonts.js';
-import { Image } from '../src/images.js';
-import { Frame } from '../src/layout.js';
-import { Page } from '../src/page.js';
-import { TextAttrs, TextSpan } from '../src/read-block.js';
+import { Font } from '../fonts.js';
+import { Image } from '../images.js';
+import { Frame } from '../layout.js';
+import { Page } from '../page.js';
+import { TextAttrs, TextSpan } from '../read-block.js';
 
 export function fakeFont(
   name: string,

@@ -1,7 +1,7 @@
 import { describe, expect, it } from '@jest/globals';
 import crypto from 'crypto';
 
-import { makePdf } from '../src/make-pdf.js';
+import { makePdf } from './make-pdf.js';
 
 global.crypto ??= (crypto as any).webcrypto;
 

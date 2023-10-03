@@ -1,6 +1,6 @@
 import { describe, expect, it } from '@jest/globals';
 
-import { parseEdges, parseLength, subtractEdges } from '../src/box.js';
+import { parseEdges, parseLength, subtractEdges } from './box.js';
 
 describe('box', () => {
   describe('subtractEdges', () => {

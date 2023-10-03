@@ -1,11 +1,11 @@
 import { beforeEach, describe, expect, it } from '@jest/globals';
 
-import { Box } from '../src/box.js';
-import { Document } from '../src/document.js';
-import { Frame } from '../src/layout.js';
-import { layoutRowsContent } from '../src/layout-rows.js';
-import { Block } from '../src/read-block.js';
-import { extractTextRows, fakeFont, range, span } from './test-utils.js';
+import { Box } from './box.js';
+import { Document } from './document.js';
+import { Frame } from './layout.js';
+import { layoutRowsContent } from './layout-rows.js';
+import { Block } from './read-block.js';
+import { extractTextRows, fakeFont, range, span } from './test/test-utils.js';
 
 describe('layout-rows', () => {
   let doc: Document, box: Box;

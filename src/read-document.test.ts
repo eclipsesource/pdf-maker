@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from '@jest/globals';
 
-import { PageInfo, readDocumentDefinition } from '../src/read-document.js';
+import { PageInfo, readDocumentDefinition } from './read-document.js';
 
 describe('read-document', () => {
   describe('readDocumentDefinition', () => {

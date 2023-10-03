@@ -3,8 +3,8 @@ import crypto from 'crypto';
 import { readFileSync } from 'fs';
 import { join } from 'path';
 
-import { Image, loadImages, readImages, registerImage } from '../src/images.js';
-import { fakePDFDocument, mkData } from './test-utils.js';
+import { Image, loadImages, readImages, registerImage } from './images.js';
+import { fakePDFDocument, mkData } from './test/test-utils.js';
 
 global.crypto ??= (crypto as any).webcrypto;
 
@@ -59,7 +59,7 @@ describe('images', () => {
     });
 
     it('reads width and height from JPEG image', async () => {
-      const data = readFileSync(join(__dirname, 'resources/liberty.jpg'));
+      const data = readFileSync(join(__dirname, './test/resources/liberty.jpg'));
 
       const images = await loadImages([{ name: 'liberty', data, format: 'jpeg' }]);
 
@@ -67,7 +67,7 @@ describe('images', () => {
     });
 
     it('reads width and height from PNG image', async () => {
-      const data = readFileSync(join(__dirname, 'resources/torus.png'));
+      const data = readFileSync(join(__dirname, './test/resources/torus.png'));
 
       const images = await loadImages([{ name: 'torus', data, format: 'png' }]);
 
@@ -78,7 +78,7 @@ describe('images', () => {
   describe('registerImage', () => {
     it('embeds image in PDF document and attaches ref', () => {
       const doc = fakePDFDocument();
-      const data = readFileSync(join(__dirname, 'resources/liberty.jpg'));
+      const data = readFileSync(join(__dirname, './test/resources/liberty.jpg'));
       const image: Image = { name: 'foo', format: 'jpeg', data, width: 100, height: 200 };
 
       const pdfRef = registerImage(image, doc);

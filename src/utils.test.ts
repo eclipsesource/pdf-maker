@@ -1,6 +1,6 @@
 import { describe, expect, it } from '@jest/globals';
 
-import { round } from '../src/utils.js';
+import { round } from './utils.js';
 
 describe('utils', () => {
   describe('round', () => {

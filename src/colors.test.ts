@@ -1,6 +1,6 @@
 import { describe, expect, it } from '@jest/globals';
 
-import { parseColor } from '../src/colors.js';
+import { parseColor } from './colors.js';
 
 const { closeTo } = expect;
 

@@ -1,6 +1,6 @@
 import { describe, expect, it } from '@jest/globals';
 
-import { parseSvgPath, svgPathToPdfOps, tokenizeSvgPath } from '../src/svg-paths.js';
+import { parseSvgPath, svgPathToPdfOps, tokenizeSvgPath } from './svg-paths.js';
 
 describe('svg-paths', () => {
   describe('tokenize', () => {

@@ -1,6 +1,6 @@
 import { describe, expect, it } from '@jest/globals';
 
-import { printValue } from '../src/print-value.js';
+import { printValue } from './print-value.js';
 
 describe('print-value', () => {
   describe('printValue', () => {

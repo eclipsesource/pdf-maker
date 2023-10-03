@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from '@jest/globals';
 
-import { Font, loadFonts, readFonts, selectFont } from '../src/fonts.js';
-import { fakeFont } from './test-utils.js';
+import { Font, loadFonts, readFonts, selectFont } from './fonts.js';
+import { fakeFont } from './test/test-utils.js';
 
 describe('fonts', () => {
   describe('readFonts', () => {

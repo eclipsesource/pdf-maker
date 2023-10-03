@@ -1,6 +1,6 @@
 import { describe, expect, it } from '@jest/globals';
 
-import { parseBinaryData } from '../src/binary-data.js';
+import { parseBinaryData } from './binary-data.js';
 
 describe('binary-data', () => {
   const data = Uint8Array.of(1, 183, 0);

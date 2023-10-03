@@ -1,17 +1,17 @@
 import { beforeEach, describe, expect, it } from '@jest/globals';
 import { rgb } from 'pdf-lib';
 
-import { Size } from '../src/box.js';
-import { Page } from '../src/page.js';
+import { Size } from './box.js';
+import { Page } from './page.js';
 import {
   CircleObject,
   LineObject,
   PathObject,
   PolylineObject,
   RectObject,
-} from '../src/read-graphics.js';
-import { renderGraphics } from '../src/render-graphics.js';
-import { fakePDFPage, getContentStream, p } from './test-utils.js';
+} from './read-graphics.js';
+import { renderGraphics } from './render-graphics.js';
+import { fakePDFPage, getContentStream, p } from './test/test-utils.js';
 
 describe('render-graphics', () => {
   let page: Page, size: Size;

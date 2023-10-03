@@ -2,7 +2,7 @@ import { describe, expect, it } from '@jest/globals';
 import crypto from 'crypto';
 import { PDFDict, PDFDocument, PDFHexString, PDFName, PDFStream, PDFString } from 'pdf-lib';
 
-import { renderDocument } from '../src/document.js';
+import { renderDocument } from './document.js';
 
 global.crypto ??= (crypto as any).webcrypto;
 

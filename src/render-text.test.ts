@@ -1,11 +1,11 @@
 import { beforeEach, describe, expect, it } from '@jest/globals';
 
-import { Size } from '../src/box.js';
-import { Font } from '../src/fonts.js';
-import { TextObject } from '../src/layout.js';
-import { Page } from '../src/page.js';
-import { renderText } from '../src/render-text.js';
-import { fakeFont, fakePDFPage, getContentStream } from './test-utils.js';
+import { Size } from './box.js';
+import { Font } from './fonts.js';
+import { TextObject } from './layout.js';
+import { Page } from './page.js';
+import { renderText } from './render-text.js';
+import { fakeFont, fakePDFPage, getContentStream } from './test/test-utils.js';
 
 describe('render-text', () => {
   let page: Page, size: Size, font: Font;

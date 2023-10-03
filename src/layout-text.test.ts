@@ -1,11 +1,11 @@
 import { beforeEach, describe, expect, it } from '@jest/globals';
 import { rgb } from 'pdf-lib';
 
-import { Box } from '../src/box.js';
-import { Document } from '../src/document.js';
-import { layoutTextContent } from '../src/layout-text.js';
-import { paperSizes } from '../src/page-sizes.js';
-import { extractTextRows, fakeFont, range, span } from './test-utils.js';
+import { Box } from './box.js';
+import { Document } from './document.js';
+import { layoutTextContent } from './layout-text.js';
+import { paperSizes } from './page-sizes.js';
+import { extractTextRows, fakeFont, range, span } from './test/test-utils.js';
 
 const { objectContaining } = expect;
 

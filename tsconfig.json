@@ -11,5 +11,6 @@
     "incremental": true,
     "strict": true
   },
-  "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.js"]
+  "include": ["src/**/*.ts", "src/**/*.d.ts"],
+  "exclude": ["node_modules", "dist", "src/**/test/", "src/**/*.test.ts"]
 }

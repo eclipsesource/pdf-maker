@@ -1,11 +1,6 @@
 import { describe, expect, it } from '@jest/globals';
 
-import {
-  applyOrientation,
-  paperSizes,
-  parseOrientation,
-  parsePageSize,
-} from '../src/page-sizes.js';
+import { applyOrientation, paperSizes, parseOrientation, parsePageSize } from './page-sizes.js';
 
 describe('page-sizes', () => {
   describe('parsePageSize', () => {

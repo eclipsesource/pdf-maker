@@ -1,9 +1,9 @@
 import { beforeEach, describe, expect, it } from '@jest/globals';
 import { PDFPage } from 'pdf-lib';
 
-import { Font } from '../src/fonts.js';
-import { addPageFont, getExtGraphicsState, Page } from '../src/page.js';
-import { fakeFont, fakePDFPage } from './test-utils.js';
+import { Font } from './fonts.js';
+import { addPageFont, getExtGraphicsState, Page } from './page.js';
+import { fakeFont, fakePDFPage } from './test/test-utils.js';
 
 describe('page', () => {
   let page: Page, pdfPage: PDFPage;
