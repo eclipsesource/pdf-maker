@@ -5,7 +5,7 @@ import { Box } from '../src/box.js';
 import { Document } from '../src/document.js';
 import { layoutTextContent } from '../src/layout-text.js';
 import { paperSizes } from '../src/page-sizes.js';
-import { fakeFont, range, span } from './test-utils.js';
+import { extractTextRows, fakeFont, range, span } from './test-utils.js';
 
 const { objectContaining } = expect;
 
@@ -248,8 +248,30 @@ describe('layout', () => {
       const text = [span(longText, { fontSize: 20 })];
       const block = { text };
 
-      const { remainder } = layoutTextContent(block, box, doc);
+      const { frame, remainder } = layoutTextContent(block, box, doc);
 
+      expect(extractTextRows(frame).join()).toMatch(/^foo.*foo$/);
+      expect(remainder).toEqual({
+        text: [
+          {
+            text: expect.stringMatching(/^foo.*foo$/),
+            attrs: expect.objectContaining({ fontSize: 20 }),
+          },
+        ],
+      });
+    });
+
+    it('does not break text before the first line', () => {
+      box.height = 10;
+      const longText = range(100)
+        .map(() => 'foo')
+        .join(' ');
+      const text = [span(longText, { fontSize: 20 })];
+      const block = { text };
+
+      const { frame, remainder } = layoutTextContent(block, box, doc);
+
+      expect(extractTextRows(frame).join()).toMatch(/^foo.*foo$/);
       expect(remainder).toEqual({
         text: [
           {
@@ -268,8 +290,9 @@ describe('layout', () => {
       const text = [span(longText, { fontSize: 20 })];
       const block = { text, breakInside: 'avoid' as const };
 
-      const { remainder } = layoutTextContent(block, box, doc);
+      const { frame, remainder } = layoutTextContent(block, box, doc);
 
+      expect(extractTextRows(frame).join()).toMatch(/^foo.*foo$/);
       expect(remainder).toBeUndefined();
     });
   });

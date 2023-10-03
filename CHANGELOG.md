@@ -2,6 +2,11 @@
 
 ## [0.5.4] - Unreleased
 
+### Fixed
+
+- Text in a text block will no longer break before the first row, which
+  would result in an empty frame.
+
 ## [0.5.3] - 2023-09-28
 
 ### Fixed

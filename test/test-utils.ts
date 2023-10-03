@@ -90,13 +90,14 @@ export function fakePDFPage(document?: PDFDocument): PDFPage {
 export function extractTextRows(frame: Partial<Frame>) {
   const lines = [] as string[];
   frame.children?.forEach((child) => {
-    child.objects?.forEach((obj) => {
-      if (obj.type === 'text') {
-        obj.rows.forEach((row) => {
-          lines.push(row.segments.map((s) => s.text).join(', '));
-        });
-      }
-    });
+    extractTextRows(child).forEach((line) => lines.push(line));
+  });
+  frame.objects?.forEach((obj) => {
+    if (obj.type === 'text') {
+      obj.rows.forEach((row) => {
+        lines.push(row.segments.map((s) => s.text).join(', '));
+      });
+    }
   });
   return lines;
 }

@@ -51,8 +51,10 @@ function layoutText(block: TextBlock, box: Box, doc: Document) {
     const { row, objects: rowObjects, remainder } = layoutResult;
 
     if (row.height > remainingSpace.height) {
-      // This row doesn't fit in the remaining space. Break here if possible.
-      if (block.breakInside !== 'avoid') {
+      // This row doesn't fit in the remaining space. Break here if
+      // possible. Do not break before the first row to avoid returning
+      // and empty frame.
+      if (block.breakInside !== 'avoid' && rows.length) {
         break;
       }
     }
