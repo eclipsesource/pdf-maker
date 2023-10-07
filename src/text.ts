@@ -1,6 +1,6 @@
 import { Color } from './colors.js';
 import { getTextHeight, getTextWidth } from './font-metrics.js';
-import { Font, selectFont } from './fonts.js';
+import { Font, FontStore } from './fonts.js';
 import { TextSpan } from './read-block.js';
 
 const defaultFontSize = 18;
@@ -22,7 +22,7 @@ export type TextSegment = {
   letterSpacing?: number;
 };
 
-export function extractTextSegments(textSpans: TextSpan[], fonts: Font[]): TextSegment[] {
+export function extractTextSegments(textSpans: TextSpan[], fontStore: FontStore): TextSegment[] {
   return textSpans.flatMap((span) => {
     const { text, attrs } = span;
     const {
@@ -36,7 +36,7 @@ export function extractTextSegments(textSpans: TextSpan[], fonts: Font[]): TextS
       rise,
       letterSpacing,
     } = attrs;
-    const font = selectFont(fonts, attrs);
+    const font = fontStore.selectFont(attrs);
     const height = getTextHeight(font.fkFont, fontSize);
 
     return splitChunks(text).map(

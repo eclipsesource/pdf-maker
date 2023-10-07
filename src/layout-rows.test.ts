@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it } from '@jest/globals';
 
 import { Box } from './box.js';
 import { Document } from './document.js';
+import { createFontStore } from './fonts.js';
 import { Frame } from './layout.js';
 import { layoutRowsContent } from './layout-rows.js';
 import { Block } from './read-block.js';
@@ -11,8 +12,8 @@ describe('layout-rows', () => {
   let doc: Document, box: Box;
 
   beforeEach(() => {
-    const fonts = [fakeFont('Test')];
-    doc = { fonts } as Document;
+    const fontStore = createFontStore([fakeFont('Test')]);
+    doc = { fontStore } as Document;
     box = { x: 20, y: 30, width: 400, height: 700 };
   });
 

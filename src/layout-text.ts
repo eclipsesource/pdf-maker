@@ -40,7 +40,7 @@ export function layoutTextContent(block: TextBlock, box: Box, doc: Document): La
 
 function layoutText(block: TextBlock, box: Box, doc: Document) {
   const { text } = block;
-  const segments = extractTextSegments(text, doc.fonts);
+  const segments = extractTextSegments(text, doc.fontStore);
   const rows: TextRowObject[] = [];
   const objects: LinkObject[] = [];
   let remainingSegments = segments;

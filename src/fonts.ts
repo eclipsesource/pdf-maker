@@ -19,6 +19,10 @@ export type FontDef = {
   data: string | Uint8Array | ArrayBuffer;
 };
 
+export type FontStore = {
+  selectFont(attrs: FontSelector): Font;
+};
+
 export type Font = {
   name: string;
   italic?: boolean;
@@ -72,14 +76,20 @@ export function registerFont(font: Font, pdfDoc: PDFDocument) {
   return ref;
 }
 
-export function selectFont(fonts: Font[], attrs: FontSelector): Font {
-  const { fontFamily, italic, bold } = attrs;
-  const font = fonts.find((font) => match(font, { fontFamily, italic, bold }));
-  if (!font) {
-    const style = italic ? (bold ? 'bold italic' : 'italic') : bold ? 'bold' : 'normal';
-    throw new Error(`No font found for "${fontFamily} ${style}"`);
+export function createFontStore(fonts: Font[]): FontStore {
+  return {
+    selectFont,
+  };
+
+  function selectFont(attrs: FontSelector) {
+    const { fontFamily, italic, bold } = attrs;
+    const font = fonts.find((font) => match(font, { fontFamily, italic, bold }));
+    if (!font) {
+      const style = italic ? (bold ? 'bold italic' : 'italic') : bold ? 'bold' : 'normal';
+      throw new Error(`No font found for "${fontFamily} ${style}"`);
+    }
+    return font;
   }
-  return font;
 }
 
 function match(font: Font, selector: FontSelector): boolean {

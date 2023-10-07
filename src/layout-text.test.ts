@@ -3,6 +3,7 @@ import { rgb } from 'pdf-lib';
 
 import { Box } from './box.js';
 import { Document } from './document.js';
+import { createFontStore, Font } from './fonts.js';
 import { layoutTextContent } from './layout-text.js';
 import { paperSizes } from './page-sizes.js';
 import { extractTextRows, fakeFont, range, span } from './test/test-utils.js';
@@ -10,12 +11,16 @@ import { extractTextRows, fakeFont, range, span } from './test/test-utils.js';
 const { objectContaining } = expect;
 
 describe('layout', () => {
-  let box: Box, doc: Document;
+  let defaultFont: Font;
+  let box: Box;
+  let doc: Document;
 
   beforeEach(() => {
-    const fonts = [fakeFont('Test'), fakeFont('Test', { italic: true })];
+    defaultFont = fakeFont('Test');
+    const italicFont = fakeFont('Test', { italic: true });
+    const fontStore = createFontStore([defaultFont, italicFont]);
     box = { x: 20, y: 30, width: 400, height: 700 };
-    doc = { fonts, pageSize: paperSizes.A4 } as Document;
+    doc = { fontStore, pageSize: paperSizes.A4 } as Document;
   });
 
   describe('layoutTextContent', () => {
@@ -58,7 +63,7 @@ describe('layout', () => {
           rows: [
             {
               ...{ x: 20, y: 30, width: 90, height: 12, baseline: 9 },
-              segments: [{ font: doc.fonts[0], fontSize: 10, text: 'Test text' }],
+              segments: [{ font: defaultFont, fontSize: 10, text: 'Test text' }],
             },
           ],
         },
@@ -83,9 +88,9 @@ describe('layout', () => {
             {
               ...{ x: 20, y: 30, width: 270, height: 18, baseline: 13.5 },
               segments: [
-                { font: doc.fonts[0], fontSize: 5, text: 'Text one' },
-                { font: doc.fonts[0], fontSize: 10, text: 'Text two' },
-                { font: doc.fonts[0], fontSize: 15, text: 'Text three' },
+                { font: defaultFont, fontSize: 5, text: 'Text one' },
+                { font: defaultFont, fontSize: 10, text: 'Text two' },
+                { font: defaultFont, fontSize: 15, text: 'Text three' },
               ],
             },
           ],
@@ -139,7 +144,7 @@ describe('layout', () => {
 
       expect((frame.objects?.[0] as any).rows[0].segments).toEqual([
         {
-          font: doc.fonts[0],
+          font: defaultFont,
           fontSize: 10,
           text: 'foo',
           color: { type: 'RGB', blue: 1, green: 0.5, red: 0 },

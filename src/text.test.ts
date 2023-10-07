@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from '@jest/globals';
 import { rgb } from 'pdf-lib';
 
-import { Font } from './fonts.js';
+import { createFontStore, Font, FontStore } from './fonts.js';
 import { fakeFont } from './test/test-utils.js';
 import {
   breakLine,
@@ -15,20 +15,22 @@ import {
 const { objectContaining } = expect;
 
 describe('text', () => {
-  let fonts: Font[], normalFont: Font;
+  let normalFont: Font;
+  let fontStore: FontStore;
 
   beforeEach(() => {
-    fonts = [fakeFont('Test'), fakeFont('Test', { italic: true })];
-    [normalFont] = fonts;
+    normalFont = fakeFont('Test');
+    const italicFont = fakeFont('Test', { italic: true });
+    fontStore = createFontStore([normalFont, italicFont]);
   });
 
   describe('extractTextSegments', () => {
     it('handles empty array', () => {
-      expect(extractTextSegments([], fonts)).toEqual([]);
+      expect(extractTextSegments([], fontStore)).toEqual([]);
     });
 
     it('returns segment with default attrs for single string', () => {
-      expect(extractTextSegments([{ text: 'foo', attrs: {} }], fonts)).toEqual([
+      expect(extractTextSegments([{ text: 'foo', attrs: {} }], fontStore)).toEqual([
         {
           text: 'foo',
           width: 3 * 18,
@@ -49,7 +51,7 @@ describe('text', () => {
         letterSpacing: 5,
       };
 
-      const segments = extractTextSegments([{ text: 'foo', attrs }], fonts);
+      const segments = extractTextSegments([{ text: 'foo', attrs }], fontStore);
 
       expect(segments).toEqual([
         objectContaining({
@@ -67,7 +69,7 @@ describe('text', () => {
     it('respects local text attrs', () => {
       const attrs = { fontSize: 10, lineHeight: 1.5, color: rgb(1, 0, 0) };
 
-      const segments = extractTextSegments([{ text: 'foo', attrs }], fonts);
+      const segments = extractTextSegments([{ text: 'foo', attrs }], fontStore);
 
       expect(segments).toEqual([
         objectContaining({
@@ -84,7 +86,7 @@ describe('text', () => {
           { text: 'foo', attrs: {} },
           { text: 'bar', attrs: {} },
         ],
-        fonts
+        fontStore
       );
 
       expect(segments).toEqual([

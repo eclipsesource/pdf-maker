@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it } from '@jest/globals';
 
 import { Box } from './box.js';
 import { Document } from './document.js';
+import { createFontStore } from './fonts.js';
 import { isBreakPossible, layoutBlock, layoutPages } from './layout.js';
 import { paperSizes } from './page-sizes.js';
 import { Block, TextAttrs, TextSpan } from './read-block.js';
@@ -14,8 +15,8 @@ describe('layout', () => {
   let doc: Document, box: Box;
 
   beforeEach(() => {
-    const fonts = [fakeFont('Test'), fakeFont('Test', { italic: true })];
-    doc = { fonts, pageSize: paperSizes.A4 } as Document;
+    const fontStore = createFontStore([fakeFont('Test')]);
+    doc = { fontStore, pageSize: paperSizes.A4 } as Document;
     box = { x: 20, y: 30, width: 400, height: 700 };
   });
 

@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from '@jest/globals';
 
-import { Font, loadFonts, readFonts, selectFont } from './fonts.js';
+import { createFontStore, Font, FontStore, loadFonts, readFonts } from './fonts.js';
 import { fakeFont } from './test/test-utils.js';
 
 describe('fonts', () => {
@@ -72,54 +72,54 @@ describe('fonts', () => {
   });
 
   describe('selectFont', () => {
-    let fonts: Font[];
     let normalFont: Font;
     let italicFont: Font;
     let boldFont: Font;
     let italicBoldFont: Font;
     let otherFont: Font;
+    let fontStore: FontStore;
 
     beforeEach(() => {
-      fonts = [
-        fakeFont('Test'),
-        fakeFont('Test', { italic: true }),
-        fakeFont('Test', { bold: true }),
-        fakeFont('Test', { italic: true, bold: true }),
-        fakeFont('Other'),
-      ];
-      [normalFont, italicFont, boldFont, italicBoldFont, otherFont] = fonts;
+      normalFont = fakeFont('Test');
+      italicFont = fakeFont('Test', { italic: true });
+      boldFont = fakeFont('Test', { bold: true });
+      italicBoldFont = fakeFont('Test', { italic: true, bold: true });
+      otherFont = fakeFont('Other');
+      fontStore = createFontStore([normalFont, italicFont, boldFont, italicBoldFont, otherFont]);
     });
 
     it('selects different font variants', () => {
       const fontFamily = 'Test';
 
-      expect(selectFont(fonts, { fontFamily })).toEqual(normalFont);
-      expect(selectFont(fonts, { fontFamily, bold: true })).toEqual(boldFont);
-      expect(selectFont(fonts, { fontFamily, italic: true })).toEqual(italicFont);
-      expect(selectFont(fonts, { fontFamily, italic: true, bold: true })).toEqual(italicBoldFont);
+      expect(fontStore.selectFont({ fontFamily })).toEqual(normalFont);
+      expect(fontStore.selectFont({ fontFamily, bold: true })).toEqual(boldFont);
+      expect(fontStore.selectFont({ fontFamily, italic: true })).toEqual(italicFont);
+      expect(fontStore.selectFont({ fontFamily, italic: true, bold: true })).toEqual(
+        italicBoldFont
+      );
     });
 
     it('selects first matching font if no family specified', () => {
-      expect(selectFont(fonts, {})).toEqual(normalFont);
-      expect(selectFont(fonts, { bold: true })).toEqual(boldFont);
-      expect(selectFont(fonts, { italic: true })).toEqual(italicFont);
-      expect(selectFont(fonts, { italic: true, bold: true })).toEqual(italicBoldFont);
+      expect(fontStore.selectFont({})).toEqual(normalFont);
+      expect(fontStore.selectFont({ bold: true })).toEqual(boldFont);
+      expect(fontStore.selectFont({ italic: true })).toEqual(italicFont);
+      expect(fontStore.selectFont({ italic: true, bold: true })).toEqual(italicBoldFont);
     });
 
     it('selects font with matching font family', () => {
-      expect(selectFont(fonts, { fontFamily: 'Other' })).toEqual(otherFont);
+      expect(fontStore.selectFont({ fontFamily: 'Other' })).toEqual(otherFont);
     });
 
     it('throws when no matching font can be found', () => {
       const fontFamily = 'Other';
 
-      expect(() => selectFont(fonts, { fontFamily, italic: true })).toThrowError(
+      expect(() => fontStore.selectFont({ fontFamily, italic: true })).toThrowError(
         'No font found for "Other italic"'
       );
-      expect(() => selectFont(fonts, { fontFamily, bold: true })).toThrowError(
+      expect(() => fontStore.selectFont({ fontFamily, bold: true })).toThrowError(
         'No font found for "Other bold"'
       );
-      expect(() => selectFont(fonts, { fontFamily, italic: true, bold: true })).toThrowError(
+      expect(() => fontStore.selectFont({ fontFamily, italic: true, bold: true })).toThrowError(
         'No font found for "Other bold italic"'
       );
     });
@@ -127,7 +127,7 @@ describe('fonts', () => {
     it('throws when font family can be found', () => {
       const fontFamily = 'Foo';
 
-      expect(() => selectFont(fonts, { fontFamily })).toThrowError(
+      expect(() => fontStore.selectFont({ fontFamily })).toThrowError(
         'No font found for "Foo normal"'
       );
     });
