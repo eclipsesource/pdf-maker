@@ -19,8 +19,12 @@ import {
 } from './text.js';
 import { omit } from './utils.js';
 
-export function layoutTextContent(block: TextBlock, box: Box, doc: Document): LayoutContent {
-  const text = layoutText(block, box, doc);
+export async function layoutTextContent(
+  block: TextBlock,
+  box: Box,
+  doc: Document
+): Promise<LayoutContent> {
+  const text = await layoutText(block, box, doc);
   const objects: RenderObject[] = [];
   text.rows.length && objects.push({ type: 'text', rows: text.rows });
   text.objects?.length && objects.push(...text.objects);
@@ -38,7 +42,7 @@ export function layoutTextContent(block: TextBlock, box: Box, doc: Document): La
   };
 }
 
-function layoutText(block: TextBlock, box: Box, doc: Document) {
+async function layoutText(block: TextBlock, box: Box, doc: Document) {
   const { text } = block;
   const segments = extractTextSegments(text, doc.fontStore);
   const rows: TextRowObject[] = [];

@@ -15,6 +15,6 @@ export * from './content.js';
 export async function makePdf(definition: DocumentDefinition): Promise<Uint8Array> {
   const def = readAs(definition, 'definition', readDocumentDefinition);
   const doc = await createDocument(def);
-  const pages = layoutPages(def, doc);
+  const pages = await layoutPages(def, doc);
   return await renderDocument(def, pages);
 }

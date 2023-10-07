@@ -21,17 +21,17 @@ describe('layout', () => {
   });
 
   describe('layoutPages', () => {
-    it('accepts empty content', () => {
-      expect(() => layoutPages({ content: [] }, doc)).not.toThrow();
+    it('accepts empty content', async () => {
+      await expect(layoutPages({ content: [] }, doc)).resolves.toBeDefined();
     });
 
-    it('includes defaultStyle in all blocks', () => {
+    it('includes defaultStyle in all blocks', async () => {
       const def = readDocumentDefinition({
         content: [{ text: [span('foo')] }, { text: [span('bar')] }],
         defaultStyle: { fontSize: 14 },
       });
 
-      const pages = layoutPages(def, doc);
+      const pages = await layoutPages(def, doc);
 
       expect(pages[0].content.children).toEqual([
         objectContaining({ height: 14 * 1.2 }),
@@ -39,12 +39,12 @@ describe('layout', () => {
       ]);
     });
 
-    it('lays out content', () => {
+    it('lays out content', async () => {
       const def = readDocumentDefinition({ content: [{ text: 'test' }], margin: 50 });
       const pageWidth = doc.pageSize.width;
       const pageHeight = doc.pageSize.height;
 
-      const pages = layoutPages(def, doc);
+      const pages = await layoutPages(def, doc);
 
       expect(pages).toEqual([
         objectContaining({
@@ -59,10 +59,10 @@ describe('layout', () => {
       ]);
     });
 
-    it('returns empty page frame for empty content', () => {
+    it('returns empty page frame for empty content', async () => {
       const def = readDocumentDefinition({ content: [], margin: 50 });
 
-      const pages = layoutPages(def, doc);
+      const pages = await layoutPages(def, doc);
 
       expect(pages).toEqual([
         {
@@ -72,10 +72,10 @@ describe('layout', () => {
       ]);
     });
 
-    it('returns single page frame for single content block', () => {
+    it('returns single page frame for single content block', async () => {
       const def = readDocumentDefinition({ content: [{ text: 'test' }], margin: 50 });
 
-      const pages = layoutPages(def, doc);
+      const pages = await layoutPages(def, doc);
 
       expect(pages).toEqual([
         {
@@ -85,7 +85,7 @@ describe('layout', () => {
       ]);
     });
 
-    it('enforces page breaks even if all content blocks have breakAfter:avoid', () => {
+    it('enforces page breaks even if all content blocks have breakAfter:avoid', async () => {
       const content = range(10).map((n) => ({
         text: `block ${n}`,
         height: 100,
@@ -93,12 +93,12 @@ describe('layout', () => {
       }));
       const def = readDocumentDefinition({ content, margin: 50 });
 
-      const pages = layoutPages(def, doc);
+      const pages = await layoutPages(def, doc);
 
       expect(pages).toHaveLength(2);
     });
 
-    it('lays out header', () => {
+    it('lays out header', async () => {
       const def = readDocumentDefinition({
         margin: 50,
         content: [{ text: 'content' }],
@@ -106,7 +106,7 @@ describe('layout', () => {
       });
       const pageWidth = doc.pageSize.width;
 
-      const pages = layoutPages(def, doc);
+      const pages = await layoutPages(def, doc);
 
       expect(pages[0].header).toEqual(
         objectContaining({
@@ -119,7 +119,7 @@ describe('layout', () => {
       expect(pages[0].footer).toBeUndefined();
     });
 
-    it('lays out footer', () => {
+    it('lays out footer', async () => {
       const def = readDocumentDefinition({
         margin: 50,
         content: [{ text: 'content' }],
@@ -128,7 +128,7 @@ describe('layout', () => {
       const pageWidth = doc.pageSize.width;
       const pageHeight = doc.pageSize.height;
 
-      const pages = layoutPages(def, doc);
+      const pages = await layoutPages(def, doc);
 
       expect(pages[0].header).toBeUndefined();
       expect(pages[0].footer).toEqual(
@@ -141,7 +141,7 @@ describe('layout', () => {
       );
     });
 
-    it('lays out header and footer', () => {
+    it('lays out header and footer', async () => {
       const def = readDocumentDefinition({
         margin: 50,
         content: [{ text: 'content' }],
@@ -151,7 +151,7 @@ describe('layout', () => {
       const pageWidth = doc.pageSize.width;
       const pageHeight = doc.pageSize.height;
 
-      const pages = layoutPages(def, doc);
+      const pages = await layoutPages(def, doc);
 
       expect(pages[0].header).toEqual(
         objectContaining({
@@ -171,7 +171,7 @@ describe('layout', () => {
       );
     });
 
-    it('supports dynamic header and footer', () => {
+    it('supports dynamic header and footer', async () => {
       const def = readDocumentDefinition({
         margin: 50,
         content: [
@@ -182,7 +182,7 @@ describe('layout', () => {
         footer: ({ pageCount, pageNumber }: PageInfo) => ({ text: `${pageNumber}/${pageCount}` }),
       });
 
-      const pages = layoutPages(def, doc) as any;
+      const pages = (await layoutPages(def, doc)) as any;
 
       expect(pages[0].header.objects[0].rows[0].segments[0].text).toEqual('1/2');
       expect(pages[0].footer.objects[0].rows[0].segments[0].text).toEqual('1/2');
@@ -192,10 +192,10 @@ describe('layout', () => {
   });
 
   describe('layoutBlock', () => {
-    it('creates frame with fixed width and height', () => {
+    it('creates frame with fixed width and height', async () => {
       const block = { rows: [], width: 200, height: 100 };
 
-      const { frame } = layoutBlock(block, box, doc);
+      const { frame } = await layoutBlock(block, box, doc);
 
       expect(frame).toEqual({
         x: box.x,
@@ -206,38 +206,38 @@ describe('layout', () => {
       });
     });
 
-    it('creates frame for empty block', () => {
+    it('creates frame for empty block', async () => {
       const padding = { left: 5, right: 6, top: 7, bottom: 8 };
       const block = { padding };
 
-      const { frame } = layoutBlock(block, box, doc);
+      const { frame } = await layoutBlock(block, box, doc);
 
       expect(frame).toEqual({ x: box.x, y: box.y, width: box.width, height: 7 + 8 });
     });
 
-    it('creates frame for empty block with auto width', () => {
+    it('creates frame for empty block with auto width', async () => {
       const padding = { left: 5, right: 6, top: 7, bottom: 8 };
       const block = { padding, autoWidth: true };
 
-      const { frame } = layoutBlock(block, box, doc);
+      const { frame } = await layoutBlock(block, box, doc);
 
       expect(frame).toEqual({ x: box.x, y: box.y, width: 5 + 6, height: 7 + 8 });
     });
 
-    it('creates frame for empty block with fixed width and height', () => {
+    it('creates frame for empty block with fixed width and height', async () => {
       const padding = { left: 5, right: 6, top: 7, bottom: 8 };
       const block = { padding, width: 100, height: 200 };
 
-      const { frame } = layoutBlock(block, box, doc);
+      const { frame } = await layoutBlock(block, box, doc);
 
       expect(frame).toEqual({ x: box.x, y: box.y, width: 100, height: 200 });
     });
 
-    it('includes padding around children', () => {
+    it('includes padding around children', async () => {
       const padding = { left: 5, right: 6, top: 7, bottom: 8 };
       const block = { columns: [{ width: 100, height: 200 }], padding };
 
-      const { frame } = layoutBlock(block, box, doc);
+      const { frame } = await layoutBlock(block, box, doc);
 
       expect(frame).toEqual({
         x: box.x,
@@ -248,24 +248,24 @@ describe('layout', () => {
       });
     });
 
-    it('includes anchor object for id', () => {
+    it('includes anchor object for id', async () => {
       const block = { columns: [], id: 'test' };
 
-      const { frame } = layoutBlock(block, box, doc);
+      const { frame } = await layoutBlock(block, box, doc);
 
       expect(frame).toEqual(
         objectContaining({ objects: [{ type: 'anchor', name: 'test', x: 0, y: 0 }] })
       );
     });
 
-    it('includes graphics objects in child frame', () => {
+    it('includes graphics objects in child frame', async () => {
       const graphics = () => [
         { type: 'line', x1: 1, y1: 2, x2: 3, y2: 4 },
         { type: 'rect', x: 1, y: 2, width: 10, height: 20 },
         { type: 'polyline', points: [p(1, 2), p(3, 4)] },
       ];
 
-      const { frame } = layoutBlock({ graphics } as any, box, doc);
+      const { frame } = await layoutBlock({ graphics } as any, box, doc);
 
       expect(frame).toEqual(objectContaining({ width: 400, height: 0 }));
       expect(frame.objects).toEqual([
@@ -280,7 +280,7 @@ describe('layout', () => {
       ]);
     });
 
-    it('does not apply padding to graphics objects', () => {
+    it('does not apply padding to graphics objects', async () => {
       const graphics = () => [
         { type: 'line', x1: 1, y1: 2, x2: 3, y2: 4 },
         { type: 'rect', x: 1, y: 2, width: 10, height: 20 },
@@ -288,7 +288,7 @@ describe('layout', () => {
       ];
       const padding = { left: 5, right: 5, top: 5, bottom: 5 };
 
-      const { frame } = layoutBlock({ graphics, padding } as any, box, doc);
+      const { frame } = await layoutBlock({ graphics, padding } as any, box, doc);
 
       expect(frame).toEqual(objectContaining({ width: 400, height: 10 }));
       expect(frame.objects).toEqual([

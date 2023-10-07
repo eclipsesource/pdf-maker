@@ -4,7 +4,11 @@ import { Frame, isBreakPossible, layoutBlock, LayoutContent } from './layout.js'
 import { Block, RowsBlock } from './read-block.js';
 import { compact, omit } from './utils.js';
 
-export function layoutRowsContent(block: RowsBlock, box: Box, doc: Document): LayoutContent {
+export async function layoutRowsContent(
+  block: RowsBlock,
+  box: Box,
+  doc: Document
+): Promise<LayoutContent> {
   let rowY = box.y;
   let lastMargin = 0;
   let remainingHeight = box.height;
@@ -26,7 +30,7 @@ export function layoutRowsContent(block: RowsBlock, box: Box, doc: Document): La
     };
 
     const autoWidth = row.width == null && (row.autoWidth || block.autoWidth);
-    const { frame, remainder } = layoutBlock(
+    const { frame, remainder } = await layoutBlock(
       { ...row, autoWidth },
       { ...nextPos, ...maxSize },
       doc

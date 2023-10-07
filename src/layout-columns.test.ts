@@ -19,18 +19,18 @@ describe('layout-columns', () => {
   });
 
   describe('layoutColumnsContent', () => {
-    it('creates empty frame for empty columns array', () => {
+    it('creates empty frame for empty columns array', async () => {
       const block = { columns: [] };
 
-      const { frame } = layoutColumnsContent(block, box, doc);
+      const { frame } = await layoutColumnsContent(block, box, doc);
 
       expect(frame).toEqual({ children: [], width: box.width, height: 0 });
     });
 
-    it('creates child for column with fixed width and height', () => {
+    it('creates child for column with fixed width and height', async () => {
       const block = { columns: [{ width: 100, height: 50 }] };
 
-      const { frame } = layoutColumnsContent(block, box, doc);
+      const { frame } = await layoutColumnsContent(block, box, doc);
 
       expect(frame).toEqual({
         children: [{ x: 20, y: 30, width: 100, height: 50 }],
@@ -39,25 +39,25 @@ describe('layout-columns', () => {
       });
     });
 
-    it('does not include block padding in height of frame', () => {
+    it('does not include block padding in height of frame', async () => {
       const padding = { left: 1, right: 2, top: 3, bottom: 4 };
       const block = { columns: [{ width: 100, height: 50 }], padding };
 
-      const { frame } = layoutColumnsContent(block, box, doc);
+      const { frame } = await layoutColumnsContent(block, box, doc);
 
       expect(frame.height).toEqual(50);
     });
 
-    it('returns frame with fixed width for block with auto width', () => {
+    it('returns frame with fixed width for block with auto width', async () => {
       const block = { columns: [{ width: 100, height: 50 }], autoWidth: true };
 
-      const { frame, remainder } = layoutColumnsContent(block, box, doc);
+      const { frame, remainder } = await layoutColumnsContent(block, box, doc);
 
       expect(frame).toEqual(expect.objectContaining({ width: 100, height: 50 }));
       expect(remainder).toBeUndefined();
     });
 
-    it("passes auto width down to children that don't have a fixed width", () => {
+    it("passes auto width down to children that don't have a fixed width", async () => {
       const block = {
         columns: [
           { text: [span('foo')], width: 50 }, // column with fixed width
@@ -66,7 +66,7 @@ describe('layout-columns', () => {
         autoWidth: true,
       };
 
-      const { frame, remainder } = layoutColumnsContent(block, box, doc);
+      const { frame, remainder } = await layoutColumnsContent(block, box, doc);
 
       expect(frame.children).toEqual([
         expect.objectContaining({ width: 50 }), // keeps fixed width
@@ -76,11 +76,11 @@ describe('layout-columns', () => {
       expect(remainder).toBeUndefined();
     });
 
-    it('respects column margin', () => {
+    it('respects column margin', async () => {
       const margin = { left: 5, right: 6, top: 7, bottom: 8 };
       const block = { columns: [{ width: 100, height: 50, margin }] };
 
-      const { frame } = layoutColumnsContent(block, box, doc);
+      const { frame } = await layoutColumnsContent(block, box, doc);
 
       expect(frame).toEqual({
         children: [{ x: 20 + 5, y: 30 + 7, width: 100, height: 50 }],
@@ -89,7 +89,7 @@ describe('layout-columns', () => {
       });
     });
 
-    it('creates children for multiple columns with fixed size and margins', () => {
+    it('creates children for multiple columns with fixed size and margins', async () => {
       const margin = { left: 5, right: 6, top: 7, bottom: 8 };
       const columns = [
         { width: 100, height: 50, margin },
@@ -97,7 +97,7 @@ describe('layout-columns', () => {
       ];
       const block = { columns };
 
-      const { frame } = layoutColumnsContent(block, box, doc);
+      const { frame } = await layoutColumnsContent(block, box, doc);
 
       expect(frame).toEqual({
         children: [
@@ -109,7 +109,7 @@ describe('layout-columns', () => {
       });
     });
 
-    it('distributes space evenly across flexible columns', () => {
+    it('distributes space evenly across flexible columns', async () => {
       const margin = { left: 5, right: 6, top: 7, bottom: 8 };
       const columns: Block[] = [
         { text: [span('Column One')], margin },
@@ -117,7 +117,7 @@ describe('layout-columns', () => {
       ];
       const block = { columns };
 
-      const { frame } = layoutColumnsContent(block, box, doc);
+      const { frame } = await layoutColumnsContent(block, box, doc);
 
       expect(frame).toEqual({
         children: [
@@ -129,7 +129,7 @@ describe('layout-columns', () => {
       });
     });
 
-    it('distributes remaining space across flexible columns', () => {
+    it('distributes remaining space across flexible columns', async () => {
       const margin = { left: 5, right: 6, top: 7, bottom: 8 };
       const columns: Block[] = [
         { width: 89, height: 25, margin }, // 89 + 5 + 6 amounts to a column width of 100
@@ -138,7 +138,7 @@ describe('layout-columns', () => {
       ];
       const block = { columns };
 
-      const { frame } = layoutColumnsContent(block, box, doc);
+      const { frame } = await layoutColumnsContent(block, box, doc);
 
       expect(frame).toEqual({
         children: [
@@ -151,7 +151,7 @@ describe('layout-columns', () => {
       });
     });
 
-    it('fits columns into given width', () => {
+    it('fits columns into given width', async () => {
       const margin = { left: 5, right: 6, top: 7, bottom: 8 };
       const columns: Block[] = [
         { text: [span('Column One')], margin },
@@ -159,7 +159,7 @@ describe('layout-columns', () => {
       ];
       const block = { columns };
 
-      const { frame } = layoutColumnsContent(block, box, doc);
+      const { frame } = await layoutColumnsContent(block, box, doc);
 
       expect(frame).toEqual({
         children: [
@@ -171,7 +171,7 @@ describe('layout-columns', () => {
       });
     });
 
-    it('respects vertical alignment', () => {
+    it('respects vertical alignment', async () => {
       const columns: Block[] = [
         { text: [span('Column One')], height: 100 },
         { text: [span('Column Two')], verticalAlign: 'middle' },
@@ -179,7 +179,7 @@ describe('layout-columns', () => {
       ];
       const block = { columns };
 
-      const { frame } = layoutColumnsContent(block, box, doc);
+      const { frame } = await layoutColumnsContent(block, box, doc);
 
       expect(frame).toEqual({
         children: [

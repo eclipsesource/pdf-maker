@@ -13,7 +13,11 @@ export type ImageObject = {
   image: Image;
 };
 
-export function layoutImageContent(block: ImageBlock, box: Box, doc: Document): LayoutContent {
+export async function layoutImageContent(
+  block: ImageBlock,
+  box: Box,
+  doc: Document
+): Promise<LayoutContent> {
   const image = doc.imageStore.selectImage(block.image);
   if (!image) throw new Error(`Unknown image: ${block.image}`);
   const hasFixedWidth = block.width != null;

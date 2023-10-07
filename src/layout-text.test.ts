@@ -10,7 +10,7 @@ import { extractTextRows, fakeFont, range, span } from './test/test-utils.js';
 
 const { objectContaining } = expect;
 
-describe('layout', () => {
+describe('layout-text', () => {
   let defaultFont: Font;
   let box: Box;
   let doc: Document;
@@ -24,38 +24,38 @@ describe('layout', () => {
   });
 
   describe('layoutTextContent', () => {
-    it('creates frame with full width and intrinsic height', () => {
+    it('creates frame with full width and intrinsic height', async () => {
       const text = [{ text: 'foo', attrs: { fontSize: 10 } }];
       const block = { text };
 
-      const { frame } = layoutTextContent(block, box, doc);
+      const { frame } = await layoutTextContent(block, box, doc);
 
       expect(frame).toEqual(objectContaining({ width: box.width, height: 12 }));
     });
 
-    it('creates frame with intrinsic width for block with autoWidth', () => {
+    it('creates frame with intrinsic width for block with autoWidth', async () => {
       const text = [{ text: 'foo', attrs: { fontSize: 10 } }];
       const block = { text, autoWidth: true };
 
-      const { frame } = layoutTextContent(block, box, doc);
+      const { frame } = await layoutTextContent(block, box, doc);
 
       expect(frame).toEqual(objectContaining({ width: 30, height: 12 }));
     });
 
-    it('does not include padding in frame height', () => {
+    it('does not include padding in frame height', async () => {
       const text = [span('foo', { fontSize: 10 })];
       const padding = { left: 1, right: 2, top: 3, bottom: 4 };
       const block = { text, padding };
 
-      const { frame } = layoutTextContent(block, box, doc);
+      const { frame } = await layoutTextContent(block, box, doc);
 
       expect(frame.height).toEqual(12);
     });
 
-    it('includes text baseline', () => {
+    it('includes text baseline', async () => {
       const block = { text: [span('Test text', { fontSize: 10 })] };
 
-      const { frame } = layoutTextContent(block, box, doc) as any;
+      const { frame } = (await layoutTextContent(block, box, doc)) as any;
 
       expect(frame.objects).toEqual([
         {
@@ -70,7 +70,7 @@ describe('layout', () => {
       ]);
     });
 
-    it('positions text segments with different font size at common baseline', () => {
+    it('positions text segments with different font size at common baseline', async () => {
       const block = {
         text: [
           span('Text one', { fontSize: 5 }),
@@ -79,7 +79,7 @@ describe('layout', () => {
         ],
       };
 
-      const { frame } = layoutTextContent(block, box, doc) as any;
+      const { frame } = (await layoutTextContent(block, box, doc)) as any;
 
       expect(frame.objects).toEqual([
         {
@@ -98,12 +98,12 @@ describe('layout', () => {
       ]);
     });
 
-    it('creates link objects', () => {
+    it('creates link objects', async () => {
       const block = {
         text: [span('foo', { link: 'test-link', fontSize: 10 })],
       };
 
-      const { frame } = layoutTextContent(block, box, doc);
+      const { frame } = await layoutTextContent(block, box, doc);
 
       expect(frame.objects).toEqual([
         { type: 'text', rows: [objectContaining({ x: 20, y: 30 })] },
@@ -111,7 +111,7 @@ describe('layout', () => {
       ]);
     });
 
-    it('merges adjacent link objects', () => {
+    it('merges adjacent link objects', async () => {
       const block = {
         text: [
           span('foo ', { link: 'test-link', fontSize: 10 }),
@@ -119,7 +119,7 @@ describe('layout', () => {
         ],
       };
 
-      const { frame } = layoutTextContent(block, box, doc);
+      const { frame } = await layoutTextContent(block, box, doc);
 
       expect(frame.objects).toEqual([
         { type: 'text', rows: [objectContaining({ x: 20, y: 30 })] },
@@ -127,7 +127,7 @@ describe('layout', () => {
       ]);
     });
 
-    it('includes extra text attrs in segments', () => {
+    it('includes extra text attrs in segments', async () => {
       const block = {
         text: [
           span('foo', {
@@ -140,7 +140,7 @@ describe('layout', () => {
         ],
       };
 
-      const { frame } = layoutTextContent(block, box, doc);
+      const { frame } = await layoutTextContent(block, box, doc);
 
       expect((frame.objects?.[0] as any).rows[0].segments).toEqual([
         {
@@ -154,12 +154,12 @@ describe('layout', () => {
       ]);
     });
 
-    it('aligns rows and link objects in block to the right', () => {
+    it('aligns rows and link objects in block to the right', async () => {
       const text = [span('foo', { fontSize: 10, link: 'test-link' })];
       const margin = { left: 10, right: 20, top: 0, bottom: 0 };
       const block = { text, textAlign: 'right' as const, margin };
 
-      const { frame } = layoutTextContent(block, box, doc);
+      const { frame } = await layoutTextContent(block, box, doc);
 
       expect(frame.objects).toEqual([
         {
@@ -170,12 +170,12 @@ describe('layout', () => {
       ]);
     });
 
-    it('aligns rows and link objects in blocks to the center', () => {
+    it('aligns rows and link objects in blocks to the center', async () => {
       const text = [span('foo', { fontSize: 10, link: 'test-link' })];
       const margin = { left: 10, right: 20, top: 0, bottom: 0 };
       const block = { text, textAlign: 'center' as const, margin };
 
-      const { frame } = layoutTextContent(block, box, doc);
+      const { frame } = await layoutTextContent(block, box, doc);
 
       expect(frame.objects).toEqual([
         {
@@ -192,12 +192,12 @@ describe('layout', () => {
       ]);
     });
 
-    it('aligns rows and link objects when width is auto', () => {
+    it('aligns rows and link objects when width is auto', async () => {
       const text = [span('foo\nline 2', { fontSize: 10, link: 'test-link' })];
       const margin = { left: 10, right: 20, top: 0, bottom: 0 };
       const block = { text, textAlign: 'right' as const, margin, autoWidth: true };
 
-      const { frame } = layoutTextContent(block, box, doc);
+      const { frame } = await layoutTextContent(block, box, doc);
 
       expect(frame.objects).toEqual([
         {
@@ -212,40 +212,40 @@ describe('layout', () => {
       ]);
     });
 
-    it('includes blank line for consecutive newlines', () => {
+    it('includes blank line for consecutive newlines', async () => {
       const text = [span('foo\n\nbar', { fontSize: 10, lineHeight: 1 })];
       const block = { text };
 
-      const { frame } = layoutTextContent(block, box, doc);
+      const { frame } = await layoutTextContent(block, box, doc);
 
       expect(frame.height).toEqual(3 * 10);
     });
 
-    it('includes blank line with height of previous line', () => {
+    it('includes blank line with height of previous line', async () => {
       const text = [
         span('foo\n\n', { fontSize: 10, lineHeight: 1 }),
         span('bar', { fontSize: 20, lineHeight: 1 }),
       ];
       const block = { text };
 
-      const { frame } = layoutTextContent(block, box, doc);
+      const { frame } = await layoutTextContent(block, box, doc);
 
       expect(frame.height).toEqual(10 + 10 + 20);
     });
 
-    it('includes blank line with height of next line', () => {
+    it('includes blank line with height of next line', async () => {
       const text = [
         span('foo\n', { fontSize: 10, lineHeight: 1 }),
         span('\nbar', { fontSize: 20, lineHeight: 1 }),
       ];
       const block = { text };
 
-      const { frame } = layoutTextContent(block, box, doc);
+      const { frame } = await layoutTextContent(block, box, doc);
 
       expect(frame.height).toEqual(10 + 20 + 20);
     });
 
-    it('breaks text if it does not fit', () => {
+    it('breaks text if it does not fit', async () => {
       box.height = 100;
       const longText = range(100)
         .map(() => 'foo')
@@ -253,7 +253,7 @@ describe('layout', () => {
       const text = [span(longText, { fontSize: 20 })];
       const block = { text };
 
-      const { frame, remainder } = layoutTextContent(block, box, doc);
+      const { frame, remainder } = await layoutTextContent(block, box, doc);
 
       expect(extractTextRows(frame).join()).toMatch(/^foo.*foo$/);
       expect(remainder).toEqual({
@@ -266,7 +266,7 @@ describe('layout', () => {
       });
     });
 
-    it('does not break text before the first line', () => {
+    it('does not break text before the first line', async () => {
       box.height = 10;
       const longText = range(100)
         .map(() => 'foo')
@@ -274,7 +274,7 @@ describe('layout', () => {
       const text = [span(longText, { fontSize: 20 })];
       const block = { text };
 
-      const { frame, remainder } = layoutTextContent(block, box, doc);
+      const { frame, remainder } = await layoutTextContent(block, box, doc);
 
       expect(extractTextRows(frame).join()).toMatch(/^foo.*foo$/);
       expect(remainder).toEqual({
@@ -287,7 +287,7 @@ describe('layout', () => {
       });
     });
 
-    it('does not break if breakInside = avoid', () => {
+    it('does not break if breakInside = avoid', async () => {
       box.height = 100;
       const longText = range(100)
         .map(() => 'foo')
@@ -295,7 +295,7 @@ describe('layout', () => {
       const text = [span(longText, { fontSize: 20 })];
       const block = { text, breakInside: 'avoid' as const };
 
-      const { frame, remainder } = layoutTextContent(block, box, doc);
+      const { frame, remainder } = await layoutTextContent(block, box, doc);
 
       expect(extractTextRows(frame).join()).toMatch(/^foo.*foo$/);
       expect(remainder).toBeUndefined();
