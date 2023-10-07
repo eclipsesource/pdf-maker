@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it } from '@jest/globals';
 
 import { Box } from './box.js';
 import { Document } from './document.js';
+import { createImageStore } from './images.js';
 import { layoutImageContent } from './layout-image.js';
 import { ImageBlock } from './read-block.js';
 import { fakeImage } from './test/test-utils.js';
@@ -12,9 +13,12 @@ describe('layout-image', () => {
   let box: Box, doc: Document;
 
   beforeEach(() => {
-    const images = [fakeImage('img-720-480', 720, 480), fakeImage('img-72-48', 72, 48)];
+    const imageStore = createImageStore([
+      fakeImage('img-720-480', 720, 480),
+      fakeImage('img-72-48', 72, 48),
+    ]);
     box = { x: 20, y: 30, width: 400, height: 700 };
-    doc = { images } as Document;
+    doc = { imageStore } as Document;
   });
 
   describe('layoutImageContent', () => {

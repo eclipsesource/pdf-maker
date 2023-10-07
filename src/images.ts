@@ -9,6 +9,10 @@ export type ImageDef = {
   format: 'jpeg' | 'png';
 };
 
+export type ImageStore = {
+  selectImage(name: string): Image;
+};
+
 export type Image = {
   name: string;
   width: number;
@@ -62,4 +66,18 @@ export function registerImage(image: Image, pdfDoc: PDFDocument) {
     },
   });
   return ref;
+}
+
+export function createImageStore(images: Image[]): ImageStore {
+  return {
+    selectImage,
+  };
+
+  function selectImage(name: string) {
+    const image = images.find((image) => image.name === name);
+    if (!image) {
+      throw new Error(`No image found for '{name}'`);
+    }
+    return image;
+  }
 }

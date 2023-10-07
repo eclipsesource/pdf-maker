@@ -14,7 +14,7 @@ export type ImageObject = {
 };
 
 export function layoutImageContent(block: ImageBlock, box: Box, doc: Document): LayoutContent {
-  const image = doc.images.find((image) => image.name === block.image);
+  const image = doc.imageStore.selectImage(block.image);
   if (!image) throw new Error(`Unknown image: ${block.image}`);
   const hasFixedWidth = block.width != null;
   const hasFixedHeight = block.height != null;
