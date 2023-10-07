@@ -44,7 +44,7 @@ export async function layoutTextContent(
 
 async function layoutText(block: TextBlock, box: Box, doc: Document) {
   const { text } = block;
-  const segments = extractTextSegments(text, doc.fontStore);
+  const segments = await extractTextSegments(text, doc.fontStore);
   const rows: TextRowObject[] = [];
   const objects: LinkObject[] = [];
   let remainingSegments = segments;

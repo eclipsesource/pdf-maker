@@ -10,7 +10,7 @@ export type ImageDef = {
 };
 
 export type ImageStore = {
-  selectImage(name: string): Image;
+  selectImage(name: string): Promise<Image>;
 };
 
 export type Image = {
@@ -73,7 +73,7 @@ export function createImageStore(images: Image[]): ImageStore {
     selectImage,
   };
 
-  function selectImage(name: string) {
+  async function selectImage(name: string) {
     const image = images.find((image) => image.name === name);
     if (!image) {
       throw new Error(`No image found for '{name}'`);

@@ -18,7 +18,7 @@ export async function layoutImageContent(
   box: Box,
   doc: Document
 ): Promise<LayoutContent> {
-  const image = doc.imageStore.selectImage(block.image);
+  const image = await doc.imageStore.selectImage(block.image);
   if (!image) throw new Error(`Unknown image: ${block.image}`);
   const hasFixedWidth = block.width != null;
   const hasFixedHeight = block.height != null;

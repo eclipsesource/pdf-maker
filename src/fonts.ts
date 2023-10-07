@@ -20,7 +20,7 @@ export type FontDef = {
 };
 
 export type FontStore = {
-  selectFont(attrs: FontSelector): Font;
+  selectFont(attrs: FontSelector): Promise<Font>;
 };
 
 export type Font = {
@@ -81,7 +81,7 @@ export function createFontStore(fonts: Font[]): FontStore {
     selectFont,
   };
 
-  function selectFont(attrs: FontSelector) {
+  async function selectFont(attrs: FontSelector) {
     const { fontFamily, italic, bold } = attrs;
     const font = fonts.find((font) => match(font, { fontFamily, italic, bold }));
     if (!font) {

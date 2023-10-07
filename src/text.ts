@@ -22,42 +22,48 @@ export type TextSegment = {
   letterSpacing?: number;
 };
 
-export function extractTextSegments(textSpans: TextSpan[], fontStore: FontStore): TextSegment[] {
-  return textSpans.flatMap((span) => {
-    const { text, attrs } = span;
-    const {
-      fontSize = defaultFontSize,
-      fontFamily,
-      italic,
-      bold,
-      lineHeight = defaultLineHeight,
-      color,
-      link,
-      rise,
-      letterSpacing,
-    } = attrs;
-    const font = fontStore.selectFont(attrs);
-    const height = getTextHeight(font.fkFont, fontSize);
+export async function extractTextSegments(
+  textSpans: TextSpan[],
+  fontStore: FontStore
+): Promise<TextSegment[]> {
+  const segments = await Promise.all(
+    textSpans.map(async (span) => {
+      const { text, attrs } = span;
+      const {
+        fontSize = defaultFontSize,
+        fontFamily,
+        italic,
+        bold,
+        lineHeight = defaultLineHeight,
+        color,
+        link,
+        rise,
+        letterSpacing,
+      } = attrs;
+      const font = await fontStore.selectFont(attrs);
+      const height = getTextHeight(font.fkFont, fontSize);
 
-    return splitChunks(text).map(
-      (text) =>
-        ({
-          text,
-          width: getTextWidth(text, font.fkFont, fontSize) + text.length * (letterSpacing ?? 0),
-          height,
-          lineHeight,
-          font,
-          fontFamily,
-          italic,
-          bold,
-          fontSize,
-          color,
-          link,
-          rise,
-          letterSpacing,
-        } as TextSegment)
-    );
-  });
+      return splitChunks(text).map(
+        (text) =>
+          ({
+            text,
+            width: getTextWidth(text, font.fkFont, fontSize) + text.length * (letterSpacing ?? 0),
+            height,
+            lineHeight,
+            font,
+            fontFamily,
+            italic,
+            bold,
+            fontSize,
+            color,
+            link,
+            rise,
+            letterSpacing,
+          } as TextSegment)
+      );
+    })
+  );
+  return segments.flat();
 }
 
 export function convertToTextSpan(segment: TextSegment): TextSpan {

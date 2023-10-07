@@ -25,12 +25,16 @@ describe('text', () => {
   });
 
   describe('extractTextSegments', () => {
-    it('handles empty array', () => {
-      expect(extractTextSegments([], fontStore)).toEqual([]);
+    it('handles empty array', async () => {
+      const segments = await extractTextSegments([], fontStore);
+
+      expect(segments).toEqual([]);
     });
 
-    it('returns segment with default attrs for single string', () => {
-      expect(extractTextSegments([{ text: 'foo', attrs: {} }], fontStore)).toEqual([
+    it('returns segment with default attrs for single string', async () => {
+      const segments = await extractTextSegments([{ text: 'foo', attrs: {} }], fontStore);
+
+      expect(segments).toEqual([
         {
           text: 'foo',
           width: 3 * 18,
@@ -42,7 +46,7 @@ describe('text', () => {
       ]);
     });
 
-    it('respects global text attrs', () => {
+    it('respects global text attrs', async () => {
       const attrs = {
         fontSize: 10,
         lineHeight: 1.5,
@@ -51,7 +55,7 @@ describe('text', () => {
         letterSpacing: 5,
       };
 
-      const segments = extractTextSegments([{ text: 'foo', attrs }], fontStore);
+      const segments = await extractTextSegments([{ text: 'foo', attrs }], fontStore);
 
       expect(segments).toEqual([
         objectContaining({
@@ -66,10 +70,10 @@ describe('text', () => {
       ]);
     });
 
-    it('respects local text attrs', () => {
+    it('respects local text attrs', async () => {
       const attrs = { fontSize: 10, lineHeight: 1.5, color: rgb(1, 0, 0) };
 
-      const segments = extractTextSegments([{ text: 'foo', attrs }], fontStore);
+      const segments = await extractTextSegments([{ text: 'foo', attrs }], fontStore);
 
       expect(segments).toEqual([
         objectContaining({
@@ -80,8 +84,8 @@ describe('text', () => {
       ]);
     });
 
-    it('returns multiple segments for multiple content parts', () => {
-      const segments = extractTextSegments(
+    it('returns multiple segments for multiple content parts', async () => {
+      const segments = await extractTextSegments(
         [
           { text: 'foo', attrs: {} },
           { text: 'bar', attrs: {} },

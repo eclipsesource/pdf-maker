@@ -88,46 +88,48 @@ describe('fonts', () => {
       fontStore = createFontStore([normalFont, italicFont, boldFont, italicBoldFont, otherFont]);
     });
 
-    it('selects different font variants', () => {
+    it('selects different font variants', async () => {
       const fontFamily = 'Test';
 
-      expect(fontStore.selectFont({ fontFamily })).toEqual(normalFont);
-      expect(fontStore.selectFont({ fontFamily, bold: true })).toEqual(boldFont);
-      expect(fontStore.selectFont({ fontFamily, italic: true })).toEqual(italicFont);
-      expect(fontStore.selectFont({ fontFamily, italic: true, bold: true })).toEqual(
+      await expect(fontStore.selectFont({ fontFamily })).resolves.toEqual(normalFont);
+      await expect(fontStore.selectFont({ fontFamily, bold: true })).resolves.toEqual(boldFont);
+      await expect(fontStore.selectFont({ fontFamily, italic: true })).resolves.toEqual(italicFont);
+      await expect(fontStore.selectFont({ fontFamily, italic: true, bold: true })).resolves.toEqual(
         italicBoldFont
       );
     });
 
-    it('selects first matching font if no family specified', () => {
-      expect(fontStore.selectFont({})).toEqual(normalFont);
-      expect(fontStore.selectFont({ bold: true })).toEqual(boldFont);
-      expect(fontStore.selectFont({ italic: true })).toEqual(italicFont);
-      expect(fontStore.selectFont({ italic: true, bold: true })).toEqual(italicBoldFont);
+    it('selects first matching font if no family specified', async () => {
+      await expect(fontStore.selectFont({})).resolves.toEqual(normalFont);
+      await expect(fontStore.selectFont({ bold: true })).resolves.toEqual(boldFont);
+      await expect(fontStore.selectFont({ italic: true })).resolves.toEqual(italicFont);
+      await expect(fontStore.selectFont({ italic: true, bold: true })).resolves.toEqual(
+        italicBoldFont
+      );
     });
 
-    it('selects font with matching font family', () => {
-      expect(fontStore.selectFont({ fontFamily: 'Other' })).toEqual(otherFont);
+    it('selects font with matching font family', async () => {
+      await expect(fontStore.selectFont({ fontFamily: 'Other' })).resolves.toEqual(otherFont);
     });
 
-    it('throws when no matching font can be found', () => {
+    it('throws when no matching font can be found', async () => {
       const fontFamily = 'Other';
 
-      expect(() => fontStore.selectFont({ fontFamily, italic: true })).toThrowError(
+      await expect(() => fontStore.selectFont({ fontFamily, italic: true })).rejects.toThrowError(
         'No font found for "Other italic"'
       );
-      expect(() => fontStore.selectFont({ fontFamily, bold: true })).toThrowError(
+      await expect(() => fontStore.selectFont({ fontFamily, bold: true })).rejects.toThrowError(
         'No font found for "Other bold"'
       );
-      expect(() => fontStore.selectFont({ fontFamily, italic: true, bold: true })).toThrowError(
-        'No font found for "Other bold italic"'
-      );
+      await expect(() =>
+        fontStore.selectFont({ fontFamily, italic: true, bold: true })
+      ).rejects.toThrowError('No font found for "Other bold italic"');
     });
 
-    it('throws when font family can be found', () => {
+    it('throws when font family can be found', async () => {
       const fontFamily = 'Foo';
 
-      expect(() => fontStore.selectFont({ fontFamily })).toThrowError(
+      await expect(() => fontStore.selectFont({ fontFamily })).rejects.toThrowError(
         'No font found for "Foo normal"'
       );
     });
