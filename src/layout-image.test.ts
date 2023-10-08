@@ -1,8 +1,8 @@
-import { beforeEach, describe, expect, it } from '@jest/globals';
+import { beforeEach, describe, expect, it, jest } from '@jest/globals';
 
 import { Box } from './box.js';
 import { Document } from './document.js';
-import { createImageStore } from './images.js';
+import { ImageSelector, ImageStore } from './images.js';
 import { layoutImageContent } from './layout-image.js';
 import { ImageBlock } from './read-block.js';
 import { fakeImage } from './test/test-utils.js';
@@ -13,10 +13,15 @@ describe('layout-image', () => {
   let box: Box, doc: Document;
 
   beforeEach(() => {
-    const imageStore = createImageStore([
-      fakeImage('img-720-480', 720, 480),
-      fakeImage('img-72-48', 72, 48),
-    ]);
+    const imageStore = {
+      selectImage: jest.fn(async (selector: ImageSelector) => {
+        const match = /^img-(\d+)-(\d+)$/.exec(selector.name);
+        if (match) {
+          return fakeImage(selector.name, Number(match[1]), Number(match[2]));
+        }
+        throw new Error(`Unknown image: ${selector.name}`);
+      }),
+    } as ImageStore;
     box = { x: 20, y: 30, width: 400, height: 700 };
     doc = { imageStore } as Document;
   });
@@ -34,6 +39,16 @@ describe('layout-image', () => {
         width: 200,
         height: 100,
       });
+    });
+
+    it('passes width and height to ImageStore', async () => {
+      const block = { image: 'img-720-480', width: 30, height: 40 };
+      box = { x: 20, y: 30, width: 200, height: 100 };
+
+      await layoutImageContent(block, box, doc);
+
+      const selector = { name: 'img-720-480', width: 30, height: 40 };
+      expect(doc.imageStore.selectImage).toHaveBeenCalledWith(selector);
     });
 
     ['img-720-480', 'img-72-48'].forEach((image) => {

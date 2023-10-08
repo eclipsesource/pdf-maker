@@ -31,6 +31,7 @@ export function fakeImage(name: string, width: number, height: number): Image {
     name,
     width,
     height,
+    data: mkData(name),
   } as any;
 }
 

@@ -9,8 +9,17 @@ export type ImageDef = {
   format: 'jpeg' | 'png';
 };
 
+export type LoadedImage = {
+  format: 'jpeg' | 'png';
+  data: Uint8Array;
+};
+
+export type ImageLoader = {
+  loadImage(selector: ImageSelector): Promise<LoadedImage>;
+};
+
 export type ImageStore = {
-  selectImage(name: string): Promise<Image>;
+  selectImage(selector: ImageSelector): Promise<Image>;
 };
 
 export type Image = {
@@ -20,6 +29,12 @@ export type Image = {
   data: Uint8Array;
   format: 'jpeg' | 'png';
   pdfRef?: PDFRef;
+};
+
+export type ImageSelector = {
+  name: string;
+  width?: number;
+  height?: number;
 };
 
 export function readImages(input: unknown): ImageDef[] {
@@ -34,19 +49,6 @@ function readImage(input: unknown) {
     data: required(parseBinaryData),
     format: optional(types.string({ enum: ['jpeg', 'png'] })),
   }) as { data: Uint8Array; format?: 'jpeg' | 'png' };
-}
-
-export async function loadImages(imageDefs: ImageDef[]): Promise<Image[]> {
-  return await Promise.all(
-    imageDefs.map(async (def) => {
-      const data = toUint8Array(def.data);
-      const embedder = await (def.format === 'png'
-        ? PngEmbedder.for(data)
-        : JpegEmbedder.for(data));
-      const { width, height } = embedder;
-      return { name: def.name, format: def.format, data, width, height };
-    })
-  );
 }
 
 export function registerImage(image: Image, pdfDoc: PDFDocument) {
@@ -68,16 +70,44 @@ export function registerImage(image: Image, pdfDoc: PDFDocument) {
   return ref;
 }
 
-export function createImageStore(images: Image[]): ImageStore {
+export function createImageLoader(images: ImageDef[]): ImageLoader {
+  return {
+    loadImage,
+  };
+
+  async function loadImage(selector: ImageSelector): Promise<LoadedImage> {
+    const imageDef = images.find((image) => image.name === selector.name);
+    if (!imageDef) {
+      throw new Error(`No image defined with name '${selector.name}'`);
+    }
+    const data = toUint8Array(imageDef.data);
+    return {
+      format: imageDef.format,
+      data,
+    };
+  }
+}
+
+export function createImageStore(imageLoader: ImageLoader): ImageStore {
   return {
     selectImage,
   };
 
-  async function selectImage(name: string) {
-    const image = images.find((image) => image.name === name);
-    if (!image) {
-      throw new Error(`No image found for '{name}'`);
+  async function selectImage(selector: ImageSelector): Promise<Image> {
+    let loadedImage: LoadedImage;
+    try {
+      loadedImage = await imageLoader.loadImage(selector);
+    } catch (error) {
+      const selectorStr =
+        `'${selector.name}'` +
+        (selector.width != null ? `, width=${selector.width}` : '') +
+        (selector.height != null ? `, height=${selector.height}` : '');
+      throw new Error(`Could not load image ${selectorStr}: ${(error as Error)?.message ?? error}`);
     }
-    return image;
+
+    const { format, data } = loadedImage;
+    const embedder = await (format === 'png' ? PngEmbedder.for(data) : JpegEmbedder.for(data));
+    const { width, height } = embedder;
+    return { name: selector.name, format, data, width, height };
   }
 }

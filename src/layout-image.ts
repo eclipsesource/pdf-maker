@@ -18,8 +18,8 @@ export async function layoutImageContent(
   box: Box,
   doc: Document
 ): Promise<LayoutContent> {
-  const image = await doc.imageStore.selectImage(block.image);
-  if (!image) throw new Error(`Unknown image: ${block.image}`);
+  const selector = { name: block.image, width: block.width, height: block.height };
+  const image = await doc.imageStore.selectImage(selector);
   const hasFixedWidth = block.width != null;
   const hasFixedHeight = block.height != null;
   const scale = getScale(image, box, hasFixedWidth, hasFixedHeight);
