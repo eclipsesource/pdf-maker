@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from '@jest/globals';
 import { rgb } from 'pdf-lib';
 
-import { createFontStore, Font, FontStore } from './fonts.js';
+import { Font, FontStore } from './fonts.js';
 import { fakeFont } from './test/test-utils.js';
 import {
   breakLine,
@@ -21,7 +21,11 @@ describe('text', () => {
   beforeEach(() => {
     normalFont = fakeFont('Test');
     const italicFont = fakeFont('Test', { italic: true });
-    fontStore = createFontStore([normalFont, italicFont]);
+    fontStore = {
+      async selectFont(selector) {
+        return selector.italic ? italicFont : normalFont;
+      },
+    };
   });
 
   describe('extractTextSegments', () => {

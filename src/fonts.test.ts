@@ -1,6 +1,10 @@
-import { beforeEach, describe, expect, it } from '@jest/globals';
+import { afterEach } from 'node:test';
 
-import { createFontStore, Font, FontStore, loadFonts, readFonts } from './fonts.js';
+import { beforeEach, describe, expect, it, jest } from '@jest/globals';
+import fontkit from '@pdf-lib/fontkit';
+
+import { FontLoader } from './font-loader.js';
+import { createFontStore, Font, FontSelector, readFonts } from './fonts.js';
 import { fakeFont } from './test/test-utils.js';
 
 describe('fonts', () => {
@@ -63,75 +67,43 @@ describe('fonts', () => {
     });
   });
 
-  describe('loadFont', () => {
-    it('returns an empty array for empty fonts definition', async () => {
-      const fonts = loadFonts([]);
-
-      expect(fonts).toEqual([]);
-    });
-  });
-
-  describe('selectFont', () => {
-    let normalFont: Font;
-    let italicFont: Font;
-    let boldFont: Font;
-    let italicBoldFont: Font;
-    let otherFont: Font;
-    let fontStore: FontStore;
+  describe('FontStore', () => {
+    let testFont: Font;
+    let fontLoader: FontLoader;
 
     beforeEach(() => {
-      normalFont = fakeFont('Test');
-      italicFont = fakeFont('Test', { italic: true });
-      boldFont = fakeFont('Test', { bold: true });
-      italicBoldFont = fakeFont('Test', { italic: true, bold: true });
-      otherFont = fakeFont('Other');
-      fontStore = createFontStore([normalFont, italicFont, boldFont, italicBoldFont, otherFont]);
+      testFont = fakeFont('Test');
+      fontLoader = {
+        loadFont: jest.fn(async (selector: FontSelector) => {
+          if (selector.fontFamily === 'Test') return testFont;
+          throw new Error('No font defined');
+        }) as any,
+      };
+      jest.spyOn(fontkit, 'create').mockReturnValue({ fake: true } as any);
     });
 
-    it('selects different font variants', async () => {
-      const fontFamily = 'Test';
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
 
-      await expect(fontStore.selectFont({ fontFamily })).resolves.toEqual(normalFont);
-      await expect(fontStore.selectFont({ fontFamily, bold: true })).resolves.toEqual(boldFont);
-      await expect(fontStore.selectFont({ fontFamily, italic: true })).resolves.toEqual(italicFont);
-      await expect(fontStore.selectFont({ fontFamily, italic: true, bold: true })).resolves.toEqual(
-        italicBoldFont
+    it('rejects if font could not be loaded', async () => {
+      const store = createFontStore(fontLoader);
+
+      await expect(store.selectFont({ fontFamily: 'foo' })).rejects.toThrowError(
+        "Could not load font for 'foo', normal: No font defined"
       );
     });
 
-    it('selects first matching font if no family specified', async () => {
-      await expect(fontStore.selectFont({})).resolves.toEqual(normalFont);
-      await expect(fontStore.selectFont({ bold: true })).resolves.toEqual(boldFont);
-      await expect(fontStore.selectFont({ italic: true })).resolves.toEqual(italicFont);
-      await expect(fontStore.selectFont({ italic: true, bold: true })).resolves.toEqual(
-        italicBoldFont
-      );
-    });
+    it('creates fontkit font object', async () => {
+      const store = createFontStore(fontLoader);
 
-    it('selects font with matching font family', async () => {
-      await expect(fontStore.selectFont({ fontFamily: 'Other' })).resolves.toEqual(otherFont);
-    });
+      const font = await store.selectFont({ fontFamily: 'Test' });
 
-    it('throws when no matching font can be found', async () => {
-      const fontFamily = 'Other';
-
-      await expect(() => fontStore.selectFont({ fontFamily, italic: true })).rejects.toThrowError(
-        'No font found for "Other italic"'
-      );
-      await expect(() => fontStore.selectFont({ fontFamily, bold: true })).rejects.toThrowError(
-        'No font found for "Other bold"'
-      );
-      await expect(() =>
-        fontStore.selectFont({ fontFamily, italic: true, bold: true })
-      ).rejects.toThrowError('No font found for "Other bold italic"');
-    });
-
-    it('throws when font family can be found', async () => {
-      const fontFamily = 'Foo';
-
-      await expect(() => fontStore.selectFont({ fontFamily })).rejects.toThrowError(
-        'No font found for "Foo normal"'
-      );
+      expect(font).toEqual({
+        name: 'Test',
+        data: testFont.data,
+        fkFont: { fake: true },
+      });
     });
   });
 });

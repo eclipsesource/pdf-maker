@@ -1,7 +1,8 @@
 import fontkit from '@pdf-lib/fontkit';
-import { CustomFontSubsetEmbedder, PDFDocument, PDFFont, PDFRef, toUint8Array } from 'pdf-lib';
+import { CustomFontSubsetEmbedder, PDFDocument, PDFFont, PDFRef } from 'pdf-lib';
 
 import { parseBinaryData } from './binary-data.js';
+import { FontLoader } from './font-loader.js';
 import {
   optional,
   pickDefined,
@@ -54,20 +55,6 @@ export function readFont(input: unknown): Partial<FontDef> {
   }) as FontDef;
 }
 
-export function loadFonts(fontDefs: FontDef[]): Font[] {
-  return fontDefs.map((def) => {
-    const data = toUint8Array(def.data);
-    const fkFont = fontkit.create(data);
-    return pickDefined({
-      name: def.name,
-      italic: def.italic,
-      bold: def.bold,
-      fkFont,
-      data,
-    });
-  });
-}
-
 export function registerFont(font: Font, pdfDoc: PDFDocument) {
   const ref = pdfDoc.context.nextRef();
   const embedder = new (CustomFontSubsetEmbedder as any)(font.fkFont, font.data);
@@ -76,26 +63,30 @@ export function registerFont(font: Font, pdfDoc: PDFDocument) {
   return ref;
 }
 
-export function createFontStore(fonts: Font[]): FontStore {
+export function createFontStore(fontLoader: FontLoader): FontStore {
   return {
     selectFont,
   };
 
-  async function selectFont(attrs: FontSelector) {
-    const { fontFamily, italic, bold } = attrs;
-    const font = fonts.find((font) => match(font, { fontFamily, italic, bold }));
-    if (!font) {
+  async function selectFont(selector: FontSelector): Promise<Font> {
+    let loadedFont;
+    try {
+      loadedFont = await fontLoader.loadFont(selector);
+    } catch (error) {
+      const { fontFamily, italic, bold } = selector;
       const style = italic ? (bold ? 'bold italic' : 'italic') : bold ? 'bold' : 'normal';
-      throw new Error(`No font found for "${fontFamily} ${style}"`);
+      const selectorStr = `'${fontFamily}', ${style}`;
+      throw new Error(
+        `Could not load font for ${selectorStr}: ${(error as Error)?.message ?? error}`
+      );
     }
-    return font;
+    const fkFont = fontkit.create(loadedFont.data);
+    return pickDefined({
+      name: loadedFont.name,
+      data: loadedFont.data,
+      italic: selector.italic,
+      bold: selector.bold,
+      fkFont,
+    });
   }
-}
-
-function match(font: Font, selector: FontSelector): boolean {
-  return (
-    (!selector.fontFamily || font.name === selector.fontFamily) &&
-    !font.italic === !selector.italic &&
-    !font.bold === !selector.bold
-  );
 }

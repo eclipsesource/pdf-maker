@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it } from '@jest/globals';
 
 import { Box } from './box.js';
 import { Document } from './document.js';
-import { createFontStore } from './fonts.js';
+import { FontStore } from './fonts.js';
 import { layoutColumnsContent } from './layout-columns.js';
 import { Block } from './read-block.js';
 import { fakeFont, span } from './test/test-utils.js';
@@ -13,7 +13,11 @@ describe('layout-columns', () => {
   let doc: Document, box: Box;
 
   beforeEach(() => {
-    const fontStore = createFontStore([fakeFont('Test')]);
+    const fontStore: FontStore = {
+      async selectFont() {
+        return fakeFont('Test');
+      },
+    };
     doc = { fontStore } as Document;
     box = { x: 20, y: 30, width: 400, height: 700 };
   });

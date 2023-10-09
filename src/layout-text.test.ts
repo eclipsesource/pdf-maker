@@ -3,7 +3,7 @@ import { rgb } from 'pdf-lib';
 
 import { Box } from './box.js';
 import { Document } from './document.js';
-import { createFontStore, Font } from './fonts.js';
+import { Font, FontSelector, FontStore } from './fonts.js';
 import { layoutTextContent } from './layout-text.js';
 import { paperSizes } from './page-sizes.js';
 import { extractTextRows, fakeFont, range, span } from './test/test-utils.js';
@@ -18,7 +18,11 @@ describe('layout-text', () => {
   beforeEach(() => {
     defaultFont = fakeFont('Test');
     const italicFont = fakeFont('Test', { italic: true });
-    const fontStore = createFontStore([defaultFont, italicFont]);
+    const fontStore: FontStore = {
+      async selectFont(selector: FontSelector) {
+        return selector.italic ? italicFont : defaultFont;
+      },
+    };
     box = { x: 20, y: 30, width: 400, height: 700 };
     doc = { fontStore, pageSize: paperSizes.A4 } as Document;
   });
