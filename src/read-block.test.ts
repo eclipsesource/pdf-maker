@@ -46,8 +46,8 @@ describe('read-block', () => {
 
       expect(result).toEqual({
         columns: [
-          { text: [{ text: 'foo', attrs: { fontSize: 8, italic: true } }] },
-          { text: [{ text: 'bar', attrs: { fontSize: 8, italic: true } }] },
+          { text: [{ text: 'foo', attrs: { fontSize: 8, fontStyle: 'italic' } }] },
+          { text: [{ text: 'bar', attrs: { fontSize: 8, fontStyle: 'italic' } }] },
         ],
       });
     });
@@ -75,8 +75,8 @@ describe('read-block', () => {
 
       expect(result).toEqual({
         rows: [
-          { text: [{ text: 'foo', attrs: { fontSize: 8, italic: true } }] },
-          { text: [{ text: 'bar', attrs: { fontSize: 8, italic: true } }] },
+          { text: [{ text: 'foo', attrs: { fontSize: 8, fontStyle: 'italic' } }] },
+          { text: [{ text: 'bar', attrs: { fontSize: 8, fontStyle: 'italic' } }] },
         ],
       });
     });
@@ -189,21 +189,39 @@ describe('read-block', () => {
 
   describe('readText', () => {
     it('accepts a string', () => {
-      const attrs = { italic: true };
+      const attrs = { fontStyle: 'italic' } as const;
 
       expect(readText('foo', attrs)).toEqual([{ text: 'foo', attrs }]);
     });
 
     it('accepts an object', () => {
-      const result = readText({ text: 'foo', bold: true }, { italic: true });
+      const result = readText({ text: 'foo', bold: true }, { fontStyle: 'italic' });
 
-      expect(result).toEqual([{ text: 'foo', attrs: { italic: true, bold: true } }]);
+      expect(result).toEqual([{ text: 'foo', attrs: { fontStyle: 'italic', fontWeight: 700 } }]);
+    });
+
+    it('accepts fontWeight and fontStyle', () => {
+      const result = readText({ text: 'foo', fontStyle: 'oblique', fontWeight: 900 }, {});
+
+      expect(result).toEqual([{ text: 'foo', attrs: { fontStyle: 'oblique', fontWeight: 900 } }]);
+    });
+
+    it('overrides italic with fontStyle', () => {
+      const result = readText({ text: 'foo', italic: true, fontStyle: 'oblique' }, {});
+
+      expect(result).toEqual([{ text: 'foo', attrs: { fontStyle: 'oblique' } }]);
+    });
+
+    it('overrides bold with fontWeight', () => {
+      const result = readText({ text: 'foo', bold: true, fontWeight: 500 }, {});
+
+      expect(result).toEqual([{ text: 'foo', attrs: { fontWeight: 500 } }]);
     });
 
     it('accepts an array', () => {
-      const result = readText([{ text: 'foo', bold: true }], { italic: true });
+      const result = readText([{ text: 'foo', bold: true }], { fontStyle: 'italic' });
 
-      expect(result).toEqual([{ text: 'foo', attrs: { italic: true, bold: true } }]);
+      expect(result).toEqual([{ text: 'foo', attrs: { fontStyle: 'italic', fontWeight: 700 } }]);
     });
 
     it('accepts empty array', () => {
@@ -217,12 +235,12 @@ describe('read-block', () => {
         { text: { text: { text: 'baz', fontSize: 23 } } },
       ];
 
-      const result = readText(input, { italic: true });
+      const result = readText(input, { fontStyle: 'italic' });
 
       expect(result).toEqual([
-        { text: 'foo', attrs: { italic: true, bold: true } },
-        { text: 'bar', attrs: { italic: true } },
-        { text: 'baz', attrs: { italic: true, fontSize: 23 } },
+        { text: 'foo', attrs: { fontStyle: 'italic', fontWeight: 700 } },
+        { text: 'bar', attrs: { fontStyle: 'italic' } },
+        { text: 'baz', attrs: { fontStyle: 'italic', fontSize: 23 } },
       ]);
     });
 

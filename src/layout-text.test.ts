@@ -17,10 +17,10 @@ describe('layout-text', () => {
 
   beforeEach(() => {
     defaultFont = fakeFont('Test');
-    const italicFont = fakeFont('Test', { italic: true });
+    const italicFont = fakeFont('Test', { style: 'italic' });
     const fontStore: FontStore = {
       async selectFont(selector: FontSelector) {
-        return selector.italic ? italicFont : defaultFont;
+        return selector.fontStyle === 'italic' ? italicFont : defaultFont;
       },
     };
     box = { x: 20, y: 30, width: 400, height: 700 };
@@ -119,7 +119,7 @@ describe('layout-text', () => {
       const block = {
         text: [
           span('foo ', { link: 'test-link', fontSize: 10 }),
-          span('bar', { italic: true, link: 'test-link', fontSize: 10 }),
+          span('bar', { link: 'test-link', fontSize: 10, fontStyle: 'italic' }),
         ],
       };
 

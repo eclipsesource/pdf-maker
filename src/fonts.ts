@@ -2,7 +2,9 @@ import fontkit from '@pdf-lib/fontkit';
 import { CustomFontSubsetEmbedder, PDFDocument, PDFFont, PDFRef } from 'pdf-lib';
 
 import { parseBinaryData } from './binary-data.js';
+import { FontStyle, FontWeight } from './content.js';
 import { FontLoader } from './font-loader.js';
+import { printValue } from './print-value.js';
 import {
   optional,
   pickDefined,
@@ -13,10 +15,13 @@ import {
   types,
 } from './types.js';
 
+/**
+ * The resolved definition of a font.
+ */
 export type FontDef = {
-  name: string;
-  italic?: boolean;
-  bold?: boolean;
+  family: string;
+  style: FontStyle;
+  weight: number;
   data: string | Uint8Array | ArrayBuffer;
 };
 
@@ -26,8 +31,8 @@ export type FontStore = {
 
 export type Font = {
   name: string;
-  italic?: boolean;
-  bold?: boolean;
+  style: FontStyle;
+  weight: number;
   data: Uint8Array;
   fkFont: fontkit.Font;
   pdfRef?: PDFRef;
@@ -35,24 +40,29 @@ export type Font = {
 
 export type FontSelector = {
   fontFamily?: string;
-  italic?: boolean;
-  bold?: boolean;
+  fontStyle?: FontStyle;
+  fontWeight?: FontWeight;
 };
 
 export function readFonts(input: unknown): FontDef[] {
   return Object.entries(readObject(input)).flatMap(([name, fontDef]) => {
     return readAs(fontDef, name, required(types.array(readFont))).map(
-      (font) => ({ name, ...font } as FontDef)
+      (font) => ({ family: name, ...font } as FontDef)
     );
   });
 }
 
 export function readFont(input: unknown): Partial<FontDef> {
-  return readObject(input, {
+  const obj = readObject(input, {
     italic: optional((value) => readBoolean(value) || undefined),
     bold: optional((value) => readBoolean(value) || undefined),
     data: required(parseBinaryData),
-  }) as FontDef;
+  });
+  return {
+    style: obj.italic ? 'italic' : 'normal',
+    weight: obj.bold ? 700 : 400,
+    data: obj.data,
+  } as FontDef;
 }
 
 export function registerFont(font: Font, pdfDoc: PDFDocument) {
@@ -73,9 +83,8 @@ export function createFontStore(fontLoader: FontLoader): FontStore {
     try {
       loadedFont = await fontLoader.loadFont(selector);
     } catch (error) {
-      const { fontFamily, italic, bold } = selector;
-      const style = italic ? (bold ? 'bold italic' : 'italic') : bold ? 'bold' : 'normal';
-      const selectorStr = `'${fontFamily}', ${style}`;
+      const { fontFamily: family, fontStyle: style, fontWeight: weight } = selector;
+      const selectorStr = `'${family}', style=${style ?? 'normal'}, weight=${weight ?? 'normal'}`;
       throw new Error(
         `Could not load font for ${selectorStr}: ${(error as Error)?.message ?? error}`
       );
@@ -84,9 +93,22 @@ export function createFontStore(fontLoader: FontLoader): FontStore {
     return pickDefined({
       name: loadedFont.name,
       data: loadedFont.data,
-      italic: selector.italic,
-      bold: selector.bold,
+      style: selector.fontStyle ?? 'normal',
+      weight: weightToNumber(selector.fontWeight ?? 400),
       fkFont,
     });
   }
+}
+
+export function weightToNumber(weight: FontWeight): number {
+  if (weight === 'normal') {
+    return 400;
+  }
+  if (weight === 'bold') {
+    return 700;
+  }
+  if (typeof weight !== 'number' || !isFinite(weight) || weight < 1 || weight > 1000) {
+    throw new Error(`Invalid font weight: ${printValue(weight)}`);
+  }
+  return weight;
 }

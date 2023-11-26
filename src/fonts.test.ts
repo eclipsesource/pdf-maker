@@ -1,10 +1,8 @@
-import { afterEach } from 'node:test';
-
-import { beforeEach, describe, expect, it, jest } from '@jest/globals';
+import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals';
 import fontkit from '@pdf-lib/fontkit';
 
 import { FontLoader } from './font-loader.js';
-import { createFontStore, Font, FontSelector, readFonts } from './fonts.js';
+import { createFontStore, Font, FontSelector, readFonts, weightToNumber } from './fonts.js';
 import { fakeFont } from './test/test-utils.js';
 
 describe('fonts', () => {
@@ -23,11 +21,11 @@ describe('fonts', () => {
       const fonts = readFonts(fontsDef);
 
       expect(fonts).toEqual([
-        { name: 'Test', data: mkData('Test_Sans_Normal') },
-        { name: 'Test', data: mkData('Test_Sans_Italic'), italic: true },
-        { name: 'Test', data: mkData('Test_Sans_Bold'), bold: true },
-        { name: 'Test', data: mkData('Test_Sans_BoldItalic'), italic: true, bold: true },
-        { name: 'Other', data: mkData('Other_Normal') },
+        { family: 'Test', style: 'normal', weight: 400, data: mkData('Test_Sans_Normal') },
+        { family: 'Test', style: 'italic', weight: 400, data: mkData('Test_Sans_Italic') },
+        { family: 'Test', style: 'normal', weight: 700, data: mkData('Test_Sans_Bold') },
+        { family: 'Test', style: 'italic', weight: 700, data: mkData('Test_Sans_BoldItalic') },
+        { family: 'Other', style: 'normal', weight: 400, data: mkData('Other_Normal') },
       ]);
     });
 
@@ -56,15 +54,6 @@ describe('fonts', () => {
 
       expect(fn).toThrowError('Missing value for "data"');
     });
-
-    it('removes redundant false values for italic and bold', () => {
-      const data = mkData('data');
-      const fontsDef = { Test: [{ data, italic: false, bold: false }] };
-
-      const fonts = readFonts(fontsDef);
-
-      expect(fonts).toEqual([{ name: 'Test', data }]);
-    });
   });
 
   describe('FontStore', () => {
@@ -90,7 +79,7 @@ describe('fonts', () => {
       const store = createFontStore(fontLoader);
 
       await expect(store.selectFont({ fontFamily: 'foo' })).rejects.toThrowError(
-        "Could not load font for 'foo', normal: No font defined"
+        "Could not load font for 'foo', style=normal, weight=normal: No font defined"
       );
     });
 
@@ -101,9 +90,32 @@ describe('fonts', () => {
 
       expect(font).toEqual({
         name: 'Test',
+        style: 'normal',
+        weight: 400,
         data: testFont.data,
         fkFont: { fake: true },
       });
+    });
+  });
+
+  describe('weightToNumber', () => {
+    it('supports keywords `normal` and `bold`', () => {
+      expect(weightToNumber('normal')).toBe(400);
+      expect(weightToNumber('bold')).toBe(700);
+    });
+
+    it('supports numbers', () => {
+      expect(weightToNumber(1)).toBe(1);
+    });
+
+    it('throws for invalid types', () => {
+      expect(() => weightToNumber('foo' as any)).toThrowError("Invalid font weight: 'foo'");
+      expect(() => weightToNumber(null as any)).toThrowError('Invalid font weight: null');
+    });
+
+    it('throws for invalid numbers', () => {
+      expect(() => weightToNumber(NaN)).toThrowError('Invalid font weight: NaN');
+      expect(() => weightToNumber(0.1)).toThrowError('Invalid font weight: 0.1');
     });
   });
 });

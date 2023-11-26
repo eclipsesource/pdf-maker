@@ -2,6 +2,15 @@
 
 ## [0.5.4] - Unreleased
 
+### Added
+
+- Text attributes `fontStyle` and `fontWeight`.
+
+### Deprecated
+
+- Text attributes `bold` and `italic` in favor of `fontStyle: 'italic'`
+  and `fontWeight: 'bold'`.
+
 ### Fixed
 
 - Text in a text block will no longer break before the first row, which

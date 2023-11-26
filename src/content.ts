@@ -503,6 +503,19 @@ type TransformAttrs = {
  */
 export type Text = string | ({ text: Text } & TextAttrs) | Text[];
 
+/**
+ * The font weight is an integer between 0 and 1000.
+ * The keywords `normal` (400) and `bold` (700) are also supported.
+ */
+export type FontWeight = number | 'normal' | 'bold';
+
+/**
+ * The font style selects a normal, italic, or oblique font face from
+ * the font family. Italic fonts are usually cursive in nature and
+ * oblique fonts are usually sloped versions of the regular font.
+ */
+export type FontStyle = 'normal' | 'italic' | 'oblique';
+
 export type TextAttrs = {
   /**
    * The name of the font to use.
@@ -510,6 +523,14 @@ export type TextAttrs = {
    * font attributes will be used.
    */
   fontFamily?: string;
+  /**
+   * The font style to use.
+   */
+  fontStyle?: FontStyle;
+  /**
+   * The font weight to use.
+   */
+  fontWeight?: FontWeight;
   /**
    * The font size in pt.
    */
@@ -520,10 +541,12 @@ export type TextAttrs = {
   lineHeight?: number;
   /**
    * Whether to use a bold variant of the selected font.
+   * @deprecated Use `fontWeight: 'bold'` instead.
    */
   bold?: boolean;
   /**
    * Whether to use an italic variant of the selected font.
+   * @deprecated Use `fontStyle: 'italic'` instead.
    */
   italic?: boolean;
   /**

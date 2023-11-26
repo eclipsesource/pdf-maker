@@ -1,6 +1,7 @@
 import { toUint8Array } from 'pdf-lib';
 
-import { FontDef, FontSelector } from './fonts.js';
+import { FontWeight } from './content.js';
+import { FontDef, FontSelector, weightToNumber } from './fonts.js';
 import { pickDefined } from './types.js';
 
 export type LoadedFont = {
@@ -18,25 +19,70 @@ export function createFontLoader(fontDefs: FontDef[]): FontLoader {
   };
 
   async function loadFont(selector: FontSelector) {
-    const fontDef = fontDefs.find((def) => match(def, selector));
-    if (!fontDef) {
-      const { fontFamily, italic, bold } = selector;
-      const style = italic ? (bold ? 'bold italic' : 'italic') : bold ? 'bold' : 'normal';
-      const selectorStr = fontFamily ? `'${fontFamily}', ${style}` : style;
+    if (!fontDefs.length) {
+      throw new Error('No fonts defined');
+    }
+    const fontsWithMatchingFamily = selector.fontFamily
+      ? fontDefs.filter((def) => def.family === selector.fontFamily)
+      : fontDefs;
+    if (!fontsWithMatchingFamily.length) {
+      throw new Error(`No font defined for '${selector.fontFamily}'`);
+    }
+    let fontsWithMatchingStyle = fontsWithMatchingFamily.filter(
+      (def) => def.style === (selector.fontStyle ?? 'normal')
+    );
+    if (!fontsWithMatchingStyle.length) {
+      fontsWithMatchingStyle = fontsWithMatchingFamily.filter(
+        (def) =>
+          (def.style === 'italic' && selector.fontStyle === 'oblique') ||
+          (def.style === 'oblique' && selector.fontStyle === 'italic')
+      );
+    }
+    if (!fontsWithMatchingStyle.length) {
+      const { fontFamily: family, fontStyle: style } = selector;
+      const selectorStr = `'${family}', style=${style ?? 'normal'}`;
       throw new Error(`No font defined for ${selectorStr}`);
     }
-    const data = toUint8Array(fontDef.data);
+    const selected = selectFontForWeight(fontsWithMatchingStyle, selector.fontWeight ?? 'normal');
+    if (!selected) {
+      const { fontFamily: family, fontStyle: style, fontWeight: weight } = selector;
+      const selectorStr = `'${family}', style=${style ?? 'normal'}, weight=${weight ?? 'normal'}`;
+      throw new Error(`No font defined for ${selectorStr}`);
+    }
     return pickDefined({
-      name: fontDef.name,
-      data,
+      name: selected.family,
+      data: toUint8Array(selected.data),
     });
   }
 }
 
-function match(fontDef: FontDef, selector: FontSelector): boolean {
-  return (
-    (!selector.fontFamily || fontDef.name === selector.fontFamily) &&
-    !fontDef.italic === !selector.italic &&
-    !fontDef.bold === !selector.bold
-  );
+function selectFontForWeight(fonts: FontDef[], weight: FontWeight): FontDef | undefined {
+  const weightNum = weightToNumber(weight);
+  const font = fonts.find((font) => font.weight === weightNum);
+  if (font) return font;
+
+  // Fallback according to
+  // https://developer.mozilla.org/en-US/docs/Web/CSS/font-weight#Fallback_weights
+  const ascending = fonts.slice().sort((a, b) => a.weight - b.weight);
+  const descending = ascending.slice().reverse();
+  if (weightNum >= 400 && weightNum <= 500) {
+    const font =
+      ascending.find((font) => font.weight > weightNum && font.weight <= 500) ??
+      descending.find((font) => font.weight < weightNum) ??
+      ascending.find((font) => font.weight > 500);
+    if (font) return font;
+  }
+  if (weightNum < 400) {
+    const font =
+      descending.find((font) => font.weight < weightNum) ??
+      ascending.find((font) => font.weight > weightNum);
+    if (font) return font;
+  }
+  if (weightNum > 500) {
+    const font =
+      ascending.find((font) => font.weight > weightNum) ??
+      descending.find((font) => font.weight < weightNum);
+    if (font) return font;
+  }
+  throw new Error(`Could not find font for weight ${weight}`);
 }

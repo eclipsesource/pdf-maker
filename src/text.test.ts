@@ -20,10 +20,10 @@ describe('text', () => {
 
   beforeEach(() => {
     normalFont = fakeFont('Test');
-    const italicFont = fakeFont('Test', { italic: true });
+    const italicFont = fakeFont('Test', { style: 'italic' });
     fontStore = {
       async selectFont(selector) {
-        return selector.italic ? italicFont : normalFont;
+        return selector.fontStyle === 'italic' ? italicFont : normalFont;
       },
     };
   });

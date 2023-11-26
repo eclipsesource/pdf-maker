@@ -1,6 +1,6 @@
 import { BoxEdges, parseEdges, parseLength } from './box.js';
 import { Color, parseColor } from './colors.js';
-import { Alignment } from './content.js';
+import { Alignment, FontStyle, FontWeight } from './content.js';
 import { readShape, Shape } from './read-graphics.js';
 import {
   dynamic,
@@ -48,10 +48,10 @@ export type TextSpan = {
 
 export type TextAttrs = {
   fontFamily?: string;
+  fontStyle?: FontStyle;
+  fontWeight?: FontWeight;
   fontSize?: number;
   lineHeight?: number;
-  bold?: boolean;
-  italic?: boolean;
   color?: Color;
   link?: string;
   rise?: number;
@@ -180,8 +180,10 @@ function parseWidth(input: unknown): number | 'auto' {
 }
 
 export function readTextAttrs(input: Obj): TextAttrs {
-  return readObject(input, {
+  const obj = readObject(input, {
     fontFamily: optional(types.string()),
+    fontStyle: optional(types.string({ enum: ['normal', 'italic', 'oblique'] })),
+    fontWeight: optional(readFontWeight),
     fontSize: optional(types.number({ minimum: 0 })),
     lineHeight: optional(types.number({ minimum: 0 })),
     bold: optional(types.boolean()),
@@ -191,6 +193,24 @@ export function readTextAttrs(input: Obj): TextAttrs {
     rise: optional(types.number()),
     letterSpacing: optional(types.number()),
   });
+  if (!obj.fontWeight && obj.bold) {
+    obj.fontWeight = 700;
+  }
+  if (!obj.fontStyle && obj.italic) {
+    obj.fontStyle = 'italic';
+  }
+  delete obj.bold;
+  delete obj.italic;
+  return obj as TextAttrs;
+}
+
+function readFontWeight(input: unknown): number {
+  if (input === 'normal') return 400;
+  if (input === 'bold') return 700;
+  if (typeof input === 'number' && Number.isInteger(input) && input >= 0 && input <= 1000) {
+    return input;
+  }
+  throw typeError("'normal', 'bold', or integer between 0 and 1000", input);
 }
 
 export function readInheritableAttrs(input: unknown): TextAttrs {

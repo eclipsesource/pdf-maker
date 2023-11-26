@@ -1,4 +1,5 @@
 import { Color } from './colors.js';
+import { FontStyle, FontWeight } from './content.js';
 import { getTextHeight, getTextWidth } from './font-metrics.js';
 import { Font, FontStore } from './fonts.js';
 import { TextSpan } from './read-block.js';
@@ -14,8 +15,8 @@ export type TextSegment = {
   font: Font;
   fontSize: number;
   fontFamily: string;
-  italic?: boolean;
-  bold?: boolean;
+  fontStyle?: FontStyle;
+  fontWeight?: FontWeight;
   color?: Color;
   link?: string;
   rise?: number;
@@ -32,15 +33,15 @@ export async function extractTextSegments(
       const {
         fontSize = defaultFontSize,
         fontFamily,
-        italic,
-        bold,
+        fontStyle,
+        fontWeight,
         lineHeight = defaultLineHeight,
         color,
         link,
         rise,
         letterSpacing,
       } = attrs;
-      const font = await fontStore.selectFont(attrs);
+      const font = await fontStore.selectFont({ fontFamily, fontStyle, fontWeight });
       const height = getTextHeight(font.fkFont, fontSize);
 
       return splitChunks(text).map(
@@ -52,8 +53,8 @@ export async function extractTextSegments(
             lineHeight,
             font,
             fontFamily,
-            italic,
-            bold,
+            fontStyle,
+            fontWeight,
             fontSize,
             color,
             link,
@@ -67,11 +68,31 @@ export async function extractTextSegments(
 }
 
 export function convertToTextSpan(segment: TextSegment): TextSpan {
-  const { text, fontSize, fontFamily, italic, bold, lineHeight, color, link, rise, letterSpacing } =
-    segment;
+  const {
+    text,
+    fontSize,
+    fontFamily,
+    fontStyle,
+    fontWeight,
+    lineHeight,
+    color,
+    link,
+    rise,
+    letterSpacing,
+  } = segment;
   return {
     text,
-    attrs: { fontSize, fontFamily, italic, bold, lineHeight, color, link, rise, letterSpacing },
+    attrs: {
+      fontSize,
+      fontFamily,
+      fontStyle,
+      fontWeight,
+      lineHeight,
+      color,
+      link,
+      rise,
+      letterSpacing,
+    },
   };
 }
 

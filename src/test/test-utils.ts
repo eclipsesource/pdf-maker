@@ -1,6 +1,6 @@
 import { PDFContext, PDFDocument, PDFFont, PDFName, PDFPage, PDFRef } from 'pdf-lib';
 
-import { Font } from '../fonts.js';
+import { Font, weightToNumber } from '../fonts.js';
 import { Image } from '../images.js';
 import { Frame } from '../layout.js';
 import { Page } from '../page.js';
@@ -8,14 +8,14 @@ import { TextAttrs, TextSpan } from '../read-block.js';
 
 export function fakeFont(
   name: string,
-  opts: { italic?: boolean; bold?: boolean; doc?: PDFDocument } = {}
+  opts: Partial<Omit<Font, 'name'>> & { doc?: PDFDocument } = {}
 ): Font {
-  const key = `${name}${opts?.italic ? '-italic' : ''}${opts?.bold ? '-bold' : ''}`;
+  const key = `${name}-${opts?.style ?? 'normal'}-${opts?.weight ?? 400}`;
   const font: Font = {
     name,
-    italic: opts?.italic,
-    bold: opts?.bold,
-    data: mkData(key),
+    style: opts?.style ?? 'normal',
+    weight: weightToNumber(opts?.weight ?? 'normal'),
+    data: opts.data ?? mkData(key),
     fkFont: fakeFkFont(key),
   };
   if (opts.doc) {
