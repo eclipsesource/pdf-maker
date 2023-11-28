@@ -34,7 +34,7 @@ const def = {
   content: [
     {
       text: 'Images',
-      bold: true,
+      fontWeight: 'bold',
       fontSize: 24,
       margin: { bottom: 10 },
       textAlign: 'center',

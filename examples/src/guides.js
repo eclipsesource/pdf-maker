@@ -22,7 +22,13 @@ const def = {
     margin: { x: '20mm', bottom: '10mm' },
   },
   content: [
-    { text: 'Guides', bold: true, fontSize: 24, margin: { bottom: 10 }, textAlign: 'center' },
+    {
+      text: 'Guides',
+      fontWeight: 'bold',
+      fontSize: 24,
+      margin: { bottom: 10 },
+      textAlign: 'center',
+    },
     {
       text: [
         'Guides can be a helpful tool for pinpointing problems in your layout. ',

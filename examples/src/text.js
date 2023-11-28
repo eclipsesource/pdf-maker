@@ -21,7 +21,7 @@ const def = {
     {
       // Text blocks have a "text" property that can be a string ...
       text: 'Text',
-      bold: true,
+      fontWeight: 'bold',
       fontSize: 24,
       margin: { bottom: 10 },
       textAlign: 'center',
@@ -30,13 +30,13 @@ const def = {
       text: [
         // ... or an array of strings and objects.
         'Text objects can be used to apply individual styles, like ',
-        { text: 'bold', bold: true },
-        ' and ',
-        { text: 'italics', italic: true },
+        { text: 'font size', fontSize: 18 },
+        ', ',
+        { text: 'font weight', fontWeight: 'bold' },
+        ', ',
+        { text: 'font style', fontStyle: 'italic' },
         ', ',
         { text: 'text color', color: 'red' },
-        ', ',
-        { text: 'font size', fontSize: 18 },
         ' and ',
         { text: 'letter spacing', letterSpacing: 2.5 },
         ' to parts of the text. ',
@@ -60,9 +60,9 @@ const def = {
         // Styles can also be applied within a link
         {
           text: [
-            { text: 'This', bold: true },
+            { text: 'This', fontWeight: 'bold' },
             ' is another ',
-            { text: 'link', italic: true },
+            { text: 'link', fontStyle: 'italic' },
             ' to example.com.',
           ],
           link: 'https://example.com',
@@ -87,7 +87,7 @@ const def = {
     },
     {
       // Line breaks
-      text: ['Text is broken at word boundaries. Explicit line breaks are\nsupported.'],
+      text: ['Text is broken at word boundaries. Explicit line\nbreaks are\nsupported.'],
       margin: { y: 10 },
     },
     {

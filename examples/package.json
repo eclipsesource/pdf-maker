@@ -3,6 +3,6 @@
   "private": true,
   "type": "module",
   "dependencies": {
-    "pdfmkr": "^0.5.3"
+    "pdfmkr": "^0.5.4"
   }
 }
