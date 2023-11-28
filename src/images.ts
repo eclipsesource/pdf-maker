@@ -1,21 +1,16 @@
-import { JpegEmbedder, PDFDocument, PDFRef, PngEmbedder, toUint8Array } from 'pdf-lib';
+import { JpegEmbedder, PDFDocument, PDFRef, PngEmbedder } from 'pdf-lib';
 
 import { parseBinaryData } from './binary-data.js';
+import { ImageLoader, LoadedImage } from './image-loader.js';
 import { optional, readAs, readObject, required, types } from './types.js';
+
+const imageTypes = ['jpeg', 'png'];
+export type ImageFormat = (typeof imageTypes)[number];
 
 export type ImageDef = {
   name: string;
   data: string | Uint8Array | ArrayBuffer;
-  format: 'jpeg' | 'png';
-};
-
-export type LoadedImage = {
-  format: 'jpeg' | 'png';
-  data: Uint8Array;
-};
-
-export type ImageLoader = {
-  loadImage(selector: ImageSelector): Promise<LoadedImage>;
+  format: ImageFormat;
 };
 
 export type ImageStore = {
@@ -27,7 +22,7 @@ export type Image = {
   width: number;
   height: number;
   data: Uint8Array;
-  format: 'jpeg' | 'png';
+  format: ImageFormat;
   pdfRef?: PDFRef;
 };
 
@@ -48,7 +43,7 @@ function readImage(input: unknown) {
   return readObject(input, {
     data: required(parseBinaryData),
     format: optional(types.string({ enum: ['jpeg', 'png'] })),
-  }) as { data: Uint8Array; format?: 'jpeg' | 'png' };
+  }) as { data: Uint8Array; format?: ImageFormat };
 }
 
 export function registerImage(image: Image, pdfDoc: PDFDocument) {
@@ -68,24 +63,6 @@ export function registerImage(image: Image, pdfDoc: PDFDocument) {
     },
   });
   return ref;
-}
-
-export function createImageLoader(images: ImageDef[]): ImageLoader {
-  return {
-    loadImage,
-  };
-
-  async function loadImage(selector: ImageSelector): Promise<LoadedImage> {
-    const imageDef = images.find((image) => image.name === selector.name);
-    if (!imageDef) {
-      throw new Error(`No image defined with name '${selector.name}'`);
-    }
-    const data = toUint8Array(imageDef.data);
-    return {
-      format: imageDef.format,
-      data,
-    };
-  }
 }
 
 export function createImageStore(imageLoader: ImageLoader): ImageStore {
