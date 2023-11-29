@@ -1,16 +1,16 @@
 import { beforeEach, describe, expect, it, jest } from '@jest/globals';
 
 import { Box } from './box.js';
-import { Document } from './document.js';
 import { ImageSelector, ImageStore } from './images.js';
 import { layoutImageContent } from './layout-image.js';
+import { MakerCtx } from './make-pdf.js';
 import { ImageBlock } from './read-block.js';
 import { fakeImage } from './test/test-utils.js';
 
 const { objectContaining } = expect;
 
 describe('layout-image', () => {
-  let box: Box, doc: Document;
+  let box: Box, ctx: MakerCtx;
 
   beforeEach(() => {
     const imageStore = {
@@ -23,7 +23,7 @@ describe('layout-image', () => {
       }),
     } as ImageStore;
     box = { x: 20, y: 30, width: 400, height: 700 };
-    doc = { imageStore } as Document;
+    ctx = { imageStore } as MakerCtx;
   });
 
   describe('layoutImageContent', () => {
@@ -32,7 +32,7 @@ describe('layout-image', () => {
       const block = { image: 'img-720-480', width: 1, height: 1 };
       box = { x: 20, y: 30, width: 200, height: 100 };
 
-      const { frame } = await layoutImageContent(block, box, doc);
+      const { frame } = await layoutImageContent(block, box, ctx);
 
       expect(frame).toEqual({
         objects: [objectContaining({ x: 20 + (200 - 150) / 2, y: 30, width: 150, height: 100 })],
@@ -45,10 +45,10 @@ describe('layout-image', () => {
       const block = { image: 'img-720-480', width: 30, height: 40 };
       box = { x: 20, y: 30, width: 200, height: 100 };
 
-      await layoutImageContent(block, box, doc);
+      await layoutImageContent(block, box, ctx);
 
       const selector = { name: 'img-720-480', width: 30, height: 40 };
-      expect(doc.imageStore.selectImage).toHaveBeenCalledWith(selector);
+      expect(ctx.imageStore.selectImage).toHaveBeenCalledWith(selector);
     });
 
     ['img-720-480', 'img-72-48'].forEach((image) => {
@@ -57,7 +57,7 @@ describe('layout-image', () => {
           const block = { image, width: 1 };
           box = { x: 20, y: 30, width: 300, height: 500 };
 
-          const { frame } = await layoutImageContent(block, box, doc);
+          const { frame } = await layoutImageContent(block, box, ctx);
 
           expect(frame).toEqual({
             objects: [objectContaining({ type: 'image', width: 300, height: 200 })],
@@ -70,7 +70,7 @@ describe('layout-image', () => {
           const block = { image, height: 1 };
           box = { x: 20, y: 30, width: 500, height: 200 };
 
-          const { frame } = await layoutImageContent(block, box, doc);
+          const { frame } = await layoutImageContent(block, box, ctx);
 
           expect(frame).toEqual({
             objects: [objectContaining({ type: 'image', width: 300, height: 200 })],
@@ -83,7 +83,7 @@ describe('layout-image', () => {
           const block = { image, width: 1, height: 1 };
           box = { x: 20, y: 30, width: 300, height: 300 };
 
-          const { frame } = await layoutImageContent(block, box, doc);
+          const { frame } = await layoutImageContent(block, box, ctx);
 
           expect(frame.objects).toEqual([
             objectContaining({ type: 'image', width: 300, height: 200 }),
@@ -95,7 +95,7 @@ describe('layout-image', () => {
     it('does not scale image if no fixed bounds', async () => {
       const block = { image: 'img-72-48' };
 
-      const { frame } = await layoutImageContent(block, box, doc);
+      const { frame } = await layoutImageContent(block, box, ctx);
 
       expect(frame).toEqual({
         objects: [objectContaining({ type: 'image', width: 72, height: 48 })],
@@ -107,7 +107,7 @@ describe('layout-image', () => {
     it('scales image down to fit into available width if no fixed bounds', async () => {
       const block = { image: 'img-720-480' };
 
-      const { frame } = await layoutImageContent(block, box, doc);
+      const { frame } = await layoutImageContent(block, box, ctx);
 
       expect(frame).toEqual({
         objects: [objectContaining({ type: 'image', width: 400, height: (400 * 2) / 3 })],
@@ -119,7 +119,7 @@ describe('layout-image', () => {
     it('center-aligns image by default', async () => {
       const block = { image: 'img-72-48' };
 
-      const { frame } = await layoutImageContent(block, box, doc);
+      const { frame } = await layoutImageContent(block, box, ctx);
 
       expect(frame.objects).toEqual([
         objectContaining({ type: 'image', x: 20 + (400 - 72) / 2, y: 30 }),
@@ -129,7 +129,7 @@ describe('layout-image', () => {
     it('left-aligns image', async () => {
       const block: ImageBlock = { image: 'img-72-48', imageAlign: 'left' };
 
-      const { frame } = await layoutImageContent(block, box, doc);
+      const { frame } = await layoutImageContent(block, box, ctx);
 
       expect(frame.objects).toEqual([objectContaining({ type: 'image', x: 20, y: 30 })]);
     });
@@ -137,7 +137,7 @@ describe('layout-image', () => {
     it('right-aligns image', async () => {
       const block: ImageBlock = { image: 'img-72-48', imageAlign: 'right' };
 
-      const { frame } = await layoutImageContent(block, box, doc);
+      const { frame } = await layoutImageContent(block, box, ctx);
 
       expect(frame.objects).toEqual([objectContaining({ type: 'image', x: 20 + 400 - 72, y: 30 })]);
     });
@@ -145,7 +145,7 @@ describe('layout-image', () => {
     it('does not aligns image in block with auto width', async () => {
       const block: ImageBlock = { image: 'img-72-48', imageAlign: 'right', autoWidth: true };
 
-      const { frame } = await layoutImageContent(block, box, doc);
+      const { frame } = await layoutImageContent(block, box, ctx);
 
       expect(frame.objects).toEqual([objectContaining({ type: 'image', x: 20, y: 30 })]);
     });

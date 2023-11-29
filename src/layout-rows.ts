@@ -1,13 +1,13 @@
 import { Box, ZERO_EDGES } from './box.js';
-import { Document } from './document.js';
 import { Frame, isBreakPossible, layoutBlock, LayoutContent } from './layout.js';
+import { MakerCtx } from './make-pdf.js';
 import { Block, RowsBlock } from './read-block.js';
 import { compact, omit } from './utils.js';
 
 export async function layoutRowsContent(
   block: RowsBlock,
   box: Box,
-  doc: Document
+  ctx: MakerCtx
 ): Promise<LayoutContent> {
   let rowY = box.y;
   let lastMargin = 0;
@@ -33,7 +33,7 @@ export async function layoutRowsContent(
     const { frame, remainder } = await layoutBlock(
       { ...row, autoWidth },
       { ...nextPos, ...maxSize },
-      doc
+      ctx
     );
 
     const performBreakAt = (breakIdx: number, remainder?: Block) => {

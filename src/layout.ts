@@ -1,12 +1,12 @@
 import { Box, parseEdges, Size, subtractEdges, ZERO_EDGES } from './box.js';
 import { Color } from './colors.js';
-import { Document } from './document.js';
 import { Font } from './fonts.js';
 import { createFrameGuides } from './guides.js';
 import { layoutColumnsContent } from './layout-columns.js';
 import { ImageObject, layoutImageContent } from './layout-image.js';
 import { layoutRowsContent } from './layout-rows.js';
 import { layoutTextContent } from './layout-text.js';
+import { MakerCtx } from './make-pdf.js';
 import { Page } from './page.js';
 import { applyOrientation, paperSizes } from './page-sizes.js';
 import { Block, RowsBlock } from './read-block.js';
@@ -118,7 +118,7 @@ export type AnchorObject = {
   y: number;
 };
 
-export async function layoutPages(def: DocumentDefinition, doc: Document): Promise<Page[]> {
+export async function layoutPages(def: DocumentDefinition, ctx: MakerCtx): Promise<Page[]> {
   const pages: Page[] = [];
   let remainingBlocks = def.content;
   let pageNumber = 1;
@@ -128,8 +128,8 @@ export async function layoutPages(def: DocumentDefinition, doc: Document): Promi
   const makePage = async () => {
     const pageInfo = { pageNumber: pageNumber++, pageSize };
     const pageMargin = def.margin?.(pageInfo) ?? defaultPageMargin;
-    const header = def.header && (await layoutHeader(def.header(pageInfo), pageSize, doc));
-    const footer = def.footer && (await layoutFooter(def.footer(pageInfo), pageSize, doc));
+    const header = def.header && (await layoutHeader(def.header(pageInfo), pageSize, ctx));
+    const footer = def.footer && (await layoutFooter(def.footer(pageInfo), pageSize, ctx));
 
     const x = 0;
     const y = (header?.y ?? 0) + (header?.height ?? 0);
@@ -137,8 +137,8 @@ export async function layoutPages(def: DocumentDefinition, doc: Document): Promi
     const height = (footer?.y ?? pageSize.height) - y;
     const contentBox = subtractEdges({ x, y, width, height }, pageMargin);
 
-    const { frame, remainder } = await layoutPageContent(remainingBlocks, contentBox, doc);
-    if (doc.guides) {
+    const { frame, remainder } = await layoutPageContent(remainingBlocks, contentBox, ctx);
+    if (ctx.guides) {
       frame.objects = [createFrameGuides(frame, { margin: pageMargin, isPage: true })];
     }
     remainingBlocks = remainder;
@@ -157,37 +157,37 @@ export async function layoutPages(def: DocumentDefinition, doc: Document): Promi
   for (const [idx, page] of pages.entries()) {
     const pageInfo = { pageCount: pages.length, pageNumber: idx + 1, pageSize };
     typeof def.header === 'function' &&
-      (page.header = await layoutHeader(def.header(pageInfo), pageSize, doc));
+      (page.header = await layoutHeader(def.header(pageInfo), pageSize, ctx));
     typeof def.footer === 'function' &&
-      (page.footer = await layoutFooter(def.footer(pageInfo), pageSize, doc));
+      (page.footer = await layoutFooter(def.footer(pageInfo), pageSize, ctx));
   }
   return pages.map(pickDefined);
 }
 
-async function layoutHeader(header: Block, pageSize: Size, doc: Document) {
+async function layoutHeader(header: Block, pageSize: Size, ctx: MakerCtx) {
   const box = subtractEdges({ x: 0, y: 0, ...pageSize }, header.margin);
-  const { frame } = await layoutBlock({ ...header, breakInside: 'avoid' }, box, doc);
+  const { frame } = await layoutBlock({ ...header, breakInside: 'avoid' }, box, ctx);
   return frame;
 }
 
-async function layoutFooter(footer: Block, pageSize: Size, doc: Document) {
+async function layoutFooter(footer: Block, pageSize: Size, ctx: MakerCtx) {
   const box = subtractEdges({ x: 0, y: 0, ...pageSize }, footer.margin);
-  const { frame } = await layoutBlock({ ...footer, breakInside: 'avoid' }, box, doc);
+  const { frame } = await layoutBlock({ ...footer, breakInside: 'avoid' }, box, ctx);
   frame.y = pageSize.height - frame.height - (footer.margin?.bottom ?? 0);
   return frame;
 }
 
-async function layoutPageContent(blocks: Block[], box: Box, doc: Document) {
+async function layoutPageContent(blocks: Block[], box: Box, ctx: MakerCtx) {
   // We create a dummy rows block and enforce a page break if the content does not fit
   const block = { rows: blocks, breakInside: 'enforce-auto' as any };
-  const { frame, remainder } = await layoutBlock(block, box, doc);
+  const { frame, remainder } = await layoutBlock(block, box, ctx);
   return {
     frame: { ...frame, ...box },
     remainder: (remainder as RowsBlock)?.rows ?? [],
   };
 }
 
-export async function layoutBlock(block: Block, box: Box, doc: Document): Promise<LayoutResult> {
+export async function layoutBlock(block: Block, box: Box, ctx: MakerCtx): Promise<LayoutResult> {
   const padding = block.padding ?? ZERO_EDGES;
   // Subtract the padding from the box to get the content box.
   const contentBox = subtractEdges(
@@ -195,7 +195,7 @@ export async function layoutBlock(block: Block, box: Box, doc: Document): Promis
     padding
   );
   // Layout the *content* of the block, i.e. what's inside the padding.
-  const result = await layoutBlockContent(block, contentBox, doc);
+  const result = await layoutBlockContent(block, contentBox, ctx);
   // Finally, add the padding back to the frame size.
   // When the width/height is fixed, the padding must not be added.
   const frame = {
@@ -207,22 +207,22 @@ export async function layoutBlock(block: Block, box: Box, doc: Document): Promis
   };
   addAnchor(frame, block);
   addGraphics(frame, block);
-  doc.guides && addGuides(frame, block);
+  ctx.guides && addGuides(frame, block);
   return { frame, remainder: result.remainder };
 }
 
-async function layoutBlockContent(block: Block, box: Box, doc: Document): Promise<LayoutContent> {
+async function layoutBlockContent(block: Block, box: Box, ctx: MakerCtx): Promise<LayoutContent> {
   if ('text' in block) {
-    return await layoutTextContent(block, box, doc);
+    return await layoutTextContent(block, box, ctx);
   }
   if ('image' in block) {
-    return await layoutImageContent(block, box, doc);
+    return await layoutImageContent(block, box, ctx);
   }
   if ('columns' in block) {
-    return await layoutColumnsContent(block, box, doc);
+    return await layoutColumnsContent(block, box, ctx);
   }
   if ('rows' in block) {
-    return await layoutRowsContent(block, box, doc);
+    return await layoutRowsContent(block, box, ctx);
   }
   return {
     frame: {

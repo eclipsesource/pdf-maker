@@ -1,15 +1,15 @@
 import { beforeEach, describe, expect, it } from '@jest/globals';
 
 import { Box } from './box.js';
-import { Document } from './document.js';
 import { FontStore } from './fonts.js';
 import { Frame } from './layout.js';
 import { layoutRowsContent } from './layout-rows.js';
+import { MakerCtx } from './make-pdf.js';
 import { Block } from './read-block.js';
 import { extractTextRows, fakeFont, range, span } from './test/test-utils.js';
 
 describe('layout-rows', () => {
-  let doc: Document, box: Box;
+  let ctx: MakerCtx, box: Box;
 
   beforeEach(() => {
     const fontStore: FontStore = {
@@ -17,7 +17,7 @@ describe('layout-rows', () => {
         return fakeFont('Test');
       },
     };
-    doc = { fontStore } as Document;
+    ctx = { fontStore } as MakerCtx;
     box = { x: 20, y: 30, width: 400, height: 700 };
   });
 
@@ -25,7 +25,7 @@ describe('layout-rows', () => {
     it('creates empty frame for empty rows array', async () => {
       const block = { rows: [] };
 
-      const { frame, remainder } = await layoutRowsContent(block, box, doc);
+      const { frame, remainder } = await layoutRowsContent(block, box, ctx);
 
       expect(frame).toEqual({ children: [], width: box.width, height: 0 });
       expect(remainder).toBeUndefined();
@@ -34,7 +34,7 @@ describe('layout-rows', () => {
     it('creates child for row with fixed width and height', async () => {
       const block = { rows: [{ width: 100, height: 50 }] };
 
-      const { frame, remainder } = await layoutRowsContent(block, box, doc);
+      const { frame, remainder } = await layoutRowsContent(block, box, ctx);
 
       expect(frame).toEqual({
         children: [{ x: 20, y: 30, width: 100, height: 50 }],
@@ -48,7 +48,7 @@ describe('layout-rows', () => {
       const padding = { left: 1, right: 2, top: 3, bottom: 4 };
       const block = { rows: [{ width: 100, height: 50 }], padding };
 
-      const { frame, remainder } = await layoutRowsContent(block, box, doc);
+      const { frame, remainder } = await layoutRowsContent(block, box, ctx);
 
       expect(frame.height).toEqual(50);
       expect(remainder).toBeUndefined();
@@ -57,7 +57,7 @@ describe('layout-rows', () => {
     it('returns frame with fixed width for block with auto width', async () => {
       const block = { rows: [{ width: 100, height: 50 }], autoWidth: true };
 
-      const { frame, remainder } = await layoutRowsContent(block, box, doc);
+      const { frame, remainder } = await layoutRowsContent(block, box, ctx);
 
       expect(frame).toEqual(expect.objectContaining({ width: 100, height: 50 }));
       expect(remainder).toBeUndefined();
@@ -69,7 +69,7 @@ describe('layout-rows', () => {
         autoWidth: true,
       };
 
-      const { frame, remainder } = await layoutRowsContent(block, box, doc);
+      const { frame, remainder } = await layoutRowsContent(block, box, ctx);
 
       expect(frame.children).toEqual([
         expect.objectContaining({ width: 30 }), // intrinsic width
@@ -83,7 +83,7 @@ describe('layout-rows', () => {
       const margin = { left: 5, right: 6, top: 7, bottom: 8 };
       const block = { rows: [{ width: 100, height: 50, margin }] };
 
-      const { frame, remainder } = await layoutRowsContent(block, box, doc);
+      const { frame, remainder } = await layoutRowsContent(block, box, ctx);
 
       expect(frame).toEqual({
         children: [{ x: 20 + 5, y: 30 + 7, width: 100, height: 50 }],
@@ -101,7 +101,7 @@ describe('layout-rows', () => {
       ];
       const block = { rows };
 
-      const { frame, remainder } = await layoutRowsContent(block, box, doc);
+      const { frame, remainder } = await layoutRowsContent(block, box, ctx);
 
       expect(frame).toEqual({
         children: [
@@ -127,7 +127,7 @@ describe('layout-rows', () => {
       it('creates page break after last fitting block', async () => {
         const rows = makeBlocks(10);
 
-        const { frame, remainder } = await layoutRowsContent({ rows }, box, doc);
+        const { frame, remainder } = await layoutRowsContent({ rows }, box, ctx);
 
         expect(renderedIds(frame)).toEqual(range(7).map(String));
         expect(remainder).toEqual({ rows: rows.slice(7) });
@@ -137,7 +137,7 @@ describe('layout-rows', () => {
         const rows = makeBlocks(10);
         const insertAfterBreak = () => ({ text: 'contd', id: 'extra' });
 
-        const { frame, remainder } = await layoutRowsContent({ rows, insertAfterBreak }, box, doc);
+        const { frame, remainder } = await layoutRowsContent({ rows, insertAfterBreak }, box, ctx);
 
         expect(renderedIds(frame)).toEqual(range(7).map(String));
         expect(remainder).toEqual({
@@ -150,7 +150,7 @@ describe('layout-rows', () => {
         const nestedRows = makeBlocks(5, 'nested');
         const rows = [...makeBlocks(5), { rows: nestedRows, id: 'nested' }];
 
-        const { frame, remainder } = await layoutRowsContent({ rows }, box, doc);
+        const { frame, remainder } = await layoutRowsContent({ rows }, box, ctx);
 
         expect(renderedIds(frame)).toEqual(['0', '1', '2', '3', '4', 'nested']);
         expect(renderedIds(frame.children?.[5])).toEqual(['nested.0', 'nested.1']);
@@ -161,7 +161,7 @@ describe('layout-rows', () => {
         const rows = makeBlocks(10);
         rows[3].breakBefore = 'always';
 
-        const { frame, remainder } = await layoutRowsContent({ rows }, box, doc);
+        const { frame, remainder } = await layoutRowsContent({ rows }, box, ctx);
 
         expect(renderedIds(frame)).toEqual(range(3).map(String));
         expect(remainder).toEqual({ rows: rows.slice(3) });
@@ -171,7 +171,7 @@ describe('layout-rows', () => {
         const rows = makeBlocks(10);
         rows[0].breakBefore = 'always';
 
-        const { frame, remainder } = await layoutRowsContent({ rows }, box, doc);
+        const { frame, remainder } = await layoutRowsContent({ rows }, box, ctx);
 
         expect(renderedIds(frame)).toEqual(range(7).map(String));
         expect(remainder).toEqual({ rows: rows.slice(7) });
@@ -181,7 +181,7 @@ describe('layout-rows', () => {
         const rows = makeBlocks(10);
         rows[3].breakAfter = 'always';
 
-        const { frame, remainder } = await layoutRowsContent({ rows }, box, doc);
+        const { frame, remainder } = await layoutRowsContent({ rows }, box, ctx);
 
         expect(renderedIds(frame)).toEqual(range(4).map(String));
         expect(remainder).toEqual({ rows: rows.slice(4) });
@@ -191,7 +191,7 @@ describe('layout-rows', () => {
         const rows = makeBlocks(7);
         rows[6].breakAfter = 'always';
 
-        const { frame, remainder } = await layoutRowsContent({ rows }, box, doc);
+        const { frame, remainder } = await layoutRowsContent({ rows }, box, ctx);
 
         expect(renderedIds(frame)).toEqual(range(7).map(String));
         expect(remainder).toBeUndefined();
@@ -201,7 +201,7 @@ describe('layout-rows', () => {
         const rows = makeBlocks(10);
         rows[7].breakBefore = 'avoid';
 
-        const { frame, remainder } = await layoutRowsContent({ rows }, box, doc);
+        const { frame, remainder } = await layoutRowsContent({ rows }, box, ctx);
 
         expect(renderedIds(frame)).toEqual(range(6).map(String));
         expect(remainder).toEqual({ rows: rows.slice(6) });
@@ -212,7 +212,7 @@ describe('layout-rows', () => {
         rows[6].breakBefore = 'avoid';
         rows[7].breakBefore = 'avoid';
 
-        const { frame, remainder } = await layoutRowsContent({ rows }, box, doc);
+        const { frame, remainder } = await layoutRowsContent({ rows }, box, ctx);
 
         expect(renderedIds(frame)).toEqual(range(5).map(String));
         expect(remainder).toEqual({ rows: rows.slice(5) });
@@ -222,7 +222,7 @@ describe('layout-rows', () => {
         const rows = makeBlocks(10);
         rows[0].breakBefore = 'avoid';
 
-        const { frame, remainder } = await layoutRowsContent({ rows }, box, doc);
+        const { frame, remainder } = await layoutRowsContent({ rows }, box, ctx);
 
         expect(renderedIds(frame)).toEqual(range(7).map(String));
         expect(remainder).toEqual({ rows: rows.slice(7) });
@@ -233,7 +233,7 @@ describe('layout-rows', () => {
         rows[3].breakAfter = 'always';
         rows[4].breakBefore = 'avoid';
 
-        const { frame, remainder } = await layoutRowsContent({ rows }, box, doc);
+        const { frame, remainder } = await layoutRowsContent({ rows }, box, ctx);
 
         expect(renderedIds(frame)).toEqual(range(4).map(String));
         expect(remainder).toEqual({ rows: rows.slice(4) });
@@ -243,7 +243,7 @@ describe('layout-rows', () => {
         const rows = makeBlocks(10);
         rows[6].breakAfter = 'avoid';
 
-        const { frame, remainder } = await layoutRowsContent({ rows }, box, doc);
+        const { frame, remainder } = await layoutRowsContent({ rows }, box, ctx);
 
         expect(renderedIds(frame)).toEqual(range(6).map(String));
         expect(remainder).toEqual({ rows: rows.slice(6) });
@@ -254,7 +254,7 @@ describe('layout-rows', () => {
         rows[5].breakAfter = 'avoid';
         rows[6].breakAfter = 'avoid';
 
-        const { frame, remainder } = await layoutRowsContent({ rows }, box, doc);
+        const { frame, remainder } = await layoutRowsContent({ rows }, box, ctx);
 
         expect(renderedIds(frame)).toEqual(range(5).map(String));
         expect(remainder).toEqual({ rows: rows.slice(5) });
@@ -264,7 +264,7 @@ describe('layout-rows', () => {
         const rows = makeBlocks(7);
         rows[6].breakAfter = 'avoid';
 
-        const { frame, remainder } = await layoutRowsContent({ rows }, box, doc);
+        const { frame, remainder } = await layoutRowsContent({ rows }, box, ctx);
 
         expect(renderedIds(frame)).toEqual(range(7).map(String));
         expect(remainder).toBeUndefined();
@@ -275,7 +275,7 @@ describe('layout-rows', () => {
         rows[3].breakAfter = 'avoid';
         rows[4].breakBefore = 'always';
 
-        const { frame, remainder } = await layoutRowsContent({ rows }, box, doc);
+        const { frame, remainder } = await layoutRowsContent({ rows }, box, ctx);
 
         expect(renderedIds(frame)).toEqual(range(4).map(String));
         expect(remainder).toEqual({ rows: rows.slice(4) });
@@ -288,7 +288,7 @@ describe('layout-rows', () => {
         const { frame, remainder } = await layoutRowsContent(
           { rows, breakInside: 'enforce-auto' as any },
           box,
-          doc
+          ctx
         );
 
         expect(renderedIds(frame)).toEqual(range(7).map(String));
@@ -302,7 +302,7 @@ describe('layout-rows', () => {
         const { frame, remainder } = await layoutRowsContent(
           { rows, breakInside: 'enforce-auto' as any },
           box,
-          doc
+          ctx
         );
 
         expect(renderedIds(frame)).toEqual(range(7).map(String));
@@ -317,7 +317,7 @@ describe('layout-rows', () => {
         const { frame, remainder } = await layoutRowsContent(
           { rows, breakInside: 'enforce-auto' as any },
           box,
-          doc
+          ctx
         );
 
         expect(renderedIds(frame)).toEqual(['0', '1', '2', '3', '4', '5', '6', 'extra']);
@@ -339,7 +339,7 @@ describe('layout-rows', () => {
         const { frame, remainder } = await layoutRowsContent(
           { rows, breakInside: 'enforce-auto' as any },
           box,
-          doc
+          ctx
         );
 
         expect(renderedIds(frame)).toEqual(['0', '1', '2', '3', '4', '5', '6']);

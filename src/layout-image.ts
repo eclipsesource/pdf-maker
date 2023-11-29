@@ -1,7 +1,7 @@
 import { Box, Pos, Size } from './box.js';
-import { Document } from './document.js';
 import { Image } from './images.js';
 import { LayoutContent, RenderObject } from './layout.js';
+import { MakerCtx } from './make-pdf.js';
 import { ImageBlock } from './read-block.js';
 
 export type ImageObject = {
@@ -16,10 +16,10 @@ export type ImageObject = {
 export async function layoutImageContent(
   block: ImageBlock,
   box: Box,
-  doc: Document
+  ctx: MakerCtx
 ): Promise<LayoutContent> {
   const selector = { name: block.image, width: block.width, height: block.height };
-  const image = await doc.imageStore.selectImage(selector);
+  const image = await ctx.imageStore.selectImage(selector);
   const hasFixedWidth = block.width != null;
   const hasFixedHeight = block.height != null;
   const scale = getScale(image, box, hasFixedWidth, hasFixedHeight);

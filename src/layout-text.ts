@@ -1,5 +1,4 @@
 import { Box, Size } from './box.js';
-import { Document } from './document.js';
 import { Font } from './fonts.js';
 import { createRowGuides } from './guides.js';
 import {
@@ -9,6 +8,7 @@ import {
   TextRowObject,
   TextSegmentObject,
 } from './layout.js';
+import { MakerCtx } from './make-pdf.js';
 import { TextBlock } from './read-block.js';
 import {
   breakLine,
@@ -22,13 +22,13 @@ import { omit } from './utils.js';
 export async function layoutTextContent(
   block: TextBlock,
   box: Box,
-  doc: Document
+  ctx: MakerCtx
 ): Promise<LayoutContent> {
-  const text = await layoutText(block, box, doc);
+  const text = await layoutText(block, box, ctx);
   const objects: RenderObject[] = [];
   text.rows.length && objects.push({ type: 'text', rows: text.rows });
   text.objects?.length && objects.push(...text.objects);
-  if (doc.guides) objects.push(...text.rows.map((row) => createRowGuides(row)));
+  if (ctx.guides) objects.push(...text.rows.map((row) => createRowGuides(row)));
 
   const remainder = text.remainder ? { ...omit(block, 'id'), text: text.remainder } : undefined;
 
@@ -42,9 +42,9 @@ export async function layoutTextContent(
   };
 }
 
-async function layoutText(block: TextBlock, box: Box, doc: Document) {
+async function layoutText(block: TextBlock, box: Box, ctx: MakerCtx) {
   const { text } = block;
-  const segments = await extractTextSegments(text, doc.fontStore);
+  const segments = await extractTextSegments(text, ctx.fontStore);
   const rows: TextRowObject[] = [];
   const objects: LinkObject[] = [];
   let remainingSegments = segments;

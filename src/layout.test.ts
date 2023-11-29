@@ -1,9 +1,9 @@
 import { beforeEach, describe, expect, it } from '@jest/globals';
 
 import { Box } from './box.js';
-import { Document } from './document.js';
 import { FontStore } from './fonts.js';
 import { isBreakPossible, layoutBlock, layoutPages } from './layout.js';
+import { MakerCtx } from './make-pdf.js';
 import { paperSizes } from './page-sizes.js';
 import { Block, TextAttrs, TextSpan } from './read-block.js';
 import { PageInfo, readDocumentDefinition } from './read-document.js';
@@ -14,7 +14,7 @@ const { objectContaining } = expect;
 const defaultPageSize = paperSizes.A4;
 
 describe('layout', () => {
-  let doc: Document, box: Box;
+  let ctx: MakerCtx, box: Box;
 
   beforeEach(() => {
     const fontStore = {
@@ -22,13 +22,13 @@ describe('layout', () => {
         return fakeFont('Test');
       },
     } as FontStore;
-    doc = { fontStore } as Document;
+    ctx = { fontStore } as MakerCtx;
     box = { x: 20, y: 30, width: 400, height: 700 };
   });
 
   describe('layoutPages', () => {
     it('accepts empty content', async () => {
-      await expect(layoutPages({ content: [] }, doc)).resolves.toBeDefined();
+      await expect(layoutPages({ content: [] }, ctx)).resolves.toBeDefined();
     });
 
     it('includes defaultStyle in all blocks', async () => {
@@ -37,7 +37,7 @@ describe('layout', () => {
         defaultStyle: { fontSize: 14 },
       });
 
-      const pages = await layoutPages(def, doc);
+      const pages = await layoutPages(def, ctx);
 
       expect(pages[0].content.children).toEqual([
         objectContaining({ height: 14 * 1.2 }),
@@ -50,7 +50,7 @@ describe('layout', () => {
       const pageWidth = defaultPageSize.width;
       const pageHeight = defaultPageSize.height;
 
-      const pages = await layoutPages(def, doc);
+      const pages = await layoutPages(def, ctx);
 
       expect(pages).toEqual([
         objectContaining({
@@ -68,7 +68,7 @@ describe('layout', () => {
     it('returns empty page frame for empty content', async () => {
       const def = readDocumentDefinition({ content: [], margin: 50 });
 
-      const pages = await layoutPages(def, doc);
+      const pages = await layoutPages(def, ctx);
 
       expect(pages).toEqual([
         {
@@ -81,7 +81,7 @@ describe('layout', () => {
     it('returns single page frame for single content block', async () => {
       const def = readDocumentDefinition({ content: [{ text: 'test' }], margin: 50 });
 
-      const pages = await layoutPages(def, doc);
+      const pages = await layoutPages(def, ctx);
 
       expect(pages).toEqual([
         {
@@ -99,7 +99,7 @@ describe('layout', () => {
       }));
       const def = readDocumentDefinition({ content, margin: 50 });
 
-      const pages = await layoutPages(def, doc);
+      const pages = await layoutPages(def, ctx);
 
       expect(pages).toHaveLength(2);
     });
@@ -112,7 +112,7 @@ describe('layout', () => {
       });
       const pageWidth = defaultPageSize.width;
 
-      const pages = await layoutPages(def, doc);
+      const pages = await layoutPages(def, ctx);
 
       expect(pages[0].header).toEqual(
         objectContaining({
@@ -134,7 +134,7 @@ describe('layout', () => {
       const pageWidth = defaultPageSize.width;
       const pageHeight = defaultPageSize.height;
 
-      const pages = await layoutPages(def, doc);
+      const pages = await layoutPages(def, ctx);
 
       expect(pages[0].header).toBeUndefined();
       expect(pages[0].footer).toEqual(
@@ -157,7 +157,7 @@ describe('layout', () => {
       const pageWidth = defaultPageSize.width;
       const pageHeight = defaultPageSize.height;
 
-      const pages = await layoutPages(def, doc);
+      const pages = await layoutPages(def, ctx);
 
       expect(pages[0].header).toEqual(
         objectContaining({
@@ -188,7 +188,7 @@ describe('layout', () => {
         footer: ({ pageCount, pageNumber }: PageInfo) => ({ text: `${pageNumber}/${pageCount}` }),
       });
 
-      const pages = (await layoutPages(def, doc)) as any;
+      const pages = (await layoutPages(def, ctx)) as any;
 
       expect(pages[0].header.objects[0].rows[0].segments[0].text).toEqual('1/2');
       expect(pages[0].footer.objects[0].rows[0].segments[0].text).toEqual('1/2');
@@ -201,7 +201,7 @@ describe('layout', () => {
     it('creates frame with fixed width and height', async () => {
       const block = { rows: [], width: 200, height: 100 };
 
-      const { frame } = await layoutBlock(block, box, doc);
+      const { frame } = await layoutBlock(block, box, ctx);
 
       expect(frame).toEqual({
         x: box.x,
@@ -216,7 +216,7 @@ describe('layout', () => {
       const padding = { left: 5, right: 6, top: 7, bottom: 8 };
       const block = { padding };
 
-      const { frame } = await layoutBlock(block, box, doc);
+      const { frame } = await layoutBlock(block, box, ctx);
 
       expect(frame).toEqual({ x: box.x, y: box.y, width: box.width, height: 7 + 8 });
     });
@@ -225,7 +225,7 @@ describe('layout', () => {
       const padding = { left: 5, right: 6, top: 7, bottom: 8 };
       const block = { padding, autoWidth: true };
 
-      const { frame } = await layoutBlock(block, box, doc);
+      const { frame } = await layoutBlock(block, box, ctx);
 
       expect(frame).toEqual({ x: box.x, y: box.y, width: 5 + 6, height: 7 + 8 });
     });
@@ -234,7 +234,7 @@ describe('layout', () => {
       const padding = { left: 5, right: 6, top: 7, bottom: 8 };
       const block = { padding, width: 100, height: 200 };
 
-      const { frame } = await layoutBlock(block, box, doc);
+      const { frame } = await layoutBlock(block, box, ctx);
 
       expect(frame).toEqual({ x: box.x, y: box.y, width: 100, height: 200 });
     });
@@ -243,7 +243,7 @@ describe('layout', () => {
       const padding = { left: 5, right: 6, top: 7, bottom: 8 };
       const block = { columns: [{ width: 100, height: 200 }], padding };
 
-      const { frame } = await layoutBlock(block, box, doc);
+      const { frame } = await layoutBlock(block, box, ctx);
 
       expect(frame).toEqual({
         x: box.x,
@@ -257,7 +257,7 @@ describe('layout', () => {
     it('includes anchor object for id', async () => {
       const block = { columns: [], id: 'test' };
 
-      const { frame } = await layoutBlock(block, box, doc);
+      const { frame } = await layoutBlock(block, box, ctx);
 
       expect(frame).toEqual(
         objectContaining({ objects: [{ type: 'anchor', name: 'test', x: 0, y: 0 }] })
@@ -271,7 +271,7 @@ describe('layout', () => {
         { type: 'polyline', points: [p(1, 2), p(3, 4)] },
       ];
 
-      const { frame } = await layoutBlock({ graphics } as any, box, doc);
+      const { frame } = await layoutBlock({ graphics } as any, box, ctx);
 
       expect(frame).toEqual(objectContaining({ width: 400, height: 0 }));
       expect(frame.objects).toEqual([
@@ -294,7 +294,7 @@ describe('layout', () => {
       ];
       const padding = { left: 5, right: 5, top: 5, bottom: 5 };
 
-      const { frame } = await layoutBlock({ graphics, padding } as any, box, doc);
+      const { frame } = await layoutBlock({ graphics, padding } as any, box, ctx);
 
       expect(frame).toEqual(objectContaining({ width: 400, height: 10 }));
       expect(frame.objects).toEqual([

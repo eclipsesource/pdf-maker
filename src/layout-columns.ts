@@ -1,12 +1,12 @@
 import { Box } from './box.js';
-import { Document } from './document.js';
 import { Frame, layoutBlock, LayoutContent } from './layout.js';
+import { MakerCtx } from './make-pdf.js';
 import { Block, ColumnsBlock } from './read-block.js';
 
 export async function layoutColumnsContent(
   block: ColumnsBlock,
   box: Box,
-  doc: Document
+  ctx: MakerCtx
 ): Promise<LayoutContent> {
   const children: Frame[] = [];
 
@@ -23,7 +23,7 @@ export async function layoutColumnsContent(
     const { frame } = await layoutBlock(
       { ...column, autoWidth, breakInside: 'avoid' },
       colBox,
-      doc
+      ctx
     );
     children[idx] = frame;
     remainingWidth -= frame.width + marginX;

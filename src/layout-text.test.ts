@@ -2,9 +2,9 @@ import { beforeEach, describe, expect, it } from '@jest/globals';
 import { rgb } from 'pdf-lib';
 
 import { Box } from './box.js';
-import { Document } from './document.js';
 import { Font, FontSelector, FontStore } from './fonts.js';
 import { layoutTextContent } from './layout-text.js';
+import { MakerCtx } from './make-pdf.js';
 import { extractTextRows, fakeFont, range, span } from './test/test-utils.js';
 
 const { objectContaining } = expect;
@@ -12,7 +12,7 @@ const { objectContaining } = expect;
 describe('layout-text', () => {
   let defaultFont: Font;
   let box: Box;
-  let doc: Document;
+  let ctx: MakerCtx;
 
   beforeEach(() => {
     defaultFont = fakeFont('Test');
@@ -23,7 +23,7 @@ describe('layout-text', () => {
       },
     };
     box = { x: 20, y: 30, width: 400, height: 700 };
-    doc = { fontStore } as Document;
+    ctx = { fontStore } as MakerCtx;
   });
 
   describe('layoutTextContent', () => {
@@ -31,7 +31,7 @@ describe('layout-text', () => {
       const text = [{ text: 'foo', attrs: { fontSize: 10 } }];
       const block = { text };
 
-      const { frame } = await layoutTextContent(block, box, doc);
+      const { frame } = await layoutTextContent(block, box, ctx);
 
       expect(frame).toEqual(objectContaining({ width: box.width, height: 12 }));
     });
@@ -40,7 +40,7 @@ describe('layout-text', () => {
       const text = [{ text: 'foo', attrs: { fontSize: 10 } }];
       const block = { text, autoWidth: true };
 
-      const { frame } = await layoutTextContent(block, box, doc);
+      const { frame } = await layoutTextContent(block, box, ctx);
 
       expect(frame).toEqual(objectContaining({ width: 30, height: 12 }));
     });
@@ -50,7 +50,7 @@ describe('layout-text', () => {
       const padding = { left: 1, right: 2, top: 3, bottom: 4 };
       const block = { text, padding };
 
-      const { frame } = await layoutTextContent(block, box, doc);
+      const { frame } = await layoutTextContent(block, box, ctx);
 
       expect(frame.height).toEqual(12);
     });
@@ -58,7 +58,7 @@ describe('layout-text', () => {
     it('includes text baseline', async () => {
       const block = { text: [span('Test text', { fontSize: 10 })] };
 
-      const { frame } = (await layoutTextContent(block, box, doc)) as any;
+      const { frame } = await layoutTextContent(block, box, ctx);
 
       expect(frame.objects).toEqual([
         {
@@ -82,7 +82,7 @@ describe('layout-text', () => {
         ],
       };
 
-      const { frame } = (await layoutTextContent(block, box, doc)) as any;
+      const { frame } = await layoutTextContent(block, box, ctx);
 
       expect(frame.objects).toEqual([
         {
@@ -106,7 +106,7 @@ describe('layout-text', () => {
         text: [span('foo', { link: 'test-link', fontSize: 10 })],
       };
 
-      const { frame } = await layoutTextContent(block, box, doc);
+      const { frame } = await layoutTextContent(block, box, ctx);
 
       expect(frame.objects).toEqual([
         { type: 'text', rows: [objectContaining({ x: 20, y: 30 })] },
@@ -122,7 +122,7 @@ describe('layout-text', () => {
         ],
       };
 
-      const { frame } = await layoutTextContent(block, box, doc);
+      const { frame } = await layoutTextContent(block, box, ctx);
 
       expect(frame.objects).toEqual([
         { type: 'text', rows: [objectContaining({ x: 20, y: 30 })] },
@@ -143,7 +143,7 @@ describe('layout-text', () => {
         ],
       };
 
-      const { frame } = await layoutTextContent(block, box, doc);
+      const { frame } = await layoutTextContent(block, box, ctx);
 
       expect((frame.objects?.[0] as any).rows[0].segments).toEqual([
         {
@@ -162,7 +162,7 @@ describe('layout-text', () => {
       const margin = { left: 10, right: 20, top: 0, bottom: 0 };
       const block = { text, textAlign: 'right' as const, margin };
 
-      const { frame } = await layoutTextContent(block, box, doc);
+      const { frame } = await layoutTextContent(block, box, ctx);
 
       expect(frame.objects).toEqual([
         {
@@ -178,7 +178,7 @@ describe('layout-text', () => {
       const margin = { left: 10, right: 20, top: 0, bottom: 0 };
       const block = { text, textAlign: 'center' as const, margin };
 
-      const { frame } = await layoutTextContent(block, box, doc);
+      const { frame } = await layoutTextContent(block, box, ctx);
 
       expect(frame.objects).toEqual([
         {
@@ -200,7 +200,7 @@ describe('layout-text', () => {
       const margin = { left: 10, right: 20, top: 0, bottom: 0 };
       const block = { text, textAlign: 'right' as const, margin, autoWidth: true };
 
-      const { frame } = await layoutTextContent(block, box, doc);
+      const { frame } = await layoutTextContent(block, box, ctx);
 
       expect(frame.objects).toEqual([
         {
@@ -219,7 +219,7 @@ describe('layout-text', () => {
       const text = [span('foo\n\nbar', { fontSize: 10, lineHeight: 1 })];
       const block = { text };
 
-      const { frame } = await layoutTextContent(block, box, doc);
+      const { frame } = await layoutTextContent(block, box, ctx);
 
       expect(frame.height).toEqual(3 * 10);
     });
@@ -231,7 +231,7 @@ describe('layout-text', () => {
       ];
       const block = { text };
 
-      const { frame } = await layoutTextContent(block, box, doc);
+      const { frame } = await layoutTextContent(block, box, ctx);
 
       expect(frame.height).toEqual(10 + 10 + 20);
     });
@@ -243,7 +243,7 @@ describe('layout-text', () => {
       ];
       const block = { text };
 
-      const { frame } = await layoutTextContent(block, box, doc);
+      const { frame } = await layoutTextContent(block, box, ctx);
 
       expect(frame.height).toEqual(10 + 20 + 20);
     });
@@ -256,7 +256,7 @@ describe('layout-text', () => {
       const text = [span(longText, { fontSize: 20 })];
       const block = { text };
 
-      const { frame, remainder } = await layoutTextContent(block, box, doc);
+      const { frame, remainder } = await layoutTextContent(block, box, ctx);
 
       expect(extractTextRows(frame).join()).toMatch(/^foo.*foo$/);
       expect(remainder).toEqual({
@@ -277,7 +277,7 @@ describe('layout-text', () => {
       const text = [span(longText, { fontSize: 20 })];
       const block = { text };
 
-      const { frame, remainder } = await layoutTextContent(block, box, doc);
+      const { frame, remainder } = await layoutTextContent(block, box, ctx);
 
       expect(extractTextRows(frame).join()).toMatch(/^foo.*foo$/);
       expect(remainder).toEqual({
@@ -298,7 +298,7 @@ describe('layout-text', () => {
       const text = [span(longText, { fontSize: 20 })];
       const block = { text, breakInside: 'avoid' as const };
 
-      const { frame, remainder } = await layoutTextContent(block, box, doc);
+      const { frame, remainder } = await layoutTextContent(block, box, ctx);
 
       expect(extractTextRows(frame).join()).toMatch(/^foo.*foo$/);
       expect(remainder).toBeUndefined();

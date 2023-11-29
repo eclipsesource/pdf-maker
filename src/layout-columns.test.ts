@@ -1,16 +1,16 @@
 import { beforeEach, describe, expect, it } from '@jest/globals';
 
 import { Box } from './box.js';
-import { Document } from './document.js';
 import { FontStore } from './fonts.js';
 import { layoutColumnsContent } from './layout-columns.js';
+import { MakerCtx } from './make-pdf.js';
 import { Block } from './read-block.js';
 import { fakeFont, span } from './test/test-utils.js';
 
 const { objectContaining } = expect;
 
 describe('layout-columns', () => {
-  let doc: Document, box: Box;
+  let ctx: MakerCtx, box: Box;
 
   beforeEach(() => {
     const fontStore: FontStore = {
@@ -18,7 +18,7 @@ describe('layout-columns', () => {
         return fakeFont('Test');
       },
     };
-    doc = { fontStore } as Document;
+    ctx = { fontStore } as MakerCtx;
     box = { x: 20, y: 30, width: 400, height: 700 };
   });
 
@@ -26,7 +26,7 @@ describe('layout-columns', () => {
     it('creates empty frame for empty columns array', async () => {
       const block = { columns: [] };
 
-      const { frame } = await layoutColumnsContent(block, box, doc);
+      const { frame } = await layoutColumnsContent(block, box, ctx);
 
       expect(frame).toEqual({ children: [], width: box.width, height: 0 });
     });
@@ -34,7 +34,7 @@ describe('layout-columns', () => {
     it('creates child for column with fixed width and height', async () => {
       const block = { columns: [{ width: 100, height: 50 }] };
 
-      const { frame } = await layoutColumnsContent(block, box, doc);
+      const { frame } = await layoutColumnsContent(block, box, ctx);
 
       expect(frame).toEqual({
         children: [{ x: 20, y: 30, width: 100, height: 50 }],
@@ -47,7 +47,7 @@ describe('layout-columns', () => {
       const padding = { left: 1, right: 2, top: 3, bottom: 4 };
       const block = { columns: [{ width: 100, height: 50 }], padding };
 
-      const { frame } = await layoutColumnsContent(block, box, doc);
+      const { frame } = await layoutColumnsContent(block, box, ctx);
 
       expect(frame.height).toEqual(50);
     });
@@ -55,7 +55,7 @@ describe('layout-columns', () => {
     it('returns frame with fixed width for block with auto width', async () => {
       const block = { columns: [{ width: 100, height: 50 }], autoWidth: true };
 
-      const { frame, remainder } = await layoutColumnsContent(block, box, doc);
+      const { frame, remainder } = await layoutColumnsContent(block, box, ctx);
 
       expect(frame).toEqual(expect.objectContaining({ width: 100, height: 50 }));
       expect(remainder).toBeUndefined();
@@ -70,7 +70,7 @@ describe('layout-columns', () => {
         autoWidth: true,
       };
 
-      const { frame, remainder } = await layoutColumnsContent(block, box, doc);
+      const { frame, remainder } = await layoutColumnsContent(block, box, ctx);
 
       expect(frame.children).toEqual([
         expect.objectContaining({ width: 50 }), // keeps fixed width
@@ -84,7 +84,7 @@ describe('layout-columns', () => {
       const margin = { left: 5, right: 6, top: 7, bottom: 8 };
       const block = { columns: [{ width: 100, height: 50, margin }] };
 
-      const { frame } = await layoutColumnsContent(block, box, doc);
+      const { frame } = await layoutColumnsContent(block, box, ctx);
 
       expect(frame).toEqual({
         children: [{ x: 20 + 5, y: 30 + 7, width: 100, height: 50 }],
@@ -101,7 +101,7 @@ describe('layout-columns', () => {
       ];
       const block = { columns };
 
-      const { frame } = await layoutColumnsContent(block, box, doc);
+      const { frame } = await layoutColumnsContent(block, box, ctx);
 
       expect(frame).toEqual({
         children: [
@@ -121,7 +121,7 @@ describe('layout-columns', () => {
       ];
       const block = { columns };
 
-      const { frame } = await layoutColumnsContent(block, box, doc);
+      const { frame } = await layoutColumnsContent(block, box, ctx);
 
       expect(frame).toEqual({
         children: [
@@ -142,7 +142,7 @@ describe('layout-columns', () => {
       ];
       const block = { columns };
 
-      const { frame } = await layoutColumnsContent(block, box, doc);
+      const { frame } = await layoutColumnsContent(block, box, ctx);
 
       expect(frame).toEqual({
         children: [
@@ -163,7 +163,7 @@ describe('layout-columns', () => {
       ];
       const block = { columns };
 
-      const { frame } = await layoutColumnsContent(block, box, doc);
+      const { frame } = await layoutColumnsContent(block, box, ctx);
 
       expect(frame).toEqual({
         children: [
@@ -183,7 +183,7 @@ describe('layout-columns', () => {
       ];
       const block = { columns };
 
-      const { frame } = await layoutColumnsContent(block, box, doc);
+      const { frame } = await layoutColumnsContent(block, box, ctx);
 
       expect(frame).toEqual({
         children: [
