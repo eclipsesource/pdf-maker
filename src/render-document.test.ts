@@ -2,11 +2,11 @@ import { describe, expect, it } from '@jest/globals';
 import crypto from 'crypto';
 import { PDFDict, PDFDocument, PDFHexString, PDFName, PDFStream, PDFString } from 'pdf-lib';
 
-import { renderDocument } from './document.js';
+import { renderDocument } from './render-document.js';
 
 global.crypto ??= (crypto as any).webcrypto;
 
-describe('document', () => {
+describe('render-document', () => {
   describe('renderDocument', () => {
     it('renders all info attributes', async () => {
       const def = {

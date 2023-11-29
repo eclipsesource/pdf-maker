@@ -1,11 +1,11 @@
 import { DocumentDefinition } from './content.js';
-import { renderDocument } from './document.js';
 import { createFontLoader } from './font-loader.js';
 import { createFontStore, FontStore } from './fonts.js';
 import { createImageLoader } from './image-loader.js';
 import { createImageStore, ImageStore } from './images.js';
 import { layoutPages } from './layout.js';
 import { readDocumentDefinition } from './read-document.js';
+import { renderDocument } from './render-document.js';
 import { readAs } from './types.js';
 
 export type MakerCtx = {
