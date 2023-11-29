@@ -3,7 +3,7 @@ import { CustomFontSubsetEmbedder, PDFDocument, PDFFont, PDFRef } from 'pdf-lib'
 
 import { parseBinaryData } from './binary-data.js';
 import { FontStyle, FontWeight } from './content.js';
-import { FontLoader } from './font-loader.js';
+import { FontLoader, LoadedFont } from './font-loader.js';
 import { printValue } from './print-value.js';
 import {
   optional,
@@ -74,12 +74,23 @@ export function registerFont(font: Font, pdfDoc: PDFDocument) {
 }
 
 export function createFontStore(fontLoader: FontLoader): FontStore {
+  const fontCache: Record<string, Promise<Font>> = {};
+
   return {
     selectFont,
   };
 
-  async function selectFont(selector: FontSelector): Promise<Font> {
-    let loadedFont;
+  function selectFont(selector: FontSelector): Promise<Font> {
+    const cacheKey = [
+      selector.fontFamily ?? 'any',
+      selector.fontStyle ?? 'normal',
+      selector.fontWeight ?? 'normal',
+    ].join(':');
+    return (fontCache[cacheKey] ??= loadFont(selector));
+  }
+
+  async function loadFont(selector: FontSelector): Promise<Font> {
+    let loadedFont: LoadedFont;
     try {
       loadedFont = await fontLoader.loadFont(selector);
     } catch (error) {

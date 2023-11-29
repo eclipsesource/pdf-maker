@@ -65,7 +65,7 @@ describe('fonts', () => {
       fontLoader = {
         loadFont: jest.fn(async (selector: FontSelector) => {
           if (selector.fontFamily === 'Test') return testFont;
-          throw new Error('No font defined');
+          throw new Error('No such font defined');
         }) as any,
       };
       jest.spyOn(fontkit, 'create').mockReturnValue({ fake: true } as any);
@@ -79,7 +79,7 @@ describe('fonts', () => {
       const store = createFontStore(fontLoader);
 
       await expect(store.selectFont({ fontFamily: 'foo' })).rejects.toThrowError(
-        "Could not load font for 'foo', style=normal, weight=normal: No font defined"
+        "Could not load font for 'foo', style=normal, weight=normal: No such font defined"
       );
     });
 
@@ -95,6 +95,40 @@ describe('fonts', () => {
         data: testFont.data,
         fkFont: { fake: true },
       });
+    });
+
+    it('calls font loader only once per selector', async () => {
+      const store = createFontStore(fontLoader);
+
+      await store.selectFont({ fontFamily: 'Test' });
+      await store.selectFont({ fontFamily: 'Test', fontStyle: 'italic' });
+      await store.selectFont({ fontFamily: 'Test' });
+      await store.selectFont({ fontFamily: 'Test', fontStyle: 'italic' });
+
+      expect(fontLoader.loadFont).toHaveBeenCalledTimes(2);
+    });
+
+    it('returns same font object for concurrent calls', async () => {
+      const store = createFontStore(fontLoader);
+
+      const [font1, font2] = await Promise.all([
+        store.selectFont({ fontFamily: 'Test' }),
+        store.selectFont({ fontFamily: 'Test' }),
+      ]);
+
+      expect(font1).toBe(font2);
+    });
+
+    it('caches errors from font loader', async () => {
+      const store = createFontStore(fontLoader);
+
+      await expect(store.selectFont({ fontFamily: 'foo' })).rejects.toThrowError(
+        "Could not load font for 'foo', style=normal, weight=normal: No such font defined"
+      );
+      await expect(store.selectFont({ fontFamily: 'foo' })).rejects.toThrowError(
+        "Could not load font for 'foo', style=normal, weight=normal: No such font defined"
+      );
+      expect(fontLoader.loadFont).toHaveBeenCalledTimes(1);
     });
   });
 
