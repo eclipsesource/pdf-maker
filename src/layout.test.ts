@@ -11,6 +11,8 @@ import { fakeFont, p, range } from './test/test-utils.js';
 
 const { objectContaining } = expect;
 
+const defaultPageSize = paperSizes.A4;
+
 describe('layout', () => {
   let doc: Document, box: Box;
 
@@ -20,7 +22,7 @@ describe('layout', () => {
         return fakeFont('Test');
       },
     } as FontStore;
-    doc = { fontStore, pageSize: paperSizes.A4 } as Document;
+    doc = { fontStore } as Document;
     box = { x: 20, y: 30, width: 400, height: 700 };
   });
 
@@ -45,8 +47,8 @@ describe('layout', () => {
 
     it('lays out content', async () => {
       const def = readDocumentDefinition({ content: [{ text: 'test' }], margin: 50 });
-      const pageWidth = doc.pageSize.width;
-      const pageHeight = doc.pageSize.height;
+      const pageWidth = defaultPageSize.width;
+      const pageHeight = defaultPageSize.height;
 
       const pages = await layoutPages(def, doc);
 
@@ -108,7 +110,7 @@ describe('layout', () => {
         content: [{ text: 'content' }],
         header: { text: 'header', margin: 20, fontSize: 10 },
       });
-      const pageWidth = doc.pageSize.width;
+      const pageWidth = defaultPageSize.width;
 
       const pages = await layoutPages(def, doc);
 
@@ -129,8 +131,8 @@ describe('layout', () => {
         content: [{ text: 'content' }],
         footer: { text: 'footer', margin: 20, fontSize: 10 },
       });
-      const pageWidth = doc.pageSize.width;
-      const pageHeight = doc.pageSize.height;
+      const pageWidth = defaultPageSize.width;
+      const pageHeight = defaultPageSize.height;
 
       const pages = await layoutPages(def, doc);
 
@@ -152,8 +154,8 @@ describe('layout', () => {
         header: { text: 'header', margin: 20, fontSize: 10 },
         footer: { text: 'footer', margin: 20, fontSize: 10 },
       });
-      const pageWidth = doc.pageSize.width;
-      const pageHeight = doc.pageSize.height;
+      const pageWidth = defaultPageSize.width;
+      const pageHeight = defaultPageSize.height;
 
       const pages = await layoutPages(def, doc);
 

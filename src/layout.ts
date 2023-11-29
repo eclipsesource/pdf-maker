@@ -1,4 +1,4 @@
-import { Box, parseEdges, subtractEdges, ZERO_EDGES } from './box.js';
+import { Box, parseEdges, Size, subtractEdges, ZERO_EDGES } from './box.js';
 import { Color } from './colors.js';
 import { Document } from './document.js';
 import { Font } from './fonts.js';
@@ -8,6 +8,7 @@ import { ImageObject, layoutImageContent } from './layout-image.js';
 import { layoutRowsContent } from './layout-rows.js';
 import { layoutTextContent } from './layout-text.js';
 import { Page } from './page.js';
+import { applyOrientation, paperSizes } from './page-sizes.js';
 import { Block, RowsBlock } from './read-block.js';
 import { DocumentDefinition } from './read-document.js';
 import { GraphicsObject } from './read-graphics.js';
@@ -121,16 +122,19 @@ export async function layoutPages(def: DocumentDefinition, doc: Document): Promi
   const pages: Page[] = [];
   let remainingBlocks = def.content;
   let pageNumber = 1;
+
+  const pageSize = applyOrientation(def.pageSize ?? paperSizes.A4, def.pageOrientation);
+
   const makePage = async () => {
-    const pageInfo = { pageNumber: pageNumber++, pageSize: doc.pageSize };
+    const pageInfo = { pageNumber: pageNumber++, pageSize };
     const pageMargin = def.margin?.(pageInfo) ?? defaultPageMargin;
-    const header = def.header && (await layoutHeader(def.header(pageInfo), doc));
-    const footer = def.footer && (await layoutFooter(def.footer(pageInfo), doc));
+    const header = def.header && (await layoutHeader(def.header(pageInfo), pageSize, doc));
+    const footer = def.footer && (await layoutFooter(def.footer(pageInfo), pageSize, doc));
 
     const x = 0;
     const y = (header?.y ?? 0) + (header?.height ?? 0);
-    const width = doc.pageSize.width;
-    const height = (footer?.y ?? doc.pageSize.height) - y;
+    const width = pageSize.width;
+    const height = (footer?.y ?? pageSize.height) - y;
     const contentBox = subtractEdges({ x, y, width, height }, pageMargin);
 
     const { frame, remainder } = await layoutPageContent(remainingBlocks, contentBox, doc);
@@ -138,7 +142,7 @@ export async function layoutPages(def: DocumentDefinition, doc: Document): Promi
       frame.objects = [createFrameGuides(frame, { margin: pageMargin, isPage: true })];
     }
     remainingBlocks = remainder;
-    pages.push({ size: doc.pageSize, content: frame, header, footer });
+    pages.push({ size: pageSize, content: frame, header, footer });
   };
 
   while (remainingBlocks?.length) {
@@ -151,25 +155,25 @@ export async function layoutPages(def: DocumentDefinition, doc: Document): Promi
 
   // Re-layout headers and footers to provide them with the final page count.
   for (const [idx, page] of pages.entries()) {
-    const pageInfo = { pageCount: pages.length, pageNumber: idx + 1, pageSize: doc.pageSize };
+    const pageInfo = { pageCount: pages.length, pageNumber: idx + 1, pageSize };
     typeof def.header === 'function' &&
-      (page.header = await layoutHeader(def.header(pageInfo), doc));
+      (page.header = await layoutHeader(def.header(pageInfo), pageSize, doc));
     typeof def.footer === 'function' &&
-      (page.footer = await layoutFooter(def.footer(pageInfo), doc));
+      (page.footer = await layoutFooter(def.footer(pageInfo), pageSize, doc));
   }
   return pages.map(pickDefined);
 }
 
-async function layoutHeader(header: Block, doc: Document) {
-  const box = subtractEdges({ x: 0, y: 0, ...doc.pageSize }, header.margin);
+async function layoutHeader(header: Block, pageSize: Size, doc: Document) {
+  const box = subtractEdges({ x: 0, y: 0, ...pageSize }, header.margin);
   const { frame } = await layoutBlock({ ...header, breakInside: 'avoid' }, box, doc);
   return frame;
 }
 
-async function layoutFooter(footer: Block, doc: Document) {
-  const box = subtractEdges({ x: 0, y: 0, ...doc.pageSize }, footer.margin);
+async function layoutFooter(footer: Block, pageSize: Size, doc: Document) {
+  const box = subtractEdges({ x: 0, y: 0, ...pageSize }, footer.margin);
   const { frame } = await layoutBlock({ ...footer, breakInside: 'avoid' }, box, doc);
-  frame.y = doc.pageSize.height - frame.height - (footer.margin?.bottom ?? 0);
+  frame.y = pageSize.height - frame.height - (footer.margin?.bottom ?? 0);
   return frame;
 }
 

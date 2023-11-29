@@ -5,7 +5,6 @@ import { Box } from './box.js';
 import { Document } from './document.js';
 import { Font, FontSelector, FontStore } from './fonts.js';
 import { layoutTextContent } from './layout-text.js';
-import { paperSizes } from './page-sizes.js';
 import { extractTextRows, fakeFont, range, span } from './test/test-utils.js';
 
 const { objectContaining } = expect;
@@ -24,7 +23,7 @@ describe('layout-text', () => {
       },
     };
     box = { x: 20, y: 30, width: 400, height: 700 };
-    doc = { fontStore, pageSize: paperSizes.A4 } as Document;
+    doc = { fontStore } as Document;
   });
 
   describe('layoutTextContent', () => {

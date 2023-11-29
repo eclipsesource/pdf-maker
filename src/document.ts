@@ -1,30 +1,26 @@
 import { PDFDict, PDFDocument, PDFHexString, PDFName } from 'pdf-lib';
 
-import { Size } from './box.js';
 import { createFontLoader } from './font-loader.js';
 import { createFontStore, FontStore } from './fonts.js';
 import { createImageLoader } from './image-loader.js';
 import { createImageStore, ImageStore } from './images.js';
 import { Page } from './page.js';
-import { applyOrientation, paperSizes } from './page-sizes.js';
 import { DocumentDefinition, Metadata } from './read-document.js';
 import { renderPage } from './render-page.js';
 
 export type Document = {
   fontStore: FontStore;
   imageStore: ImageStore;
-  pageSize: Size;
   guides?: boolean;
 };
 
 export async function createDocument(def: DocumentDefinition): Promise<Document> {
-  const pageSize = applyOrientation(def.pageSize ?? paperSizes.A4, def.pageOrientation);
   const guides = !!def.dev?.guides;
   const fontLoader = createFontLoader(def.fonts ?? []);
   const imageLoader = createImageLoader(def.images ?? []);
   const fontStore = createFontStore(fontLoader);
   const imageStore = createImageStore(imageLoader);
-  return { fontStore, imageStore, pageSize, guides };
+  return { fontStore, imageStore, guides };
 }
 
 export async function renderDocument(def: DocumentDefinition, pages: Page[]): Promise<Uint8Array> {
