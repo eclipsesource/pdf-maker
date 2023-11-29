@@ -4,8 +4,8 @@ import { parseBinaryData } from './binary-data.js';
 import { ImageLoader, LoadedImage } from './image-loader.js';
 import { optional, readAs, readObject, required, types } from './types.js';
 
-const imageTypes = ['jpeg', 'png'];
-export type ImageFormat = (typeof imageTypes)[number];
+const imageFormats = ['jpeg', 'png'];
+export type ImageFormat = (typeof imageFormats)[number];
 
 export type ImageDef = {
   name: string;
@@ -42,7 +42,7 @@ export function readImages(input: unknown): ImageDef[] {
 function readImage(input: unknown) {
   return readObject(input, {
     data: required(parseBinaryData),
-    format: optional(types.string({ enum: ['jpeg', 'png'] })),
+    format: optional(types.string({ enum: imageFormats })),
   }) as { data: Uint8Array; format?: ImageFormat };
 }
 
