@@ -1,6 +1,6 @@
 import { Box, ZERO_EDGES } from '../box.js';
 import { Frame } from '../frame.js';
-import { MakerCtx } from '../make-pdf.js';
+import { MakerCtx } from '../maker-ctx.js';
 import { Block, RowsBlock } from '../read-block.js';
 import { compact, omit } from '../utils.js';
 import { isBreakPossible, layoutBlock, LayoutContent } from './layout.js';

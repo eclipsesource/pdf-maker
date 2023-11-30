@@ -1,7 +1,7 @@
 import { Box, parseEdges, Size, subtractEdges, ZERO_EDGES } from '../box.js';
 import { AnchorObject, Frame } from '../frame.js';
 import { createFrameGuides } from '../guides.js';
-import { MakerCtx } from '../make-pdf.js';
+import { MakerCtx } from '../maker-ctx.js';
 import { Page } from '../page.js';
 import { applyOrientation, paperSizes } from '../page-sizes.js';
 import { Block, RowsBlock } from '../read-block.js';

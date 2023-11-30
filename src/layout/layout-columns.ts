@@ -1,6 +1,6 @@
 import { Box } from '../box.js';
 import { Frame } from '../frame.js';
-import { MakerCtx } from '../make-pdf.js';
+import { MakerCtx } from '../maker-ctx.js';
 import { Block, ColumnsBlock } from '../read-block.js';
 import { layoutBlock, LayoutContent } from './layout.js';
 

@@ -1,18 +1,12 @@
 import { DocumentDefinition } from './content.js';
 import { createFontLoader } from './font-loader.js';
-import { createFontStore, FontStore } from './fonts.js';
+import { createFontStore } from './fonts.js';
 import { createImageLoader } from './image-loader.js';
-import { createImageStore, ImageStore } from './images.js';
+import { createImageStore } from './images.js';
 import { layoutPages } from './layout/layout.js';
 import { readDocumentDefinition } from './read-document.js';
 import { renderDocument } from './render/render-document.js';
 import { readAs } from './types.js';
-
-export type MakerCtx = {
-  fontStore: FontStore;
-  imageStore: ImageStore;
-  guides?: boolean;
-};
 
 /**
  * Generates a PDF from the given document definition.

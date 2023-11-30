@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it } from '@jest/globals';
 
 import { Box } from '../box.js';
 import { FontStore } from '../fonts.js';
-import { MakerCtx } from '../make-pdf.js';
+import { MakerCtx } from '../maker-ctx.js';
 import { Block } from '../read-block.js';
 import { fakeFont, span } from '../test/test-utils.js';
 import { layoutColumnsContent } from './layout-columns.js';

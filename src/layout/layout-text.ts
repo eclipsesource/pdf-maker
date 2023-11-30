@@ -2,7 +2,7 @@ import { Box, Size } from '../box.js';
 import { Font } from '../fonts.js';
 import { LinkObject, RenderObject, TextRowObject, TextSegmentObject } from '../frame.js';
 import { createRowGuides } from '../guides.js';
-import { MakerCtx } from '../make-pdf.js';
+import { MakerCtx } from '../maker-ctx.js';
 import { TextBlock } from '../read-block.js';
 import {
   breakLine,

@@ -1,7 +1,7 @@
 import { Box, Pos, Size } from '../box.js';
 import { ImageObject, RenderObject } from '../frame.js';
 import { Image } from '../images.js';
-import { MakerCtx } from '../make-pdf.js';
+import { MakerCtx } from '../maker-ctx.js';
 import { ImageBlock } from '../read-block.js';
 import { LayoutContent } from './layout.js';
 

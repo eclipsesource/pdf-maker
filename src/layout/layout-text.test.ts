@@ -3,7 +3,7 @@ import { rgb } from 'pdf-lib';
 
 import { Box } from '../box.js';
 import { Font, FontSelector, FontStore } from '../fonts.js';
-import { MakerCtx } from '../make-pdf.js';
+import { MakerCtx } from '../maker-ctx.js';
 import { extractTextRows, fakeFont, range, span } from '../test/test-utils.js';
 import { layoutTextContent } from './layout-text.js';
 
