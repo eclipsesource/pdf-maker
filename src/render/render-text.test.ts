@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it } from '@jest/globals';
 
 import { Size } from '../box.js';
 import { Font } from '../fonts.js';
-import { TextObject } from '../layout/layout.js';
+import { TextObject } from '../frame.js';
 import { Page } from '../page.js';
 import { fakeFont, fakePDFPage, getContentStream } from '../test/test-utils.js';
 import { renderText } from './render-text.js';

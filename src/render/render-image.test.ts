@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it } from '@jest/globals';
 
 import { Size } from '../box.js';
+import { ImageObject } from '../frame.js';
 import { Image } from '../images.js';
-import { ImageObject } from '../layout/layout-image.js';
 import { Page } from '../page.js';
 import { fakePDFPage, getContentStream } from '../test/test-utils.js';
 import { renderImage } from './render-image.js';

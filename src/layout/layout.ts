@@ -1,16 +1,14 @@
 import { Box, parseEdges, Size, subtractEdges, ZERO_EDGES } from '../box.js';
-import { Color } from '../colors.js';
-import { Font } from '../fonts.js';
+import { AnchorObject, Frame } from '../frame.js';
 import { createFrameGuides } from '../guides.js';
 import { MakerCtx } from '../make-pdf.js';
 import { Page } from '../page.js';
 import { applyOrientation, paperSizes } from '../page-sizes.js';
 import { Block, RowsBlock } from '../read-block.js';
 import { DocumentDefinition } from '../read-document.js';
-import { GraphicsObject } from '../read-graphics.js';
 import { pickDefined } from '../types.js';
 import { layoutColumnsContent } from './layout-columns.js';
-import { ImageObject, layoutImageContent } from './layout-image.js';
+import { layoutImageContent } from './layout-image.js';
 import { layoutRowsContent } from './layout-rows.js';
 import { layoutTextContent } from './layout-text.js';
 
@@ -46,21 +44,6 @@ const defaultPageMargin = parseEdges('2cm');
 //    that is passed to them which already has the padding subtracted.
 
 /**
- * Frames are created during the layout process. They have a position
- * relative to their parent, a size, and render objects to be rendered.
- * Frames can contain children that represent nested blocks, e.g. in a
- * row or column layout.
- */
-export type Frame = {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-  objects?: RenderObject[];
-  children?: Frame[];
-};
-
-/**
  * Result of the layout of a block.
  */
 export type LayoutResult = {
@@ -75,47 +58,6 @@ export type LayoutResult = {
 export type LayoutContent = {
   frame: Omit<Frame, 'x' | 'y'>;
   remainder?: Block;
-};
-
-export type RenderObject = TextObject | ImageObject | GraphicsObject | LinkObject | AnchorObject;
-
-export type TextObject = {
-  type: 'text';
-  rows: TextRowObject[];
-};
-
-export type TextRowObject = {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-  baseline: number;
-  segments: TextSegmentObject[];
-};
-
-export type TextSegmentObject = {
-  text: string;
-  font: Font;
-  fontSize: number;
-  color?: Color;
-  rise?: number;
-  letterSpacing?: number;
-};
-
-export type LinkObject = {
-  type: 'link';
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-  url: string;
-};
-
-export type AnchorObject = {
-  type: 'anchor';
-  name: string;
-  x: number;
-  y: number;
 };
 
 export async function layoutPages(def: DocumentDefinition, ctx: MakerCtx): Promise<Page[]> {

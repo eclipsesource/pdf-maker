@@ -8,7 +8,7 @@ import {
 } from 'pdf-lib';
 
 import { Pos } from '../box.js';
-import { ImageObject } from '../layout/layout-image.js';
+import { ImageObject } from '../frame.js';
 import { addPageImage, Page } from '../page.js';
 import { compact } from '../utils.js';
 

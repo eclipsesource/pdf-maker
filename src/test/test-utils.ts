@@ -2,7 +2,7 @@ import { PDFContext, PDFDocument, PDFFont, PDFName, PDFPage, PDFRef } from 'pdf-
 
 import { Font, weightToNumber } from '../fonts.js';
 import { Image } from '../images.js';
-import { Frame } from '../layout/layout.js';
+import { Frame } from '../frame.js';
 import { Page } from '../page.js';
 import { TextAttrs, TextSpan } from '../read-block.js';
 

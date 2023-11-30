@@ -1,17 +1,9 @@
 import { Box, Pos, Size } from '../box.js';
+import { ImageObject, RenderObject } from '../frame.js';
 import { Image } from '../images.js';
 import { MakerCtx } from '../make-pdf.js';
 import { ImageBlock } from '../read-block.js';
-import { LayoutContent, RenderObject } from './layout.js';
-
-export type ImageObject = {
-  type: 'image';
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-  image: Image;
-};
+import { LayoutContent } from './layout.js';
 
 export async function layoutImageContent(
   block: ImageBlock,

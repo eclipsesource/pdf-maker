@@ -1,7 +1,7 @@
 import { PDFArray, PDFDict, PDFName, PDFPage, PDFString } from 'pdf-lib';
 
 import { Box, Pos } from '../box.js';
-import { AnchorObject, LinkObject } from '../layout/layout.js';
+import { AnchorObject, LinkObject } from '../frame.js';
 import { Page } from '../page.js';
 
 export function renderAnchor(obj: AnchorObject, page: Page, base: Pos) {

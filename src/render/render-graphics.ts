@@ -25,7 +25,6 @@ import {
 
 import { Pos } from '../box.js';
 import { LineCap, LineJoin } from '../content.js';
-import { getExtGraphicsState, Page } from '../page.js';
 import {
   CircleObject,
   FillAttrs,
@@ -36,7 +35,8 @@ import {
   PolylineObject,
   RectObject,
   Shape,
-} from '../read-graphics.js';
+} from '../frame.js';
+import { getExtGraphicsState, Page } from '../page.js';
 import { svgPathToPdfOps } from '../svg-paths.js';
 import { compact, multiplyMatrices, round } from '../utils.js';
 

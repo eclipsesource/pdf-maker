@@ -1,82 +1,15 @@
-import { Color, parseColor } from './colors.js';
-import { parseSvgPath, PathCommand } from './svg-paths.js';
+import { parseColor } from './colors.js';
+import {
+  CircleObject,
+  LineObject,
+  PathObject,
+  PolylineObject,
+  RectObject,
+  Shape,
+} from './frame.js';
+import { parseSvgPath } from './svg-paths.js';
 import { Obj, optional, readFrom, readObject, required, types } from './types.js';
 import { omit } from './utils.js';
-
-export type GraphicsObject = {
-  type: 'graphics';
-  shapes: Shape[];
-};
-
-export type Shape = RectObject | CircleObject | LineObject | PolylineObject | PathObject;
-
-type LineCap = 'butt' | 'round' | 'square';
-type LineJoin = 'miter' | 'round' | 'bevel';
-
-export type LineAttrs = {
-  lineWidth?: number;
-  lineColor?: Color;
-  lineOpacity?: number;
-  lineCap?: LineCap;
-  lineJoin?: LineJoin;
-  lineDash?: number[];
-};
-
-export type FillAttrs = {
-  fillColor?: Color;
-  fillOpacity?: number;
-};
-
-type TransformAttrs = {
-  translate?: { x?: number; y?: number };
-  scale?: { x?: number; y?: number };
-  rotate?: { angle: number; cx?: number; cy?: number };
-  skew?: { x?: number; y?: number };
-  matrix?: number[];
-};
-
-export type RectObject = {
-  type: 'rect';
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-} & Omit<LineAttrs, 'lineCap'> &
-  FillAttrs &
-  TransformAttrs;
-
-export type CircleObject = {
-  type: 'circle';
-  cx: number;
-  cy: number;
-  r: number;
-} & Omit<LineAttrs, 'lineCap' | 'lineJoin'> &
-  FillAttrs &
-  TransformAttrs;
-
-export type LineObject = {
-  type: 'line';
-  x1: number;
-  y1: number;
-  x2: number;
-  y2: number;
-} & Omit<LineAttrs, 'lineJoin'> &
-  TransformAttrs;
-
-export type PolylineObject = {
-  type: 'polyline';
-  points: { x: number; y: number }[];
-  closePath?: boolean;
-} & LineAttrs &
-  FillAttrs &
-  TransformAttrs;
-
-export type PathObject = {
-  type: 'path';
-  commands: PathCommand[];
-} & LineAttrs &
-  FillAttrs &
-  TransformAttrs;
 
 const tLineCap = types.string({ enum: ['butt', 'round', 'square'] });
 const tLineJoin = types.string({ enum: ['miter', 'round', 'bevel'] });

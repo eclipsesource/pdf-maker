@@ -1,5 +1,6 @@
 import { Box, Size } from '../box.js';
 import { Font } from '../fonts.js';
+import { LinkObject, RenderObject, TextRowObject, TextSegmentObject } from '../frame.js';
 import { createRowGuides } from '../guides.js';
 import { MakerCtx } from '../make-pdf.js';
 import { TextBlock } from '../read-block.js';
@@ -11,13 +12,7 @@ import {
   TextSegment,
 } from '../text.js';
 import { omit } from '../utils.js';
-import {
-  LayoutContent,
-  LinkObject,
-  RenderObject,
-  TextRowObject,
-  TextSegmentObject,
-} from './layout.js';
+import { LayoutContent } from './layout.js';
 
 export async function layoutTextContent(
   block: TextBlock,

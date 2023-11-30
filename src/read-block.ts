@@ -1,7 +1,8 @@
 import { BoxEdges, parseEdges, parseLength } from './box.js';
 import { Color, parseColor } from './colors.js';
 import { Alignment, FontStyle, FontWeight } from './content.js';
-import { readShape, Shape } from './read-graphics.js';
+import { Shape } from './frame.js';
+import { readShape } from './read-graphics.js';
 import {
   dynamic,
   isObject,
