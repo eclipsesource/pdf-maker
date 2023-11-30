@@ -1,5 +1,3 @@
-import { Obj } from './types.js';
-
 export function printValue(value: unknown, refs?: unknown[]) {
   if (typeof value === 'string') return `'${value}'`;
   if (Array.isArray(value)) return printArray(value, refs);
@@ -12,7 +10,7 @@ export function printValue(value: unknown, refs?: unknown[]) {
     return `${value.constructor.name} ${printArray([...new Uint8Array(value.buffer)])}`;
   }
   const str = `${value}`;
-  if (str === '[object Object]') return printObject(value as Obj, refs);
+  if (str === '[object Object]') return printObject(value as Record<string, unknown>, refs);
   return str;
 }
 
@@ -27,7 +25,7 @@ function printArray(array: unknown[], refs?: unknown[]): string {
   return `[${content}${tail}]`;
 }
 
-function printObject(object: Obj, refs?: unknown[]): string {
+function printObject(object: Record<string, unknown>, refs?: unknown[]): string {
   if (refs?.includes(object)) return 'recursive ref';
   const maxEntries = 8;
   const entries = Object.entries(object);
