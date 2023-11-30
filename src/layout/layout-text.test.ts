@@ -2,7 +2,8 @@ import { beforeEach, describe, expect, it } from '@jest/globals';
 import { rgb } from 'pdf-lib';
 
 import { Box } from '../box.js';
-import { Font, FontSelector, FontStore } from '../fonts.js';
+import { FontStore } from '../font-loader.js';
+import { Font, FontSelector } from '../fonts.js';
 import { MakerCtx } from '../maker-ctx.js';
 import { extractTextRows, fakeFont, range, span } from '../test/test-utils.js';
 import { layoutTextContent } from './layout-text.js';

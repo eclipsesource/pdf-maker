@@ -1,6 +1,6 @@
-import { toUint8Array } from 'pdf-lib';
+import { JpegEmbedder, PngEmbedder, toUint8Array } from 'pdf-lib';
 
-import { ImageDef, ImageFormat as ImageFormat, ImageSelector } from './images.js';
+import { Image, ImageDef, ImageFormat, ImageSelector } from './images.js';
 
 export type LoadedImage = {
   format: ImageFormat;
@@ -26,5 +26,33 @@ export function createImageLoader(images: ImageDef[]): ImageLoader {
       format: imageDef.format,
       data,
     };
+  }
+}
+
+export type ImageStore = {
+  selectImage(selector: ImageSelector): Promise<Image>;
+};
+
+export function createImageStore(imageLoader: ImageLoader): ImageStore {
+  return {
+    selectImage,
+  };
+
+  async function selectImage(selector: ImageSelector): Promise<Image> {
+    let loadedImage: LoadedImage;
+    try {
+      loadedImage = await imageLoader.loadImage(selector);
+    } catch (error) {
+      const selectorStr =
+        `'${selector.name}'` +
+        (selector.width != null ? `, width=${selector.width}` : '') +
+        (selector.height != null ? `, height=${selector.height}` : '');
+      throw new Error(`Could not load image ${selectorStr}: ${(error as Error)?.message ?? error}`);
+    }
+
+    const { format, data } = loadedImage;
+    const embedder = await (format === 'png' ? PngEmbedder.for(data) : JpegEmbedder.for(data));
+    const { width, height } = embedder;
+    return { name: selector.name, format, data, width, height };
   }
 }

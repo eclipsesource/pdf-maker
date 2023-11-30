@@ -1,8 +1,6 @@
 import { DocumentDefinition } from './content.js';
-import { createFontLoader } from './font-loader.js';
-import { createFontStore } from './fonts.js';
-import { createImageLoader } from './image-loader.js';
-import { createImageStore } from './images.js';
+import { createFontLoader, createFontStore } from './font-loader.js';
+import { createImageLoader, createImageStore } from './image-loader.js';
 import { layoutPages } from './layout/layout.js';
 import { readDocumentDefinition } from './read-document.js';
 import { renderDocument } from './render/render-document.js';

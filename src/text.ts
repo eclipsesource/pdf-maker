@@ -1,7 +1,8 @@
 import { Color } from './colors.js';
 import { FontStyle, FontWeight } from './content.js';
+import { FontStore } from './font-loader.js';
 import { getTextHeight, getTextWidth } from './font-metrics.js';
-import { Font, FontStore } from './fonts.js';
+import { Font } from './fonts.js';
 import { TextSpan } from './read-block.js';
 
 const defaultFontSize = 18;

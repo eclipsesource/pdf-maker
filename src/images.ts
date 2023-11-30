@@ -1,7 +1,6 @@
 import { JpegEmbedder, PDFDocument, PDFRef, PngEmbedder } from 'pdf-lib';
 
 import { parseBinaryData } from './binary-data.js';
-import { ImageLoader, LoadedImage } from './image-loader.js';
 import { optional, readAs, readObject, required, types } from './types.js';
 
 const imageFormats = ['jpeg', 'png'];
@@ -11,10 +10,6 @@ export type ImageDef = {
   name: string;
   data: string | Uint8Array | ArrayBuffer;
   format: ImageFormat;
-};
-
-export type ImageStore = {
-  selectImage(selector: ImageSelector): Promise<Image>;
 };
 
 export type Image = {
@@ -63,28 +58,4 @@ export function registerImage(image: Image, pdfDoc: PDFDocument) {
     },
   });
   return ref;
-}
-
-export function createImageStore(imageLoader: ImageLoader): ImageStore {
-  return {
-    selectImage,
-  };
-
-  async function selectImage(selector: ImageSelector): Promise<Image> {
-    let loadedImage: LoadedImage;
-    try {
-      loadedImage = await imageLoader.loadImage(selector);
-    } catch (error) {
-      const selectorStr =
-        `'${selector.name}'` +
-        (selector.width != null ? `, width=${selector.width}` : '') +
-        (selector.height != null ? `, height=${selector.height}` : '');
-      throw new Error(`Could not load image ${selectorStr}: ${(error as Error)?.message ?? error}`);
-    }
-
-    const { format, data } = loadedImage;
-    const embedder = await (format === 'png' ? PngEmbedder.for(data) : JpegEmbedder.for(data));
-    const { width, height } = embedder;
-    return { name: selector.name, format, data, width, height };
-  }
 }

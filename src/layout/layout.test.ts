@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from '@jest/globals';
 
 import { Box } from '../box.js';
-import { FontStore } from '../fonts.js';
+import { FontStore } from '../font-loader.js';
 import { MakerCtx } from '../maker-ctx.js';
 import { paperSizes } from '../page-sizes.js';
 import { Block, TextAttrs, TextSpan } from '../read-block.js';

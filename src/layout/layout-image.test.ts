@@ -1,7 +1,8 @@
 import { beforeEach, describe, expect, it, jest } from '@jest/globals';
 
 import { Box } from '../box.js';
-import { ImageSelector, ImageStore } from '../images.js';
+import { ImageStore } from '../image-loader.js';
+import { ImageSelector } from '../images.js';
 import { MakerCtx } from '../maker-ctx.js';
 import { ImageBlock } from '../read-block.js';
 import { fakeImage } from '../test/test-utils.js';

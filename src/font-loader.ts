@@ -1,7 +1,8 @@
+import fontkit from '@pdf-lib/fontkit';
 import { toUint8Array } from 'pdf-lib';
 
 import { FontWeight } from './content.js';
-import { FontDef, FontSelector, weightToNumber } from './fonts.js';
+import { Font, FontDef, FontSelector, weightToNumber } from './fonts.js';
 import { pickDefined } from './types.js';
 
 export type LoadedFont = {
@@ -85,4 +86,46 @@ function selectFontForWeight(fonts: FontDef[], weight: FontWeight): FontDef | un
     if (font) return font;
   }
   throw new Error(`Could not find font for weight ${weight}`);
+}
+
+export type FontStore = {
+  selectFont(attrs: FontSelector): Promise<Font>;
+};
+
+export function createFontStore(fontLoader: FontLoader): FontStore {
+  const fontCache: Record<string, Promise<Font>> = {};
+
+  return {
+    selectFont,
+  };
+
+  function selectFont(selector: FontSelector): Promise<Font> {
+    const cacheKey = [
+      selector.fontFamily ?? 'any',
+      selector.fontStyle ?? 'normal',
+      selector.fontWeight ?? 'normal',
+    ].join(':');
+    return (fontCache[cacheKey] ??= loadFont(selector));
+  }
+
+  async function loadFont(selector: FontSelector): Promise<Font> {
+    let loadedFont: LoadedFont;
+    try {
+      loadedFont = await fontLoader.loadFont(selector);
+    } catch (error) {
+      const { fontFamily: family, fontStyle: style, fontWeight: weight } = selector;
+      const selectorStr = `'${family}', style=${style ?? 'normal'}, weight=${weight ?? 'normal'}`;
+      throw new Error(
+        `Could not load font for ${selectorStr}: ${(error as Error)?.message ?? error}`
+      );
+    }
+    const fkFont = fontkit.create(loadedFont.data);
+    return pickDefined({
+      name: loadedFont.name,
+      data: loadedFont.data,
+      style: selector.fontStyle ?? 'normal',
+      weight: weightToNumber(selector.fontWeight ?? 400),
+      fkFont,
+    });
+  }
 }

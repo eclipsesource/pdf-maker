@@ -1,7 +1,8 @@
 import { beforeEach, describe, expect, it } from '@jest/globals';
 import { rgb } from 'pdf-lib';
 
-import { Font, FontStore } from './fonts.js';
+import { FontStore } from './font-loader.js';
+import { Font } from './fonts.js';
 import { fakeFont } from './test/test-utils.js';
 import {
   breakLine,

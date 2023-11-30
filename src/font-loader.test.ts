@@ -1,8 +1,9 @@
-import { beforeEach, describe, expect, it } from '@jest/globals';
+import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals';
+import fontkit from '@pdf-lib/fontkit';
 
-import { createFontLoader, FontLoader } from './font-loader.js';
-import { FontDef } from './fonts.js';
-import { mkData } from './test/test-utils.js';
+import { createFontLoader, createFontStore, FontLoader } from './font-loader.js';
+import { Font, FontDef, FontSelector } from './fonts.js';
+import { fakeFont, mkData } from './test/test-utils.js';
 
 describe('font-loader', () => {
   let normalFont: FontDef;
@@ -125,6 +126,82 @@ describe('font-loader', () => {
         name: 'Other',
         data: otherFont.data,
       });
+    });
+  });
+
+  describe('FontStore', () => {
+    let testFont: Font;
+    let fontLoader: FontLoader;
+
+    beforeEach(() => {
+      testFont = fakeFont('Test');
+      fontLoader = {
+        loadFont: jest.fn(async (selector: FontSelector) => {
+          if (selector.fontFamily === 'Test') return testFont;
+          throw new Error('No such font defined');
+        }) as any,
+      };
+      jest.spyOn(fontkit, 'create').mockReturnValue({ fake: true } as any);
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it('rejects if font could not be loaded', async () => {
+      const store = createFontStore(fontLoader);
+
+      await expect(store.selectFont({ fontFamily: 'foo' })).rejects.toThrowError(
+        "Could not load font for 'foo', style=normal, weight=normal: No such font defined"
+      );
+    });
+
+    it('creates fontkit font object', async () => {
+      const store = createFontStore(fontLoader);
+
+      const font = await store.selectFont({ fontFamily: 'Test' });
+
+      expect(font).toEqual({
+        name: 'Test',
+        style: 'normal',
+        weight: 400,
+        data: testFont.data,
+        fkFont: { fake: true },
+      });
+    });
+
+    it('calls font loader only once per selector', async () => {
+      const store = createFontStore(fontLoader);
+
+      await store.selectFont({ fontFamily: 'Test' });
+      await store.selectFont({ fontFamily: 'Test', fontStyle: 'italic' });
+      await store.selectFont({ fontFamily: 'Test' });
+      await store.selectFont({ fontFamily: 'Test', fontStyle: 'italic' });
+
+      expect(fontLoader.loadFont).toHaveBeenCalledTimes(2);
+    });
+
+    it('returns same font object for concurrent calls', async () => {
+      const store = createFontStore(fontLoader);
+
+      const [font1, font2] = await Promise.all([
+        store.selectFont({ fontFamily: 'Test' }),
+        store.selectFont({ fontFamily: 'Test' }),
+      ]);
+
+      expect(font1).toBe(font2);
+    });
+
+    it('caches errors from font loader', async () => {
+      const store = createFontStore(fontLoader);
+
+      await expect(store.selectFont({ fontFamily: 'foo' })).rejects.toThrowError(
+        "Could not load font for 'foo', style=normal, weight=normal: No such font defined"
+      );
+      await expect(store.selectFont({ fontFamily: 'foo' })).rejects.toThrowError(
+        "Could not load font for 'foo', style=normal, weight=normal: No such font defined"
+      );
+      expect(fontLoader.loadFont).toHaveBeenCalledTimes(1);
     });
   });
 });
