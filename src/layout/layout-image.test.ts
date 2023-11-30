@@ -1,11 +1,11 @@
 import { beforeEach, describe, expect, it, jest } from '@jest/globals';
 
-import { Box } from './box.js';
-import { ImageSelector, ImageStore } from './images.js';
+import { Box } from '../box.js';
+import { ImageSelector, ImageStore } from '../images.js';
+import { MakerCtx } from '../make-pdf.js';
+import { ImageBlock } from '../read-block.js';
+import { fakeImage } from '../test/test-utils.js';
 import { layoutImageContent } from './layout-image.js';
-import { MakerCtx } from './make-pdf.js';
-import { ImageBlock } from './read-block.js';
-import { fakeImage } from './test/test-utils.js';
 
 const { objectContaining } = expect;
 

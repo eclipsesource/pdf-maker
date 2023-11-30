@@ -1,8 +1,8 @@
-import { Box, ZERO_EDGES } from './box.js';
+import { Box, ZERO_EDGES } from '../box.js';
+import { MakerCtx } from '../make-pdf.js';
+import { Block, RowsBlock } from '../read-block.js';
+import { compact, omit } from '../utils.js';
 import { Frame, isBreakPossible, layoutBlock, LayoutContent } from './layout.js';
-import { MakerCtx } from './make-pdf.js';
-import { Block, RowsBlock } from './read-block.js';
-import { compact, omit } from './utils.js';
 
 export async function layoutRowsContent(
   block: RowsBlock,

@@ -1,7 +1,7 @@
-import { Box } from './box.js';
+import { Box } from '../box.js';
+import { MakerCtx } from '../make-pdf.js';
+import { Block, ColumnsBlock } from '../read-block.js';
 import { Frame, layoutBlock, LayoutContent } from './layout.js';
-import { MakerCtx } from './make-pdf.js';
-import { Block, ColumnsBlock } from './read-block.js';
 
 export async function layoutColumnsContent(
   block: ColumnsBlock,

@@ -1,8 +1,8 @@
-import { Box, Pos, Size } from './box.js';
-import { Image } from './images.js';
+import { Box, Pos, Size } from '../box.js';
+import { Image } from '../images.js';
+import { MakerCtx } from '../make-pdf.js';
+import { ImageBlock } from '../read-block.js';
 import { LayoutContent, RenderObject } from './layout.js';
-import { MakerCtx } from './make-pdf.js';
-import { ImageBlock } from './read-block.js';
 
 export type ImageObject = {
   type: 'image';

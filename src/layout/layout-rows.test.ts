@@ -1,12 +1,12 @@
 import { beforeEach, describe, expect, it } from '@jest/globals';
 
-import { Box } from './box.js';
-import { FontStore } from './fonts.js';
+import { Box } from '../box.js';
+import { FontStore } from '../fonts.js';
+import { MakerCtx } from '../make-pdf.js';
+import { Block } from '../read-block.js';
+import { extractTextRows, fakeFont, range, span } from '../test/test-utils.js';
 import { Frame } from './layout.js';
 import { layoutRowsContent } from './layout-rows.js';
-import { MakerCtx } from './make-pdf.js';
-import { Block } from './read-block.js';
-import { extractTextRows, fakeFont, range, span } from './test/test-utils.js';
 
 describe('layout-rows', () => {
   let ctx: MakerCtx, box: Box;

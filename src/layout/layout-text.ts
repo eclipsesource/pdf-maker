@@ -1,6 +1,16 @@
-import { Box, Size } from './box.js';
-import { Font } from './fonts.js';
-import { createRowGuides } from './guides.js';
+import { Box, Size } from '../box.js';
+import { Font } from '../fonts.js';
+import { createRowGuides } from '../guides.js';
+import { MakerCtx } from '../make-pdf.js';
+import { TextBlock } from '../read-block.js';
+import {
+  breakLine,
+  convertToTextSpan,
+  extractTextSegments,
+  flattenTextSegments,
+  TextSegment,
+} from '../text.js';
+import { omit } from '../utils.js';
 import {
   LayoutContent,
   LinkObject,
@@ -8,16 +18,6 @@ import {
   TextRowObject,
   TextSegmentObject,
 } from './layout.js';
-import { MakerCtx } from './make-pdf.js';
-import { TextBlock } from './read-block.js';
-import {
-  breakLine,
-  convertToTextSpan,
-  extractTextSegments,
-  flattenTextSegments,
-  TextSegment,
-} from './text.js';
-import { omit } from './utils.js';
 
 export async function layoutTextContent(
   block: TextBlock,

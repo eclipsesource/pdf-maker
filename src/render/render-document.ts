@@ -1,7 +1,7 @@
 import { PDFDict, PDFDocument, PDFHexString, PDFName } from 'pdf-lib';
 
-import { Page } from './page.js';
-import { DocumentDefinition, Metadata } from './read-document.js';
+import { Page } from '../page.js';
+import { DocumentDefinition, Metadata } from '../read-document.js';
 import { renderPage } from './render-page.js';
 
 export async function renderDocument(def: DocumentDefinition, pages: Page[]): Promise<Uint8Array> {

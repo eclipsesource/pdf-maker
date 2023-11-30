@@ -15,10 +15,10 @@ import {
   showText,
 } from 'pdf-lib';
 
-import { Pos } from './box.js';
-import { TextObject } from './layout.js';
-import { addPageFont, Page, TextState } from './page.js';
-import { compact } from './utils.js';
+import { Pos } from '../box.js';
+import { TextObject } from '../layout/layout.js';
+import { addPageFont, Page, TextState } from '../page.js';
+import { compact } from '../utils.js';
 
 export function renderText(object: TextObject, page: Page, base: Pos) {
   const contentStream: PDFContentStream = (page.pdfPage as any).getContentStream();

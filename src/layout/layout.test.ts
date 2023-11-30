@@ -1,13 +1,13 @@
 import { beforeEach, describe, expect, it } from '@jest/globals';
 
-import { Box } from './box.js';
-import { FontStore } from './fonts.js';
+import { Box } from '../box.js';
+import { FontStore } from '../fonts.js';
+import { MakerCtx } from '../make-pdf.js';
+import { paperSizes } from '../page-sizes.js';
+import { Block, TextAttrs, TextSpan } from '../read-block.js';
+import { PageInfo, readDocumentDefinition } from '../read-document.js';
+import { fakeFont, p, range } from '../test/test-utils.js';
 import { isBreakPossible, layoutBlock, layoutPages } from './layout.js';
-import { MakerCtx } from './make-pdf.js';
-import { paperSizes } from './page-sizes.js';
-import { Block, TextAttrs, TextSpan } from './read-block.js';
-import { PageInfo, readDocumentDefinition } from './read-document.js';
-import { fakeFont, p, range } from './test/test-utils.js';
 
 const { objectContaining } = expect;
 

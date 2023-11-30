@@ -1,11 +1,11 @@
 import { beforeEach, describe, expect, it } from '@jest/globals';
 import { rgb } from 'pdf-lib';
 
-import { Box } from './box.js';
-import { Font, FontSelector, FontStore } from './fonts.js';
+import { Box } from '../box.js';
+import { Font, FontSelector, FontStore } from '../fonts.js';
+import { MakerCtx } from '../make-pdf.js';
+import { extractTextRows, fakeFont, range, span } from '../test/test-utils.js';
 import { layoutTextContent } from './layout-text.js';
-import { MakerCtx } from './make-pdf.js';
-import { extractTextRows, fakeFont, range, span } from './test/test-utils.js';
 
 const { objectContaining } = expect;
 

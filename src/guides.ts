@@ -1,7 +1,7 @@
 import { rgb } from 'pdf-lib';
 
 import { ZERO_EDGES } from './box.js';
-import { Frame, TextRowObject } from './layout.js';
+import { Frame, TextRowObject } from './layout/layout.js';
 import { Block } from './read-block.js';
 import { CircleObject, GraphicsObject, LineObject, RectObject } from './read-graphics.js';
 import { compact } from './utils.js';

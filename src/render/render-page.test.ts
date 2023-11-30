@@ -1,12 +1,12 @@
 import { beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { PDFArray, PDFDict, PDFDocument, PDFName, PDFPage, PDFRef } from 'pdf-lib';
 
-import { Size } from './box.js';
-import { Font } from './fonts.js';
-import { Frame } from './layout.js';
-import { Page } from './page.js';
+import { Size } from '../box.js';
+import { Font } from '../fonts.js';
+import { Frame } from '../layout/layout.js';
+import { Page } from '../page.js';
+import { fakeFont, fakePDFPage, getContentStream } from '../test/test-utils.js';
 import { renderFrame, renderPage } from './render-page.js';
-import { fakeFont, fakePDFPage, getContentStream } from './test/test-utils.js';
 
 describe('render-page', () => {
   let pdfPage: PDFPage;

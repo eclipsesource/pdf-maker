@@ -1,18 +1,18 @@
-import { Box, parseEdges, Size, subtractEdges, ZERO_EDGES } from './box.js';
-import { Color } from './colors.js';
-import { Font } from './fonts.js';
-import { createFrameGuides } from './guides.js';
+import { Box, parseEdges, Size, subtractEdges, ZERO_EDGES } from '../box.js';
+import { Color } from '../colors.js';
+import { Font } from '../fonts.js';
+import { createFrameGuides } from '../guides.js';
+import { MakerCtx } from '../make-pdf.js';
+import { Page } from '../page.js';
+import { applyOrientation, paperSizes } from '../page-sizes.js';
+import { Block, RowsBlock } from '../read-block.js';
+import { DocumentDefinition } from '../read-document.js';
+import { GraphicsObject } from '../read-graphics.js';
+import { pickDefined } from '../types.js';
 import { layoutColumnsContent } from './layout-columns.js';
 import { ImageObject, layoutImageContent } from './layout-image.js';
 import { layoutRowsContent } from './layout-rows.js';
 import { layoutTextContent } from './layout-text.js';
-import { MakerCtx } from './make-pdf.js';
-import { Page } from './page.js';
-import { applyOrientation, paperSizes } from './page-sizes.js';
-import { Block, RowsBlock } from './read-block.js';
-import { DocumentDefinition } from './read-document.js';
-import { GraphicsObject } from './read-graphics.js';
-import { pickDefined } from './types.js';
 
 const defaultPageMargin = parseEdges('2cm');
 

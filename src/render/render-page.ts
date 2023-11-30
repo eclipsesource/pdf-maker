@@ -1,8 +1,8 @@
 import { PDFDocument } from 'pdf-lib';
 
-import { Pos } from './box.js';
-import { Frame } from './layout.js';
-import { Page } from './page.js';
+import { Pos } from '../box.js';
+import { Frame } from '../layout/layout.js';
+import { Page } from '../page.js';
 import { renderAnchor, renderLink } from './render-annotations.js';
 import { renderGraphics } from './render-graphics.js';
 import { renderImage } from './render-image.js';
