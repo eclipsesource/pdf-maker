@@ -1,5 +1,6 @@
-import { namedColors } from './colors.js';
-import { paperSizes } from './page-sizes.js';
+import { Color } from './colors.js';
+import { Length } from './sizes.js';
+import { Orientation, PaperSize } from './sizes.js';
 
 /**
  * The complete definition of a document to create.
@@ -30,7 +31,7 @@ export type DocumentDefinition = {
   /**
    * The page size of the document. Defaults to A4.
    */
-  pageSize?: PaperSize | Size;
+  pageSize?: PaperSize;
 
   /**
    * The orientation of the pages in the document. When this parameter is set, width and height
@@ -668,32 +669,4 @@ export type BoxLengths = {
   y?: Length;
 };
 
-/**
- * A length definition as a number, optionally followed by a unit.
- * Supported units are `pt` (point), `in` (inch), `mm` (millimeter), and `cm` (centimeter).
- * If the unit is left out, the number is interpreted as point (`pt`).
- * One point is defined as `1/72` of an inch (`72pt = 1in`).
- */
-export type Length = number | `${number}${LengthUnit}`;
-
-export type LengthUnit = 'pt' | 'in' | 'mm' | 'cm';
-
-export type Color = NamedColor | HTMLColor;
-
-export type NamedColor = keyof typeof namedColors;
-
-/**
- * A color specified in the hexadecimal format `#xxxxxx` that is usual in HTML.
- */
-export type HTMLColor = `#${string}`;
-
 export type Alignment = 'left' | 'right' | 'center';
-
-/**
- * All named paper sizes are in portrait orientation.
- */
-export type PaperSize = keyof typeof paperSizes;
-
-export type Orientation = 'portrait' | 'landscape';
-
-export type Size = { width: Length; height: Length };

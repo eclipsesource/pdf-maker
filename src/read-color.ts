@@ -1,10 +1,11 @@
 import { Color, rgb } from 'pdf-lib';
 
+import { namedColors } from './api/colors.js';
 import { typeError } from './types.js';
 
 export { Color };
 
-export function parseColor(input: unknown): Color {
+export function readColor(input: unknown): Color {
   if (typeof input === 'string') {
     if (/^#[0-9a-f]{6}$/.test(input)) {
       const r = parseInt(input.slice(1, 3), 16) / 255;
@@ -13,22 +14,8 @@ export function parseColor(input: unknown): Color {
       return rgb(r, g, b);
     }
     const color = namedColors[input as keyof typeof namedColors];
-    if (color) return color;
+    if (color) return rgb(...color);
     throw typeError('valid color name', input);
   }
   throw typeError('valid color', input);
 }
-
-export const namedColors = {
-  black: rgb(0, 0, 0),
-  gray: rgb(0.5, 0.5, 0.5),
-  white: rgb(1, 1, 1),
-  red: rgb(1, 0, 0),
-  blue: rgb(0, 0, 1),
-  green: rgb(0, 0.5, 0),
-  cyan: rgb(0, 1, 1),
-  magenta: rgb(1, 0, 1),
-  yellow: rgb(1, 1, 0),
-  lightgray: rgb(0.83, 0.83, 0.83),
-  darkgray: rgb(0.66, 0.66, 0.66),
-};

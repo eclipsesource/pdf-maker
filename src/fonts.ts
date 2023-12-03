@@ -1,8 +1,8 @@
 import fontkit from '@pdf-lib/fontkit';
 import { CustomFontSubsetEmbedder, PDFDocument, PDFFont, PDFRef } from 'pdf-lib';
 
+import { FontStyle, FontWeight } from './api/content.js';
 import { parseBinaryData } from './binary-data.js';
-import { FontStyle, FontWeight } from './content.js';
 import { printValue } from './print-value.js';
 import { optional, readAs, readBoolean, readObject, required, types } from './types.js';
 

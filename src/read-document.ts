@@ -1,8 +1,8 @@
 import { BoxEdges, parseEdges, Size } from './box.js';
 import { FontDef, readFonts } from './fonts.js';
 import { ImageDef, readImages } from './images.js';
-import { parseOrientation, parsePageSize } from './page-sizes.js';
 import { Block, readBlock, readInheritableAttrs, TextAttrs } from './read-block.js';
+import { parseOrientation, readPageSize } from './read-page-size.js';
 import { dynamic, Obj, optional, readAs, readObject, required, typeError, types } from './types.js';
 
 export type DocumentDefinition = {
@@ -41,7 +41,7 @@ export function readDocumentDefinition(input: unknown): DocumentDefinition {
   const def1 = readObject(input, {
     fonts: optional(readFonts),
     images: optional(readImages),
-    pageSize: optional(parsePageSize),
+    pageSize: optional(readPageSize),
     pageOrientation: optional(parseOrientation),
     info: optional(readInfo),
     defaultStyle: optional(readInheritableAttrs),

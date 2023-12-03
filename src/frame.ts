@@ -1,6 +1,6 @@
-import { Color } from './colors.js';
 import { Font } from './fonts.js';
 import { Image } from './images.js';
+import { Color } from './read-color.js';
 import { PathCommand } from './svg-paths.js';
 
 /**

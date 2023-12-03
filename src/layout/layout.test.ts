@@ -1,9 +1,9 @@
 import { beforeEach, describe, expect, it } from '@jest/globals';
 
+import { paperSizes } from '../api/sizes.js';
 import { Box } from '../box.js';
 import { FontStore } from '../font-loader.js';
 import { MakerCtx } from '../maker-ctx.js';
-import { paperSizes } from '../page-sizes.js';
 import { Block, TextAttrs, TextSpan } from '../read-block.js';
 import { PageInfo, readDocumentDefinition } from '../read-document.js';
 import { fakeFont, p, range } from '../test/test-utils.js';

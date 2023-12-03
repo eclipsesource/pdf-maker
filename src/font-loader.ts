@@ -1,7 +1,7 @@
 import fontkit from '@pdf-lib/fontkit';
 import { toUint8Array } from 'pdf-lib';
 
-import { FontWeight } from './content.js';
+import { FontWeight } from './api/content.js';
 import { Font, FontDef, FontSelector, weightToNumber } from './fonts.js';
 import { pickDefined } from './types.js';
 

@@ -1,7 +1,7 @@
+import { Alignment, FontStyle, FontWeight } from './api/content.js';
 import { BoxEdges, parseEdges, parseLength } from './box.js';
-import { Color, parseColor } from './colors.js';
-import { Alignment, FontStyle, FontWeight } from './content.js';
 import { Shape } from './frame.js';
+import { Color, readColor } from './read-color.js';
 import { readShape } from './read-graphics.js';
 import {
   dynamic,
@@ -189,7 +189,7 @@ export function readTextAttrs(input: Obj): TextAttrs {
     lineHeight: optional(types.number({ minimum: 0 })),
     bold: optional(types.boolean()),
     italic: optional(types.boolean()),
-    color: optional(parseColor),
+    color: optional(readColor),
     link: optional(types.string()),
     rise: optional(types.number()),
     letterSpacing: optional(types.number()),

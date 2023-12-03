@@ -1,9 +1,9 @@
-import { Color } from './colors.js';
-import { FontStyle, FontWeight } from './content.js';
+import { FontStyle, FontWeight } from './api/content.js';
 import { FontStore } from './font-loader.js';
 import { getTextHeight, getTextWidth } from './font-metrics.js';
 import { Font } from './fonts.js';
 import { TextSpan } from './read-block.js';
+import { Color } from './read-color.js';
 
 const defaultFontSize = 18;
 const defaultLineHeight = 1.2;

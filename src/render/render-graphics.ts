@@ -23,8 +23,8 @@ import {
   stroke,
 } from 'pdf-lib';
 
+import { LineCap, LineJoin } from '../api/content.js';
 import { Pos } from '../box.js';
-import { LineCap, LineJoin } from '../content.js';
 import {
   CircleObject,
   FillAttrs,

@@ -1,4 +1,3 @@
-import { parseColor } from './colors.js';
 import {
   CircleObject,
   LineObject,
@@ -7,6 +6,7 @@ import {
   RectObject,
   Shape,
 } from './frame.js';
+import { readColor } from './read-color.js';
 import { parseSvgPath } from './svg-paths.js';
 import { Obj, optional, readFrom, readObject, required, types } from './types.js';
 import { omit } from './utils.js';
@@ -101,7 +101,7 @@ function readPath(input: Obj): PathObject {
 
 const lineAttrs = {
   lineWidth: optional(tLineWidth),
-  lineColor: optional(parseColor),
+  lineColor: optional(readColor),
   lineOpacity: optional(tOpacity),
   lineCap: optional(tLineCap),
   lineJoin: optional(tLineJoin),
@@ -109,7 +109,7 @@ const lineAttrs = {
 };
 
 const fillAttrs = {
-  fillColor: optional(parseColor),
+  fillColor: optional(readColor),
   fillOpacity: optional(tOpacity),
 };
 

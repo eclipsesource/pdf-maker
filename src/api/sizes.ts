@@ -1,38 +1,23 @@
-import { parseLength, Size } from './box.js';
-import { isObject, readFrom, required, typeError } from './types.js';
+/**
+ * A length definition as a number, optionally followed by a unit.
+ * Supported units are `pt` (point), `in` (inch), `mm` (millimeter), and `cm` (centimeter).
+ * If the unit is left out, the number is interpreted as point (`pt`).
+ * One point is defined as `1/72` of an inch (`72pt = 1in`).
+ */
+export type Length = number | `${number}${LengthUnit}`;
 
-export function parsePageSize(def?: unknown): Size {
-  if (typeof def === 'string') {
-    const size = paperSizes[def as keyof typeof paperSizes];
-    if (!size) throw typeError('valid paper size', def);
-    const { width, height } = size;
-    return { width, height };
-  }
-  if (isObject(def)) {
-    const width = readFrom(def, 'width', required(parseLength));
-    const height = readFrom(def, 'height', required(parseLength));
-    if (width <= 0) throw typeError('positive width', width);
-    if (height <= 0) throw typeError('positive height', height);
-    return { width, height };
-  }
-  throw typeError('valid page size', def);
-}
+export type LengthUnit = 'pt' | 'in' | 'mm' | 'cm';
 
-export function parseOrientation(def?: unknown): 'portrait' | 'landscape' {
-  if (def === 'portrait' || def === 'landscape') return def;
-  throw typeError("'portrait' or 'landscape'", def);
-}
+export type Size = { width: Length; height: Length };
 
-export function applyOrientation(size: Size, orientation?: 'portrait' | 'landscape'): Size {
-  const { width, height } = size;
-  if (orientation === 'portrait') {
-    return { width: Math.min(width, height), height: Math.max(width, height) };
-  }
-  if (orientation === 'landscape') {
-    return { width: Math.max(width, height), height: Math.min(width, height) };
-  }
-  return size;
-}
+/**
+ * All named paper sizes are in portrait orientation.
+ */
+export type PaperSize = Size | NamedPaperSize;
+
+export type NamedPaperSize = keyof typeof paperSizes;
+
+export type Orientation = 'portrait' | 'landscape';
 
 export const paperSizes = {
   '4A0': { width: 4767.87, height: 6740.79 },
