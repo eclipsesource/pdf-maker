@@ -1,8 +1,8 @@
 import { PDFContext, PDFDocument, PDFFont, PDFName, PDFPage, PDFRef } from 'pdf-lib';
 
 import { Font, weightToNumber } from '../fonts.js';
-import { Image } from '../images.js';
 import { Frame } from '../frame.js';
+import { Image } from '../images.js';
 import { Page } from '../page.js';
 import { TextAttrs, TextSpan } from '../read-block.js';
 

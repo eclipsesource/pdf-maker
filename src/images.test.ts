@@ -1,7 +1,8 @@
+import crypto from 'node:crypto';
+import { readFile } from 'node:fs/promises';
+import { join } from 'node:path';
+
 import { describe, expect, it } from '@jest/globals';
-import crypto from 'crypto';
-import { readFileSync } from 'fs';
-import { join } from 'path';
 
 import { Image, readImages, registerImage } from './images.js';
 import { fakePDFDocument, mkData } from './test/test-utils.js';
@@ -52,9 +53,9 @@ describe('images', () => {
   });
 
   describe('registerImage', () => {
-    it('embeds image in PDF document and attaches ref', () => {
+    it('embeds image in PDF document and attaches ref', async () => {
       const doc = fakePDFDocument();
-      const data = readFileSync(join(__dirname, './test/resources/liberty.jpg'));
+      const data = await readFile(join(__dirname, './test/resources/liberty.jpg'));
       const image: Image = { name: 'foo', format: 'jpeg', data, width: 100, height: 200 };
 
       const pdfRef = registerImage(image, doc);

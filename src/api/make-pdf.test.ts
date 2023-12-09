@@ -1,5 +1,6 @@
+import crypto from 'node:crypto';
+
 import { describe, expect, it } from '@jest/globals';
-import crypto from 'crypto';
 
 import { makePdf } from './make-pdf.js';
 

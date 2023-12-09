@@ -1,4 +1,5 @@
-import { readFile, writeFile } from 'fs/promises';
+import { readFile, writeFile } from 'node:fs/promises';
+
 import { makePdf } from 'pdfmkr';
 
 const fontData = await readFile('./fonts/DejaVuSansCondensed.ttf');
