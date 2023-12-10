@@ -58,8 +58,9 @@ export type DocumentDefinition = {
   fonts?: FontsDefinition;
 
   /**
-   * The images to use in the document. Each image in the document needs to be registered.
-   * Once registered, an image can be reused without multiplying its footprint.
+   * Pre-defined image data. These images can be used by their name in
+   * the document. This is only needed if images cannot be loaded
+   * directly from the file system.
    */
   images?: ImagesDefinition;
 
@@ -163,11 +164,6 @@ export type ImageDefinition = {
    * Supported image formats are PNG and JPEG.
    */
   data: string | Uint8Array | ArrayBuffer;
-
-  /**
-   * The image format. Defaults to `jpeg`.
-   */
-  format?: 'jpeg' | 'png';
 };
 
 export type Block = TextBlock | ImageBlock | ColumnsBlock | RowsBlock | EmptyBlock;
@@ -189,13 +185,18 @@ export type TextBlock = {
 
 export type ImageBlock = {
   /**
-   * The name of the JPG image to display in this block. The image must have been registered with
-   * the global `images` attribute.
+   * The name of an image to display in this block. If the given image
+   * name has been registered with the global `images` attribute, the
+   * registered image will be used. Otherwise, the image name is
+   * interpreted as a file name and the image is loaded from the file
+   * system. Relative paths are resolved relative to the current working
+   * directory.
    *
-   * When any of the attributes `width` and `height` are specified, the image will be scaled
-   * proportionally to be contained in the given bounds.
-   * When neither `width` nor `height` is given, the image is not scaled unless it exceeds the
-   * maximum available width. In this case, it is scaled down to fit onto the page.
+   * When any of the attributes `width` and `height` are specified, the
+   * image will be scaled proportionally to be contained in the given
+   * bounds. When neither `width` nor `height` is given, the image is
+   * not scaled unless it exceeds the maximum available width. In this
+   * case, it is scaled down to fit onto the page.
    */
   image: string;
 

@@ -85,9 +85,8 @@ const documentDefinition = {
 
 ### Images
 
-JPG and PNG images are supported. All images must be registered with the
-`images` attribute. Images can be used multiple times in the document,
-but the image data is only included once in the PDF. The size of an
+JPG and PNG images are supported. When the same image is used more than
+once, the image data is only included once in the PDF. The size of an
 image can be confined using the `width` and `height` attributes.
 
 ```js
@@ -98,7 +97,7 @@ const documentDefinition = {
   },
   content: [
     // An image block
-    { image: 'logo', width: 200, height: 100 },
+    { image: 'images/logo.png', width: 200, height: 100 },
     …
   ]
 };

@@ -6,10 +6,21 @@
 
 - Text attributes `fontStyle` and `fontWeight`.
 
+### Changed
+
+- The `image` attribute of an image block now supports a file name.
+  When file names are used, the images don't need to be registered with
+  the global `images` attribute anymore.
+
 ### Deprecated
 
 - Text attributes `bold` and `italic` in favor of `fontStyle: 'italic'`
   and `fontWeight: 'bold'`.
+
+### Removed
+
+- The optional `format` attribute of an image definition. The format is
+  now auto-detected from the file content.
 
 ### Fixed
 
