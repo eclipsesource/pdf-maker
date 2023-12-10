@@ -1,5 +1,5 @@
 import crypto from 'node:crypto';
-import { readFileSync } from 'node:fs';
+import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
 import { describe, expect, it } from '@jest/globals';
@@ -43,7 +43,7 @@ describe('image-loader', () => {
     });
 
     it('reads width and height from JPEG image', async () => {
-      const data = readFileSync(join(__dirname, './test/resources/liberty.jpg'));
+      const data = await readFile(join(__dirname, './test/resources/liberty.jpg'));
       const loader = createImageLoader([{ name: 'liberty', data, format: 'jpeg' }]);
 
       const store = createImageStore(loader);
@@ -53,7 +53,7 @@ describe('image-loader', () => {
     });
 
     it('reads width and height from PNG image', async () => {
-      const data = readFileSync(join(__dirname, './test/resources/torus.png'));
+      const data = await readFile(join(__dirname, './test/resources/torus.png'));
       const loader = createImageLoader([{ name: 'torus', data, format: 'png' }]);
 
       const store = createImageStore(loader);

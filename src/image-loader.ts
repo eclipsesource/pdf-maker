@@ -1,6 +1,8 @@
-import { JpegEmbedder, PngEmbedder, toUint8Array } from 'pdf-lib';
+import { toUint8Array } from 'pdf-lib';
 
 import { Image, ImageDef, ImageFormat, ImageSelector } from './images.js';
+import { readJpegInfo } from './images/jpeg.js';
+import { readPngInfo } from './images/png.js';
 
 export type LoadedImage = {
   format: ImageFormat;
@@ -51,8 +53,7 @@ export function createImageStore(imageLoader: ImageLoader): ImageStore {
     }
 
     const { format, data } = loadedImage;
-    const embedder = await (format === 'png' ? PngEmbedder.for(data) : JpegEmbedder.for(data));
-    const { width, height } = embedder;
+    const { width, height } = format === 'png' ? readPngInfo(data) : readJpegInfo(data);
     return { name: selector.name, format, data, width, height };
   }
 }
