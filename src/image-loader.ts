@@ -49,7 +49,7 @@ export function createImageStore(imageLoader: ImageLoader): ImageStore {
   };
 
   async function selectImage(selector: ImageSelector): Promise<Image> {
-    const cacheKey = [selector.name, selector.height ?? 'any', selector.width ?? 'any'].join(':');
+    const cacheKey = selector.name;
     return (imageCache[cacheKey] ??= loadImage(selector));
   }
 
@@ -58,11 +58,9 @@ export function createImageStore(imageLoader: ImageLoader): ImageStore {
     try {
       loadedImage = await imageLoader.loadImage(selector);
     } catch (error) {
-      const selectorStr =
-        `'${selector.name}'` +
-        (selector.width != null ? `, width=${selector.width}` : '') +
-        (selector.height != null ? `, height=${selector.height}` : '');
-      throw new Error(`Could not load image ${selectorStr}: ${(error as Error)?.message ?? error}`);
+      throw new Error(
+        `Could not load image '${selector.name}': ${(error as Error)?.message ?? error}`
+      );
     }
     const { data } = loadedImage;
     const format = determineImageFormat(data);

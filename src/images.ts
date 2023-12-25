@@ -23,8 +23,6 @@ export type Image = {
 
 export type ImageSelector = {
   name: string;
-  width?: number;
-  height?: number;
 };
 
 export function readImages(input: unknown): ImageDef[] {

@@ -73,7 +73,7 @@ describe('image-loader', () => {
       );
     });
 
-    it('reads width and height from JPEG image', async () => {
+    it('reads format, width and height from JPEG image', async () => {
       const store = createImageStore(imageLoader);
 
       const image = await store.selectImage({ name: 'liberty' });
@@ -87,7 +87,7 @@ describe('image-loader', () => {
       });
     });
 
-    it('reads width and height from PNG image', async () => {
+    it('reads format, width and height from PNG image', async () => {
       const store = createImageStore(imageLoader);
 
       const image = await store.selectImage({ name: 'torus' });
@@ -105,11 +105,9 @@ describe('image-loader', () => {
       const store = createImageStore(imageLoader);
 
       await store.selectImage({ name: 'liberty' });
-      await store.selectImage({ name: 'liberty', width: 300 });
       await store.selectImage({ name: 'liberty' });
-      await store.selectImage({ name: 'liberty', width: 300 });
 
-      expect(imageLoader.loadImage).toHaveBeenCalledTimes(2);
+      expect(imageLoader.loadImage).toHaveBeenCalledTimes(1);
     });
 
     it('returns same image object for concurrent calls', async () => {
