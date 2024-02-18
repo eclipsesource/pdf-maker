@@ -10,17 +10,15 @@ export type LoadedImage = {
   data: Uint8Array;
 };
 
-export type ImageLoader = {
-  loadImage(selector: ImageSelector): Promise<LoadedImage>;
-};
+export class ImageLoader {
+  readonly #images: ImageDef[];
 
-export function createImageLoader(images: ImageDef[]): ImageLoader {
-  return {
-    loadImage,
-  };
+  constructor(images: ImageDef[]) {
+    this.#images = images;
+  }
 
-  async function loadImage(selector: ImageSelector): Promise<LoadedImage> {
-    const imageDef = images.find((image) => image.name === selector.name);
+  async loadImage(selector: ImageSelector): Promise<LoadedImage> {
+    const imageDef = this.#images.find((image) => image.name === selector.name);
     let data: Uint8Array;
     if (imageDef) {
       data = toUint8Array(imageDef.data);
@@ -37,26 +35,23 @@ export function createImageLoader(images: ImageDef[]): ImageLoader {
   }
 }
 
-export type ImageStore = {
-  selectImage(selector: ImageSelector): Promise<Image>;
-};
+export class ImageStore {
+  readonly #imageLoader: ImageLoader;
+  readonly #imageCache: Record<string, Promise<Image>> = {};
 
-export function createImageStore(imageLoader: ImageLoader): ImageStore {
-  const imageCache: Record<string, Promise<Image>> = {};
-
-  return {
-    selectImage,
-  };
-
-  async function selectImage(selector: ImageSelector): Promise<Image> {
-    const cacheKey = selector.name;
-    return (imageCache[cacheKey] ??= loadImage(selector));
+  constructor(imageLoader: ImageLoader) {
+    this.#imageLoader = imageLoader;
   }
 
-  async function loadImage(selector: ImageSelector): Promise<Image> {
+  async selectImage(selector: ImageSelector): Promise<Image> {
+    const cacheKey = selector.name;
+    return (this.#imageCache[cacheKey] ??= this.loadImage(selector));
+  }
+
+  async loadImage(selector: ImageSelector): Promise<Image> {
     let loadedImage: LoadedImage;
     try {
-      loadedImage = await imageLoader.loadImage(selector);
+      loadedImage = await this.#imageLoader.loadImage(selector);
     } catch (error) {
       throw new Error(
         `Could not load image '${selector.name}': ${(error as Error)?.message ?? error}`,

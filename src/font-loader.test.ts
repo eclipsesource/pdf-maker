@@ -1,7 +1,7 @@
 import fontkit from '@pdf-lib/fontkit';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { createFontLoader, createFontStore, FontLoader } from './font-loader.ts';
+import { FontLoader, FontStore } from './font-loader.ts';
 import { Font, FontDef, FontSelector } from './fonts.ts';
 import { fakeFont, mkData } from './test/test-utils.ts';
 
@@ -15,7 +15,7 @@ describe('font-loader', () => {
   let otherFont: FontDef;
   let fontLoader: FontLoader;
 
-  describe('createFontLoader', () => {
+  describe('new FontLoader', () => {
     beforeEach(() => {
       normalFont = fakeFontDef('Test');
       italicFont = fakeFontDef('Test', { style: 'italic' });
@@ -24,11 +24,11 @@ describe('font-loader', () => {
       italicBoldFont = fakeFontDef('Test', { style: 'italic', weight: 700 });
       obliqueBoldFont = fakeFontDef('Test', { style: 'oblique', weight: 700 });
       otherFont = fakeFontDef('Other');
-      fontLoader = createFontLoader([normalFont, italicFont, boldFont, italicBoldFont, otherFont]);
+      fontLoader = new FontLoader([normalFont, italicFont, boldFont, italicBoldFont, otherFont]);
     });
 
     it('rejects when no fonts defined', async () => {
-      const loader = createFontLoader([]);
+      const loader = new FontLoader([]);
 
       await expect(loader.loadFont({})).rejects.toThrowError('No fonts defined');
     });
@@ -97,7 +97,7 @@ describe('font-loader', () => {
     });
 
     it('falls back to oblique when no italic font can be found', async () => {
-      fontLoader = createFontLoader([normalFont, obliqueFont, boldFont, obliqueBoldFont]);
+      fontLoader = new FontLoader([normalFont, obliqueFont, boldFont, obliqueBoldFont]);
       await expect(
         fontLoader.loadFont({ fontFamily: 'Test', fontStyle: 'italic' }),
       ).resolves.toEqual({
@@ -140,7 +140,7 @@ describe('font-loader', () => {
           if (selector.fontFamily === 'Test') return testFont;
           throw new Error('No such font defined');
         }) as any,
-      };
+      } as FontLoader;
       vi.spyOn(fontkit, 'create').mockReturnValue({ fake: true } as any);
     });
 
@@ -149,7 +149,7 @@ describe('font-loader', () => {
     });
 
     it('rejects if font could not be loaded', async () => {
-      const store = createFontStore(fontLoader);
+      const store = new FontStore(fontLoader);
 
       await expect(store.selectFont({ fontFamily: 'foo' })).rejects.toThrowError(
         "Could not load font for 'foo', style=normal, weight=normal: No such font defined",
@@ -157,7 +157,7 @@ describe('font-loader', () => {
     });
 
     it('creates fontkit font object', async () => {
-      const store = createFontStore(fontLoader);
+      const store = new FontStore(fontLoader);
 
       const font = await store.selectFont({ fontFamily: 'Test' });
 
@@ -171,7 +171,7 @@ describe('font-loader', () => {
     });
 
     it('calls font loader only once per selector', async () => {
-      const store = createFontStore(fontLoader);
+      const store = new FontStore(fontLoader);
 
       await store.selectFont({ fontFamily: 'Test' });
       await store.selectFont({ fontFamily: 'Test', fontStyle: 'italic' });
@@ -182,7 +182,7 @@ describe('font-loader', () => {
     });
 
     it('returns same font object for concurrent calls', async () => {
-      const store = createFontStore(fontLoader);
+      const store = new FontStore(fontLoader);
 
       const [font1, font2] = await Promise.all([
         store.selectFont({ fontFamily: 'Test' }),
@@ -193,7 +193,7 @@ describe('font-loader', () => {
     });
 
     it('caches errors from font loader', async () => {
-      const store = createFontStore(fontLoader);
+      const store = new FontStore(fontLoader);
 
       await expect(store.selectFont({ fontFamily: 'foo' })).rejects.toThrowError(
         "Could not load font for 'foo', style=normal, weight=normal: No such font defined",
