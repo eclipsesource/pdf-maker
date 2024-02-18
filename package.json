@@ -25,12 +25,13 @@
     "npm": ">=8"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "rm -rf dist/ && tsc && esbuild src/index.ts --bundle --sourcemap --platform=node --target=es2021,node18 --outdir=dist --format=esm --external:pdf-lib --external:@pdf-lib/fontkit",
     "lint": "eslint '{src,test}/**/*.{js,ts}' --max-warnings 0 --format visualstudio && prettier --check .",
     "test": "vitest run test"
   },
   "dependencies": {
     "@pdf-lib/fontkit": "^1.1.1",
+    "esbuild": "^0.20.0",
     "pdf-lib": "^1.17.1"
   },
   "devDependencies": {
