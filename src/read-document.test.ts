@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from '@jest/globals';
+import { beforeEach, describe, expect, it } from 'vitest';
 
 import { PageInfo, readDocumentDefinition } from './read-document.js';
 

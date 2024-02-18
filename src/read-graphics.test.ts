@@ -1,5 +1,5 @@
-import { describe, expect, it } from '@jest/globals';
 import { rgb } from 'pdf-lib';
+import { describe, expect, it } from 'vitest';
 
 import { readShape } from './read-graphics.js';
 import { p } from './test/test-utils.js';

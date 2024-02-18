@@ -1,5 +1,5 @@
-import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals';
 import fontkit from '@pdf-lib/fontkit';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { createFontLoader, createFontStore, FontLoader } from './font-loader.js';
 import { Font, FontDef, FontSelector } from './fonts.js';
@@ -136,16 +136,16 @@ describe('font-loader', () => {
     beforeEach(() => {
       testFont = fakeFont('Test');
       fontLoader = {
-        loadFont: jest.fn(async (selector: FontSelector) => {
+        loadFont: vi.fn(async (selector: FontSelector) => {
           if (selector.fontFamily === 'Test') return testFont;
           throw new Error('No such font defined');
         }) as any,
       };
-      jest.spyOn(fontkit, 'create').mockReturnValue({ fake: true } as any);
+      vi.spyOn(fontkit, 'create').mockReturnValue({ fake: true } as any);
     });
 
     afterEach(() => {
-      jest.restoreAllMocks();
+      vi.restoreAllMocks();
     });
 
     it('rejects if font could not be loaded', async () => {

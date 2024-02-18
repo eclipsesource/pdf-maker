@@ -1,4 +1,4 @@
-import { describe, expect, it } from '@jest/globals';
+import { describe, expect, it } from 'vitest';
 
 import { paperSizes } from './api/sizes.js';
 import { applyOrientation, parseOrientation, readPageSize } from './read-page-size.js';

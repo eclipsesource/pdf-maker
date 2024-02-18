@@ -2,7 +2,7 @@ import crypto from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
-import { describe, expect, it } from '@jest/globals';
+import { describe, expect, it } from 'vitest';
 
 import { Image, readImages, registerImage } from './images.js';
 import { fakePDFDocument, mkData } from './test/test-utils.js';

@@ -1,5 +1,5 @@
-import { beforeEach, describe, expect, it } from '@jest/globals';
 import { PDFPage } from 'pdf-lib';
+import { beforeEach, describe, expect, it } from 'vitest';
 
 import { Font } from './fonts.js';
 import { addPageFont, getExtGraphicsState, Page } from './page.js';

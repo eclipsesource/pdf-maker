@@ -1,7 +1,7 @@
 import crypto from 'node:crypto';
 
-import { describe, expect, it } from '@jest/globals';
 import { PDFDict, PDFDocument, PDFHexString, PDFName, PDFStream, PDFString } from 'pdf-lib';
+import { describe, expect, it } from 'vitest';
 
 import { renderDocument } from './render-document.js';
 

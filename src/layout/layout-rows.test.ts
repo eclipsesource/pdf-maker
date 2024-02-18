@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from '@jest/globals';
+import { beforeEach, describe, expect, it } from 'vitest';
 
 import { Box } from '../box.js';
 import { FontStore } from '../font-loader.js';

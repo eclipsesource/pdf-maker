@@ -1,5 +1,5 @@
-import { beforeEach, describe, expect, it } from '@jest/globals';
 import { rgb } from 'pdf-lib';
+import { beforeEach, describe, expect, it } from 'vitest';
 
 import { Size } from '../box.js';
 import { CircleObject, LineObject, PathObject, PolylineObject, RectObject } from '../frame.js';

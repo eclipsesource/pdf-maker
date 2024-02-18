@@ -2,7 +2,7 @@ import crypto from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
-import { beforeAll, beforeEach, describe, expect, it, jest } from '@jest/globals';
+import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { createImageLoader, createImageStore, ImageLoader } from './image-loader.js';
 import { ImageSelector } from './images.js';
@@ -57,7 +57,7 @@ describe('image-loader', () => {
 
     beforeEach(() => {
       imageLoader = {
-        loadImage: jest.fn(async (selector: ImageSelector) => {
+        loadImage: vi.fn(async (selector: ImageSelector) => {
           if (selector.name === 'liberty') return { data: libertyJpg };
           if (selector.name === 'torus') return { data: torusPng };
           throw new Error('No such image');

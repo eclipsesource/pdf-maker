@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, jest } from '@jest/globals';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { Box } from '../box.js';
 import { ImageStore } from '../image-loader.js';
@@ -15,7 +15,7 @@ describe('layout-image', () => {
 
   beforeEach(() => {
     const imageStore = {
-      selectImage: jest.fn(async (selector: ImageSelector) => {
+      selectImage: vi.fn(async (selector: ImageSelector) => {
         const match = /^img-(\d+)-(\d+)$/.exec(selector.name);
         if (match) {
           return fakeImage(selector.name, Number(match[1]), Number(match[2]));

@@ -1,5 +1,5 @@
-import { beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { PDFArray, PDFDict, PDFDocument, PDFName, PDFPage, PDFRef } from 'pdf-lib';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { Size } from '../box.js';
 import { Font } from '../fonts.js';
@@ -20,7 +20,7 @@ describe('render-page', () => {
 
     beforeEach(() => {
       size = { width: 300, height: 400 };
-      pdfDoc = { addPage: jest.fn().mockReturnValue(pdfPage) } as unknown as PDFDocument;
+      pdfDoc = { addPage: vi.fn().mockReturnValue(pdfPage) } as unknown as PDFDocument;
     });
 
     it('renders content', () => {
