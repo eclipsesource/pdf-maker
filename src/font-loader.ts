@@ -30,13 +30,13 @@ export function createFontLoader(fontDefs: FontDef[]): FontLoader {
       throw new Error(`No font defined for '${selector.fontFamily}'`);
     }
     let fontsWithMatchingStyle = fontsWithMatchingFamily.filter(
-      (def) => def.style === (selector.fontStyle ?? 'normal')
+      (def) => def.style === (selector.fontStyle ?? 'normal'),
     );
     if (!fontsWithMatchingStyle.length) {
       fontsWithMatchingStyle = fontsWithMatchingFamily.filter(
         (def) =>
           (def.style === 'italic' && selector.fontStyle === 'oblique') ||
-          (def.style === 'oblique' && selector.fontStyle === 'italic')
+          (def.style === 'oblique' && selector.fontStyle === 'italic'),
       );
     }
     if (!fontsWithMatchingStyle.length) {
@@ -116,7 +116,7 @@ export function createFontStore(fontLoader: FontLoader): FontStore {
       const { fontFamily: family, fontStyle: style, fontWeight: weight } = selector;
       const selectorStr = `'${family}', style=${style ?? 'normal'}, weight=${weight ?? 'normal'}`;
       throw new Error(
-        `Could not load font for ${selectorStr}: ${(error as Error)?.message ?? error}`
+        `Could not load font for ${selectorStr}: ${(error as Error)?.message ?? error}`,
       );
     }
     const fkFont = fontkit.create(loadedFont.data);

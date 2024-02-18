@@ -31,7 +31,7 @@ export function createImageLoader(images: ImageDef[]): ImageLoader {
       return { data };
     } catch (error) {
       throw new Error(
-        `Could not load image '${selector.name}': ${(error as Error)?.message ?? error}`
+        `Could not load image '${selector.name}': ${(error as Error)?.message ?? error}`,
       );
     }
   }
@@ -59,7 +59,7 @@ export function createImageStore(imageLoader: ImageLoader): ImageStore {
       loadedImage = await imageLoader.loadImage(selector);
     } catch (error) {
       throw new Error(
-        `Could not load image '${selector.name}': ${(error as Error)?.message ?? error}`
+        `Could not load image '${selector.name}': ${(error as Error)?.message ?? error}`,
       );
     }
     const { data } = loadedImage;

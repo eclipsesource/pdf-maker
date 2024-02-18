@@ -49,7 +49,7 @@ describe('svg-paths', () => {
 
     it('throws for invalid commands', () => {
       expect(() => tokenizeSvgPath('M 1 x 2')).toThrowError(
-        "Unexpected character: 'x' at position 4"
+        "Unexpected character: 'x' at position 4",
       );
       expect(() => tokenizeSvgPath('M1?2')).toThrowError("Unexpected character: '?' at position 2");
     });

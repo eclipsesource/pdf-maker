@@ -8,7 +8,7 @@ import { TextAttrs, TextSpan } from '../read-block.js';
 
 export function fakeFont(
   name: string,
-  opts: Partial<Omit<Font, 'name'>> & { doc?: PDFDocument } = {}
+  opts: Partial<Omit<Font, 'name'>> & { doc?: PDFDocument } = {},
 ): Font {
   const key = `${name}-${opts?.style ?? 'normal'}-${opts?.weight ?? 400}`;
   const font: Font = {

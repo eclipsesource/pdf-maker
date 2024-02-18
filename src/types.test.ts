@@ -193,7 +193,7 @@ describe('types', () => {
         const resolve = validate(() => 23);
 
         expect(() => resolve()).toThrowError(
-          'Supplied function for "test" returned invalid value: Expected string, got: 23'
+          'Supplied function for "test" returned invalid value: Expected string, got: 23',
         );
       });
 
@@ -203,7 +203,7 @@ describe('types', () => {
         });
 
         expect(() => resolve()).toThrowError(
-          'Supplied function for "test" threw: Error: test error'
+          'Supplied function for "test" threw: Error: test error',
         );
       });
     });
@@ -235,7 +235,7 @@ describe('types', () => {
 
     it('throws if string does not match pattern', () => {
       expect(() => readString('23', { pattern: /[a-z]/ })).toThrowError(
-        "Expected string matching pattern /[a-z]/, got: '23'"
+        "Expected string matching pattern /[a-z]/, got: '23'",
       );
     });
 
@@ -246,7 +246,7 @@ describe('types', () => {
 
     it('throws if string does not match enum', () => {
       expect(() => readString('baz', { enum: ['foo', 'bar'] })).toThrowError(
-        "Expected one of ('foo', 'bar'), got: 'baz'"
+        "Expected one of ('foo', 'bar'), got: 'baz'",
       );
     });
 
@@ -294,7 +294,7 @@ describe('types', () => {
 
     it('throws for date strings', () => {
       expect(() => readDate('2000-04-01T12:13:14.000Z')).toThrowError(
-        "Expected Date, got: '2000-04-01T12:13:14.000Z'"
+        "Expected Date, got: '2000-04-01T12:13:14.000Z'",
       );
     });
 
@@ -317,10 +317,10 @@ describe('types', () => {
 
     it('throws if array length exceeds given range', () => {
       expect(() => readArray([], undefined, { minItems: 1 })).toThrowError(
-        'Expected array with minimum length 1, got: []'
+        'Expected array with minimum length 1, got: []',
       );
       expect(() => readArray([1, 2, 3, 4], undefined, { maxItems: 3 })).toThrowError(
-        'Expected array with maximum length 3, got: [1, 2, 3, 4]'
+        'Expected array with maximum length 3, got: [1, 2, 3, 4]',
       );
     });
 
@@ -334,10 +334,10 @@ describe('types', () => {
 
     it('throws if array has duplicates', () => {
       expect(() => readArray([1, 2, 1], undefined, { uniqueItems: true })).toThrowError(
-        'Expected array with unique items, got: [1, 2, 1]'
+        'Expected array with unique items, got: [1, 2, 1]',
       );
       expect(() => readArray(['foo', 'bar', 'foo'], undefined, { uniqueItems: true })).toThrowError(
-        "Expected array with unique items, got: ['foo', 'bar', 'foo']"
+        "Expected array with unique items, got: ['foo', 'bar', 'foo']",
       );
     });
 
@@ -349,17 +349,17 @@ describe('types', () => {
 
     it('throws if array item does not match item type', () => {
       expect(() => readArray(['foo'], types.number())).toThrowError(
-        `Invalid value for "0": Expected number, got: 'foo'`
+        `Invalid value for "0": Expected number, got: 'foo'`,
       );
       expect(() => readArray([1, 2, 'foo', 4], types.number())).toThrowError(
-        `Invalid value for "2": Expected number, got: 'foo'`
+        `Invalid value for "2": Expected number, got: 'foo'`,
       );
     });
 
     it('throws for objects', () => {
       expect(() => readArray({})).toThrowError('Expected array, got: {}');
       expect(() => readArray(Uint8Array.of(1, 2, 3).buffer)).toThrowError(
-        'Expected array, got: ArrayBuffer [1, 2, 3]'
+        'Expected array, got: ArrayBuffer [1, 2, 3]',
       );
     });
   });
@@ -374,7 +374,7 @@ describe('types', () => {
       expect(() => readObject(null)).toThrowError('Expected object, got: null');
       expect(() => readObject([])).toThrowError('Expected object, got: []');
       expect(() => readObject(new ArrayBuffer(3))).toThrowError(
-        'Expected object, got: ArrayBuffer [0, 0, 0]'
+        'Expected object, got: ArrayBuffer [0, 0, 0]',
       );
     });
   });

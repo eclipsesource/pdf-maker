@@ -100,7 +100,7 @@ describe('render-page', () => {
       renderFrame(frame, page);
 
       expect(getContentStream(page).join()).toEqual(
-        'BT,1 0 0 1 15 762 Tm,0 0 0 rg,/Test-1 12 Tf,Test text Tj,ET'
+        'BT,1 0 0 1 15 762 Tm,0 0 0 rg,/Test-1 12 Tf,Test text Tj,ET',
       );
     });
 
@@ -133,7 +133,7 @@ describe('render-page', () => {
 
       // text rendered at (25, 750) + (10, 20)
       expect(getContentStream(page).join()).toEqual(
-        'BT,1 0 0 1 25 742 Tm,0 0 0 rg,/Test-1 12 Tf,Test text Tj,ET'
+        'BT,1 0 0 1 25 742 Tm,0 0 0 rg,/Test-1 12 Tf,Test text Tj,ET',
       );
     });
 
@@ -181,7 +181,7 @@ describe('render-page', () => {
           '/C [ ]',
           '/F 4',
           '>>',
-        ].join('\n')
+        ].join('\n'),
       );
     });
 
@@ -212,7 +212,7 @@ describe('render-page', () => {
           '/C [ ]',
           '/F 4',
           '>>',
-        ].join('\n')
+        ].join('\n'),
       );
     });
   });

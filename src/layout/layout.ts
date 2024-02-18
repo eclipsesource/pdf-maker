@@ -135,7 +135,7 @@ export async function layoutBlock(block: Block, box: Box, ctx: MakerCtx): Promis
   // Subtract the padding from the box to get the content box.
   const contentBox = subtractEdges(
     { x: 0, y: 0, width: block.width ?? box.width, height: block.height ?? box.height },
-    padding
+    padding,
   );
   // Layout the *content* of the block, i.e. what's inside the padding.
   const result = await layoutBlockContent(block, contentBox, ctx);

@@ -72,7 +72,7 @@ function readInfo(input: unknown): Metadata {
   const custom = Object.fromEntries(
     Object.entries(input as Obj)
       .filter(([key]) => !(key in properties))
-      .map(([key, value]) => [key, readAs(value, key, types.string())])
+      .map(([key, value]) => [key, readAs(value, key, types.string())]),
   );
   return Object.keys(custom).length ? { ...obj, custom } : obj;
 }
@@ -84,6 +84,6 @@ function readCustomData(input: unknown) {
     throw typeError('string or Uint8Array', input);
   };
   return Object.fromEntries(
-    Object.entries(readObject(input)).map(([key, value]) => [key, readAs(value, key, readValue)])
+    Object.entries(readObject(input)).map(([key, value]) => [key, readAs(value, key, readValue)]),
   );
 }

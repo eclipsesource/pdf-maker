@@ -121,7 +121,7 @@ const transformAttrs = {
       cx: optional(types.number()),
       cy: optional(types.number()),
       angle: types.number(),
-    })
+    }),
   ),
   skew: optional(types.object({ x: optional(types.number()), y: optional(types.number()) })),
   matrix: optional(types.array(types.number(), { minItems: 6, maxItems: 6 })),

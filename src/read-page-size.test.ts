@@ -30,16 +30,16 @@ describe('read-page-sizes', () => {
 
     it('throws on zero or negative values for width or height', () => {
       expect(() => readPageSize({ width: 0, height: 42 })).toThrowError(
-        'Expected positive width, got: 0'
+        'Expected positive width, got: 0',
       );
       expect(() => readPageSize({ width: -1, height: 42 })).toThrowError(
-        'Expected positive width, got: -1'
+        'Expected positive width, got: -1',
       );
       expect(() => readPageSize({ width: 23, height: 0 })).toThrowError(
-        'Expected positive height, got: 0'
+        'Expected positive height, got: 0',
       );
       expect(() => readPageSize({ width: 23, height: -1 })).toThrowError(
-        'Expected positive height, got: -1'
+        'Expected positive height, got: -1',
       );
     });
 
@@ -56,16 +56,16 @@ describe('read-page-sizes', () => {
 
     it('throws on unsupported orientation', () => {
       expect(() => parseOrientation('foo')).toThrowError(
-        "Expected 'portrait' or 'landscape', got: 'foo'"
+        "Expected 'portrait' or 'landscape', got: 'foo'",
       );
     });
 
     it('throws on invalid type', () => {
       expect(() => parseOrientation(23)).toThrowError(
-        "Expected 'portrait' or 'landscape', got: 23"
+        "Expected 'portrait' or 'landscape', got: 23",
       );
       expect(() => parseOrientation(null)).toThrowError(
-        "Expected 'portrait' or 'landscape', got: null"
+        "Expected 'portrait' or 'landscape', got: null",
       );
     });
   });

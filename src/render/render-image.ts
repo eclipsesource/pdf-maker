@@ -25,6 +25,6 @@ export function renderImage(object: ImageObject, page: Page, base: Pos) {
       scale(width, height),
       drawObject(name),
       popGraphicsState(),
-    ])
+    ]),
   );
 }

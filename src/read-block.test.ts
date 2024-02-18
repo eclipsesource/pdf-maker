@@ -246,7 +246,7 @@ describe('read-block', () => {
 
     it('throws on invalid type', () => {
       expect(() => readText([23 as any], {})).toThrowError(
-        'Expected string, object with text attribute, or array of text, got: 23'
+        'Expected string, object with text attribute, or array of text, got: 23',
       );
     });
   });

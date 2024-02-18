@@ -20,7 +20,7 @@ export const arcToSegments = (
   large: number,
   sweep: number,
   x: number,
-  y: number
+  y: number,
 ) => {
   const th = rotateX * (Math.PI / 180);
   const sinTh = Math.sin(th);

@@ -196,7 +196,7 @@ function tr(pos: Pos, page: Page): Pos {
 
 function getExtGraphicsStateForShape(
   page: Page,
-  shape: { lineOpacity?: number; fillOpacity?: number }
+  shape: { lineOpacity?: number; fillOpacity?: number },
 ): PDFName | undefined {
   const { lineOpacity, fillOpacity } = shape;
   if (lineOpacity != null || fillOpacity != null) {

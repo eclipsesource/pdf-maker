@@ -17,7 +17,7 @@ import { LayoutContent } from './layout.js';
 export async function layoutTextContent(
   block: TextBlock,
   box: Box,
-  ctx: MakerCtx
+  ctx: MakerCtx,
 ): Promise<LayoutContent> {
   const text = await layoutText(block, box, ctx);
   const objects: RenderObject[] = [];

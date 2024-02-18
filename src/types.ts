@@ -87,7 +87,7 @@ export function required<T = unknown>(type?: TypeDef<T>): TypeDef<T> {
 
 export function dynamic<T = unknown>(
   type: TypeDef<T>,
-  name?: string
+  name?: string,
 ): TypeDef<(...args: unknown[]) => T> {
   return (value: unknown) => {
     if (typeof value !== 'function') {
@@ -175,7 +175,7 @@ type ArrayOptions = {
 export function readArray<T = unknown>(
   input: unknown,
   items?: TypeDef<T>,
-  options?: ArrayOptions
+  options?: ArrayOptions,
 ): T[] {
   if (!Array.isArray(input)) throw typeError('array', input);
   if (options?.minItems != null && input.length < options.minItems) {
@@ -208,7 +208,7 @@ type ReturnType<T> = T extends (...args: any[]) => infer R ? R : never;
 export function readObject<T extends Record<string, TypeDef<unknown>>>(
   input: unknown,
   properties?: T,
-  options?: ObjectOptions
+  options?: ObjectOptions,
 ): Partial<{ [P in keyof T]: ReturnType<T[P]> }> {
   if (!isObject(input)) throw typeError('object', input);
   if (options?.minProperties != null && Object.keys(input).length < options.minProperties) {
@@ -225,8 +225,8 @@ function mapObject(obj: Obj, properties: Record<string, TypeDef<unknown>>) {
     Object.fromEntries(
       Object.entries(properties).map(([key, type]) => {
         return [key, readFrom(obj, key, type)];
-      })
-    )
+      }),
+    ),
   );
 }
 

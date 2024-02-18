@@ -21,7 +21,7 @@ describe('print-value', () => {
 
     it('prints Date objects', () => {
       expect(printValue(new Date('2001-02-03T04:05:06.789Z'))).toEqual(
-        'Date 2001-02-03T04:05:06.789Z'
+        'Date 2001-02-03T04:05:06.789Z',
       );
     });
 

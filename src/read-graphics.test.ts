@@ -23,7 +23,7 @@ describe('read-graphics', () => {
       const fn = () => readShape({ type: 'foo' });
 
       expect(fn).toThrowError(
-        `Invalid value for "type": Expected one of ('rect', 'circle', 'line', 'polyline', 'path'), got: 'foo'`
+        `Invalid value for "type": Expected one of ('rect', 'circle', 'line', 'polyline', 'path'), got: 'foo'`,
       );
     });
 
@@ -181,7 +181,7 @@ describe('read-graphics', () => {
         const fn = () => readShape(rect);
 
         expect(fn).toThrowError(
-          `Invalid value for "${name}": Expected valid color name, got: 'foo'`
+          `Invalid value for "${name}": Expected valid color name, got: 'foo'`,
         );
       });
     });
@@ -198,16 +198,16 @@ describe('read-graphics', () => {
       const rect = { type: 'rect', x: 1, y: 2, width: 10, height: 20 };
 
       expect(() => readShape({ ...rect, lineOpacity: -1 })).toThrowError(
-        'Invalid value for "lineOpacity": Expected number >= 0, got: -1'
+        'Invalid value for "lineOpacity": Expected number >= 0, got: -1',
       );
       expect(() => readShape({ ...rect, lineOpacity: 1.5 })).toThrowError(
-        'Invalid value for "lineOpacity": Expected number <= 1, got: 1.5'
+        'Invalid value for "lineOpacity": Expected number <= 1, got: 1.5',
       );
       expect(() => readShape({ ...rect, fillOpacity: -1 })).toThrowError(
-        'Invalid value for "fillOpacity": Expected number >= 0, got: -1'
+        'Invalid value for "fillOpacity": Expected number >= 0, got: -1',
       );
       expect(() => readShape({ ...rect, fillOpacity: 1.5 })).toThrowError(
-        'Invalid value for "fillOpacity": Expected number <= 1, got: 1.5'
+        'Invalid value for "fillOpacity": Expected number <= 1, got: 1.5',
       );
     });
   });

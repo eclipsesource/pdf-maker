@@ -77,20 +77,20 @@ describe('box', () => {
     it('throws on invalid lengths', () => {
       expect(() => parseEdges('')).toThrowError("Expected number or length string, got: ''");
       expect(() => parseEdges(Infinity)).toThrowError(
-        'Expected number or length string, got: Infinity'
+        'Expected number or length string, got: Infinity',
       );
     });
 
     it('throws on invalid types', () => {
       expect(() => parseEdges('')).toThrowError("Expected number or length string, got: ''");
       expect(() => parseEdges(null)).toThrowError(
-        'Expected number, length string, or object, got: null'
+        'Expected number, length string, or object, got: null',
       );
       expect(() => parseEdges(true)).toThrowError(
-        'Expected number, length string, or object, got: true'
+        'Expected number, length string, or object, got: true',
       );
       expect(() => parseEdges(() => 23)).toThrowError(
-        'Expected number, length string, or object, got: anonymous function'
+        'Expected number, length string, or object, got: anonymous function',
       );
     });
   });
@@ -133,7 +133,7 @@ describe('box', () => {
 
     it('throws on invalid numbers', () => {
       expect(() => parseLength(Infinity)).toThrowError(
-        'Expected number or length string, got: Infinity'
+        'Expected number or length string, got: Infinity',
       );
       expect(() => parseLength(NaN)).toThrowError('Expected number or length string, got: NaN');
     });
@@ -142,7 +142,7 @@ describe('box', () => {
       expect(() => parseLength(null)).toThrowError('Expected number or length string, got: null');
       expect(() => parseLength(true)).toThrowError('Expected number or length string, got: true');
       expect(() => parseLength(() => 23)).toThrowError(
-        'Expected number or length string, got: anonymous function'
+        'Expected number or length string, got: anonymous function',
       );
     });
   });

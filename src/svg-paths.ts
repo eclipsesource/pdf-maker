@@ -81,7 +81,7 @@ export function parseSvgPath(path: string) {
   const readParam = () => {
     if (!hasParam())
       throw new Error(
-        'Expected parameter at ' + (tokens[pos] ? 'position ' + tokens[pos]?.start : 'end')
+        'Expected parameter at ' + (tokens[pos] ? 'position ' + tokens[pos]?.start : 'end'),
       );
     return tokens[pos++].value as number;
   };

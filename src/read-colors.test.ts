@@ -23,7 +23,7 @@ describe('read-color', () => {
     it('throws on unsupported named color', () => {
       expect(() => readColor('' as any)).toThrowError("Expected valid color name, got: ''");
       expect(() => readColor('salmon' as any)).toThrowError(
-        "Expected valid color name, got: 'salmon'"
+        "Expected valid color name, got: 'salmon'",
       );
     });
 

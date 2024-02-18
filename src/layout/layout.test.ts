@@ -120,7 +120,7 @@ describe('layout', () => {
           y: 20,
           width: pageWidth - 40,
           height: 12,
-        })
+        }),
       );
       expect(pages[0].footer).toBeUndefined();
     });
@@ -143,7 +143,7 @@ describe('layout', () => {
           y: pageHeight - 20 - 12,
           width: pageWidth - 40,
           height: 12,
-        })
+        }),
       );
     });
 
@@ -165,7 +165,7 @@ describe('layout', () => {
           y: 20,
           width: pageWidth - 40,
           height: 12,
-        })
+        }),
       );
       expect(pages[0].footer).toEqual(
         objectContaining({
@@ -173,7 +173,7 @@ describe('layout', () => {
           y: pageHeight - 20 - 12,
           width: pageWidth - 40,
           height: 12,
-        })
+        }),
       );
     });
 
@@ -260,7 +260,7 @@ describe('layout', () => {
       const { frame } = await layoutBlock(block, box, ctx);
 
       expect(frame).toEqual(
-        objectContaining({ objects: [{ type: 'anchor', name: 'test', x: 0, y: 0 }] })
+        objectContaining({ objects: [{ type: 'anchor', name: 'test', x: 0, y: 0 }] }),
       );
     });
 

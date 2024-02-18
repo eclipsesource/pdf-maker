@@ -95,7 +95,7 @@ describe('text', () => {
           { text: 'foo', attrs: {} },
           { text: 'bar', attrs: {} },
         ],
-        fontStore
+        fontStore,
       );
 
       expect(segments).toEqual([

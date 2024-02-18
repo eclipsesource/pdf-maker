@@ -34,7 +34,7 @@ export type FontSelector = {
 export function readFonts(input: unknown): FontDef[] {
   return Object.entries(readObject(input)).flatMap(([name, fontDef]) => {
     return readAs(fontDef, name, required(types.array(readFont))).map(
-      (font) => ({ family: name, ...font } as FontDef)
+      (font) => ({ family: name, ...font }) as FontDef,
     );
   });
 }

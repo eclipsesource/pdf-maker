@@ -14,7 +14,7 @@ import { compact } from './utils.js';
 
 export function createFrameGuides(
   frame: Frame,
-  block: Block & { isPage?: boolean }
+  block: Block & { isPage?: boolean },
 ): GraphicsObject {
   const { width: w, height: h } = frame;
   const { left: ml, right: mr, top: mt, bottom: mb } = block.margin ?? ZERO_EDGES;

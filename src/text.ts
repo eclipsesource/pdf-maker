@@ -26,7 +26,7 @@ export type TextSegment = {
 
 export async function extractTextSegments(
   textSpans: TextSpan[],
-  fontStore: FontStore
+  fontStore: FontStore,
 ): Promise<TextSegment[]> {
   const segments = await Promise.all(
     textSpans.map(async (span) => {
@@ -61,9 +61,9 @@ export async function extractTextSegments(
             link,
             rise,
             letterSpacing,
-          } as TextSegment)
+          }) as TextSegment,
       );
-    })
+    }),
   );
   return segments.flat();
 }
@@ -171,7 +171,7 @@ function findLinebreak(segments: TextSegment[], maxWidth: number): number | unde
  */
 export function findLinebreakOpportunity(
   segments: TextSegment[],
-  index: number
+  index: number,
 ): number | undefined {
   // If the segment at the given index does not allow for a linebreak, look for a previous one.
   for (let i = index; i >= 0; i--) {

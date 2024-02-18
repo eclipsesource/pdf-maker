@@ -8,7 +8,7 @@ import { LayoutContent } from './layout.js';
 export async function layoutImageContent(
   block: ImageBlock,
   box: Box,
-  ctx: MakerCtx
+  ctx: MakerCtx,
 ): Promise<LayoutContent> {
   const selector = { name: block.image, width: block.width, height: block.height };
   const image = await ctx.imageStore.selectImage(selector);

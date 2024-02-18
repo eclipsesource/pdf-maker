@@ -117,7 +117,7 @@ describe('layout-rows', () => {
     describe('page breaks', () => {
       const makeBlocks = (n: number, idPrefix?: string) => {
         return range(n).map(
-          (n) => ({ id: idPrefix ? `${idPrefix}.${n}` : `${n}`, height: 100 } as Block)
+          (n) => ({ id: idPrefix ? `${idPrefix}.${n}` : `${n}`, height: 100 }) as Block,
         );
       };
       const renderedIds = (frame?: Pick<Frame, 'children'>) =>
@@ -288,7 +288,7 @@ describe('layout-rows', () => {
         const { frame, remainder } = await layoutRowsContent(
           { rows, breakInside: 'enforce-auto' as any },
           box,
-          ctx
+          ctx,
         );
 
         expect(renderedIds(frame)).toEqual(range(7).map(String));
@@ -302,7 +302,7 @@ describe('layout-rows', () => {
         const { frame, remainder } = await layoutRowsContent(
           { rows, breakInside: 'enforce-auto' as any },
           box,
-          ctx
+          ctx,
         );
 
         expect(renderedIds(frame)).toEqual(range(7).map(String));
@@ -317,7 +317,7 @@ describe('layout-rows', () => {
         const { frame, remainder } = await layoutRowsContent(
           { rows, breakInside: 'enforce-auto' as any },
           box,
-          ctx
+          ctx,
         );
 
         expect(renderedIds(frame)).toEqual(['0', '1', '2', '3', '4', '5', '6', 'extra']);
@@ -339,7 +339,7 @@ describe('layout-rows', () => {
         const { frame, remainder } = await layoutRowsContent(
           { rows, breakInside: 'enforce-auto' as any },
           box,
-          ctx
+          ctx,
         );
 
         expect(renderedIds(frame)).toEqual(['0', '1', '2', '3', '4', '5', '6']);

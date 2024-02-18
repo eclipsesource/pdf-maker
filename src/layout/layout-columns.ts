@@ -7,7 +7,7 @@ import { layoutBlock, LayoutContent } from './layout.js';
 export async function layoutColumnsContent(
   block: ColumnsBlock,
   box: Box,
-  ctx: MakerCtx
+  ctx: MakerCtx,
 ): Promise<LayoutContent> {
   const children: Frame[] = [];
 
@@ -24,7 +24,7 @@ export async function layoutColumnsContent(
     const { frame } = await layoutBlock(
       { ...column, autoWidth, breakInside: 'avoid' },
       colBox,
-      ctx
+      ctx,
     );
     children[idx] = frame;
     remainingWidth -= frame.width + marginX;

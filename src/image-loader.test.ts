@@ -25,7 +25,7 @@ describe('image-loader', () => {
       const loader = createImageLoader([]);
 
       await expect(loader.loadImage({ name: 'foo' })).rejects.toThrowError(
-        "Could not load image 'foo': ENOENT: no such file or directory, open 'foo'"
+        "Could not load image 'foo': ENOENT: no such file or directory, open 'foo'",
       );
     });
 
@@ -69,7 +69,7 @@ describe('image-loader', () => {
       const store = createImageStore(imageLoader);
 
       await expect(store.selectImage({ name: 'foo' })).rejects.toThrowError(
-        "Could not load image 'foo': No such image"
+        "Could not load image 'foo': No such image",
       );
     });
 
@@ -125,10 +125,10 @@ describe('image-loader', () => {
       const store = createImageStore(imageLoader);
 
       await expect(store.selectImage({ name: 'foo' })).rejects.toThrowError(
-        "Could not load image 'foo': No such image"
+        "Could not load image 'foo': No such image",
       );
       await expect(store.selectImage({ name: 'foo' })).rejects.toThrowError(
-        "Could not load image 'foo': No such image"
+        "Could not load image 'foo': No such image",
       );
       expect(imageLoader.loadImage).toHaveBeenCalledTimes(1);
     });

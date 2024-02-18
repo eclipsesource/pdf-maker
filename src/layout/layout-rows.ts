@@ -8,7 +8,7 @@ import { isBreakPossible, layoutBlock, LayoutContent } from './layout.js';
 export async function layoutRowsContent(
   block: RowsBlock,
   box: Box,
-  ctx: MakerCtx
+  ctx: MakerCtx,
 ): Promise<LayoutContent> {
   let rowY = box.y;
   let lastMargin = 0;
@@ -34,7 +34,7 @@ export async function layoutRowsContent(
     const { frame, remainder } = await layoutBlock(
       { ...row, autoWidth },
       { ...nextPos, ...maxSize },
-      ctx
+      ctx,
     );
 
     const performBreakAt = (breakIdx: number, remainder?: Block) => {
@@ -94,7 +94,7 @@ export async function layoutRowsContent(
           const row = block.rows[idx];
           const marginX = row.margin ? row.margin.left + row.margin.right : 0;
           return frame.width + marginX;
-        })
+        }),
       )
     : box.width;
 

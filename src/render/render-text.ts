@@ -31,7 +31,7 @@ export function renderText(object: TextObject, page: Page, base: Pos) {
     row.segments?.forEach((seg) => {
       const fontKey = addPageFont(page, seg.font);
       const pdfFont = (page.pdfPage as any)?.doc?.fonts?.find(
-        (font: PDFFont) => font.ref === seg.font.pdfRef
+        (font: PDFFont) => font.ref === seg.font.pdfRef,
       );
       const encodedText = pdfFont.encodeText(seg.text);
       const operators = compact([
@@ -58,7 +58,7 @@ function setTextColorOp(state: TextState, color?: Color): PDFOperator | undefine
 function setTextFontAndSizeOp(
   state: TextState,
   font: PDFName,
-  size: number
+  size: number,
 ): PDFOperator | undefined {
   if (state.font !== font?.toString() || state.size !== size) {
     state.font = font?.toString();
@@ -87,7 +87,7 @@ function equalsColor(color1: Color | undefined, color2: Color | undefined) {
     !!color1 &&
     !!color2 &&
     Object.keys(color1).every(
-      (key) => color1[key as keyof typeof color1] === color2[key as keyof typeof color2]
+      (key) => color1[key as keyof typeof color1] === color2[key as keyof typeof color2],
     )
   );
 }
