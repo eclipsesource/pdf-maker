@@ -1,12 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { Box } from '../box.js';
-import { ImageStore } from '../image-loader.js';
-import { ImageSelector } from '../images.js';
-import { MakerCtx } from '../maker-ctx.js';
-import { ImageBlock } from '../read-block.js';
-import { fakeImage } from '../test/test-utils.js';
-import { layoutImageContent } from './layout-image.js';
+import { Box } from '../box.ts';
+import { ImageStore } from '../image-loader.ts';
+import { ImageSelector } from '../images.ts';
+import { MakerCtx } from '../maker-ctx.ts';
+import { ImageBlock } from '../read-block.ts';
+import { fakeImage } from '../test/test-utils.ts';
+import { layoutImageContent } from './layout-image.ts';
 
 const { objectContaining } = expect;
 

@@ -1,8 +1,8 @@
-import { Alignment, FontStyle, FontWeight } from './api/content.js';
-import { BoxEdges, parseEdges, parseLength } from './box.js';
-import { Shape } from './frame.js';
-import { Color, readColor } from './read-color.js';
-import { readShape } from './read-graphics.js';
+import { Alignment, FontStyle, FontWeight } from './api/content.ts';
+import { BoxEdges, parseEdges, parseLength } from './box.ts';
+import { Shape } from './frame.ts';
+import { Color, readColor } from './read-color.ts';
+import { readShape } from './read-graphics.ts';
 import {
   dynamic,
   isObject,
@@ -15,7 +15,7 @@ import {
   TypeDef,
   typeError,
   types,
-} from './types.js';
+} from './types.ts';
 
 export type Block = TextBlock | ImageBlock | ColumnsBlock | RowsBlock | EmptyBlock;
 

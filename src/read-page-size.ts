@@ -1,6 +1,6 @@
-import { paperSizes } from './api/sizes.js';
-import { parseLength, Size } from './box.js';
-import { isObject, readFrom, required, typeError } from './types.js';
+import { paperSizes } from './api/sizes.ts';
+import { parseLength, Size } from './box.ts';
+import { isObject, readFrom, required, typeError } from './types.ts';
 
 export function readPageSize(def?: unknown): Size {
   if (typeof def === 'string') {

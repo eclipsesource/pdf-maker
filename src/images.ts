@@ -1,7 +1,7 @@
 import { JpegEmbedder, PDFDocument, PDFRef, PngEmbedder } from 'pdf-lib';
 
-import { parseBinaryData } from './binary-data.js';
-import { optional, readAs, readObject, required, types } from './types.js';
+import { parseBinaryData } from './binary-data.ts';
+import { optional, readAs, readObject, required, types } from './types.ts';
 
 const imageFormats = ['jpeg', 'png'];
 export type ImageFormat = (typeof imageFormats)[number];

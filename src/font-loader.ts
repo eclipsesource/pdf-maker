@@ -1,9 +1,9 @@
 import fontkit from '@pdf-lib/fontkit';
 import { toUint8Array } from 'pdf-lib';
 
-import { FontWeight } from './api/content.js';
-import { Font, FontDef, FontSelector, weightToNumber } from './fonts.js';
-import { pickDefined } from './types.js';
+import { FontWeight } from './api/content.ts';
+import { Font, FontDef, FontSelector, weightToNumber } from './fonts.ts';
+import { pickDefined } from './types.ts';
 
 export type LoadedFont = {
   name: string;

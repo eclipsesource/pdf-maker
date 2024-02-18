@@ -1,8 +1,8 @@
-import { Box } from '../box.js';
-import { Frame } from '../frame.js';
-import { MakerCtx } from '../maker-ctx.js';
-import { Block, ColumnsBlock } from '../read-block.js';
-import { layoutBlock, LayoutContent } from './layout.js';
+import { Box } from '../box.ts';
+import { Frame } from '../frame.ts';
+import { MakerCtx } from '../maker-ctx.ts';
+import { Block, ColumnsBlock } from '../read-block.ts';
+import { layoutBlock, LayoutContent } from './layout.ts';
 
 export async function layoutColumnsContent(
   block: ColumnsBlock,

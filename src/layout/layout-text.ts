@@ -1,18 +1,18 @@
-import { Box, Size } from '../box.js';
-import { Font } from '../fonts.js';
-import { LinkObject, RenderObject, TextRowObject, TextSegmentObject } from '../frame.js';
-import { createRowGuides } from '../guides.js';
-import { MakerCtx } from '../maker-ctx.js';
-import { TextBlock } from '../read-block.js';
+import { Box, Size } from '../box.ts';
+import { Font } from '../fonts.ts';
+import { LinkObject, RenderObject, TextRowObject, TextSegmentObject } from '../frame.ts';
+import { createRowGuides } from '../guides.ts';
+import { MakerCtx } from '../maker-ctx.ts';
+import { TextBlock } from '../read-block.ts';
 import {
   breakLine,
   convertToTextSpan,
   extractTextSegments,
   flattenTextSegments,
   TextSegment,
-} from '../text.js';
-import { omit } from '../utils.js';
-import { LayoutContent } from './layout.js';
+} from '../text.ts';
+import { omit } from '../utils.ts';
+import { LayoutContent } from './layout.ts';
 
 export async function layoutTextContent(
   block: TextBlock,

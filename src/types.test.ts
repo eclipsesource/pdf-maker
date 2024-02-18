@@ -15,7 +15,7 @@ import {
   readString,
   required,
   types,
-} from './types.js';
+} from './types.ts';
 
 describe('types', () => {
   describe('pickDefined', () => {

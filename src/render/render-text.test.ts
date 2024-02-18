@@ -1,11 +1,11 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 
-import { Size } from '../box.js';
-import { Font } from '../fonts.js';
-import { TextObject } from '../frame.js';
-import { Page } from '../page.js';
-import { fakeFont, fakePDFPage, getContentStream } from '../test/test-utils.js';
-import { renderText } from './render-text.js';
+import { Size } from '../box.ts';
+import { Font } from '../fonts.ts';
+import { TextObject } from '../frame.ts';
+import { Page } from '../page.ts';
+import { fakeFont, fakePDFPage, getContentStream } from '../test/test-utils.ts';
+import { renderText } from './render-text.ts';
 
 describe('render-text', () => {
   let page: Page, size: Size, font: Font;

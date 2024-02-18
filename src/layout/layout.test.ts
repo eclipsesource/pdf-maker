@@ -1,13 +1,13 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 
-import { paperSizes } from '../api/sizes.js';
-import { Box } from '../box.js';
-import { FontStore } from '../font-loader.js';
-import { MakerCtx } from '../maker-ctx.js';
-import { Block, TextAttrs, TextSpan } from '../read-block.js';
-import { PageInfo, readDocumentDefinition } from '../read-document.js';
-import { fakeFont, p, range } from '../test/test-utils.js';
-import { isBreakPossible, layoutBlock, layoutPages } from './layout.js';
+import { paperSizes } from '../api/sizes.ts';
+import { Box } from '../box.ts';
+import { FontStore } from '../font-loader.ts';
+import { MakerCtx } from '../maker-ctx.ts';
+import { Block, TextAttrs, TextSpan } from '../read-block.ts';
+import { PageInfo, readDocumentDefinition } from '../read-document.ts';
+import { fakeFont, p, range } from '../test/test-utils.ts';
+import { isBreakPossible, layoutBlock, layoutPages } from './layout.ts';
 
 const { objectContaining } = expect;
 

@@ -1,9 +1,9 @@
 import { Color, PDFName, PDFPage } from 'pdf-lib';
 
-import { Size } from './box.js';
-import { Font, registerFont } from './fonts.js';
-import { Frame } from './frame.js';
-import { Image, registerImage } from './images.js';
+import { Size } from './box.ts';
+import { Font, registerFont } from './fonts.ts';
+import { Frame } from './frame.ts';
+import { Image, registerImage } from './images.ts';
 
 export type TextState = {
   color?: Color;

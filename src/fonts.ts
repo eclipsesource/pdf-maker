@@ -1,10 +1,10 @@
 import fontkit from '@pdf-lib/fontkit';
 import { CustomFontSubsetEmbedder, PDFDocument, PDFFont, PDFRef } from 'pdf-lib';
 
-import { FontStyle, FontWeight } from './api/content.js';
-import { parseBinaryData } from './binary-data.js';
-import { printValue } from './print-value.js';
-import { optional, readAs, readBoolean, readObject, required, types } from './types.js';
+import { FontStyle, FontWeight } from './api/content.ts';
+import { parseBinaryData } from './binary-data.ts';
+import { printValue } from './print-value.ts';
+import { optional, readAs, readBoolean, readObject, required, types } from './types.ts';
 
 /**
  * The resolved definition of a font.

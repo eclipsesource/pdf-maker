@@ -1,8 +1,8 @@
 import { rgb } from 'pdf-lib';
 import { describe, expect, it } from 'vitest';
 
-import { readShape } from './read-graphics.js';
-import { p } from './test/test-utils.js';
+import { readShape } from './read-graphics.ts';
+import { p } from './test/test-utils.ts';
 
 const transformAttrs = {
   translate: { x: 1, y: 2 },

@@ -6,7 +6,7 @@ import {
   readRowsBlock,
   readText,
   readTextBlock,
-} from './read-block.js';
+} from './read-block.ts';
 
 describe('read-block', () => {
   describe('readBlock', () => {

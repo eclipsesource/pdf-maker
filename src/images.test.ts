@@ -4,8 +4,8 @@ import { join } from 'node:path';
 
 import { describe, expect, it } from 'vitest';
 
-import { Image, readImages, registerImage } from './images.js';
-import { fakePDFDocument, mkData } from './test/test-utils.js';
+import { Image, readImages, registerImage } from './images.ts';
+import { fakePDFDocument, mkData } from './test/test-utils.ts';
 
 global.crypto ??= (crypto as any).webcrypto;
 

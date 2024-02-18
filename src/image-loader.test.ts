@@ -4,8 +4,8 @@ import { join } from 'node:path';
 
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { createImageLoader, createImageStore, ImageLoader } from './image-loader.js';
-import { ImageSelector } from './images.js';
+import { createImageLoader, createImageStore, ImageLoader } from './image-loader.ts';
+import { ImageSelector } from './images.ts';
 
 global.crypto ??= (crypto as any).webcrypto;
 

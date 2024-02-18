@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
-import { paperSizes } from './api/sizes.js';
-import { applyOrientation, parseOrientation, readPageSize } from './read-page-size.js';
+import { paperSizes } from './api/sizes.ts';
+import { applyOrientation, parseOrientation, readPageSize } from './read-page-size.ts';
 
 describe('read-page-sizes', () => {
   describe('readPageSize', () => {

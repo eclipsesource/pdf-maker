@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { round } from './utils.js';
+import { round } from './utils.ts';
 
 describe('utils', () => {
   describe('round', () => {

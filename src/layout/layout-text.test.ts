@@ -1,12 +1,12 @@
 import { rgb } from 'pdf-lib';
 import { beforeEach, describe, expect, it } from 'vitest';
 
-import { Box } from '../box.js';
-import { FontStore } from '../font-loader.js';
-import { Font, FontSelector } from '../fonts.js';
-import { MakerCtx } from '../maker-ctx.js';
-import { extractTextRows, fakeFont, range, span } from '../test/test-utils.js';
-import { layoutTextContent } from './layout-text.js';
+import { Box } from '../box.ts';
+import { FontStore } from '../font-loader.ts';
+import { Font, FontSelector } from '../fonts.ts';
+import { MakerCtx } from '../maker-ctx.ts';
+import { extractTextRows, fakeFont, range, span } from '../test/test-utils.ts';
+import { layoutTextContent } from './layout-text.ts';
 
 const { objectContaining } = expect;
 

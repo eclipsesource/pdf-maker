@@ -7,10 +7,10 @@ import {
   translate,
 } from 'pdf-lib';
 
-import { Pos } from '../box.js';
-import { ImageObject } from '../frame.js';
-import { addPageImage, Page } from '../page.js';
-import { compact } from '../utils.js';
+import { Pos } from '../box.ts';
+import { ImageObject } from '../frame.ts';
+import { addPageImage, Page } from '../page.ts';
+import { compact } from '../utils.ts';
 
 export function renderImage(object: ImageObject, page: Page, base: Pos) {
   const x = base.x + object.x;

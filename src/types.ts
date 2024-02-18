@@ -1,4 +1,4 @@
-import { printValue } from './print-value.js';
+import { printValue } from './print-value.ts';
 
 export type Obj = Record<string, unknown>;
 

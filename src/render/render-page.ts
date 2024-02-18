@@ -1,12 +1,12 @@
 import { PDFDocument } from 'pdf-lib';
 
-import { Pos } from '../box.js';
-import { Frame } from '../frame.js';
-import { Page } from '../page.js';
-import { renderAnchor, renderLink } from './render-annotations.js';
-import { renderGraphics } from './render-graphics.js';
-import { renderImage } from './render-image.js';
-import { renderText } from './render-text.js';
+import { Pos } from '../box.ts';
+import { Frame } from '../frame.ts';
+import { Page } from '../page.ts';
+import { renderAnchor, renderLink } from './render-annotations.ts';
+import { renderGraphics } from './render-graphics.ts';
+import { renderImage } from './render-image.ts';
+import { renderText } from './render-text.ts';
 
 export function renderPage(page: Page, pdfDoc: PDFDocument) {
   page.pdfPage = pdfDoc.addPage([page.size.width, page.size.height]);

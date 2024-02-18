@@ -1,8 +1,8 @@
 import { PDFDict, PDFDocument, PDFHexString, PDFName } from 'pdf-lib';
 
-import { Page } from '../page.js';
-import { DocumentDefinition, Metadata } from '../read-document.js';
-import { renderPage } from './render-page.js';
+import { Page } from '../page.ts';
+import { DocumentDefinition, Metadata } from '../read-document.ts';
+import { renderPage } from './render-page.ts';
 
 export async function renderDocument(def: DocumentDefinition, pages: Page[]): Promise<Uint8Array> {
   const pdfDoc = await PDFDocument.create({ updateMetadata: false });

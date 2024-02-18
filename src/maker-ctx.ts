@@ -1,5 +1,5 @@
-import { FontStore } from './font-loader.js';
-import { ImageStore } from './image-loader.js';
+import { FontStore } from './font-loader.ts';
+import { ImageStore } from './image-loader.ts';
 
 export type MakerCtx = {
   fontStore: FontStore;

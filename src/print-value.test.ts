@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { printValue } from './print-value.js';
+import { printValue } from './print-value.ts';
 
 describe('print-value', () => {
   describe('printValue', () => {

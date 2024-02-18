@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { readFonts, weightToNumber } from './fonts.js';
+import { readFonts, weightToNumber } from './fonts.ts';
 
 describe('fonts', () => {
   describe('readFonts', () => {

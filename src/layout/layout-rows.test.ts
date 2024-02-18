@@ -1,12 +1,12 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 
-import { Box } from '../box.js';
-import { FontStore } from '../font-loader.js';
-import { Frame } from '../frame.js';
-import { MakerCtx } from '../maker-ctx.js';
-import { Block } from '../read-block.js';
-import { extractTextRows, fakeFont, range, span } from '../test/test-utils.js';
-import { layoutRowsContent } from './layout-rows.js';
+import { Box } from '../box.ts';
+import { FontStore } from '../font-loader.ts';
+import { Frame } from '../frame.ts';
+import { MakerCtx } from '../maker-ctx.ts';
+import { Block } from '../read-block.ts';
+import { extractTextRows, fakeFont, range, span } from '../test/test-utils.ts';
+import { layoutRowsContent } from './layout-rows.ts';
 
 describe('layout-rows', () => {
   let ctx: MakerCtx, box: Box;

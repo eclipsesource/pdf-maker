@@ -1,6 +1,6 @@
-import { Color } from './colors.js';
-import { Length } from './sizes.js';
-import { Orientation, PaperSize } from './sizes.js';
+import { Color } from './colors.ts';
+import { Length } from './sizes.ts';
+import { Orientation, PaperSize } from './sizes.ts';
 
 /**
  * The complete definition of a document to create.

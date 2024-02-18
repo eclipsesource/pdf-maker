@@ -1,10 +1,10 @@
-import { createFontLoader, createFontStore } from '../font-loader.js';
-import { createImageLoader, createImageStore } from '../image-loader.js';
-import { layoutPages } from '../layout/layout.js';
-import { readDocumentDefinition } from '../read-document.js';
-import { renderDocument } from '../render/render-document.js';
-import { readAs } from '../types.js';
-import { DocumentDefinition } from './content.js';
+import { createFontLoader, createFontStore } from '../font-loader.ts';
+import { createImageLoader, createImageStore } from '../image-loader.ts';
+import { layoutPages } from '../layout/layout.ts';
+import { readDocumentDefinition } from '../read-document.ts';
+import { renderDocument } from '../render/render-document.ts';
+import { readAs } from '../types.ts';
+import { DocumentDefinition } from './content.ts';
 
 /**
  * Generates a PDF from the given document definition.

@@ -5,11 +5,11 @@ import {
   PolylineObject,
   RectObject,
   Shape,
-} from './frame.js';
-import { readColor } from './read-color.js';
-import { parseSvgPath } from './svg-paths.js';
-import { Obj, optional, readFrom, readObject, required, types } from './types.js';
-import { omit } from './utils.js';
+} from './frame.ts';
+import { readColor } from './read-color.ts';
+import { parseSvgPath } from './svg-paths.ts';
+import { Obj, optional, readFrom, readObject, required, types } from './types.ts';
+import { omit } from './utils.ts';
 
 const tLineCap = types.string({ enum: ['butt', 'round', 'square'] });
 const tLineJoin = types.string({ enum: ['miter', 'round', 'bevel'] });

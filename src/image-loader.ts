@@ -2,9 +2,9 @@ import { readFile } from 'node:fs/promises';
 
 import { toUint8Array } from 'pdf-lib';
 
-import { Image, ImageDef, ImageFormat, ImageSelector } from './images.js';
-import { isJpeg, readJpegInfo } from './images/jpeg.js';
-import { isPng, readPngInfo } from './images/png.js';
+import { Image, ImageDef, ImageFormat, ImageSelector } from './images.ts';
+import { isJpeg, readJpegInfo } from './images/jpeg.ts';
+import { isPng, readPngInfo } from './images/png.ts';
 
 export type LoadedImage = {
   data: Uint8Array;

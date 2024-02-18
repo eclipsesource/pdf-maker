@@ -1,7 +1,7 @@
 import { Color, rgb } from 'pdf-lib';
 
-import { namedColors } from './api/colors.js';
-import { typeError } from './types.js';
+import { namedColors } from './api/colors.ts';
+import { typeError } from './types.ts';
 
 export { Color };
 

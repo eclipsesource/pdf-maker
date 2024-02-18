@@ -1,9 +1,9 @@
-import { BoxEdges, parseEdges, Size } from './box.js';
-import { FontDef, readFonts } from './fonts.js';
-import { ImageDef, readImages } from './images.js';
-import { Block, readBlock, readInheritableAttrs, TextAttrs } from './read-block.js';
-import { parseOrientation, readPageSize } from './read-page-size.js';
-import { dynamic, Obj, optional, readAs, readObject, required, typeError, types } from './types.js';
+import { BoxEdges, parseEdges, Size } from './box.ts';
+import { FontDef, readFonts } from './fonts.ts';
+import { ImageDef, readImages } from './images.ts';
+import { Block, readBlock, readInheritableAttrs, TextAttrs } from './read-block.ts';
+import { parseOrientation, readPageSize } from './read-page-size.ts';
+import { dynamic, Obj, optional, readAs, readObject, required, typeError, types } from './types.ts';
 
 export type DocumentDefinition = {
   fonts?: FontDef[];

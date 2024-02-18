@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { parseSvgPath, svgPathToPdfOps, tokenizeSvgPath } from './svg-paths.js';
+import { parseSvgPath, svgPathToPdfOps, tokenizeSvgPath } from './svg-paths.ts';
 
 describe('svg-paths', () => {
   describe('tokenize', () => {

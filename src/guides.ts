@@ -1,6 +1,6 @@
 import { rgb } from 'pdf-lib';
 
-import { ZERO_EDGES } from './box.js';
+import { ZERO_EDGES } from './box.ts';
 import {
   CircleObject,
   Frame,
@@ -8,9 +8,9 @@ import {
   LineObject,
   RectObject,
   TextRowObject,
-} from './frame.js';
-import { Block } from './read-block.js';
-import { compact } from './utils.js';
+} from './frame.ts';
+import { Block } from './read-block.ts';
+import { compact } from './utils.ts';
 
 export function createFrameGuides(
   frame: Frame,

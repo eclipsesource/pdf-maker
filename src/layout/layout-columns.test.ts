@@ -1,11 +1,11 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 
-import { Box } from '../box.js';
-import { FontStore } from '../font-loader.js';
-import { MakerCtx } from '../maker-ctx.js';
-import { Block } from '../read-block.js';
-import { fakeFont, span } from '../test/test-utils.js';
-import { layoutColumnsContent } from './layout-columns.js';
+import { Box } from '../box.ts';
+import { FontStore } from '../font-loader.ts';
+import { MakerCtx } from '../maker-ctx.ts';
+import { Block } from '../read-block.ts';
+import { fakeFont, span } from '../test/test-utils.ts';
+import { layoutColumnsContent } from './layout-columns.ts';
 
 const { objectContaining } = expect;
 

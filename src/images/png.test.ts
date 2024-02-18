@@ -3,7 +3,7 @@ import { join } from 'node:path';
 
 import { describe, expect, it } from 'vitest';
 
-import { isPng, readPngInfo } from './png.js';
+import { isPng, readPngInfo } from './png.ts';
 
 describe('png', () => {
   describe('isPng', () => {

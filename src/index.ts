@@ -1,2 +1,2 @@
-export * from './api/content.js';
-export { makePdf } from './api/make-pdf.js';
+export * from './api/content.ts';
+export { makePdf } from './api/make-pdf.ts';

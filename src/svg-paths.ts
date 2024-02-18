@@ -7,7 +7,7 @@ import {
   PDFOperator,
 } from 'pdf-lib';
 
-import { arcToSegments, segmentToBezier } from './arcs.js';
+import { arcToSegments, segmentToBezier } from './arcs.ts';
 
 const svgOpsParams = {
   M: 2,

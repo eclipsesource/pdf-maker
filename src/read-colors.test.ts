@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { readColor } from './read-color.js';
+import { readColor } from './read-color.ts';
 
 const { closeTo } = expect;
 

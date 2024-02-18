@@ -23,8 +23,8 @@ import {
   stroke,
 } from 'pdf-lib';
 
-import { LineCap, LineJoin } from '../api/content.js';
-import { Pos } from '../box.js';
+import { LineCap, LineJoin } from '../api/content.ts';
+import { Pos } from '../box.ts';
 import {
   CircleObject,
   FillAttrs,
@@ -35,10 +35,10 @@ import {
   PolylineObject,
   RectObject,
   Shape,
-} from '../frame.js';
-import { getExtGraphicsState, Page } from '../page.js';
-import { svgPathToPdfOps } from '../svg-paths.js';
-import { compact, multiplyMatrices, round } from '../utils.js';
+} from '../frame.ts';
+import { getExtGraphicsState, Page } from '../page.ts';
+import { svgPathToPdfOps } from '../svg-paths.ts';
+import { compact, multiplyMatrices, round } from '../utils.ts';
 
 // See https://stackoverflow.com/a/27863181/247159
 const KAPPA = (4 * (Math.sqrt(2) - 1)) / 3;

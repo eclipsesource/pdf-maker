@@ -1,6 +1,6 @@
 import { decodeFromBase64DataUri } from 'pdf-lib';
 
-import { typeError } from './types.js';
+import { typeError } from './types.ts';
 
 export function parseBinaryData(input: unknown): Uint8Array {
   if (input instanceof Uint8Array) return input;

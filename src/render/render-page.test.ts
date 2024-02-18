@@ -1,12 +1,12 @@
 import { PDFArray, PDFDict, PDFDocument, PDFName, PDFPage, PDFRef } from 'pdf-lib';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { Size } from '../box.js';
-import { Font } from '../fonts.js';
-import { Frame } from '../frame.js';
-import { Page } from '../page.js';
-import { fakeFont, fakePDFPage, getContentStream } from '../test/test-utils.js';
-import { renderFrame, renderPage } from './render-page.js';
+import { Size } from '../box.ts';
+import { Font } from '../fonts.ts';
+import { Frame } from '../frame.ts';
+import { Page } from '../page.ts';
+import { fakeFont, fakePDFPage, getContentStream } from '../test/test-utils.ts';
+import { renderFrame, renderPage } from './render-page.ts';
 
 describe('render-page', () => {
   let pdfPage: PDFPage;

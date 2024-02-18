@@ -1,11 +1,11 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 
-import { Size } from '../box.js';
-import { ImageObject } from '../frame.js';
-import { Image } from '../images.js';
-import { Page } from '../page.js';
-import { fakePDFPage, getContentStream } from '../test/test-utils.js';
-import { renderImage } from './render-image.js';
+import { Size } from '../box.ts';
+import { ImageObject } from '../frame.ts';
+import { Image } from '../images.ts';
+import { Page } from '../page.ts';
+import { fakePDFPage, getContentStream } from '../test/test-utils.ts';
+import { renderImage } from './render-image.ts';
 
 describe('render-image', () => {
   let page: Page, size: Size, image: Image;

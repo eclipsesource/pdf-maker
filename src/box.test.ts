@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { parseEdges, parseLength, subtractEdges } from './box.js';
+import { parseEdges, parseLength, subtractEdges } from './box.ts';
 
 describe('box', () => {
   describe('subtractEdges', () => {

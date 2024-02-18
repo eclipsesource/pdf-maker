@@ -1,9 +1,9 @@
-import { Box, ZERO_EDGES } from '../box.js';
-import { Frame } from '../frame.js';
-import { MakerCtx } from '../maker-ctx.js';
-import { Block, RowsBlock } from '../read-block.js';
-import { compact, omit } from '../utils.js';
-import { isBreakPossible, layoutBlock, LayoutContent } from './layout.js';
+import { Box, ZERO_EDGES } from '../box.ts';
+import { Frame } from '../frame.ts';
+import { MakerCtx } from '../maker-ctx.ts';
+import { Block, RowsBlock } from '../read-block.ts';
+import { compact, omit } from '../utils.ts';
+import { isBreakPossible, layoutBlock, LayoutContent } from './layout.ts';
 
 export async function layoutRowsContent(
   block: RowsBlock,

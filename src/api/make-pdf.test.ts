@@ -2,7 +2,7 @@ import crypto from 'node:crypto';
 
 import { describe, expect, it } from 'vitest';
 
-import { makePdf } from './make-pdf.js';
+import { makePdf } from './make-pdf.ts';
 
 global.crypto ??= (crypto as any).webcrypto;
 

@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 
-import { PageInfo, readDocumentDefinition } from './read-document.js';
+import { PageInfo, readDocumentDefinition } from './read-document.ts';
 
 describe('read-document', () => {
   describe('readDocumentDefinition', () => {

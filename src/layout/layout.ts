@@ -1,17 +1,17 @@
-import { paperSizes } from '../api/sizes.js';
-import { Box, parseEdges, Size, subtractEdges, ZERO_EDGES } from '../box.js';
-import { AnchorObject, Frame } from '../frame.js';
-import { createFrameGuides } from '../guides.js';
-import { MakerCtx } from '../maker-ctx.js';
-import { Page } from '../page.js';
-import { Block, RowsBlock } from '../read-block.js';
-import { DocumentDefinition } from '../read-document.js';
-import { applyOrientation } from '../read-page-size.js';
-import { pickDefined } from '../types.js';
-import { layoutColumnsContent } from './layout-columns.js';
-import { layoutImageContent } from './layout-image.js';
-import { layoutRowsContent } from './layout-rows.js';
-import { layoutTextContent } from './layout-text.js';
+import { paperSizes } from '../api/sizes.ts';
+import { Box, parseEdges, Size, subtractEdges, ZERO_EDGES } from '../box.ts';
+import { AnchorObject, Frame } from '../frame.ts';
+import { createFrameGuides } from '../guides.ts';
+import { MakerCtx } from '../maker-ctx.ts';
+import { Page } from '../page.ts';
+import { Block, RowsBlock } from '../read-block.ts';
+import { DocumentDefinition } from '../read-document.ts';
+import { applyOrientation } from '../read-page-size.ts';
+import { pickDefined } from '../types.ts';
+import { layoutColumnsContent } from './layout-columns.ts';
+import { layoutImageContent } from './layout-image.ts';
+import { layoutRowsContent } from './layout-rows.ts';
+import { layoutTextContent } from './layout-text.ts';
 
 const defaultPageMargin = parseEdges('2cm');
 

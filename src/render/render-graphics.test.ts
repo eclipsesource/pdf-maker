@@ -1,11 +1,11 @@
 import { rgb } from 'pdf-lib';
 import { beforeEach, describe, expect, it } from 'vitest';
 
-import { Size } from '../box.js';
-import { CircleObject, LineObject, PathObject, PolylineObject, RectObject } from '../frame.js';
-import { Page } from '../page.js';
-import { fakePDFPage, getContentStream, p } from '../test/test-utils.js';
-import { renderGraphics } from './render-graphics.js';
+import { Size } from '../box.ts';
+import { CircleObject, LineObject, PathObject, PolylineObject, RectObject } from '../frame.ts';
+import { Page } from '../page.ts';
+import { fakePDFPage, getContentStream, p } from '../test/test-utils.ts';
+import { renderGraphics } from './render-graphics.ts';
 
 describe('render-graphics', () => {
   let page: Page, size: Size;

@@ -3,7 +3,7 @@ import crypto from 'node:crypto';
 import { PDFDict, PDFDocument, PDFHexString, PDFName, PDFStream, PDFString } from 'pdf-lib';
 import { describe, expect, it } from 'vitest';
 
-import { renderDocument } from './render-document.js';
+import { renderDocument } from './render-document.ts';
 
 global.crypto ??= (crypto as any).webcrypto;
 

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { parseBinaryData } from './binary-data.js';
+import { parseBinaryData } from './binary-data.ts';
 
 describe('binary-data', () => {
   const data = Uint8Array.of(1, 183, 0);
