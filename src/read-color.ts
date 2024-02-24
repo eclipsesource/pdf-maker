@@ -1,9 +1,9 @@
-import { Color, rgb } from 'pdf-lib';
+import { type Color, rgb } from 'pdf-lib';
 
 import { namedColors } from './api/colors.ts';
 import { typeError } from './types.ts';
 
-export { Color };
+export { type Color };
 
 export function readColor(input: unknown): Color {
   if (typeof input === 'string') {
