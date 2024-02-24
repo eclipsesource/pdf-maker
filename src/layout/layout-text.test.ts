@@ -1,10 +1,10 @@
 import { rgb } from 'pdf-lib';
 import { beforeEach, describe, expect, it } from 'vitest';
 
-import { Box } from '../box.ts';
-import { FontStore } from '../font-loader.ts';
-import { Font, FontSelector } from '../fonts.ts';
-import { MakerCtx } from '../maker-ctx.ts';
+import type { Box } from '../box.ts';
+import type { FontStore } from '../font-loader.ts';
+import type { Font, FontSelector } from '../fonts.ts';
+import type { MakerCtx } from '../maker-ctx.ts';
 import { extractTextRows, fakeFont, range, span } from '../test/test-utils.ts';
 import { layoutTextContent } from './layout-text.ts';
 

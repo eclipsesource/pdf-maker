@@ -1,8 +1,8 @@
-import { PDFDocument } from 'pdf-lib';
+import type { PDFDocument } from 'pdf-lib';
 
-import { Pos } from '../box.ts';
-import { Frame } from '../frame.ts';
-import { Page } from '../page.ts';
+import type { Pos } from '../box.ts';
+import type { Frame } from '../frame.ts';
+import type { Page } from '../page.ts';
 import { renderAnchor, renderLink } from './render-annotations.ts';
 import { renderGraphics } from './render-graphics.ts';
 import { renderImage } from './render-image.ts';

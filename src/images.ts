@@ -1,4 +1,5 @@
-import { JpegEmbedder, PDFDocument, PDFRef, PngEmbedder } from 'pdf-lib';
+import type { PDFDocument, PDFRef } from 'pdf-lib';
+import { JpegEmbedder, PngEmbedder } from 'pdf-lib';
 
 import { parseBinaryData } from './binary-data.ts';
 import { optional, readAs, readObject, required, types } from './types.ts';

@@ -1,11 +1,12 @@
 import { paperSizes } from '../api/sizes.ts';
-import { Box, parseEdges, Size, subtractEdges, ZERO_EDGES } from '../box.ts';
-import { AnchorObject, Frame } from '../frame.ts';
+import type { Box, Size } from '../box.ts';
+import { parseEdges, subtractEdges, ZERO_EDGES } from '../box.ts';
+import type { AnchorObject, Frame } from '../frame.ts';
 import { createFrameGuides } from '../guides.ts';
-import { MakerCtx } from '../maker-ctx.ts';
-import { Page } from '../page.ts';
-import { Block, RowsBlock } from '../read-block.ts';
-import { DocumentDefinition } from '../read-document.ts';
+import type { MakerCtx } from '../maker-ctx.ts';
+import type { Page } from '../page.ts';
+import type { Block, RowsBlock } from '../read-block.ts';
+import type { DocumentDefinition } from '../read-document.ts';
 import { applyOrientation } from '../read-page-size.ts';
 import { pickDefined } from '../types.ts';
 import { layoutColumnsContent } from './layout-columns.ts';

@@ -1,6 +1,7 @@
 import crypto from 'node:crypto';
 
-import { PDFDict, PDFDocument, PDFHexString, PDFName, PDFStream, PDFString } from 'pdf-lib';
+import type { PDFStream } from 'pdf-lib';
+import { PDFDict, PDFDocument, PDFHexString, PDFName, PDFString } from 'pdf-lib';
 import { describe, expect, it } from 'vitest';
 
 import { renderDocument } from './render-document.ts';

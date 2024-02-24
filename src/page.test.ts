@@ -1,8 +1,9 @@
-import { PDFPage } from 'pdf-lib';
+import type { PDFPage } from 'pdf-lib';
 import { beforeEach, describe, expect, it } from 'vitest';
 
-import { Font } from './fonts.ts';
-import { addPageFont, getExtGraphicsState, Page } from './page.ts';
+import type { Font } from './fonts.ts';
+import type { Page } from './page.ts';
+import { addPageFont, getExtGraphicsState } from './page.ts';
 import { fakeFont, fakePDFPage } from './test/test-utils.ts';
 
 describe('page', () => {

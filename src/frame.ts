@@ -1,7 +1,7 @@
-import { Font } from './fonts.ts';
-import { Image } from './images.ts';
-import { Color } from './read-color.ts';
-import { PathCommand } from './svg-paths.ts';
+import type { Font } from './fonts.ts';
+import type { Image } from './images.ts';
+import type { Color } from './read-color.ts';
+import type { PathCommand } from './svg-paths.ts';
 
 /**
  * Frames are created during the layout process. They have a position

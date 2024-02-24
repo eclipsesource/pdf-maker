@@ -1,10 +1,12 @@
-import { PDFContext, PDFDocument, PDFFont, PDFName, PDFPage, PDFRef } from 'pdf-lib';
+import type { PDFDocument, PDFFont, PDFPage } from 'pdf-lib';
+import { PDFContext, PDFName, PDFRef } from 'pdf-lib';
 
-import { Font, weightToNumber } from '../fonts.ts';
-import { Frame } from '../frame.ts';
-import { Image } from '../images.ts';
-import { Page } from '../page.ts';
-import { TextAttrs, TextSpan } from '../read-block.ts';
+import type { Font } from '../fonts.ts';
+import { weightToNumber } from '../fonts.ts';
+import type { Frame } from '../frame.ts';
+import type { Image } from '../images.ts';
+import type { Page } from '../page.ts';
+import type { TextAttrs, TextSpan } from '../read-block.ts';
 
 export function fakeFont(
   name: string,

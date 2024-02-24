@@ -1,4 +1,4 @@
-import {
+import type {
   CircleObject,
   LineObject,
   PathObject,
@@ -8,7 +8,8 @@ import {
 } from './frame.ts';
 import { readColor } from './read-color.ts';
 import { parseSvgPath } from './svg-paths.ts';
-import { Obj, optional, readFrom, readObject, required, types } from './types.ts';
+import type { Obj } from './types.ts';
+import { optional, readFrom, readObject, required, types } from './types.ts';
 import { omit } from './utils.ts';
 
 const tLineCap = types.string({ enum: ['butt', 'round', 'square'] });

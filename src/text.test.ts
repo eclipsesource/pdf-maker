@@ -1,16 +1,16 @@
 import { rgb } from 'pdf-lib';
 import { beforeEach, describe, expect, it } from 'vitest';
 
-import { FontStore } from './font-loader.ts';
-import { Font } from './fonts.ts';
+import type { FontStore } from './font-loader.ts';
+import type { Font } from './fonts.ts';
 import { fakeFont } from './test/test-utils.ts';
+import type { TextSegment } from './text.ts';
 import {
   breakLine,
   extractTextSegments,
   findLinebreakOpportunity,
   flattenTextSegments,
   splitChunks,
-  TextSegment,
 } from './text.ts';
 
 const { objectContaining } = expect;

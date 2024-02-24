@@ -1,9 +1,9 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 
-import { Box } from '../box.ts';
-import { FontStore } from '../font-loader.ts';
-import { MakerCtx } from '../maker-ctx.ts';
-import { Block } from '../read-block.ts';
+import type { Box } from '../box.ts';
+import type { FontStore } from '../font-loader.ts';
+import type { MakerCtx } from '../maker-ctx.ts';
+import type { Block } from '../read-block.ts';
 import { fakeFont, span } from '../test/test-utils.ts';
 import { layoutColumnsContent } from './layout-columns.ts';
 

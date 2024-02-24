@@ -1,4 +1,4 @@
-import { Font } from '@pdf-lib/fontkit';
+import type { Font } from '@pdf-lib/fontkit';
 
 export function getTextWidth(text: string, font: Font, fontSize: number): number {
   const { glyphs } = font.layout(text);

@@ -1,10 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { Box } from '../box.ts';
-import { ImageStore } from '../image-loader.ts';
-import { ImageSelector } from '../images.ts';
-import { MakerCtx } from '../maker-ctx.ts';
-import { ImageBlock } from '../read-block.ts';
+import type { Box } from '../box.ts';
+import type { ImageStore } from '../image-loader.ts';
+import type { ImageSelector } from '../images.ts';
+import type { MakerCtx } from '../maker-ctx.ts';
+import type { ImageBlock } from '../read-block.ts';
 import { fakeImage } from '../test/test-utils.ts';
 import { layoutImageContent } from './layout-image.ts';
 

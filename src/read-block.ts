@@ -1,18 +1,19 @@
-import { Alignment, FontStyle, FontWeight } from './api/content.ts';
-import { BoxEdges, parseEdges, parseLength } from './box.ts';
-import { Shape } from './frame.ts';
-import { Color, readColor } from './read-color.ts';
+import type { Alignment, FontStyle, FontWeight } from './api/content.ts';
+import type { BoxEdges } from './box.ts';
+import { parseEdges, parseLength } from './box.ts';
+import type { Shape } from './frame.ts';
+import type { Color } from './read-color.ts';
+import { readColor } from './read-color.ts';
 import { readShape } from './read-graphics.ts';
+import type { Obj, TypeDef } from './types.ts';
 import {
   dynamic,
   isObject,
-  Obj,
   optional,
   pickDefined,
   readFrom,
   readObject,
   required,
-  TypeDef,
   typeError,
   types,
 } from './types.ts';

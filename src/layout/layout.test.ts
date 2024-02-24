@@ -1,11 +1,12 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import { paperSizes } from '../api/sizes.ts';
-import { Box } from '../box.ts';
-import { FontStore } from '../font-loader.ts';
-import { MakerCtx } from '../maker-ctx.ts';
-import { Block, TextAttrs, TextSpan } from '../read-block.ts';
-import { PageInfo, readDocumentDefinition } from '../read-document.ts';
+import type { Box } from '../box.ts';
+import type { FontStore } from '../font-loader.ts';
+import type { MakerCtx } from '../maker-ctx.ts';
+import type { Block, TextAttrs, TextSpan } from '../read-block.ts';
+import type { PageInfo } from '../read-document.ts';
+import { readDocumentDefinition } from '../read-document.ts';
 import { fakeFont, p, range } from '../test/test-utils.ts';
 import { isBreakPossible, layoutBlock, layoutPages } from './layout.ts';
 

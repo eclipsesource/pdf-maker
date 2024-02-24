@@ -1,8 +1,9 @@
-import { Box } from '../box.ts';
-import { Frame } from '../frame.ts';
-import { MakerCtx } from '../maker-ctx.ts';
-import { Block, ColumnsBlock } from '../read-block.ts';
-import { layoutBlock, LayoutContent } from './layout.ts';
+import type { Box } from '../box.ts';
+import type { Frame } from '../frame.ts';
+import type { MakerCtx } from '../maker-ctx.ts';
+import type { Block, ColumnsBlock } from '../read-block.ts';
+import type { LayoutContent } from './layout.ts';
+import { layoutBlock } from './layout.ts';
 
 export async function layoutColumnsContent(
   block: ColumnsBlock,

@@ -1,7 +1,8 @@
-import fontkit from '@pdf-lib/fontkit';
-import { CustomFontSubsetEmbedder, PDFDocument, PDFFont, PDFRef } from 'pdf-lib';
+import type fontkit from '@pdf-lib/fontkit';
+import type { PDFDocument, PDFRef } from 'pdf-lib';
+import { CustomFontSubsetEmbedder, PDFFont } from 'pdf-lib';
 
-import { FontStyle, FontWeight } from './api/content.ts';
+import type { FontStyle, FontWeight } from './api/content.ts';
 import { parseBinaryData } from './binary-data.ts';
 import { printValue } from './print-value.ts';
 import { optional, readAs, readBoolean, readObject, required, types } from './types.ts';

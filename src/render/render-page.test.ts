@@ -1,10 +1,11 @@
-import { PDFArray, PDFDict, PDFDocument, PDFName, PDFPage, PDFRef } from 'pdf-lib';
+import type { PDFDocument, PDFPage } from 'pdf-lib';
+import { PDFArray, PDFDict, PDFName, PDFRef } from 'pdf-lib';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { Size } from '../box.ts';
-import { Font } from '../fonts.ts';
-import { Frame } from '../frame.ts';
-import { Page } from '../page.ts';
+import type { Size } from '../box.ts';
+import type { Font } from '../fonts.ts';
+import type { Frame } from '../frame.ts';
+import type { Page } from '../page.ts';
 import { fakeFont, fakePDFPage, getContentStream } from '../test/test-utils.ts';
 import { renderFrame, renderPage } from './render-page.ts';
 

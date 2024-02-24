@@ -1,11 +1,5 @@
-import {
-  appendBezierCurve,
-  appendQuadraticCurve,
-  closePath,
-  lineTo,
-  moveTo,
-  PDFOperator,
-} from 'pdf-lib';
+import type { PDFOperator } from 'pdf-lib';
+import { appendBezierCurve, appendQuadraticCurve, closePath, lineTo, moveTo } from 'pdf-lib';
 
 import { arcToSegments, segmentToBezier } from './arcs.ts';
 

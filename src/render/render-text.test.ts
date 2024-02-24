@@ -1,9 +1,9 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 
-import { Size } from '../box.ts';
-import { Font } from '../fonts.ts';
-import { TextObject } from '../frame.ts';
-import { Page } from '../page.ts';
+import type { Size } from '../box.ts';
+import type { Font } from '../fonts.ts';
+import type { TextObject } from '../frame.ts';
+import type { Page } from '../page.ts';
 import { fakeFont, fakePDFPage, getContentStream } from '../test/test-utils.ts';
 import { renderText } from './render-text.ts';
 

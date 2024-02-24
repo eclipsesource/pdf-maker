@@ -2,7 +2,7 @@ import { readFile } from 'node:fs/promises';
 
 import { toUint8Array } from 'pdf-lib';
 
-import { Image, ImageDef, ImageFormat, ImageSelector } from './images.ts';
+import type { Image, ImageDef, ImageFormat, ImageSelector } from './images.ts';
 import { isJpeg, readJpegInfo } from './images/jpeg.ts';
 import { isPng, readPngInfo } from './images/png.ts';
 

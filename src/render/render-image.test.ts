@@ -1,9 +1,9 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 
-import { Size } from '../box.ts';
-import { ImageObject } from '../frame.ts';
-import { Image } from '../images.ts';
-import { Page } from '../page.ts';
+import type { Size } from '../box.ts';
+import type { ImageObject } from '../frame.ts';
+import type { Image } from '../images.ts';
+import type { Page } from '../page.ts';
 import { fakePDFPage, getContentStream } from '../test/test-utils.ts';
 import { renderImage } from './render-image.ts';
 

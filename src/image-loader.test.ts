@@ -5,7 +5,7 @@ import { join } from 'node:path';
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { ImageLoader, ImageStore } from './image-loader.ts';
-import { ImageSelector } from './images.ts';
+import type { ImageSelector } from './images.ts';
 
 global.crypto ??= (crypto as any).webcrypto;
 

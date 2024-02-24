@@ -1,9 +1,9 @@
-import { Box, Pos, Size } from '../box.ts';
-import { ImageObject, RenderObject } from '../frame.ts';
-import { Image } from '../images.ts';
-import { MakerCtx } from '../maker-ctx.ts';
-import { ImageBlock } from '../read-block.ts';
-import { LayoutContent } from './layout.ts';
+import type { Box, Pos, Size } from '../box.ts';
+import type { ImageObject, RenderObject } from '../frame.ts';
+import type { Image } from '../images.ts';
+import type { MakerCtx } from '../maker-ctx.ts';
+import type { ImageBlock } from '../read-block.ts';
+import type { LayoutContent } from './layout.ts';
 
 export async function layoutImageContent(
   block: ImageBlock,

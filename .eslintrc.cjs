@@ -22,5 +22,6 @@ module.exports = {
     'import/no-default-export': 'error',
     // TODO temporarily disabled to support legacy code, re-enable
     '@typescript-eslint/no-explicit-any': 'off',
+    '@typescript-eslint/consistent-type-imports': ['error', { prefer: 'type-imports' }],
   },
 };

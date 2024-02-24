@@ -1,8 +1,9 @@
-import { PDFArray, PDFDict, PDFName, PDFPage, PDFString } from 'pdf-lib';
+import type { PDFArray, PDFDict, PDFPage } from 'pdf-lib';
+import { PDFName, PDFString } from 'pdf-lib';
 
-import { Box, Pos } from '../box.ts';
-import { AnchorObject, LinkObject } from '../frame.ts';
-import { Page } from '../page.ts';
+import type { Box, Pos } from '../box.ts';
+import type { AnchorObject, LinkObject } from '../frame.ts';
+import type { Page } from '../page.ts';
 
 export function renderAnchor(obj: AnchorObject, page: Page, base: Pos) {
   const x = base.x + obj.x;

@@ -1,3 +1,4 @@
+import type { PDFName } from 'pdf-lib';
 import {
   appendBezierCurve,
   asPDFNumber,
@@ -9,7 +10,6 @@ import {
   LineJoinStyle,
   lineTo,
   moveTo,
-  PDFName,
   PDFOperator,
   popGraphicsState,
   pushGraphicsState,
@@ -23,9 +23,9 @@ import {
   stroke,
 } from 'pdf-lib';
 
-import { LineCap, LineJoin } from '../api/content.ts';
-import { Pos } from '../box.ts';
-import {
+import type { LineCap, LineJoin } from '../api/content.ts';
+import type { Pos } from '../box.ts';
+import type {
   CircleObject,
   FillAttrs,
   GraphicsObject,
@@ -36,7 +36,8 @@ import {
   RectObject,
   Shape,
 } from '../frame.ts';
-import { getExtGraphicsState, Page } from '../page.ts';
+import type { Page } from '../page.ts';
+import { getExtGraphicsState } from '../page.ts';
 import { svgPathToPdfOps } from '../svg-paths.ts';
 import { compact, multiplyMatrices, round } from '../utils.ts';
 

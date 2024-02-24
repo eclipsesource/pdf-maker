@@ -1,11 +1,7 @@
+import type { Color, PDFContentStream, PDFFont, PDFName, PDFOperator } from 'pdf-lib';
 import {
   beginText,
-  Color,
   endText,
-  PDFContentStream,
-  PDFFont,
-  PDFName,
-  PDFOperator,
   rgb,
   setCharacterSpacing,
   setFillingColor,
@@ -15,9 +11,10 @@ import {
   showText,
 } from 'pdf-lib';
 
-import { Pos } from '../box.ts';
-import { TextObject } from '../frame.ts';
-import { addPageFont, Page, TextState } from '../page.ts';
+import type { Pos } from '../box.ts';
+import type { TextObject } from '../frame.ts';
+import type { Page, TextState } from '../page.ts';
+import { addPageFont } from '../page.ts';
 import { compact } from '../utils.ts';
 
 export function renderText(object: TextObject, page: Page, base: Pos) {
