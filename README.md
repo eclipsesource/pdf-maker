@@ -35,12 +35,12 @@ const pdfData = await makePdf({
   // Content as an array of blocks
   content: [
     // Blocks can contain text and text attributes
-    { text: 'Lorem ipsum', italic: true, textAlign: 'center', fontSize: 24 },
+    { text: 'Lorem ipsum', fontStyle: 'italic', textAlign: 'center', fontSize: 24 },
     // Text can also be an array of text ranges with different attributes
     {
       text: [
         'dolor sit amet, consectetur adipiscing elit ',
-        { text: 'sed do eiusmod', italic: true },
+        { text: 'sed do eiusmod', fontStyle: 'italic' },
         ' tempor, incididunt ut labore et dolore magna aliqua.',
       ],
     },
@@ -77,7 +77,7 @@ const documentDefinition = {
     ],
   },
   content: [
-    { text: 'lorem ipsum', fontFamily: 'Roboto', bold: true }, // will use Roboto Medium
+    { text: 'lorem ipsum', fontFamily: 'Roboto', fontWeight: 'bold' }, // will use Roboto Medium
     { text: 'dolor sit amet' }, // will use DejaVu-Sans (the font registered first), normal
   ],
 };
@@ -90,17 +90,8 @@ once, the image data is only included once in the PDF. The size of an
 image can be confined using the `width` and `height` attributes.
 
 ```js
-const documentDefinition = {
-  images: {
-    'logo': { data: imageData }
-    …
-  },
-  content: [
-    // An image block
-    { image: 'images/logo.png', width: 200, height: 100 },
-    …
-  ]
-};
+// An image block
+{ image: 'images/logo.png', width: 200, height: 100 },
 ```
 
 ### Columns
