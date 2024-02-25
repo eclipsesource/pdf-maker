@@ -14,7 +14,7 @@ describe('read-block', () => {
       expect(readBlock({})).toEqual({});
     });
 
-    it('includes all block attributes', () => {
+    it('includes all block properties', () => {
       const input = {
         padding: 6,
         margin: 5,
@@ -38,7 +38,7 @@ describe('read-block', () => {
   });
 
   describe('readColumnsBlock', () => {
-    it('merges text attributes with default style', () => {
+    it('merges text properties with default style', () => {
       const content = { columns: [{ text: 'foo' }, { text: 'bar' }], fontSize: 8 };
       const defaultStyle = { fontSize: 10, italic: true };
 
@@ -52,7 +52,7 @@ describe('read-block', () => {
       });
     });
 
-    it('passes textAlign attribute to included blocks', () => {
+    it('passes textAlign property to included blocks', () => {
       const content = { columns: [{ text: 'foo' }, { text: 'bar' }], textAlign: 'right' };
 
       const result = readColumnsBlock(content);
@@ -67,7 +67,7 @@ describe('read-block', () => {
   });
 
   describe('readRowsBlock', () => {
-    it('merges text attributes with default style', () => {
+    it('merges text properties with default style', () => {
       const content = { rows: [{ text: 'foo' }, { text: 'bar' }], fontSize: 8 };
       const defaultStyle = { fontSize: 10, italic: true };
 
@@ -81,7 +81,7 @@ describe('read-block', () => {
       });
     });
 
-    it('passes textAlign attribute to included blocks', () => {
+    it('passes textAlign property to included blocks', () => {
       const content = { rows: [{ text: 'foo' }, { text: 'bar' }], textAlign: 'right' };
 
       const result = readRowsBlock(content);
@@ -96,7 +96,7 @@ describe('read-block', () => {
   });
 
   describe('readTextBlock', () => {
-    it('includes all block attributes', () => {
+    it('includes all block properties', () => {
       const input = {
         text: 'foo',
         graphics: [{ type: 'rect', x: 1, y: 2, width: 3, height: 4 }],
@@ -120,7 +120,7 @@ describe('read-block', () => {
       });
     });
 
-    it('includes text attributes', () => {
+    it('includes text properties', () => {
       const input = {
         text: ['foo', 'bar'],
         rise: 3,
@@ -246,7 +246,7 @@ describe('read-block', () => {
 
     it('throws on invalid type', () => {
       expect(() => readText([23 as any], {})).toThrowError(
-        'Expected string, object with text attribute, or array of text, got: 23',
+        'Expected string, object with text property, or array of text, got: 23',
       );
     });
   });

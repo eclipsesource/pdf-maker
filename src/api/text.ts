@@ -4,7 +4,7 @@ import type { Color } from './colors.ts';
  * A piece of inline text. A list can be used to apply different styles
  * to individual ranges of a text.
  */
-export type Text = string | ({ text: Text } & TextAttrs) | Text[];
+export type Text = string | ({ text: Text } & TextProps) | Text[];
 
 /**
  * The font weight is an integer between 0 and 1000. The keywords
@@ -20,13 +20,18 @@ export type FontWeight = number | 'normal' | 'bold';
 export type FontStyle = 'normal' | 'italic' | 'oblique';
 
 /**
- * Text attributes that can be applied to a text.
+ * @deprecated Use `TextProps` instead.
  */
-export type TextAttrs = {
+export type TextAttrs = TextProps;
+
+/**
+ * Text properties that can be applied to a text.
+ */
+export type TextProps = {
   /**
    * The name of the font to use. If not specified, the first font
    * registered in the document definition that matches the other font
-   * attributes will be used.
+   * properties will be used.
    */
   fontFamily?: string;
 
@@ -68,7 +73,7 @@ export type TextAttrs = {
   color?: Color;
 
   /**
-   * A link target. When this attribute is present, the corresponding text will be rendered as a
+   * A link target. When this property is present, the corresponding text will be rendered as a
    * link to the given target. The target can either be a URL or a reference to an anchor in the
    * document. An internal reference starts with a hash sign (`#`), followed by the `id` of an
    * element in the document.

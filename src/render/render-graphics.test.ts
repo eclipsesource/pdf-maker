@@ -22,7 +22,7 @@ describe('render-graphics', () => {
     const tail = ['Q', 'Q'];
 
     describe('with rect', () => {
-      it('renders rect without color attributes', () => {
+      it('renders rect without color properties', () => {
         const rect: RectObject = { type: 'rect', x: 1, y: 2, width: 3, height: 4 };
 
         renderGraphics({ type: 'graphics', shapes: [rect] }, page, pos);
@@ -52,7 +52,7 @@ describe('render-graphics', () => {
         expect(getContentStream(page)).toEqual([...head, '1 0 0 RG', '1 2 3 4 re', 'S', ...tail]);
       });
 
-      it('renders rect with all attributes', () => {
+      it('renders rect with all properties', () => {
         const rect: RectObject = {
           ...{ type: 'rect', x: 1, y: 2, width: 3, height: 4 },
           fillColor: rgb(0, 0, 1),
@@ -82,7 +82,7 @@ describe('render-graphics', () => {
     });
 
     describe('with circle', () => {
-      it('renders circle without style attributes', () => {
+      it('renders circle without style properties', () => {
         const circle: CircleObject = { type: 'circle', cx: 1, cy: 2, r: 3 };
 
         renderGraphics({ type: 'graphics', shapes: [circle] }, page, pos);
@@ -99,7 +99,7 @@ describe('render-graphics', () => {
         ]);
       });
 
-      it('renders circle with all attributes', () => {
+      it('renders circle with all properties', () => {
         const circle: CircleObject = {
           ...{ type: 'circle', cx: 1, cy: 2, r: 3 },
           fillColor: rgb(0, 0, 1),
@@ -139,7 +139,7 @@ describe('render-graphics', () => {
         expect(getContentStream(page)).toEqual([...head, '1 2 m', '3 4 l', 'S', ...tail]);
       });
 
-      it('renders line with all attributes', () => {
+      it('renders line with all properties', () => {
         const line: LineObject = {
           ...{ type: 'line', x1: 1, y1: 2, x2: 3, y2: 4 },
           lineColor: rgb(1, 0, 0),
@@ -167,7 +167,7 @@ describe('render-graphics', () => {
     });
 
     describe('with polyline', () => {
-      it('renders polyline without color attributes', () => {
+      it('renders polyline without color properties', () => {
         const polyline: PolylineObject = { type: 'polyline', points: [p(1, 2), p(3, 4)] };
 
         renderGraphics({ type: 'graphics', shapes: [polyline] }, page, pos);
@@ -187,7 +187,7 @@ describe('render-graphics', () => {
         expect(getContentStream(page)).toEqual([...head, '1 2 m', '3 4 l', 'h', 'S', ...tail]);
       });
 
-      it('renders polyline with all attributes', () => {
+      it('renders polyline with all properties', () => {
         const polyline: PolylineObject = {
           ...{ type: 'polyline', points: [p(1, 2), p(3, 4)] },
           fillColor: rgb(0, 0, 1),

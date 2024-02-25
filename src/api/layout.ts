@@ -1,6 +1,6 @@
 import type { Shape } from './graphics.ts';
 import type { BoxLengths, Length } from './sizes.ts';
-import type { TextAttrs } from './text.ts';
+import type { TextProps } from './text.ts';
 
 export type Block = TextBlock | ImageBlock | ColumnsBlock | RowsBlock | EmptyBlock;
 
@@ -19,8 +19,8 @@ export type TextBlock = {
    * - `avoid`: Do not insert a page break inside this block if it can be avoided.
    */
   breakInside?: 'auto' | 'avoid';
-} & TextAttrs &
-  BlockAttrs;
+} & TextProps &
+  BlockProps;
 
 /**
  * A block that contains an image.
@@ -28,13 +28,13 @@ export type TextBlock = {
 export type ImageBlock = {
   /**
    * The name of an image to display in this block. If the given image
-   * name has been registered with the global `images` attribute, the
+   * name has been registered with the global `images` property, the
    * registered image will be used. Otherwise, the image name is
    * interpreted as a file name and the image is loaded from the file
    * system. Relative paths are resolved relative to the current working
    * directory.
    *
-   * When any of the attributes `width` and `height` are specified, the
+   * When any of the properties `width` and `height` are specified, the
    * image will be scaled proportionally to be contained in the given
    * bounds. When neither `width` nor `height` is given, the image is
    * not scaled unless it exceeds the maximum available width. In this
@@ -46,7 +46,7 @@ export type ImageBlock = {
    * Align the image in this block. By default, it is center-aligned.
    */
   imageAlign?: Alignment;
-} & BlockAttrs;
+} & BlockProps;
 
 /**
  * A block that contains other blocks arranged horizontally.
@@ -56,8 +56,8 @@ export type ColumnsBlock = {
    * Content blocks to arrange horizontally.
    */
   columns: Block[];
-} & TextAttrs &
-  BlockAttrs;
+} & TextProps &
+  BlockProps;
 
 /**
  * A block that contains other blocks arranged vertically.
@@ -79,19 +79,24 @@ export type RowsBlock = {
    * Allows to insert an extra block after a page break.
    */
   insertAfterBreak?: Block | (() => Block);
-} & TextAttrs &
-  BlockAttrs;
+} & TextProps &
+  BlockProps;
 
 /**
  * A block that doesn't contain any content. It can be used to include
  * graphics.
  */
-export type EmptyBlock = BlockAttrs;
+export type EmptyBlock = BlockProps;
 
 /**
- * Attributes that can be applied to a block.
+ * @deprecated Use `BlockProps` instead.
  */
-export type BlockAttrs = {
+export type BlockAttrs = BlockProps;
+
+/**
+ * Properties that can be applied to a block.
+ */
+export type BlockProps = {
   /**
    * Space to leave between the content and the edges of the block.
    */
@@ -133,7 +138,7 @@ export type BlockAttrs = {
   /**
    * An optional *unique* id for the element. When an `id` is specified, an anchor with this id
    * will be included in the PDF document that can be used to refer to this element using the text
-   * attribute `link`.
+   * property `link`.
    */
   id?: string;
 

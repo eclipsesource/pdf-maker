@@ -62,7 +62,7 @@ const def = {
       margin: { y: 10 },
     },
     // Rectangles and circles support a line color and stroke color. If
-    // neither line nor stroke attributes are set, a black stroke and
+    // neither line nor stroke properties are set, a black stroke and
     // line width of 1 is assumed.
     {
       text: 'Rectangles\nand circles',

@@ -10,7 +10,7 @@ global.crypto ??= (crypto as any).webcrypto;
 
 describe('render-document', () => {
   describe('renderDocument', () => {
-    it('renders all info attributes', async () => {
+    it('renders all info properties', async () => {
       const def = {
         content: [],
         info: {

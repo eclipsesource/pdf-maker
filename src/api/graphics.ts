@@ -25,7 +25,7 @@ export type Line = {
   y2: number;
 } & LineOpts;
 
-export type LineOpts = Omit<LineAttrs, 'lineJoin'> & TransformAttrs;
+export type LineOpts = Omit<LineProps, 'lineJoin'> & TransformProps;
 
 /**
  * A rectangle.
@@ -50,7 +50,7 @@ export type Rect = {
   height: number;
 } & RectOpts;
 
-export type RectOpts = Omit<LineAttrs, 'lineCap'> & FillAttrs & TransformAttrs;
+export type RectOpts = Omit<LineProps, 'lineCap'> & FillProps & TransformProps;
 
 /**
  * A circle.
@@ -71,7 +71,7 @@ export type Circle = {
   r: number;
 } & CircleOpts;
 
-export type CircleOpts = Omit<LineAttrs, 'lineCap' | 'lineJoin'> & FillAttrs & TransformAttrs;
+export type CircleOpts = Omit<LineProps, 'lineCap' | 'lineJoin'> & FillProps & TransformProps;
 
 /**
  * An SVG path element.
@@ -84,7 +84,7 @@ export type Path = {
   d: string;
 } & PathOpts;
 
-export type PathOpts = LineAttrs & FillAttrs & TransformAttrs;
+export type PathOpts = LineProps & FillProps & TransformProps;
 
 /**
  * A polyline, i.e. a line consisting of multiple segments.
@@ -102,12 +102,12 @@ export type Polyline = {
   closePath?: boolean;
 } & PolyLineOpts;
 
-export type PolyLineOpts = LineAttrs & FillAttrs & TransformAttrs;
+export type PolyLineOpts = LineProps & FillProps & TransformProps;
 
 export type LineCap = 'butt' | 'round' | 'square';
 export type LineJoin = 'miter' | 'round' | 'bevel';
 
-type LineAttrs = {
+type LineProps = {
   /**
    * The width of stroked lines in pt.
    */
@@ -152,7 +152,7 @@ type LineAttrs = {
   lineDash?: number[];
 };
 
-type FillAttrs = {
+type FillProps = {
   /**
    * The color to use for filling the shape.
    */
@@ -163,7 +163,7 @@ type FillAttrs = {
   fillOpacity?: number;
 };
 
-type TransformAttrs = {
+type TransformProps = {
   /**
    * Moves the element by `x` and `y`.
    */

@@ -15,7 +15,7 @@ describe('read-document', () => {
       expect(readDocumentDefinition(input)).toEqual({ content: [] });
     });
 
-    it('accepts standard info attributes', () => {
+    it('accepts standard info properties', () => {
       input.info = {
         title: 'test-title',
         subject: 'test-subject',
@@ -31,7 +31,7 @@ describe('read-document', () => {
       expect(def.info).toEqual(input.info);
     });
 
-    it('accepts custom info attributes', () => {
+    it('accepts custom info properties', () => {
       input.info = {
         title: 'test-title',
         foo: 'test-foo',

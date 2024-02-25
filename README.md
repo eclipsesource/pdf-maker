@@ -17,8 +17,8 @@ definition_. This definition is a plain object.
 
 ### Content
 
-The most important attribute in the definition is named `content`. This
-attribute accepts a list of _blocks_. There are different types of
+The most important property in the definition is named `content`. This
+property accepts a list of _blocks_. There are different types of
 blocks, such as text blocks, image blocks, column and row layout blocks.
 
 ### Basic Example
@@ -34,9 +34,9 @@ const pdfData = await makePdf({
   },
   // Content as an array of blocks
   content: [
-    // Blocks can contain text and text attributes
+    // Blocks can contain text and text properties
     { text: 'Lorem ipsum', fontStyle: 'italic', textAlign: 'center', fontSize: 24 },
-    // Text can also be an array of text ranges with different attributes
+    // Text can also be an array of text ranges with different properties
     {
       text: [
         'dolor sit amet, consectetur adipiscing elit ',
@@ -54,9 +54,9 @@ There are more examples in the [examples/](examples/) folder.
 ### Fonts
 
 All fonts are embedded in the PDF and must be registered with the
-`fonts` attribute. Font data is accepted in `.ttf` or `.otf` format, as
+`fonts` property. Font data is accepted in `.ttf` or `.otf` format, as
 ArrayBuffer or Uint8Array. Each font family can contain different
-variants which are selected based on the attributes `bold` and `italic`.
+variants which are selected based on the properties `bold` and `italic`.
 The font family that is registered first becomes the default.
 
 ```js
@@ -87,7 +87,7 @@ const documentDefinition = {
 
 JPG and PNG images are supported. When the same image is used more than
 once, the image data is only included once in the PDF. The size of an
-image can be confined using the `width` and `height` attributes.
+image can be confined using the `width` and `height` properties.
 
 ```js
 // An image block
@@ -97,7 +97,7 @@ image can be confined using the `width` and `height` attributes.
 ### Columns
 
 To arrange blocks horizontally, they can be included in a block with a
-`columns` attribute. When columns have a `width` attribute, it is
+`columns` property. When columns have a `width` property, it is
 respected. The remaining space id distributed evenly across all columns.
 
 ```js
@@ -113,7 +113,7 @@ respected. The remaining space id distributed evenly across all columns.
 ### Rows
 
 A row layout can be used to group multiple rows into a single block,
-e.g. to apply common attributes or to enclose rows in a surrounding
+e.g. to apply common properties or to enclose rows in a surrounding
 columns layout.
 
 ```js
@@ -129,13 +129,13 @@ columns layout.
 
 ### Graphics
 
-Each block can have a `graphics` attribute that accepts a list of shapes
+Each block can have a `graphics` property that accepts a list of shapes
 to draw into that block or a function that returns a list of shapes. The
 function will be called with the block's width and height. This can be
 used to draw shapes that depend on the block's size.
 
 Shapes can be lines, rectangles, circles, or SVG paths. In the following
-example, a graphics attribute is used to draw a yellow background behind
+example, a graphics property is used to draw a yellow background behind
 the text and a blue border at the left edge.
 
 ```js
@@ -153,10 +153,10 @@ Also see the [graphics example](examples/src/graphics.js).
 
 ### Margin and padding
 
-The `margin` attribute can be used to add space around blocks. It
+The `margin` property can be used to add space around blocks. It
 accepts either a single value (applies to all four edges) an object with
-any of the attributes `top`, `right`, `bottom`, `left`, `x`, and `y`.
-The attributes `x` and `y` can be used as shorthands to set both `left`
+any of the properties `top`, `right`, `bottom`, `left`, `x`, and `y`.
+The properties `x` and `y` can be used as shorthands to set both `left`
 and `right` or `top` and `bottom` at the same time. Values can be given
 as numbers (in pt) or as strings with a unit. If a string is given, it
 must contain one of the units `pt`, `in`, `mm`, or `cm`;
@@ -175,15 +175,15 @@ The `top` and `bottom` margins of adjacent blocks
 are collapsed into a single margin whose size is the maximum of the two
 margins. Column margins don't collapse.
 
-The `padding` attribute can be used to add space between the content and
+The `padding` property can be used to add space between the content and
 the edges of blocks.
 
 ### Page layout
 
-The top-level `pageSize` attribute can be used to set the page size.
+The top-level `pageSize` property can be used to set the page size.
 Various standard sizes are supported, such as `A4`, `Letter`, and
 `Legal`. The default is A4. A custom page size can be specified as an
-object with the attributes `width` and `height`. Values can be given as
+object with the properties `width` and `height`. Values can be given as
 numbers (in pt) or as strings with a unit.
 
 ```js
@@ -192,7 +192,7 @@ numbers (in pt) or as strings with a unit.
 }
 ```
 
-The `pageOrientation` attribute can be used to set the page orientation.
+The `pageOrientation` property can be used to set the page orientation.
 The value can be either `portrait` or `landscape`. The default is
 portrait.
 
@@ -210,7 +210,7 @@ portrait.
 ### Headers and footers
 
 Headers and footers that repeat on each page can be defined using the
-optional `header` and `footer` attributes. Both accept either a single
+optional `header` and `footer` properties. Both accept either a single
 block or a function that returns a block. The function will be called
 with the page number and the total number of pages. The page number
 starts at 1.
@@ -234,12 +234,12 @@ starts at 1.
 Page breaks are included automatically. When a block does not fit on the
 current page, a new page is added to the document. To insert a page
 break before or after a block, set the `breakBefore` or `breakAfter`
-attribute of a block to `always`. To prevent a page break, set this
-attribute to `avoid`.
+property of a block to `always`. To prevent a page break, set this
+property to `avoid`.
 
 Page breaks are also automatically inserted between the lines of a text
 block. To prevent a page break within a text block, set the
-`breakInside` attribute to `avoid`.
+`breakInside` property to `avoid`.
 
 ```js
 {
@@ -253,7 +253,7 @@ block. To prevent a page break within a text block, set the
 ## Documentation
 
 While there is no generated documentation yet, you can refer to the
-[api](src/api) folder for a specification of all supported attributes in
+[api](src/api) folder for a specification of all supported properties in
 a document definition.
 
 Also check out the examples in the [examples/](examples/) folder.

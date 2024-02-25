@@ -193,7 +193,7 @@ function isLineBreakOpportunity(segment: TextSegment): boolean {
 
 /**
  * Flatten a list of text segments by merging subsequent segments that have identical text
- * attributes.
+ * properties.
  *
  * @param segments a list of text segments
  * @returns a possibly shorter list of text segments

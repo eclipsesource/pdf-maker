@@ -1,7 +1,7 @@
 import type { Block } from './layout.ts';
 import type { BoxLengths, Length } from './sizes.ts';
 import type { Orientation, PaperSize } from './sizes.ts';
-import type { TextAttrs } from './text.ts';
+import type { TextProps } from './text.ts';
 
 /**
  * The complete definition of a PDF document to create.
@@ -25,9 +25,9 @@ export type DocumentDefinition = {
   content: Block[];
 
   /**
-   * The default style attributes to use in the document.
+   * The default style properties to use in the document.
    */
-  defaultStyle?: TextAttrs;
+  defaultStyle?: TextProps;
 
   /**
    * The page size of the document. Defaults to A4.
@@ -68,10 +68,10 @@ export type DocumentDefinition = {
   /**
    * Metadata to include in the PDF's *document information dictionary*.
    */
-  info?: InfoAttrs & CustomInfoAttrs;
+  info?: InfoProps & CustomInfoProps;
 
   /**
-   * Custom data to be added to the PDF *document catalog*. This attribute should only be used by
+   * Custom data to be added to the PDF *document catalog*. This property should only be used by
    * PDF applications that need to include custom data in a PDF document.
    * To avoid name collisions, keys should be prefixed with `XX`.
    *
@@ -91,11 +91,16 @@ export type DocumentDefinition = {
 };
 
 /**
- * Standard metadata attributes to include in the PDF's *document
+ * @deprecated Use `InfoProps` instead.
+ */
+export type InfoAttrs = InfoProps;
+
+/**
+ * Standard metadata properties to include in the PDF's *document
  * information dictionary*. These properties are usually displayed by
  * PDF viewers.
  */
-export type InfoAttrs = {
+export type InfoProps = {
   /**
    * The document’s title.
    */
@@ -134,11 +139,16 @@ export type InfoAttrs = {
 };
 
 /**
+ * @deprecated Use `CustomInfoProps` instead.
+ */
+export type CustomInfoAttrs = CustomInfoProps;
+
+/**
  * Custom metadata properties to include in the PDF's *document
  * information dictionary*. These properties should be prefixed with
  * `XX` to avoid name collisions.
  */
-export type CustomInfoAttrs = {
+export type CustomInfoProps = {
   [name: string]: string;
 };
 

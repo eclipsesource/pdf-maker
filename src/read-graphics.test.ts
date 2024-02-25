@@ -19,7 +19,7 @@ describe('read-graphics', () => {
       expect(() => readShape('foo')).toThrowError("Expected object, got: 'foo'");
     });
 
-    it('throws for unsupported type attribute', () => {
+    it('throws for unsupported type property', () => {
       const fn = () => readShape({ type: 'foo' });
 
       expect(fn).toThrowError(
@@ -48,7 +48,7 @@ describe('read-graphics', () => {
     });
 
     (['x', 'y', 'width', 'height'] as const).forEach((name) => {
-      it(`throws for missing rect attribute ${name}`, () => {
+      it(`throws for missing rect property ${name}`, () => {
         const rect = { type: 'rect', x: 1, y: 2, width: 10, height: 20 };
         delete rect[name];
 
@@ -79,7 +79,7 @@ describe('read-graphics', () => {
     });
 
     (['cx', 'cy', 'r'] as const).forEach((name) => {
-      it(`throws for missing circle attribute ${name}`, () => {
+      it(`throws for missing circle property ${name}`, () => {
         const circle = { type: 'circle', cx: 1, cy: 2, r: 3 };
         delete circle[name];
 
@@ -106,7 +106,7 @@ describe('read-graphics', () => {
     });
 
     (['x1', 'y1', 'x2', 'y2'] as const).forEach((name) => {
-      it(`throws for missing line attribute ${name}`, () => {
+      it(`throws for missing line property ${name}`, () => {
         const line = { type: 'line', x1: 1, y1: 2, x2: 11, y2: 12 };
         delete line[name];
 
@@ -136,7 +136,7 @@ describe('read-graphics', () => {
       });
     });
 
-    it(`throws for missing polyline attribute points`, () => {
+    it(`throws for missing polyline property points`, () => {
       const fn = () => readShape({ type: 'polyline' });
 
       expect(fn).toThrowError(`Missing value for "points"`);
@@ -175,7 +175,7 @@ describe('read-graphics', () => {
     });
 
     ['lineColor', 'fillColor'].forEach((name) => {
-      it(`throws for invalid attribute ${name}`, () => {
+      it(`throws for invalid property ${name}`, () => {
         const rect = { type: 'rect', x: 1, y: 2, width: 10, height: 20, [name]: 'foo' };
 
         const fn = () => readShape(rect);
@@ -186,7 +186,7 @@ describe('read-graphics', () => {
       });
     });
 
-    it(`throws for negative value in attribute lineWidth`, () => {
+    it(`throws for negative value in property lineWidth`, () => {
       const rect = { type: 'rect', x: 1, y: 2, width: 10, height: 20, lineWidth: -1 };
 
       const fn = () => readShape(rect);
@@ -194,7 +194,7 @@ describe('read-graphics', () => {
       expect(fn).toThrowError('Invalid value for "lineWidth": Expected number >= 0, got: -1');
     });
 
-    it(`throws for invalid opacity attributes`, () => {
+    it(`throws for invalid opacity properties`, () => {
       const rect = { type: 'rect', x: 1, y: 2, width: 10, height: 20 };
 
       expect(() => readShape({ ...rect, lineOpacity: -1 })).toThrowError(

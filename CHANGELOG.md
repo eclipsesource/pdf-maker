@@ -2,26 +2,33 @@
 
 ## [0.5.5] - Unreleased
 
+### Deprecated
+
+- `TextAttrs` in favor of `TextProps`.
+- `BlockAttrs` in favor of `BlockProps`.
+- `InfoAttrs` in favor of `InfoProps`.
+- `CustomInfoAttrs` in favor of `CustomInfoProps`.
+
 ## [0.5.4] - 2024-02-25
 
 ### Added
 
-- Text attributes `fontStyle` and `fontWeight`.
+- Text properties `fontStyle` and `fontWeight`.
 
 ### Changed
 
-- The `image` attribute of an image block now supports a file name.
+- The `image` property of an image block now supports a file name.
   When file names are used, the images don't need to be registered with
-  the global `images` attribute anymore.
+  the global `images` property anymore.
 
 ### Deprecated
 
-- Text attributes `bold` and `italic` in favor of `fontStyle: 'italic'`
+- Text properties `bold` and `italic` in favor of `fontStyle: 'italic'`
   and `fontWeight: 'bold'`.
 
 ### Removed
 
-- The optional `format` attribute of an image definition. The format is
+- The optional `format` property of an image definition. The format is
   now auto-detected from the file content.
 
 ### Fixed
@@ -40,7 +47,7 @@
 
 ### Added
 
-- The `width` attribute of a `Block` now supports the value `auto` on
+- The `width` property of a `Block` now supports the value `auto` on
   all block types. When set to `auto`, the block will shrink to the
   width of its contents.
 
@@ -48,7 +55,7 @@
 
 ### Added
 
-- The attribute `margin` in a document definition now supports a
+- The property `margin` in a document definition now supports a
   function that returns the margin for a given page.
 
 - Support for PNG images. A new, optional property `format` is added to
@@ -81,25 +88,25 @@
 - Lines in a `TextBlock` will now break and continue on the next page
   when they do not fit. To prevent this, set `breakInside` to `avoid`.
 
-- The `lineJoin` attribute is no longer supported by the graphics type
+- The `lineJoin` property is no longer supported by the graphics type
   `Circle`.
 
 ### Added
 
-- Attribute `breakInside` to control page breaks inside a block on
+- Property `breakInside` to control page breaks inside a block on
   `TextBlock` and `RowsBlock`. The default is `auto`.
 
-- Attribute `insertAfterBreak` on `RowsBlock` to insert an extra block
+- Property `insertAfterBreak` on `RowsBlock` to insert an extra block
   after a page break.
 
-- Attributes `translate`, `scale`, `rotate`, `skew` and `matrix` on all
+- Properties `translate`, `scale`, `rotate`, `skew` and `matrix` on all
   graphics elements to apply transformations.
 
 ## [0.4.2] - 2023-04-29
 
 ### Added
 
-- Text attribute `letterSpacing`.
+- Text property `letterSpacing`.
 - Support for SVG paths in `graphics` using `Path` elements.
 
 ## [0.4.1] - 2023-04-15 (not available)
@@ -121,9 +128,9 @@ a build error. Do to npm's policy, the version number cannot be reused.
 
 ### Added
 
-- Text attribute `rise` for superscripts and subscripts.
-- Block attribute `verticalAlign` for vertical alignment of columns.
-- Attribute `lineDash` for graphics shapes.
+- Text property `rise` for superscripts and subscripts.
+- Block property `verticalAlign` for vertical alignment of columns.
+- Property `lineDash` for graphics shapes.
 
 ## [0.3.3] - 2023-03-03
 
@@ -136,7 +143,7 @@ a build error. Do to npm's policy, the version number cannot be reused.
 
 ### Added
 
-- Attribute `customData` to include custom data in the PDF _document catalog_.
+- Property `customData` to include custom data in the PDF _document catalog_.
 
 ## [0.3.1] - 2022-08-25
 
@@ -157,30 +164,30 @@ a build error. Do to npm's policy, the version number cannot be reused.
 ### Added
 
 - Graphics shape type `circle`.
-- Attributes `lineOpacity` and `fillOpacity` on graphics shapes.
-- Attribute `padding` on _all_ block types.
-- Attributes `breakBefore` and `breakAfter` on top-level blocks.
+- Properties `lineOpacity` and `fillOpacity` on graphics shapes.
+- Property `padding` on _all_ block types.
+- Properties `breakBefore` and `breakAfter` on top-level blocks.
 - Margins and paddings are highlighted when guides are enabled.
 
 ### Fixed
 
-- Attribute `imageAlign` marked optional in type definition
+- Property `imageAlign` marked optional in type definition
 - Copied text from a PDF document now includes headers and footers in correct order
 
 ## [0.2.0] - 2022-06-08
 
 ### Breaking changes
 
-- Attributes `strokeWidth`, `strokeColor` have been renamed to `lineWidth`, `lineColor`.
+- Properties `strokeWidth`, `strokeColor` have been renamed to `lineWidth`, `lineColor`.
 - Images are horizontally centered by default.
 - Text is now vertically aligned in text rows.
 
 ### Added
 
-- Attributes `lineCap` and `lineJoin`.
-- Support for functions in the `graphics` attribute.
-- Attribute `imageAlign` for horizontal alignment.
-- Attribute `pageSize` and `pageOrientation`.
+- Properties `lineCap` and `lineJoin`.
+- Support for functions in the `graphics` property.
+- Property `imageAlign` for horizontal alignment.
+- Property `pageSize` and `pageOrientation`.
 
 ### Fixed
 
@@ -205,3 +212,4 @@ First public version.
 [0.5.1]: https://github.com/eclipsesource/pdf-maker/releases/tag/v0.5.1
 [0.5.2]: https://github.com/eclipsesource/pdf-maker/releases/tag/v0.5.2
 [0.5.3]: https://github.com/eclipsesource/pdf-maker/releases/tag/v0.5.3
+[0.5.4]: https://github.com/eclipsesource/pdf-maker/releases/tag/v0.5.4
