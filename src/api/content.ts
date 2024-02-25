@@ -2,6 +2,8 @@ import type { Color } from './colors.ts';
 import type { Length } from './sizes.ts';
 import type { Orientation, PaperSize } from './sizes.ts';
 
+export type { Color, Length, PaperSize, Orientation };
+
 /**
  * The complete definition of a document to create.
  */
