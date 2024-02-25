@@ -253,8 +253,8 @@ block. To prevent a page break within a text block, set the
 ## Documentation
 
 While there is no generated documentation yet, you can refer to the
-[content.ts](src/content.ts) for a specification of all supported
-attributes in a document definition.
+[api](src/api) folder for a specification of all supported attributes in
+a document definition.
 
 Also check out the examples in the [examples/](examples/) folder.
 

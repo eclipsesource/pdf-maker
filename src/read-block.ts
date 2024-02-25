@@ -1,4 +1,5 @@
-import type { Alignment, FontStyle, FontWeight } from './api/content.ts';
+import type { Alignment } from './api/layout.ts';
+import type { FontStyle, FontWeight } from './api/text.ts';
 import type { BoxEdges } from './box.ts';
 import { parseEdges, parseLength } from './box.ts';
 import type { Shape } from './frame.ts';

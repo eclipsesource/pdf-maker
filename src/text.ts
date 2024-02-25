@@ -1,4 +1,4 @@
-import type { FontStyle, FontWeight } from './api/content.ts';
+import type { FontStyle, FontWeight } from './api/text.ts';
 import type { FontStore } from './font-loader.ts';
 import { getTextHeight, getTextWidth } from './font-metrics.ts';
 import type { Font } from './fonts.ts';

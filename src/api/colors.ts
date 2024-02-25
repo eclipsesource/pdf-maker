@@ -1,5 +1,11 @@
+/**
+ * A color specified either by name or in the hexadecimal format `#xxxxxx` that is usual in HTML.
+ */
 export type Color = NamedColor | HTMLColor;
 
+/**
+ * A color specified by name.
+ */
 export type NamedColor = keyof typeof namedColors;
 
 /**

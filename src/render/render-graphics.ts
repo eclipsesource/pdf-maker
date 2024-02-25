@@ -23,7 +23,7 @@ import {
   stroke,
 } from 'pdf-lib';
 
-import type { LineCap, LineJoin } from '../api/content.ts';
+import type { LineCap, LineJoin } from '../api/graphics.ts';
 import type { Pos } from '../box.ts';
 import type {
   CircleObject,

@@ -1,17 +1,48 @@
 /**
  * A length definition as a number, optionally followed by a unit.
- * Supported units are `pt` (point), `in` (inch), `mm` (millimeter), and `cm` (centimeter).
+ * Supported units are `pt` (point), `in` (inch), `mm` (millimeter),
+ * and `cm` (centimeter).
  * If the unit is left out, the number is interpreted as point (`pt`).
  * One point is defined as `1/72` of an inch (`72pt = 1in`).
  */
 export type Length = number | `${number}${LengthUnit}`;
 
+/**
+ * A length unit, either `pt` (point), `in` (inch), `mm` (millimeter),
+ * or `cm` (centimeter).
+ * One point is defined as 1/72 of an inch (72pt = 1in).
+ */
 export type LengthUnit = 'pt' | 'in' | 'mm' | 'cm';
+
+/**
+ * A set of lengths to describe the inner or outer edges of a box. Used
+ * for paddings and margins.
+ */
+export type BoxLengths = {
+  /** Space on the left edge, overrides `x`. */
+  left?: Length;
+
+  /** Space on the right edge, overrides `x`. */
+  right?: Length;
+
+  /** Space on the upper edge, overrides `y`. */
+  top?: Length;
+
+  /** Space on the lower edge, overrides `y`. */
+  bottom?: Length;
+
+  /** Space on the left and right edge. */
+  x?: Length;
+
+  /** Space on the upper and lower edge. */
+  y?: Length;
+};
 
 export type Size = { width: Length; height: Length };
 
 /**
- * All named paper sizes are in portrait orientation.
+ * A paper size, either as a string (e.g. `'A4'`) or as an object with
+ * `width` and `height` properties.
  */
 export type PaperSize = Size | NamedPaperSize;
 
@@ -19,6 +50,9 @@ export type NamedPaperSize = keyof typeof paperSizes;
 
 export type Orientation = 'portrait' | 'landscape';
 
+/**
+ * Common paper sizes, in portrait orientation.
+ */
 export const paperSizes = {
   '4A0': { width: 4767.87, height: 6740.79 },
   '2A0': { width: 3370.39, height: 4767.87 },

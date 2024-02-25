@@ -4,7 +4,7 @@ import { layoutPages } from '../layout/layout.ts';
 import { readDocumentDefinition } from '../read-document.ts';
 import { renderDocument } from '../render/render-document.ts';
 import { readAs } from '../types.ts';
-import type { DocumentDefinition } from './content.ts';
+import type { DocumentDefinition } from './document.ts';
 
 /**
  * Generates a PDF from the given document definition.
