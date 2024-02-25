@@ -1,6 +1,6 @@
 {
   "name": "pdfmkr",
-  "version": "0.5.4",
+  "version": "0.5.5",
   "description": "Generate PDF documents from JavaScript objects",
   "license": "MIT",
   "repository": {
