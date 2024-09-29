@@ -1,10 +1,16 @@
 import type { Color } from './colors.ts';
 
 /**
- * A piece of inline text. A list can be used to apply different styles
- * to individual ranges of a text.
+ * Deprecated. Use `TextSpan` instead.
  */
-export type Text = string | ({ text: Text } & TextProps) | Text[];
+export type Text = string | TextSpan | TextSpan[];
+
+/**
+ * A span of text with optional text properties. Nested spans can be
+ * used to apply different text properties to different parts of a
+ * text.
+ */
+export type TextSpan = { text: string | TextSpan | (string | TextSpan)[] } & TextProps;
 
 /**
  * The font weight is an integer between 0 and 1000. The keywords

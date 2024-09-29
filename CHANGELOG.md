@@ -8,6 +8,7 @@
 - `BlockAttrs` in favor of `BlockProps`.
 - `InfoAttrs` in favor of `InfoProps`.
 - `CustomInfoAttrs` in favor of `CustomInfoProps`.
+- `Text` in favor of `TextSpan`.
 
 ## [0.5.4] - 2024-02-25
 
