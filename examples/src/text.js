@@ -28,7 +28,7 @@ const def = {
     },
     {
       text: [
-        // ... or an array of strings and objects.
+        // ... or an array of strings and text spans.
         'Text objects can be used to apply individual styles, like ',
         { text: 'font size', fontSize: 18 },
         ', ',

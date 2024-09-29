@@ -1,6 +1,6 @@
 import type { Shape } from './graphics.ts';
 import type { BoxLengths, Length } from './sizes.ts';
-import type { TextProps } from './text.ts';
+import type { Text, TextProps, TextSpan } from './text.ts';
 
 export type Block = TextBlock | ImageBlock | ColumnsBlock | RowsBlock | EmptyBlock;
 
@@ -9,9 +9,10 @@ export type Block = TextBlock | ImageBlock | ColumnsBlock | RowsBlock | EmptyBlo
  */
 export type TextBlock = {
   /**
-   * Text to display in this block.
+   * Text to display in this block. Nested text spans can be used to
+   * apply different text properties to different parts of the text.
    */
-  text: Text;
+  text: string | TextSpan | (string | TextSpan)[] | Text;
 
   /**
    * Controls whether a page break may occur inside the block.

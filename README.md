@@ -36,7 +36,7 @@ const pdfData = await makePdf({
   content: [
     // Blocks can contain text and text properties
     { text: 'Lorem ipsum', fontStyle: 'italic', textAlign: 'center', fontSize: 24 },
-    // Text can also be an array of text ranges with different properties
+    // Text can also be an array of text spans with different properties
     {
       text: [
         'dolor sit amet, consectetur adipiscing elit ',
