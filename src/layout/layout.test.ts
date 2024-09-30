@@ -10,8 +10,6 @@ import { readDocumentDefinition } from '../read-document.ts';
 import { fakeFont, p, range } from '../test/test-utils.ts';
 import { isBreakPossible, layoutBlock, layoutPages } from './layout.ts';
 
-const { objectContaining } = expect;
-
 const defaultPageSize = paperSizes.A4;
 
 describe('layout', () => {
@@ -41,8 +39,8 @@ describe('layout', () => {
       const pages = await layoutPages(def, ctx);
 
       expect(pages[0].content.children).toEqual([
-        objectContaining({ height: 14 * 1.2 }),
-        objectContaining({ height: 14 * 1.2 }),
+        expect.objectContaining({ height: 14 * 1.2 }),
+        expect.objectContaining({ height: 14 * 1.2 }),
       ]);
     });
 
@@ -54,8 +52,8 @@ describe('layout', () => {
       const pages = await layoutPages(def, ctx);
 
       expect(pages).toEqual([
-        objectContaining({
-          content: objectContaining({
+        expect.objectContaining({
+          content: expect.objectContaining({
             x: 50,
             y: 50,
             width: pageWidth - 100,
@@ -116,7 +114,7 @@ describe('layout', () => {
       const pages = await layoutPages(def, ctx);
 
       expect(pages[0].header).toEqual(
-        objectContaining({
+        expect.objectContaining({
           x: 20,
           y: 20,
           width: pageWidth - 40,
@@ -139,7 +137,7 @@ describe('layout', () => {
 
       expect(pages[0].header).toBeUndefined();
       expect(pages[0].footer).toEqual(
-        objectContaining({
+        expect.objectContaining({
           x: 20,
           y: pageHeight - 20 - 12,
           width: pageWidth - 40,
@@ -161,7 +159,7 @@ describe('layout', () => {
       const pages = await layoutPages(def, ctx);
 
       expect(pages[0].header).toEqual(
-        objectContaining({
+        expect.objectContaining({
           x: 20,
           y: 20,
           width: pageWidth - 40,
@@ -169,7 +167,7 @@ describe('layout', () => {
         }),
       );
       expect(pages[0].footer).toEqual(
-        objectContaining({
+        expect.objectContaining({
           x: 20,
           y: pageHeight - 20 - 12,
           width: pageWidth - 40,
@@ -261,7 +259,7 @@ describe('layout', () => {
       const { frame } = await layoutBlock(block, box, ctx);
 
       expect(frame).toEqual(
-        objectContaining({ objects: [{ type: 'anchor', name: 'test', x: 0, y: 0 }] }),
+        expect.objectContaining({ objects: [{ type: 'anchor', name: 'test', x: 0, y: 0 }] }),
       );
     });
 
@@ -274,7 +272,7 @@ describe('layout', () => {
 
       const { frame } = await layoutBlock({ graphics } as any, box, ctx);
 
-      expect(frame).toEqual(objectContaining({ width: 400, height: 0 }));
+      expect(frame).toEqual(expect.objectContaining({ width: 400, height: 0 }));
       expect(frame.objects).toEqual([
         {
           type: 'graphics',
@@ -297,7 +295,7 @@ describe('layout', () => {
 
       const { frame } = await layoutBlock({ graphics, padding } as any, box, ctx);
 
-      expect(frame).toEqual(objectContaining({ width: 400, height: 10 }));
+      expect(frame).toEqual(expect.objectContaining({ width: 400, height: 10 }));
       expect(frame.objects).toEqual([
         {
           type: 'graphics',

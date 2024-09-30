@@ -2,14 +2,17 @@ import { describe, expect, it } from 'vitest';
 
 import { readColor } from './read-color.ts';
 
-const { closeTo } = expect;
-
 describe('read-color', () => {
   describe('readColor', () => {
     it('supports html color', () => {
       expect(readColor('#ffffff')).toEqual({ type: 'RGB', red: 1, green: 1, blue: 1 });
       expect(readColor('#000000')).toEqual({ type: 'RGB', red: 0, green: 0, blue: 0 });
-      expect(readColor('#0080ff')).toEqual({ type: 'RGB', red: 0, green: closeTo(0.5), blue: 1 });
+      expect(readColor('#0080ff')).toEqual({
+        type: 'RGB',
+        red: 0,
+        green: expect.closeTo(0.5),
+        blue: 1,
+      });
     });
 
     it('supports named color', () => {

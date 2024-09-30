@@ -13,8 +13,6 @@ import {
   splitChunks,
 } from './text.ts';
 
-const { objectContaining } = expect;
-
 describe('text', () => {
   let normalFont: Font;
   let fontStore: FontStore;
@@ -63,7 +61,7 @@ describe('text', () => {
       const segments = await extractTextSegments([{ text: 'foo', attrs }], fontStore);
 
       expect(segments).toEqual([
-        objectContaining({
+        expect.objectContaining({
           width: 3 * (10 + 5), // 3 chars * 10pt + 5pt letterSpacing
           height: 10,
           fontSize: 10,
@@ -81,7 +79,7 @@ describe('text', () => {
       const segments = await extractTextSegments([{ text: 'foo', attrs }], fontStore);
 
       expect(segments).toEqual([
-        objectContaining({
+        expect.objectContaining({
           fontSize: 10,
           lineHeight: 1.5,
           color: rgb(1, 0, 0),
@@ -99,8 +97,8 @@ describe('text', () => {
       );
 
       expect(segments).toEqual([
-        objectContaining({ text: 'foo' }),
-        objectContaining({ text: 'bar' }),
+        expect.objectContaining({ text: 'foo' }),
+        expect.objectContaining({ text: 'bar' }),
       ]);
     });
   });

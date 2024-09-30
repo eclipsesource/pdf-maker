@@ -8,8 +8,6 @@ import type { ImageBlock } from '../read-block.ts';
 import { fakeImage } from '../test/test-utils.ts';
 import { layoutImageContent } from './layout-image.ts';
 
-const { objectContaining } = expect;
-
 describe('layout-image', () => {
   let box: Box, ctx: MakerCtx;
 
@@ -36,7 +34,9 @@ describe('layout-image', () => {
       const { frame } = await layoutImageContent(block, box, ctx);
 
       expect(frame).toEqual({
-        objects: [objectContaining({ x: 20 + (200 - 150) / 2, y: 30, width: 150, height: 100 })],
+        objects: [
+          expect.objectContaining({ x: 20 + (200 - 150) / 2, y: 30, width: 150, height: 100 }),
+        ],
         width: 200,
         height: 100,
       });
@@ -61,7 +61,7 @@ describe('layout-image', () => {
           const { frame } = await layoutImageContent(block, box, ctx);
 
           expect(frame).toEqual({
-            objects: [objectContaining({ type: 'image', width: 300, height: 200 })],
+            objects: [expect.objectContaining({ type: 'image', width: 300, height: 200 })],
             width: 300,
             height: 200,
           });
@@ -74,7 +74,7 @@ describe('layout-image', () => {
           const { frame } = await layoutImageContent(block, box, ctx);
 
           expect(frame).toEqual({
-            objects: [objectContaining({ type: 'image', width: 300, height: 200 })],
+            objects: [expect.objectContaining({ type: 'image', width: 300, height: 200 })],
             width: box.width,
             height: 200,
           });
@@ -87,7 +87,7 @@ describe('layout-image', () => {
           const { frame } = await layoutImageContent(block, box, ctx);
 
           expect(frame.objects).toEqual([
-            objectContaining({ type: 'image', width: 300, height: 200 }),
+            expect.objectContaining({ type: 'image', width: 300, height: 200 }),
           ]);
         });
       });
@@ -99,7 +99,7 @@ describe('layout-image', () => {
       const { frame } = await layoutImageContent(block, box, ctx);
 
       expect(frame).toEqual({
-        objects: [objectContaining({ type: 'image', width: 72, height: 48 })],
+        objects: [expect.objectContaining({ type: 'image', width: 72, height: 48 })],
         width: box.width,
         height: 48,
       });
@@ -111,7 +111,7 @@ describe('layout-image', () => {
       const { frame } = await layoutImageContent(block, box, ctx);
 
       expect(frame).toEqual({
-        objects: [objectContaining({ type: 'image', width: 400, height: (400 * 2) / 3 })],
+        objects: [expect.objectContaining({ type: 'image', width: 400, height: (400 * 2) / 3 })],
         width: box.width,
         height: (400 * 2) / 3,
       });
@@ -123,7 +123,7 @@ describe('layout-image', () => {
       const { frame } = await layoutImageContent(block, box, ctx);
 
       expect(frame.objects).toEqual([
-        objectContaining({ type: 'image', x: 20 + (400 - 72) / 2, y: 30 }),
+        expect.objectContaining({ type: 'image', x: 20 + (400 - 72) / 2, y: 30 }),
       ]);
     });
 
@@ -132,7 +132,7 @@ describe('layout-image', () => {
 
       const { frame } = await layoutImageContent(block, box, ctx);
 
-      expect(frame.objects).toEqual([objectContaining({ type: 'image', x: 20, y: 30 })]);
+      expect(frame.objects).toEqual([expect.objectContaining({ type: 'image', x: 20, y: 30 })]);
     });
 
     it('right-aligns image', async () => {
@@ -140,7 +140,9 @@ describe('layout-image', () => {
 
       const { frame } = await layoutImageContent(block, box, ctx);
 
-      expect(frame.objects).toEqual([objectContaining({ type: 'image', x: 20 + 400 - 72, y: 30 })]);
+      expect(frame.objects).toEqual([
+        expect.objectContaining({ type: 'image', x: 20 + 400 - 72, y: 30 }),
+      ]);
     });
 
     it('does not aligns image in block with auto width', async () => {
@@ -148,7 +150,7 @@ describe('layout-image', () => {
 
       const { frame } = await layoutImageContent(block, box, ctx);
 
-      expect(frame.objects).toEqual([objectContaining({ type: 'image', x: 20, y: 30 })]);
+      expect(frame.objects).toEqual([expect.objectContaining({ type: 'image', x: 20, y: 30 })]);
     });
   });
 });

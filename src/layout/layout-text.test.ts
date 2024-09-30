@@ -8,8 +8,6 @@ import type { MakerCtx } from '../maker-ctx.ts';
 import { extractTextRows, fakeFont, range, span } from '../test/test-utils.ts';
 import { layoutTextContent } from './layout-text.ts';
 
-const { objectContaining } = expect;
-
 describe('layout-text', () => {
   let defaultFont: Font;
   let box: Box;
@@ -34,7 +32,7 @@ describe('layout-text', () => {
 
       const { frame } = await layoutTextContent(block, box, ctx);
 
-      expect(frame).toEqual(objectContaining({ width: box.width, height: 12 }));
+      expect(frame).toEqual(expect.objectContaining({ width: box.width, height: 12 }));
     });
 
     it('creates frame with intrinsic width for block with autoWidth', async () => {
@@ -43,7 +41,7 @@ describe('layout-text', () => {
 
       const { frame } = await layoutTextContent(block, box, ctx);
 
-      expect(frame).toEqual(objectContaining({ width: 30, height: 12 }));
+      expect(frame).toEqual(expect.objectContaining({ width: 30, height: 12 }));
     });
 
     it('does not include padding in frame height', async () => {
@@ -110,7 +108,7 @@ describe('layout-text', () => {
       const { frame } = await layoutTextContent(block, box, ctx);
 
       expect(frame.objects).toEqual([
-        { type: 'text', rows: [objectContaining({ x: 20, y: 30 })] },
+        { type: 'text', rows: [expect.objectContaining({ x: 20, y: 30 })] },
         { type: 'link', x: 20, y: 30 + 1, width: 30, height: 10, url: 'test-link' },
       ]);
     });
@@ -126,7 +124,7 @@ describe('layout-text', () => {
       const { frame } = await layoutTextContent(block, box, ctx);
 
       expect(frame.objects).toEqual([
-        { type: 'text', rows: [objectContaining({ x: 20, y: 30 })] },
+        { type: 'text', rows: [expect.objectContaining({ x: 20, y: 30 })] },
         { type: 'link', x: 20, y: 30 + 1, width: 70, height: 10, url: 'test-link' },
       ]);
     });
@@ -168,9 +166,13 @@ describe('layout-text', () => {
       expect(frame.objects).toEqual([
         {
           type: 'text',
-          rows: [objectContaining({ x: margin.right + box.width - 30, width: 30 })],
+          rows: [expect.objectContaining({ x: margin.right + box.width - 30, width: 30 })],
         },
-        expect.objectContaining({ type: 'link', x: margin.right + box.width - 30, width: 30 }),
+        expect.objectContaining({
+          type: 'link',
+          x: margin.right + box.width - 30,
+          width: 30,
+        }),
       ]);
     });
 
@@ -185,7 +187,11 @@ describe('layout-text', () => {
         {
           type: 'text',
           rows: [
-            objectContaining({ x: margin.right + (box.width - 30) / 2, width: 30, height: 12 }),
+            expect.objectContaining({
+              x: margin.right + (box.width - 30) / 2,
+              width: 30,
+              height: 12,
+            }),
           ],
         },
         expect.objectContaining({
@@ -207,8 +213,8 @@ describe('layout-text', () => {
         {
           type: 'text',
           rows: [
-            objectContaining({ x: margin.right + 30, width: 30 }),
-            objectContaining({ x: margin.right, width: 60 }),
+            expect.objectContaining({ x: margin.right + 30, width: 30 }),
+            expect.objectContaining({ x: margin.right, width: 60 }),
           ],
         },
         expect.objectContaining({ type: 'link', x: margin.right + 30, width: 30 }),

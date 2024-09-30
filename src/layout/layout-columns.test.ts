@@ -7,8 +7,6 @@ import type { Block } from '../read-block.ts';
 import { fakeFont, span } from '../test/test-utils.ts';
 import { layoutColumnsContent } from './layout-columns.ts';
 
-const { objectContaining } = expect;
-
 describe('layout-columns', () => {
   let ctx: MakerCtx, box: Box;
 
@@ -125,8 +123,8 @@ describe('layout-columns', () => {
 
       expect(frame).toEqual({
         children: [
-          objectContaining({ x: 20 + 5, y: 30 + 7, width: 200 - 5 - 6, height: 12 }),
-          objectContaining({ x: 20 + 200 + 5, y: 30 + 7, width: 200 - 5 - 6, height: 12 }),
+          expect.objectContaining({ x: 20 + 5, y: 30 + 7, width: 200 - 5 - 6, height: 12 }),
+          expect.objectContaining({ x: 20 + 200 + 5, y: 30 + 7, width: 200 - 5 - 6, height: 12 }),
         ],
         width: box.width,
         height: 12 + 7 + 8,
@@ -146,9 +144,9 @@ describe('layout-columns', () => {
 
       expect(frame).toEqual({
         children: [
-          objectContaining({ x: 20 + 5, y: 30 + 7, width: 89, height: 25 }),
-          objectContaining({ x: 20 + 100 + 5, y: 30 + 7, width: 150 - 5 - 6, height: 12 }),
-          objectContaining({ x: 20 + 250 + 5, y: 30 + 7, width: 150 - 5 - 6, height: 12 }),
+          expect.objectContaining({ x: 20 + 5, y: 30 + 7, width: 89, height: 25 }),
+          expect.objectContaining({ x: 20 + 100 + 5, y: 30 + 7, width: 150 - 5 - 6, height: 12 }),
+          expect.objectContaining({ x: 20 + 250 + 5, y: 30 + 7, width: 150 - 5 - 6, height: 12 }),
         ],
         width: box.width,
         height: 25 + 7 + 8,
@@ -167,8 +165,8 @@ describe('layout-columns', () => {
 
       expect(frame).toEqual({
         children: [
-          objectContaining({ x: 20 + 5, y: 30 + 7, width: 200 - 5 - 6, height: 12 }),
-          objectContaining({ x: 20 + 200 + 5, y: 30 + 7, width: 200 - 5 - 6, height: 12 }),
+          expect.objectContaining({ x: 20 + 5, y: 30 + 7, width: 200 - 5 - 6, height: 12 }),
+          expect.objectContaining({ x: 20 + 200 + 5, y: 30 + 7, width: 200 - 5 - 6, height: 12 }),
         ],
         width: box.width,
         height: 27,
@@ -187,9 +185,9 @@ describe('layout-columns', () => {
 
       expect(frame).toEqual({
         children: [
-          objectContaining({ y: box.y, height: 100 }),
-          objectContaining({ y: box.y + (100 - 12) / 2, height: 12 }),
-          objectContaining({ y: box.y + 100 - 12, height: 12 }),
+          expect.objectContaining({ y: box.y, height: 100 }),
+          expect.objectContaining({ y: box.y + (100 - 12) / 2, height: 12 }),
+          expect.objectContaining({ y: box.y + 100 - 12, height: 12 }),
         ],
         width: box.width,
         height: 100,
