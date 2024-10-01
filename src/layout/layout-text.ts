@@ -16,8 +16,8 @@ export async function layoutTextContent(
 ): Promise<LayoutContent> {
   const text = await layoutText(block, box, ctx);
   const objects: RenderObject[] = [];
-  text.rows.length && objects.push({ type: 'text', rows: text.rows });
-  text.objects?.length && objects.push(...text.objects);
+  if (text.rows.length) objects.push({ type: 'text', rows: text.rows });
+  if (text.objects?.length) objects.push(...text.objects);
   if (ctx.guides) objects.push(...text.rows.map((row) => createRowGuides(row)));
 
   const remainder = text.remainder ? { ...omit(block, 'id'), text: text.remainder } : undefined;

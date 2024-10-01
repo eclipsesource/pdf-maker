@@ -1,6 +1,5 @@
 import type { Block } from './layout.ts';
-import type { BoxLengths, Length } from './sizes.ts';
-import type { Orientation, PaperSize } from './sizes.ts';
+import type { BoxLengths, Length, Orientation, PaperSize } from './sizes.ts';
 import type { TextProps } from './text.ts';
 
 /**

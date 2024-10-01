@@ -9,7 +9,8 @@ import { extractTextRows, fakeFont, range, span } from '../test/test-utils.ts';
 import { layoutRowsContent } from './layout-rows.ts';
 
 describe('layout-rows', () => {
-  let ctx: MakerCtx, box: Box;
+  let ctx: MakerCtx;
+  let box: Box;
 
   beforeEach(() => {
     const fontStore: FontStore = {

@@ -8,7 +8,8 @@ import { fakePDFPage, getContentStream, p } from '../test/test-utils.ts';
 import { renderGraphics } from './render-graphics.ts';
 
 describe('render-graphics', () => {
-  let page: Page, size: Size;
+  let page: Page;
+  let size: Size;
 
   beforeEach(() => {
     size = { width: 500, height: 800 };

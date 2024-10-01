@@ -1,6 +1,6 @@
 import type { Shape } from './graphics.ts';
 import type { BoxLengths, Length } from './sizes.ts';
-import type { TextProps } from './text.ts';
+import type { Text, TextProps } from './text.ts';
 
 export type Block = TextBlock | ImageBlock | ColumnsBlock | RowsBlock | EmptyBlock;
 

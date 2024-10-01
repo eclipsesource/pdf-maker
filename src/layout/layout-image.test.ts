@@ -9,7 +9,8 @@ import { fakeImage } from '../test/test-utils.ts';
 import { layoutImageContent } from './layout-image.ts';
 
 describe('layout-image', () => {
-  let box: Box, ctx: MakerCtx;
+  let box: Box;
+  let ctx: MakerCtx;
 
   beforeEach(() => {
     const imageStore = {

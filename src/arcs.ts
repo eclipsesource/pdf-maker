@@ -1,3 +1,4 @@
+/* eslint-disable no-param-reassign */
 // The code in this file was copied from pdf-lib Copyright (c) 2019 Andrew Dillon
 // https://github.com/Hopding/pdf-lib/blob/v1.17.1/src/api/svgPath.ts
 // Originated from pdfkit Copyright (c) 2014 Devon Govett

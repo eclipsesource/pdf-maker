@@ -26,7 +26,7 @@
   },
   "scripts": {
     "build": "rm -rf dist/ && tsc && esbuild src/index.ts --bundle --sourcemap --platform=node --target=es2021,node18 --outdir=dist --format=esm --external:pdf-lib --external:@pdf-lib/fontkit",
-    "lint": "eslint '{src,test}/**/*.{js,ts}' --max-warnings 0 --format visualstudio && prettier --check .",
+    "lint": "eslint '{src,test}/**/*.{js,ts}' --max-warnings 0 && prettier --check .",
     "test": "vitest run test",
     "fix": "eslint '{src,test}/**/*.{js,ts}' --fix && prettier -w ."
   },
@@ -36,13 +36,14 @@
   },
   "devDependencies": {
     "@types/node": "^20.11.20",
-    "@typescript-eslint/eslint-plugin": "^7.0.2",
     "esbuild": "^0.20.1",
+    "eslint": "^9.11.1",
     "eslint-config-prettier": "^9.1.0",
-    "eslint-plugin-import": "^2.29.1",
-    "eslint-plugin-simple-import-sort": "^12.0.0",
+    "eslint-plugin-import": "^2.31.0",
+    "eslint-plugin-simple-import-sort": "^12.1.1",
     "prettier": "^3.2.5",
     "typescript": "^5.3.3",
+    "typescript-eslint": "^8.8.0",
     "vitest": "^2.1.2"
   }
 }

@@ -8,7 +8,9 @@ import { fakeFont, fakePDFPage, getContentStream } from '../test/test-utils.ts';
 import { renderText } from './render-text.ts';
 
 describe('render-text', () => {
-  let page: Page, size: Size, font: Font;
+  let page: Page;
+  let size: Size;
+  let font: Font;
 
   beforeEach(() => {
     size = { width: 500, height: 800 };

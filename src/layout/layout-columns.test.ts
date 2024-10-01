@@ -8,7 +8,8 @@ import { fakeFont, span } from '../test/test-utils.ts';
 import { layoutColumnsContent } from './layout-columns.ts';
 
 describe('layout-columns', () => {
-  let ctx: MakerCtx, box: Box;
+  let ctx: MakerCtx;
+  let box: Box;
 
   beforeEach(() => {
     const fontStore: FontStore = {

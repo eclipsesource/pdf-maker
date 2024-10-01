@@ -100,10 +100,12 @@ export async function layoutPages(def: DocumentDefinition, ctx: MakerCtx): Promi
   // Re-layout headers and footers to provide them with the final page count.
   for (const [idx, page] of pages.entries()) {
     const pageInfo = { pageCount: pages.length, pageNumber: idx + 1, pageSize };
-    typeof def.header === 'function' &&
-      (page.header = await layoutHeader(def.header(pageInfo), pageSize, ctx));
-    typeof def.footer === 'function' &&
-      (page.footer = await layoutFooter(def.footer(pageInfo), pageSize, ctx));
+    if (typeof def.header === 'function') {
+      page.header = await layoutHeader(def.header(pageInfo), pageSize, ctx);
+    }
+    if (typeof def.footer === 'function') {
+      page.footer = await layoutFooter(def.footer(pageInfo), pageSize, ctx);
+    }
   }
   return pages.map(pickDefined);
 }
@@ -151,7 +153,7 @@ export async function layoutBlock(block: Block, box: Box, ctx: MakerCtx): Promis
   };
   addAnchor(frame, block);
   addGraphics(frame, block);
-  ctx.guides && addGuides(frame, block);
+  if (ctx.guides) addGuides(frame, block);
   return { frame, remainder: result.remainder };
 }
 

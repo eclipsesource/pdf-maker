@@ -13,7 +13,8 @@ import { isBreakPossible, layoutBlock, layoutPages } from './layout.ts';
 const defaultPageSize = paperSizes.A4;
 
 describe('layout', () => {
-  let ctx: MakerCtx, box: Box;
+  let ctx: MakerCtx;
+  let box: Box;
 
   beforeEach(() => {
     const fontStore = {

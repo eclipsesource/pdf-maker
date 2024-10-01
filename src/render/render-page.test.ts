@@ -17,7 +17,8 @@ describe('render-page', () => {
   });
 
   describe('renderPage', () => {
-    let size: Size, pdfDoc: PDFDocument;
+    let size: Size;
+    let pdfDoc: PDFDocument;
 
     beforeEach(() => {
       size = { width: 300, height: 400 };
@@ -70,7 +71,9 @@ describe('render-page', () => {
   });
 
   describe('renderFrame', () => {
-    let page: Page, size: Size, font: Font;
+    let page: Page;
+    let size: Size;
+    let font: Font;
 
     beforeEach(() => {
       size = { width: 500, height: 800 };

@@ -7,7 +7,8 @@ import { addPageFont, getExtGraphicsState } from './page.ts';
 import { fakeFont, fakePDFPage } from './test/test-utils.ts';
 
 describe('page', () => {
-  let page: Page, pdfPage: PDFPage;
+  let page: Page;
+  let pdfPage: PDFPage;
 
   beforeEach(() => {
     pdfPage = fakePDFPage();
@@ -15,7 +16,8 @@ describe('page', () => {
   });
 
   describe('addPageFont', () => {
-    let fontA: Font, fontB: Font;
+    let fontA: Font;
+    let fontB: Font;
 
     beforeEach(() => {
       fontA = fakeFont('fontA', { doc: pdfPage.doc });

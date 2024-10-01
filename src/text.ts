@@ -139,7 +139,8 @@ export function breakLine(segments: TextSegment[], maxWidth: number): TextSegmen
     const head = [{ ...segments[0], text: '', width: 0 }];
     const tail = segments.slice(breakIdx + 1);
     return tail.length ? [head, tail] : [head];
-  } else if (breakIdx !== undefined) {
+  }
+  if (breakIdx !== undefined) {
     const head = segments.slice(0, breakIdx);
     const tail = segments.slice(breakIdx + 1);
     return tail.length ? [head, tail] : [head];
