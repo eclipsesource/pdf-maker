@@ -7,13 +7,13 @@ import { isPng, readPngInfo } from './png.ts';
 
 describe('png', () => {
   describe('isPng', () => {
-    it('returns true if PNG header found', async () => {
+    it('returns true if PNG header found', () => {
       const info = isPng(new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]));
 
       expect(info).toBe(true);
     });
 
-    it('returns false for other data', async () => {
+    it('returns false for other data', () => {
       expect(isPng(new Uint8Array())).toBe(false);
       expect(isPng(new Uint8Array([1, 2, 3, 4, 5]))).toBe(false);
     });

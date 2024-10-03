@@ -14,7 +14,7 @@ describe('layout-rows', () => {
 
   beforeEach(() => {
     const fontStore = new FontStore(new FontLoader([]));
-    fontStore.selectFont = async () => fakeFont('Test');
+    fontStore.selectFont = () => Promise.resolve(fakeFont('Test'));
     ctx = { fontStore } as MakerCtx;
     box = { x: 20, y: 30, width: 400, height: 700 };
   });

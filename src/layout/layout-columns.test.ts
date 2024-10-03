@@ -13,8 +13,8 @@ describe('layout-columns', () => {
 
   beforeEach(() => {
     const fontStore = new FontStore(new FontLoader([]));
-    fontStore.selectFont = async () => {
-      return fakeFont('Test');
+    fontStore.selectFont = () => {
+      return Promise.resolve(fakeFont('Test'));
     };
     ctx = { fontStore } as MakerCtx;
     box = { x: 20, y: 30, width: 400, height: 700 };

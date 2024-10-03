@@ -57,9 +57,9 @@ describe('image-loader', () => {
 
     beforeEach(() => {
       imageLoader = new ImageLoader([]);
-      imageLoader.loadImage = vi.fn(async (selector: ImageSelector) => {
-        if (selector.name === 'liberty') return { data: libertyJpg };
-        if (selector.name === 'torus') return { data: torusPng };
+      imageLoader.loadImage = vi.fn((selector: ImageSelector) => {
+        if (selector.name === 'liberty') return Promise.resolve({ data: libertyJpg });
+        if (selector.name === 'torus') return Promise.resolve({ data: torusPng });
         throw new Error('No such image');
       });
     });

@@ -21,8 +21,8 @@ describe('text', () => {
     normalFont = fakeFont('Test');
     const italicFont = fakeFont('Test', { style: 'italic' });
     fontStore = new FontStore(new FontLoader([]));
-    fontStore.selectFont = async (selector) => {
-      return selector.fontStyle === 'italic' ? italicFont : normalFont;
+    fontStore.selectFont = (selector) => {
+      return Promise.resolve(selector.fontStyle === 'italic' ? italicFont : normalFont);
     };
   });
 

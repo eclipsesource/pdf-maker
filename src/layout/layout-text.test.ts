@@ -17,8 +17,8 @@ describe('layout-text', () => {
     defaultFont = fakeFont('Test');
     const italicFont = fakeFont('Test', { style: 'italic' });
     const fontStore = new FontStore(new FontLoader([]));
-    fontStore.selectFont = async (selector: FontSelector) => {
-      return selector.fontStyle === 'italic' ? italicFont : defaultFont;
+    fontStore.selectFont = (selector: FontSelector) => {
+      return Promise.resolve(selector.fontStyle === 'italic' ? italicFont : defaultFont);
     };
     box = { x: 20, y: 30, width: 400, height: 700 };
     ctx = { fontStore } as MakerCtx;

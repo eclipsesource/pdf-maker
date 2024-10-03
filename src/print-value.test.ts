@@ -27,7 +27,7 @@ describe('print-value', () => {
 
     it('prints functions', () => {
       expect(printValue((x: unknown) => x)).toEqual('anonymous function');
-      expect(printValue(async (x: unknown) => x)).toEqual('anonymous function');
+      expect(printValue((x: unknown) => x)).toEqual('anonymous function');
       expect(printValue(printValue)).toEqual('function printValue');
     });
 

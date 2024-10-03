@@ -14,10 +14,10 @@ describe('layout-image', () => {
 
   beforeEach(() => {
     const imageStore = new ImageStore(new ImageLoader([]));
-    imageStore.selectImage = vi.fn(async (selector: ImageSelector) => {
+    imageStore.selectImage = vi.fn((selector: ImageSelector) => {
       const match = /^img-(\d+)-(\d+)$/.exec(selector.name);
       if (match) {
-        return fakeImage(selector.name, Number(match[1]), Number(match[2]));
+        return Promise.resolve(fakeImage(selector.name, Number(match[1]), Number(match[2])));
       }
       throw new Error(`Unknown image: ${selector.name}`);
     });

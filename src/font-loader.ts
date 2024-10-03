@@ -18,7 +18,7 @@ export class FontLoader {
     this.#fontDefs = fontDefs;
   }
 
-  async loadFont(selector: FontSelector): Promise<LoadedFont> {
+  loadFont(selector: FontSelector): LoadedFont {
     if (!this.#fontDefs.length) {
       throw new Error('No fonts defined');
     }

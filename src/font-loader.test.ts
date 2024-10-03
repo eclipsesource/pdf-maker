@@ -27,22 +27,22 @@ describe('font-loader', () => {
       fontLoader = new FontLoader([normalFont, italicFont, boldFont, italicBoldFont, otherFont]);
     });
 
-    it('rejects when no fonts defined', async () => {
+    it('rejects when no fonts defined', () => {
       const loader = new FontLoader([]);
 
-      await expect(loader.loadFont({})).rejects.toThrowError('No fonts defined');
+      expect(() => loader.loadFont({})).toThrowError('No fonts defined');
     });
 
-    it('rejects for unknown font name', async () => {
-      await expect(fontLoader.loadFont({ fontFamily: 'Unknown' })).rejects.toThrowError(
+    it('rejects for unknown font name', () => {
+      expect(() => fontLoader.loadFont({ fontFamily: 'Unknown' })).toThrowError(
         "No font defined for 'Unknown'",
       );
     });
 
-    it('rejects when no matching font style can be found', async () => {
-      await expect(() =>
-        fontLoader.loadFont({ fontFamily: 'Other', fontStyle: 'italic' }),
-      ).rejects.toThrowError("No font defined for 'Other', style=italic");
+    it('rejects when no matching font style can be found', () => {
+      expect(() => fontLoader.loadFont({ fontFamily: 'Other', fontStyle: 'italic' })).toThrowError(
+        "No font defined for 'Other', style=italic",
+      );
     });
 
     it('selects different font variants', async () => {
@@ -68,61 +68,53 @@ describe('font-loader', () => {
       });
     });
 
-    it('selects first matching font if no family specified', async () => {
-      await expect(fontLoader.loadFont({})).resolves.toEqual({
+    it('selects first matching font if no family specified', () => {
+      expect(fontLoader.loadFont({})).toEqual({
         name: 'Test',
         data: normalFont.data,
       });
-      await expect(fontLoader.loadFont({ fontWeight: 'bold' })).resolves.toEqual({
+      expect(fontLoader.loadFont({ fontWeight: 'bold' })).toEqual({
         name: 'Test',
         data: boldFont.data,
       });
-      await expect(fontLoader.loadFont({ fontStyle: 'italic' })).resolves.toEqual({
+      expect(fontLoader.loadFont({ fontStyle: 'italic' })).toEqual({
         name: 'Test',
         data: italicFont.data,
       });
-      await expect(
-        fontLoader.loadFont({ fontStyle: 'italic', fontWeight: 'bold' }),
-      ).resolves.toEqual({
+      expect(fontLoader.loadFont({ fontStyle: 'italic', fontWeight: 'bold' })).toEqual({
         name: 'Test',
         data: italicBoldFont.data,
       });
     });
 
-    it('selects font with matching font family', async () => {
-      await expect(fontLoader.loadFont({ fontFamily: 'Other' })).resolves.toEqual({
+    it('selects font with matching font family', () => {
+      expect(fontLoader.loadFont({ fontFamily: 'Other' })).toEqual({
         name: 'Other',
         data: otherFont.data,
       });
     });
 
-    it('falls back to oblique when no italic font can be found', async () => {
+    it('falls back to oblique when no italic font can be found', () => {
       fontLoader = new FontLoader([normalFont, obliqueFont, boldFont, obliqueBoldFont]);
-      await expect(
-        fontLoader.loadFont({ fontFamily: 'Test', fontStyle: 'italic' }),
-      ).resolves.toEqual({
+      expect(fontLoader.loadFont({ fontFamily: 'Test', fontStyle: 'italic' })).toEqual({
         name: 'Test',
         data: obliqueFont.data,
       });
     });
 
-    it('falls back to italic when no oblique font can be found', async () => {
-      await expect(
-        fontLoader.loadFont({ fontFamily: 'Test', fontStyle: 'oblique' }),
-      ).resolves.toEqual({
+    it('falls back to italic when no oblique font can be found', () => {
+      expect(fontLoader.loadFont({ fontFamily: 'Test', fontStyle: 'oblique' })).toEqual({
         name: 'Test',
         data: italicFont.data,
       });
     });
 
-    it('falls back when no matching font weight can be found', async () => {
-      await expect(
-        fontLoader.loadFont({ fontFamily: 'Other', fontWeight: 'bold' }),
-      ).resolves.toEqual({
+    it('falls back when no matching font weight can be found', () => {
+      expect(fontLoader.loadFont({ fontFamily: 'Other', fontWeight: 'bold' })).toEqual({
         name: 'Other',
         data: otherFont.data,
       });
-      await expect(fontLoader.loadFont({ fontFamily: 'Other', fontWeight: 200 })).resolves.toEqual({
+      expect(fontLoader.loadFont({ fontFamily: 'Other', fontWeight: 200 })).toEqual({
         name: 'Other',
         data: otherFont.data,
       });
@@ -136,7 +128,7 @@ describe('font-loader', () => {
     beforeEach(() => {
       testFont = fakeFont('Test');
       fontLoader = new FontLoader([]);
-      fontLoader.loadFont = vi.fn(async (selector: FontSelector) => {
+      fontLoader.loadFont = vi.fn((selector: FontSelector) => {
         if (selector.fontFamily === 'Test') return testFont;
         throw new Error('No such font defined');
       });

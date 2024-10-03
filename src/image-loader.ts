@@ -43,7 +43,7 @@ export class ImageStore {
     this.#imageLoader = imageLoader;
   }
 
-  async selectImage(selector: ImageSelector): Promise<Image> {
+  selectImage(selector: ImageSelector): Promise<Image> {
     const cacheKey = selector.name;
     return (this.#imageCache[cacheKey] ??= this.loadImage(selector));
   }

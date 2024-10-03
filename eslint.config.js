@@ -35,6 +35,7 @@ export default tseslint.config(
       'no-else-return': ['error', { allowElseIf: false }],
       'dot-notation': 'error',
       'one-var': ['error', 'never'],
+      'require-await': 'error',
       '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/consistent-type-imports': ['error', { prefer: 'type-imports' }],
       'simple-import-sort/imports': 'error',
