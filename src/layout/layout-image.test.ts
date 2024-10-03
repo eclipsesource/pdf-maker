@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { Box } from '../box.ts';
-import type { ImageStore } from '../image-loader.ts';
+import { ImageLoader, ImageStore } from '../image-loader.ts';
 import type { ImageSelector } from '../images.ts';
 import type { MakerCtx } from '../maker-ctx.ts';
 import type { ImageBlock } from '../read-block.ts';
@@ -13,15 +13,14 @@ describe('layout-image', () => {
   let ctx: MakerCtx;
 
   beforeEach(() => {
-    const imageStore = {
-      selectImage: vi.fn(async (selector: ImageSelector) => {
-        const match = /^img-(\d+)-(\d+)$/.exec(selector.name);
-        if (match) {
-          return fakeImage(selector.name, Number(match[1]), Number(match[2]));
-        }
-        throw new Error(`Unknown image: ${selector.name}`);
-      }),
-    } as ImageStore;
+    const imageStore = new ImageStore(new ImageLoader([]));
+    imageStore.selectImage = vi.fn(async (selector: ImageSelector) => {
+      const match = /^img-(\d+)-(\d+)$/.exec(selector.name);
+      if (match) {
+        return fakeImage(selector.name, Number(match[1]), Number(match[2]));
+      }
+      throw new Error(`Unknown image: ${selector.name}`);
+    });
     box = { x: 20, y: 30, width: 400, height: 700 };
     ctx = { imageStore } as MakerCtx;
   });

@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import type { Box } from '../box.ts';
-import type { FontStore } from '../font-loader.ts';
+import { FontLoader, FontStore } from '../font-loader.ts';
 import type { Frame } from '../frame.ts';
 import type { MakerCtx } from '../maker-ctx.ts';
 import type { Block } from '../read-block.ts';
@@ -13,11 +13,8 @@ describe('layout-rows', () => {
   let box: Box;
 
   beforeEach(() => {
-    const fontStore: FontStore = {
-      async selectFont() {
-        return fakeFont('Test');
-      },
-    };
+    const fontStore = new FontStore(new FontLoader([]));
+    fontStore.selectFont = async () => fakeFont('Test');
     ctx = { fontStore } as MakerCtx;
     box = { x: 20, y: 30, width: 400, height: 700 };
   });

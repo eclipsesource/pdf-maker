@@ -56,13 +56,12 @@ describe('image-loader', () => {
     let imageLoader: ImageLoader;
 
     beforeEach(() => {
-      imageLoader = {
-        loadImage: vi.fn(async (selector: ImageSelector) => {
-          if (selector.name === 'liberty') return { data: libertyJpg };
-          if (selector.name === 'torus') return { data: torusPng };
-          throw new Error('No such image');
-        }) as any,
-      } as ImageLoader;
+      imageLoader = new ImageLoader([]);
+      imageLoader.loadImage = vi.fn(async (selector: ImageSelector) => {
+        if (selector.name === 'liberty') return { data: libertyJpg };
+        if (selector.name === 'torus') return { data: torusPng };
+        throw new Error('No such image');
+      });
     });
 
     it('rejects if image could not be loaded', async () => {

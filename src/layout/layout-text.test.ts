@@ -2,7 +2,7 @@ import { rgb } from 'pdf-lib';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import type { Box } from '../box.ts';
-import type { FontStore } from '../font-loader.ts';
+import { FontLoader, FontStore } from '../font-loader.ts';
 import type { Font, FontSelector } from '../fonts.ts';
 import type { MakerCtx } from '../maker-ctx.ts';
 import { extractTextRows, fakeFont, range, span } from '../test/test-utils.ts';
@@ -16,10 +16,9 @@ describe('layout-text', () => {
   beforeEach(() => {
     defaultFont = fakeFont('Test');
     const italicFont = fakeFont('Test', { style: 'italic' });
-    const fontStore: FontStore = {
-      async selectFont(selector: FontSelector) {
-        return selector.fontStyle === 'italic' ? italicFont : defaultFont;
-      },
+    const fontStore = new FontStore(new FontLoader([]));
+    fontStore.selectFont = async (selector: FontSelector) => {
+      return selector.fontStyle === 'italic' ? italicFont : defaultFont;
     };
     box = { x: 20, y: 30, width: 400, height: 700 };
     ctx = { fontStore } as MakerCtx;

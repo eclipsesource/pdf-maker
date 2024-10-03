@@ -1,7 +1,7 @@
 import { rgb } from 'pdf-lib';
 import { beforeEach, describe, expect, it } from 'vitest';
 
-import type { FontStore } from './font-loader.ts';
+import { FontLoader, FontStore } from './font-loader.ts';
 import type { Font } from './fonts.ts';
 import { fakeFont } from './test/test-utils.ts';
 import type { TextSegment } from './text.ts';
@@ -20,10 +20,9 @@ describe('text', () => {
   beforeEach(() => {
     normalFont = fakeFont('Test');
     const italicFont = fakeFont('Test', { style: 'italic' });
-    fontStore = {
-      async selectFont(selector) {
-        return selector.fontStyle === 'italic' ? italicFont : normalFont;
-      },
+    fontStore = new FontStore(new FontLoader([]));
+    fontStore.selectFont = async (selector) => {
+      return selector.fontStyle === 'italic' ? italicFont : normalFont;
     };
   });
 

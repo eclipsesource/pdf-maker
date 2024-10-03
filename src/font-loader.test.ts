@@ -135,12 +135,11 @@ describe('font-loader', () => {
 
     beforeEach(() => {
       testFont = fakeFont('Test');
-      fontLoader = {
-        loadFont: vi.fn(async (selector: FontSelector) => {
-          if (selector.fontFamily === 'Test') return testFont;
-          throw new Error('No such font defined');
-        }) as any,
-      } as FontLoader;
+      fontLoader = new FontLoader([]);
+      fontLoader.loadFont = vi.fn(async (selector: FontSelector) => {
+        if (selector.fontFamily === 'Test') return testFont;
+        throw new Error('No such font defined');
+      });
       vi.spyOn(fontkit, 'create').mockReturnValue({ fake: true } as any);
     });
 
