@@ -3,7 +3,7 @@
     "module": "NodeNext",
     "target": "ES6",
     "lib": ["ES2021", "DOM"],
-    "outDir": "dist",
+    "outDir": "build",
     "paths": {
       "src/*": ["./src/*"]
     },
@@ -20,5 +20,5 @@
     "stripInternal": true
   },
   "include": ["src/**/*.ts", "src/**/*.d.ts"],
-  "exclude": ["node_modules", "dist", "src/**/test/", "src/**/*.test.ts"]
+  "exclude": ["node_modules", "dist"]
 }

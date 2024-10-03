@@ -4,8 +4,4 @@
 !LICENSE.*
 !CHANGELOG.*
 !README.*
-
-!dist/*.js
-!dist/*.js.map
-!dist/index.d.ts
-!dist/api/*.d.ts
+!dist/**/*
