@@ -100,7 +100,7 @@ export function dynamic<T = unknown>(
       try {
         return asType(result, type);
       } catch (error) {
-        const errorStr = error instanceof Error ? error.message ?? String(error) : String(error);
+        const errorStr = error instanceof Error ? (error.message ?? String(error)) : String(error);
         throw new Error(`${subject} returned invalid value: ${errorStr}`);
       }
     };
@@ -112,7 +112,7 @@ function safeCall(fn: (...params: unknown[]) => unknown, args: unknown[], subjec
     return fn(...args);
   } catch (error: unknown) {
     const errorStr =
-      error instanceof Error ? error.stack ?? error.message ?? String(error) : String(error);
+      error instanceof Error ? (error.stack ?? error.message ?? String(error)) : String(error);
     throw new Error(`${subject} threw: ${errorStr}`);
   }
 }
