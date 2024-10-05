@@ -9,6 +9,9 @@ Minimum requirements bumped to Node 20 and npm 10.
 - The functions `line()`, `rect()`, `circle()`, and `path()` to create
   graphics shapes with less code and better tool support.
 
+- The function `span()` to create text spans with less code and better
+  tool support.
+
 ### Deprecated
 
 - `TextAttrs` in favor of `TextProps`.

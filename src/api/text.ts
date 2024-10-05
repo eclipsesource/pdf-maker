@@ -13,6 +13,20 @@ export type Text = string | TextSpan | TextSpan[];
 export type TextSpan = { text: string | TextSpan | (string | TextSpan)[] } & TextProps;
 
 /**
+ * Creates a span of text with the given text and properties.
+ *
+ * @param text The text to display in this span.
+ * @param props Optional properties for the span.
+ */
+export function span(text: string | TextSpan | (string | TextSpan)[], props?: TextProps): TextSpan {
+  const unwrappedText = Array.isArray(text) && text.length === 1 ? text[0] : text;
+  if (typeof unwrappedText === 'string' || Array.isArray(unwrappedText)) {
+    return { ...props, text: unwrappedText };
+  }
+  return { ...props, ...unwrappedText };
+}
+
+/**
  * The font weight is an integer between 0 and 1000. The keywords
  * `normal` (400) and `bold` (700) are also supported.
  */
