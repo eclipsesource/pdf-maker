@@ -1,12 +1,8 @@
-import crypto from 'node:crypto';
-
-import type { PDFStream } from 'pdf-lib';
+import type { PDFArray, PDFStream } from 'pdf-lib';
 import { PDFDict, PDFDocument, PDFHexString, PDFName, PDFString } from 'pdf-lib';
 import { describe, expect, it } from 'vitest';
 
 import { renderDocument } from './render-document.ts';
-
-global.crypto ??= (crypto as any).webcrypto;
 
 describe('render-document', () => {
   describe('renderDocument', () => {
@@ -43,6 +39,18 @@ describe('render-document', () => {
       expect(getInfo('CreationDate')).toEqual(PDFString.fromDate(new Date(23)));
       expect(getInfo('foo')).toEqual(PDFHexString.fromText('foo-value'));
       expect(getInfo('bar')).toEqual(PDFHexString.fromText('bar-value'));
+    });
+
+    it('generates file ID', async () => {
+      const def = { content: [] };
+
+      const pdfData = await renderDocument(def, []);
+
+      const pdfDoc = await PDFDocument.load(pdfData, { updateMetadata: false });
+      const fileId = pdfDoc.context.lookup(pdfDoc.context.trailerInfo.ID) as PDFArray;
+      expect(fileId.size()).toBe(2);
+      expect(fileId.get(0).toString()).toMatch(/^<[0-9A-F]{64}>$/);
+      expect(fileId.get(1).toString()).toMatch(/^<[0-9A-F]{64}>$/);
     });
 
     it('renders custom data', async () => {

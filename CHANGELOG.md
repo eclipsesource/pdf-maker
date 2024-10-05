@@ -2,6 +2,8 @@
 
 ## [0.5.5] - Unreleased
 
+Minimum requirements bumped to Node 20 and npm 10.
+
 ### Deprecated
 
 - `TextAttrs` in favor of `TextProps`.

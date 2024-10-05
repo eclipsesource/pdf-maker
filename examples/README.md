@@ -32,39 +32,11 @@ If you're using [Deno], you can skip this step.
 
 ## Run the examples
 
-### Node
-
-Node.js does not yet expose the [WebCrypto API] in the global scope.
-Since PDF Maker uses this API, the `--experimental-global-webcrypto`
-flag must be used:
-
 ```sh
-$ node --experimental-global-webcrypto src/hello-world.js
-```
-
-Alternatively, you can expose the API in the global scope yourself:
-
-```js
-import * as crypto from 'crypto';
-global.crypto ??= crypto;
-```
-
-Also note that Node.js still relies on the `module: true` flag in the
-`package.json` file to enable ESM mode.
-
-### Bun
-
-[Bun] works out of the box:
-
-```sh
+$ node src/hello-world.js
+# OR
 $ bun run src/hello-world.js
-```
-
-### Deno
-
-[Deno] works out of the box:
-
-```sh
+# OR
 $ deno run --allow-read --allow-write src/hello-world.js
 ```
 
@@ -80,4 +52,3 @@ $ bun run --watch src/hello-world.js
 [Node]: https://nodejs.org/en/
 [Bun]: https://bun.sh/
 [Deno]: https://deno.land/
-[WebCrypto API]: https://developer.mozilla.org/en-US/docs/Web/API/Web_Crypto_API

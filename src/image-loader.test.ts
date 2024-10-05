@@ -1,4 +1,3 @@
-import crypto from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
@@ -6,8 +5,6 @@ import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { ImageLoader, ImageStore } from './image-loader.ts';
 import type { ImageSelector } from './images.ts';
-
-global.crypto ??= (crypto as any).webcrypto;
 
 describe('image-loader', () => {
   let libertyJpg: Uint8Array;

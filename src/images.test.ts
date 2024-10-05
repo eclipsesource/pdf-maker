@@ -1,4 +1,3 @@
-import crypto from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
@@ -7,8 +6,6 @@ import { describe, expect, it } from 'vitest';
 import type { Image } from './images.ts';
 import { readImages, registerImage } from './images.ts';
 import { fakePDFDocument, mkData } from './test/test-utils.ts';
-
-global.crypto ??= (crypto as any).webcrypto;
 
 describe('images', () => {
   describe('readImages', () => {
