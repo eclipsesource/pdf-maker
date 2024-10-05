@@ -23,9 +23,25 @@ export type Line = {
    * The y coordinate of the end point of the line.
    */
   y2: number;
-} & LineOpts;
+} & LineProps;
 
-export type LineOpts = Omit<LineProps, 'lineJoin'> & TransformProps;
+export type LineProps = Omit<StrokeProps, 'lineJoin'> & TransformProps;
+
+/** @deprecated Use `LineProps` instead. */
+export type LineOpts = LineProps;
+
+/**
+ * Creates a line with the given coordinates and properties.
+ *
+ * @param x1 The x coordinate of the start of the line.
+ * @param y1 The y coordinate of the start of the line.
+ * @param x2 The x coordinate of the end of the line.
+ * @param y2 The y coordinate of the end of the line.
+ * @param props Optional properties for the line.
+ */
+export function line(x1: number, y1: number, x2: number, y2: number, props?: LineProps): Line {
+  return { ...props, type: 'line', x1, y1, x2, y2 };
+}
 
 /**
  * A rectangle.
@@ -48,9 +64,25 @@ export type Rect = {
    * The height of the rectangle.
    */
   height: number;
-} & RectOpts;
+} & RectProps;
 
-export type RectOpts = Omit<LineProps, 'lineCap'> & FillProps & TransformProps;
+export type RectProps = Omit<StrokeProps, 'lineCap'> & FillProps & TransformProps;
+
+/** @deprecated Use `RectProps` instead. */
+export type RectOpts = RectProps;
+
+/**
+ * Creates a rectangle with the given coordinates and properties.
+ *
+ * @param x The x coordinate of the top left corner of the rectangle.
+ * @param y The y coordinate of the top left corner of the rectangle.
+ * @param width The width of the rectangle.
+ * @param height The height of the rectangle.
+ * @param props Optional properties for the rectangle.
+ */
+export function rect(x: number, y: number, width: number, height: number, props?: RectProps): Rect {
+  return { ...props, type: 'rect', x, y, width, height };
+}
 
 /**
  * A circle.
@@ -69,9 +101,24 @@ export type Circle = {
    * The radius of the circle.
    */
   r: number;
-} & CircleOpts;
+} & CircleProps;
 
-export type CircleOpts = Omit<LineProps, 'lineCap' | 'lineJoin'> & FillProps & TransformProps;
+export type CircleProps = Omit<StrokeProps, 'lineCap' | 'lineJoin'> & FillProps & TransformProps;
+
+/** @deprecated Use `CircleProps` instead. */
+export type CircleOpts = CircleProps;
+
+/**
+ * Creates a circle with the given center, radius, and properties.
+ *
+ * @param cx The x coordinate of the center of the circle.
+ * @param cy The y coordinate of the center of the circle.
+ * @param r The radius of the circle.
+ * @param props Optional properties for the circle.
+ */
+export function circle(cx: number, cy: number, r: number, props?: CircleProps): Circle {
+  return { ...props, type: 'circle', cx, cy, r };
+}
 
 /**
  * An SVG path element.
@@ -82,9 +129,22 @@ export type Path = {
    * An SVG path. See https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/d for details.
    */
   d: string;
-} & PathOpts;
+} & PathProps;
 
-export type PathOpts = LineProps & FillProps & TransformProps;
+export type PathProps = StrokeProps & FillProps & TransformProps;
+
+/** @deprecated Use `PathProps` instead. */
+export type PathOpts = PathProps;
+
+/**
+ * Creates a path with the given path data and properties.
+ *
+ * @param d The path data. See https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/d for details.
+ * @param props Optional properties for the path.
+ */
+export function path(d: string, props?: PathProps): Path {
+  return { ...props, type: 'path', d };
+}
 
 /**
  * A polyline, i.e. a line consisting of multiple segments.
@@ -102,12 +162,13 @@ export type Polyline = {
   closePath?: boolean;
 } & PolyLineOpts;
 
-export type PolyLineOpts = LineProps & FillProps & TransformProps;
+/** @deprecated  Use `Path` instead of `PolyLine`. */
+export type PolyLineOpts = StrokeProps & FillProps & TransformProps;
 
 export type LineCap = 'butt' | 'round' | 'square';
 export type LineJoin = 'miter' | 'round' | 'bevel';
 
-type LineProps = {
+type StrokeProps = {
   /**
    * The width of stroked lines in pt.
    */

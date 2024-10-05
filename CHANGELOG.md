@@ -4,6 +4,11 @@
 
 Minimum requirements bumped to Node 20 and npm 10.
 
+### Added
+
+- The functions `line()`, `rect()`, `circle()`, and `path()` to create
+  graphics shapes with less code and better tool support.
+
 ### Deprecated
 
 - `TextAttrs` in favor of `TextProps`.
@@ -11,6 +16,10 @@ Minimum requirements bumped to Node 20 and npm 10.
 - `InfoAttrs` in favor of `InfoProps`.
 - `CustomInfoAttrs` in favor of `CustomInfoProps`.
 - `Text` in favor of `TextSpan`.
+- `LineOpts` in favor of `StrokeProps`.
+- `RectOpts` in favor of `RectProps`.
+- `CircleOpts` in favor of `CircleProps`.
+- `PathOpts` in favor of `PathProps`.
 
 ## [0.5.4] - 2024-02-25
 
