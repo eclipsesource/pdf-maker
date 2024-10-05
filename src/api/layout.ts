@@ -24,6 +24,21 @@ export type TextBlock = {
   BlockProps;
 
 /**
+ * Creates a text block. The text can contain nested text spans to apply
+ * different text properties to different parts of the text. Use
+ * `span()` to create text spans.
+ *
+ * @param text The text to display in this block.
+ * @param props Optional properties for the block.
+ */
+export function text(
+  text: string | TextSpan | (string | TextSpan)[],
+  props?: Omit<TextBlock, 'text'>,
+): TextBlock {
+  return { ...props, text };
+}
+
+/**
  * A block that contains an image.
  */
 export type ImageBlock = {
@@ -50,6 +65,16 @@ export type ImageBlock = {
 } & BlockProps;
 
 /**
+ * Creates a block that contains an image.
+ *
+ * @param image The name or path of an image to display in this block.
+ * @param props Optional properties for the block.
+ */
+export function image(image: string, props?: Omit<ImageBlock, 'image'>): ImageBlock {
+  return { ...props, image };
+}
+
+/**
  * A block that contains other blocks arranged horizontally.
  */
 export type ColumnsBlock = {
@@ -59,6 +84,16 @@ export type ColumnsBlock = {
   columns: Block[];
 } & TextProps &
   BlockProps;
+
+/**
+ * Creates a block that contains other blocks arranged horizontally.
+ *
+ * @param columns Content blocks to arrange horizontally.
+ * @param props Optional properties for the block.
+ */
+export function columns(columns: Block[], props?: Omit<ColumnsBlock, 'columns'>): ColumnsBlock {
+  return { ...props, columns };
+}
 
 /**
  * A block that contains other blocks arranged vertically.
@@ -82,6 +117,16 @@ export type RowsBlock = {
   insertAfterBreak?: Block | (() => Block);
 } & TextProps &
   BlockProps;
+
+/**
+ * Creates a block that contains other blocks arranged vertically.
+ *
+ * @param rows Content blocks to arrange vertically.
+ * @param props Optional properties for the block.
+ */
+export function rows(rows: Block[], props?: Omit<RowsBlock, 'rows'>): RowsBlock {
+  return { ...props, rows };
+}
 
 /**
  * A block that doesn't contain any content. It can be used to include

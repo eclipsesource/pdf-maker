@@ -12,6 +12,9 @@ Minimum requirements bumped to Node 20 and npm 10.
 - The function `span()` to create text spans with less code and better
   tool support.
 
+- The functions `text()`, `image()`, `rows()`, and `columns()` to create
+  blocks with less code and better tool support.
+
 ### Deprecated
 
 - `TextAttrs` in favor of `TextProps`.
