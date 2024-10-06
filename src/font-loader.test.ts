@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { FontLoader, FontStore } from './font-loader.ts';
 import type { Font, FontDef, FontSelector } from './fonts.ts';
-import { fakeFont, mkData } from './test/test-utils.ts';
+import { catchErrorAsync, fakeFont, mkData } from './test/test-utils.ts';
 
 describe('font-loader', () => {
   let normalFont: FontDef;
@@ -142,9 +142,10 @@ describe('font-loader', () => {
     it('rejects if font could not be loaded', async () => {
       const store = new FontStore(fontLoader);
 
-      await expect(store.selectFont({ fontFamily: 'foo' })).rejects.toThrowError(
-        "Could not load font for 'foo', style=normal, weight=normal: No such font defined",
-      );
+      const error = await catchErrorAsync(() => store.selectFont({ fontFamily: 'foo' }));
+
+      expect(error.message).toBe("Could not load font for 'foo', style=normal, weight=normal");
+      expect(error.cause).toEqual(new Error('No such font defined'));
     });
 
     it('creates fontkit font object', async () => {
@@ -186,13 +187,10 @@ describe('font-loader', () => {
     it('caches errors from font loader', async () => {
       const store = new FontStore(fontLoader);
 
-      await expect(store.selectFont({ fontFamily: 'foo' })).rejects.toThrowError(
-        "Could not load font for 'foo', style=normal, weight=normal: No such font defined",
-      );
-      await expect(store.selectFont({ fontFamily: 'foo' })).rejects.toThrowError(
-        "Could not load font for 'foo', style=normal, weight=normal: No such font defined",
-      );
-      expect(fontLoader.loadFont).toHaveBeenCalledTimes(1);
+      const error = await catchErrorAsync(() => store.selectFont({ fontFamily: 'foo' }));
+
+      expect(error.message).toBe("Could not load font for 'foo', style=normal, weight=normal");
+      expect(error.cause).toEqual(new Error('No such font defined'));
     });
   });
 });

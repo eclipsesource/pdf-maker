@@ -111,9 +111,7 @@ export class FontStore {
     } catch (error) {
       const { fontFamily: family, fontStyle: style, fontWeight: weight } = selector;
       const selectorStr = `'${family}', style=${style ?? 'normal'}, weight=${weight ?? 'normal'}`;
-      throw new Error(
-        `Could not load font for ${selectorStr}: ${(error as Error)?.message ?? error}`,
-      );
+      throw new Error(`Could not load font for ${selectorStr}`, { cause: error });
     }
     const fkFont = fontkit.create(loadedFont.data);
     return pickDefined({

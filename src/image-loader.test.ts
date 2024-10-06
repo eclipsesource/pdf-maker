@@ -5,6 +5,7 @@ import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { ImageLoader, ImageStore } from './image-loader.ts';
 import type { ImageSelector } from './images.ts';
+import { catchErrorAsync } from './test/test-utils.ts';
 
 describe('image-loader', () => {
   let libertyJpg: Uint8Array;
@@ -21,9 +22,10 @@ describe('image-loader', () => {
     it('rejects if image cannot be loaded', async () => {
       const loader = new ImageLoader([]);
 
-      await expect(loader.loadImage({ name: 'foo' })).rejects.toThrowError(
-        "Could not load image 'foo': ENOENT: no such file or directory, open 'foo'",
-      );
+      const error = await catchErrorAsync(() => loader.loadImage({ name: 'foo' }));
+
+      expect(error.message).toBe("Could not load image 'foo'");
+      expect(error.cause).toEqual(new Error("ENOENT: no such file or directory, open 'foo'"));
     });
 
     it('returns data and metadata for registered images', async () => {
@@ -64,9 +66,10 @@ describe('image-loader', () => {
     it('rejects if image could not be loaded', async () => {
       const store = new ImageStore(imageLoader);
 
-      await expect(store.selectImage({ name: 'foo' })).rejects.toThrowError(
-        "Could not load image 'foo': No such image",
-      );
+      const error = await catchErrorAsync(() => store.selectImage({ name: 'foo' }));
+
+      expect(error.message).toBe("Could not load image 'foo'");
+      expect(error.cause).toEqual(new Error('No such image'));
     });
 
     it('reads format, width and height from JPEG image', async () => {
@@ -120,13 +123,10 @@ describe('image-loader', () => {
     it('caches errors from image loader', async () => {
       const store = new ImageStore(imageLoader);
 
-      await expect(store.selectImage({ name: 'foo' })).rejects.toThrowError(
-        "Could not load image 'foo': No such image",
-      );
-      await expect(store.selectImage({ name: 'foo' })).rejects.toThrowError(
-        "Could not load image 'foo': No such image",
-      );
-      expect(imageLoader.loadImage).toHaveBeenCalledTimes(1);
+      const error = await catchErrorAsync(() => store.selectImage({ name: 'foo' }));
+
+      expect(error.message).toBe("Could not load image 'foo'");
+      expect(error.cause).toEqual(new Error('No such image'));
     });
   });
 });

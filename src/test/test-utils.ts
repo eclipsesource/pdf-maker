@@ -1,5 +1,6 @@
 import type { PDFDocument, PDFFont, PDFPage } from 'pdf-lib';
 import { PDFContext, PDFName, PDFRef } from 'pdf-lib';
+import { printValue } from 'src/print-value.ts';
 
 import type { Font } from '../fonts.ts';
 import { weightToNumber } from '../fonts.ts';
@@ -124,4 +125,36 @@ export function getContentStream(page: Page) {
 
 export function mkData(value: string) {
   return new Uint8Array(value.split('').map((c) => c.charCodeAt(0)));
+}
+
+export function catchError(fn: (...args: any[]) => any): Error {
+  const result = { value: undefined as unknown };
+  try {
+    result.value = fn();
+    throw result;
+  } catch (error) {
+    if (error instanceof Error) {
+      return error;
+    }
+    if (error === result) {
+      throw new Error(`Expected function to throw, but it returned ${printValue(result.value)}`);
+    }
+    throw new Error(`Expected function to throw Error, but it threw ${printValue(error)}`);
+  }
+}
+
+export async function catchErrorAsync(fn: (...args: any[]) => any): Promise<Error> {
+  const result = { value: undefined as unknown };
+  try {
+    result.value = await fn();
+    throw result;
+  } catch (error) {
+    if (error instanceof Error) {
+      return error;
+    }
+    if (error === result) {
+      throw new Error(`Expected function to throw, but it returned ${printValue(result.value)}`);
+    }
+    throw new Error(`Expected function to throw Error, but it threw ${printValue(error)}`);
+  }
 }

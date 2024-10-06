@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
+import { catchError } from './test/test-utils.ts';
 import {
   dynamic,
   isObject,
@@ -190,11 +191,10 @@ describe('types', () => {
       });
 
       it('throws when function returns invalid value', () => {
-        const resolve = validate(() => 23);
+        const error = catchError(validate(() => 23));
 
-        expect(() => resolve()).toThrowError(
-          'Supplied function for "test" returned invalid value: Expected string, got: 23',
-        );
+        expect(error.message).toBe('Supplied function for "test" returned invalid value');
+        expect(error.cause).toEqual(new Error('Expected string, got: 23'));
       });
 
       it('throws when function throws', () => {
@@ -202,9 +202,10 @@ describe('types', () => {
           throw new Error('test error');
         });
 
-        expect(() => resolve()).toThrowError(
-          'Supplied function for "test" threw: Error: test error',
-        );
+        const error = catchError(resolve);
+
+        expect(error.message).toBe('Supplied function for "test" threw error');
+        expect(error.cause).toEqual(new Error('test error'));
       });
     });
   });
