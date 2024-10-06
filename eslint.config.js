@@ -19,7 +19,7 @@ export default tseslint.config(
       'simple-import-sort': simpleImportSortPlugin,
     },
     languageOptions: {
-      ecmaVersion: 2021,
+      ecmaVersion: 2022,
       sourceType: 'module',
     },
     rules: {

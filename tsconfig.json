@@ -2,7 +2,7 @@
   "compilerOptions": {
     "module": "NodeNext",
     "target": "ES6",
-    "lib": ["ES2021", "DOM"],
+    "lib": ["ES2022", "DOM"],
     "outDir": "build",
     "paths": {
       "src/*": ["./src/*"]
