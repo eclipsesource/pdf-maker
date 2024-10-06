@@ -47,6 +47,9 @@ export function readPngInfo(data: Uint8Array): PngInfo {
   if (data[12] !== 0x49 || data[13] !== 0x48 || data[14] !== 0x44 || data[15] !== 0x52) {
     throw new Error('Invalid PNG data');
   }
+  if (data.length < 33) {
+    throw new Error('Invalid PNG data');
+  }
   const width = readUint32BE(data, 16);
   const height = readUint32BE(data, 20);
   const bitDepth = data[24];

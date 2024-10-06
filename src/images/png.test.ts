@@ -35,5 +35,27 @@ describe('png', () => {
         isInterlaced: false,
       });
     });
+
+    it('throws if PNG signature is missing', () => {
+      const data = new Uint8Array(40);
+      data.set([0x49, 0x48, 0x44, 0x52], 12); // IHDR chunk
+
+      expect(() => readPngInfo(data)).toThrow('Invalid PNG data');
+    });
+
+    it('throws if IHDR chunk is missing', () => {
+      const data = new Uint8Array(40);
+      data.set([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]); // PNG signature
+
+      expect(() => readPngInfo(data)).toThrow('Invalid PNG data');
+    });
+
+    it('throws if too short', () => {
+      const data = new Uint8Array(32);
+      data.set([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]); // PNG signature
+      data.set([0x49, 0x48, 0x44, 0x52], 12); // IHDR chunk
+
+      expect(() => readPngInfo(data)).toThrow('Invalid PNG data');
+    });
   });
 });
