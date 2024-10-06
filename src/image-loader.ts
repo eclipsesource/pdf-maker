@@ -28,9 +28,7 @@ export class ImageLoader {
       data = await readFile(selector.name);
       return { data };
     } catch (error) {
-      throw new Error(
-        `Could not load image '${selector.name}': ${(error as Error)?.message ?? error}`,
-      );
+      throw new Error(`Could not load image '${selector.name}'`, { cause: error });
     }
   }
 }
@@ -53,9 +51,7 @@ export class ImageStore {
     try {
       loadedImage = await this.#imageLoader.loadImage(selector);
     } catch (error) {
-      throw new Error(
-        `Could not load image '${selector.name}': ${(error as Error)?.message ?? error}`,
-      );
+      throw new Error(`Could not load image '${selector.name}'`, { cause: error });
     }
     const { data } = loadedImage;
     const format = determineImageFormat(data);

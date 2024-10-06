@@ -50,9 +50,7 @@ export function registerImage(image: Image, pdfDoc: PDFDocument) {
           : JpegEmbedder.for(image.data));
         embedder.embedIntoContext(pdfDoc.context, ref);
       } catch (error) {
-        throw new Error(
-          `Could not embed image "${image.name}": ${(error as Error)?.message ?? error}`,
-        );
+        throw new Error(`Could not embed image "${image.name}"`, { cause: error });
       }
     },
   });

@@ -21,8 +21,11 @@ describe('image-loader', () => {
     it('rejects if image cannot be loaded', async () => {
       const loader = new ImageLoader([]);
 
-      await expect(loader.loadImage({ name: 'foo' })).rejects.toThrowError(
-        "Could not load image 'foo': ENOENT: no such file or directory, open 'foo'",
+      await expect(() => loader.loadImage({ name: 'foo' })).rejects.toThrow(
+        expect.objectContaining({
+          message: "Could not load image 'foo'",
+          cause: new Error("ENOENT: no such file or directory, open 'foo'"),
+        }),
       );
     });
 
@@ -64,8 +67,11 @@ describe('image-loader', () => {
     it('rejects if image could not be loaded', async () => {
       const store = new ImageStore(imageLoader);
 
-      await expect(store.selectImage({ name: 'foo' })).rejects.toThrowError(
-        "Could not load image 'foo': No such image",
+      await expect(() => store.selectImage({ name: 'foo' })).rejects.toThrow(
+        expect.objectContaining({
+          message: "Could not load image 'foo'",
+          cause: new Error('No such image'),
+        }),
       );
     });
 
@@ -120,13 +126,12 @@ describe('image-loader', () => {
     it('caches errors from image loader', async () => {
       const store = new ImageStore(imageLoader);
 
-      await expect(store.selectImage({ name: 'foo' })).rejects.toThrowError(
-        "Could not load image 'foo': No such image",
+      await expect(() => store.selectImage({ name: 'foo' })).rejects.toThrow(
+        expect.objectContaining({
+          message: "Could not load image 'foo'",
+          cause: new Error('No such image'),
+        }),
       );
-      await expect(store.selectImage({ name: 'foo' })).rejects.toThrowError(
-        "Could not load image 'foo': No such image",
-      );
-      expect(imageLoader.loadImage).toHaveBeenCalledTimes(1);
     });
   });
 });

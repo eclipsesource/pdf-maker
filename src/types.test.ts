@@ -190,10 +190,11 @@ describe('types', () => {
       });
 
       it('throws when function returns invalid value', () => {
-        const resolve = validate(() => 23);
-
-        expect(() => resolve()).toThrowError(
-          'Supplied function for "test" returned invalid value: Expected string, got: 23',
+        expect(validate(() => 23)).toThrow(
+          expect.objectContaining({
+            message: 'Supplied function for "test" returned invalid value',
+            cause: new Error('Expected string, got: 23'),
+          }),
         );
       });
 
@@ -202,8 +203,11 @@ describe('types', () => {
           throw new Error('test error');
         });
 
-        expect(() => resolve()).toThrowError(
-          'Supplied function for "test" threw: Error: test error',
+        expect(resolve).toThrow(
+          expect.objectContaining({
+            message: 'Supplied function for "test" threw error',
+            cause: new Error('test error'),
+          }),
         );
       });
     });
