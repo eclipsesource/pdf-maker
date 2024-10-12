@@ -1,7 +1,7 @@
 import { rgb } from 'pdf-lib';
 import { beforeEach, describe, expect, it } from 'vitest';
 
-import { FontStore } from './font-loader.ts';
+import { FontStore } from './font-store.ts';
 import type { Font } from './fonts.ts';
 import { fakeFont } from './test/test-utils.ts';
 import type { TextSegment } from './text.ts';

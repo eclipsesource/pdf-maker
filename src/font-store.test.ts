@@ -1,7 +1,7 @@
 import fontkit from '@pdf-lib/fontkit';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { FontStore } from './font-loader.ts';
+import { FontStore } from './font-store.ts';
 import type { FontDef } from './fonts.ts';
 import { mkData } from './test/test-utils.ts';
 
