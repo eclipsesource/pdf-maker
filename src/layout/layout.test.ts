@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 
 import { paperSizes } from '../api/sizes.ts';
 import type { Box } from '../box.ts';
-import { FontLoader, FontStore } from '../font-loader.ts';
+import { FontStore } from '../font-loader.ts';
 import type { MakerCtx } from '../maker-ctx.ts';
 import type { Block, TextAttrs, TextSpan } from '../read-block.ts';
 import type { PageInfo } from '../read-document.ts';
@@ -17,8 +17,8 @@ describe('layout', () => {
   let box: Box;
 
   beforeEach(() => {
-    const fontStore = new FontStore(new FontLoader([]));
-    fontStore.loadFont = () => Promise.resolve(fakeFont('Test'));
+    const fontStore = new FontStore([]);
+    fontStore._loadFont = () => Promise.resolve(fakeFont('Test'));
     ctx = { fontStore } as MakerCtx;
     box = { x: 20, y: 30, width: 400, height: 700 };
   });

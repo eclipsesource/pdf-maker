@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import type { Box } from '../box.ts';
-import { FontLoader, FontStore } from '../font-loader.ts';
+import { FontStore } from '../font-loader.ts';
 import type { MakerCtx } from '../maker-ctx.ts';
 import type { Block } from '../read-block.ts';
 import { fakeFont, span } from '../test/test-utils.ts';
@@ -12,7 +12,7 @@ describe('layout-columns', () => {
   let box: Box;
 
   beforeEach(() => {
-    const fontStore = new FontStore(new FontLoader([]));
+    const fontStore = new FontStore([]);
     fontStore.selectFont = () => {
       return Promise.resolve(fakeFont('Test'));
     };
