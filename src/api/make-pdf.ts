@@ -1,4 +1,4 @@
-import { FontStore } from '../font-loader.ts';
+import { FontStore } from '../font-store.ts';
 import { ImageLoader, ImageStore } from '../image-loader.ts';
 import { layoutPages } from '../layout/layout.ts';
 import { readDocumentDefinition } from '../read-document.ts';

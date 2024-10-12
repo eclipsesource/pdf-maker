@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import type { Box } from '../box.ts';
-import { FontStore } from '../font-loader.ts';
+import { FontStore } from '../font-store.ts';
 import type { MakerCtx } from '../maker-ctx.ts';
 import type { Block } from '../read-block.ts';
 import { fakeFont, span } from '../test/test-utils.ts';
