@@ -4,5 +4,4 @@ build/
 dist/
 out/
 coverage/
-*.local
 package-lock.json
