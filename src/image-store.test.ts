@@ -22,9 +22,7 @@ describe('image-loader', () => {
     it('rejects if image could not be loaded', async () => {
       const store = new ImageStore([]);
 
-      await expect(store.selectImage({ name: 'foo' })).rejects.toThrow(
-        "Could not load image 'foo'",
-      );
+      await expect(store.selectImage('foo')).rejects.toThrow("Could not load image 'foo'");
     });
 
     it('loads registered images', async () => {
@@ -33,8 +31,8 @@ describe('image-loader', () => {
         { name: 'torus', data: torusPng, format: 'png' },
       ]);
 
-      const torus = await store.selectImage({ name: 'torus' });
-      const liberty = await store.selectImage({ name: 'liberty' });
+      const torus = await store.selectImage('torus');
+      const liberty = await store.selectImage('liberty');
 
       expect(torus).toEqual(expect.objectContaining({ name: 'torus', data: torusPng }));
       expect(liberty).toEqual(expect.objectContaining({ name: 'liberty', data: libertyJpg }));
@@ -44,7 +42,7 @@ describe('image-loader', () => {
       const store = new ImageStore([]);
 
       const torusPath = join(baseDir, './test/resources/torus.png');
-      const image = await store.selectImage({ name: torusPath });
+      const image = await store.selectImage(torusPath);
 
       expect(image).toEqual(expect.objectContaining({ name: torusPath, data: torusPng }));
     });
@@ -52,7 +50,7 @@ describe('image-loader', () => {
     it('reads format, width and height from JPEG image', async () => {
       const store = new ImageStore([{ name: 'liberty', data: libertyJpg, format: 'jpeg' }]);
 
-      const image = await store.selectImage({ name: 'liberty' });
+      const image = await store.selectImage('liberty');
 
       expect(image).toEqual({
         name: 'liberty',
@@ -66,7 +64,7 @@ describe('image-loader', () => {
     it('reads format, width and height from PNG image', async () => {
       const store = new ImageStore([{ name: 'torus', data: torusPng, format: 'png' }]);
 
-      const image = await store.selectImage({ name: 'torus' });
+      const image = await store.selectImage('torus');
 
       expect(image).toEqual({
         name: 'torus',
@@ -81,8 +79,8 @@ describe('image-loader', () => {
       const store = new ImageStore([{ name: 'liberty', data: libertyJpg, format: 'jpeg' }]);
 
       const [image1, image2] = await Promise.all([
-        store.selectImage({ name: 'liberty' }),
-        store.selectImage({ name: 'liberty' }),
+        store.selectImage('liberty'),
+        store.selectImage('liberty'),
       ]);
 
       expect(image1).toBe(image2);

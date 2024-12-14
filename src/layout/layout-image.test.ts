@@ -2,7 +2,6 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { Box } from '../box.ts';
 import { ImageStore } from '../image-store.ts';
-import type { ImageSelector } from '../images.ts';
 import type { MakerCtx } from '../maker-ctx.ts';
 import type { ImageBlock } from '../read-block.ts';
 import { fakeImage } from '../test/test-utils.ts';
@@ -14,12 +13,12 @@ describe('layout-image', () => {
 
   beforeEach(() => {
     const imageStore = new ImageStore([]);
-    imageStore.selectImage = vi.fn((selector: ImageSelector) => {
-      const match = /^img-(\d+)-(\d+)$/.exec(selector.name);
+    imageStore.selectImage = vi.fn((selector: string) => {
+      const match = /^img-(\d+)-(\d+)$/.exec(selector);
       if (match) {
-        return Promise.resolve(fakeImage(selector.name, Number(match[1]), Number(match[2])));
+        return Promise.resolve(fakeImage(selector, Number(match[1]), Number(match[2])));
       }
-      throw new Error(`Unknown image: ${selector.name}`);
+      throw new Error(`Unknown image: ${selector}`);
     });
     box = { x: 20, y: 30, width: 400, height: 700 };
     ctx = { imageStore } as MakerCtx;
@@ -48,8 +47,7 @@ describe('layout-image', () => {
 
       await layoutImageContent(block, box, ctx);
 
-      const selector = { name: 'img-720-480', width: 30, height: 40 };
-      expect(ctx.imageStore.selectImage).toHaveBeenCalledWith(selector);
+      expect(ctx.imageStore.selectImage).toHaveBeenCalledWith('img-720-480');
     });
 
     ['img-720-480', 'img-72-48'].forEach((image) => {

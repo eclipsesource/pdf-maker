@@ -22,10 +22,6 @@ export type Image = {
   pdfRef?: PDFRef;
 };
 
-export type ImageSelector = {
-  name: string;
-};
-
 export function readImages(input: unknown): ImageDef[] {
   return Object.entries(readObject(input)).map(([name, imageDef]) => {
     const { data, format } = readAs(imageDef, name, required(readImage));
