@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { Box } from '../box.ts';
-import { ImageStore } from '../image-loader.ts';
+import { ImageStore } from '../image-store.ts';
 import type { ImageSelector } from '../images.ts';
 import type { MakerCtx } from '../maker-ctx.ts';
 import type { ImageBlock } from '../read-block.ts';

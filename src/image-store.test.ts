@@ -3,7 +3,7 @@ import { join } from 'node:path';
 
 import { beforeAll, describe, expect, it } from 'vitest';
 
-import { ImageStore } from './image-loader.ts';
+import { ImageStore } from './image-store.ts';
 
 const baseDir = import.meta.dirname;
 

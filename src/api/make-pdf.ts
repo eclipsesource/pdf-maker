@@ -1,5 +1,5 @@
 import { FontStore } from '../font-store.ts';
-import { ImageStore } from '../image-loader.ts';
+import { ImageStore } from '../image-store.ts';
 import { layoutPages } from '../layout/layout.ts';
 import { readDocumentDefinition } from '../read-document.ts';
 import { renderDocument } from '../render/render-document.ts';
