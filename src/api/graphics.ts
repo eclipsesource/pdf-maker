@@ -168,7 +168,7 @@ export type PolyLineOpts = StrokeProps & FillProps & TransformProps;
 export type LineCap = 'butt' | 'round' | 'square';
 export type LineJoin = 'miter' | 'round' | 'bevel';
 
-type StrokeProps = {
+export type StrokeProps = {
   /**
    * The width of stroked lines in pt.
    */
@@ -213,7 +213,7 @@ type StrokeProps = {
   lineDash?: number[];
 };
 
-type FillProps = {
+export type FillProps = {
   /**
    * The color to use for filling the shape.
    */
@@ -224,7 +224,7 @@ type FillProps = {
   fillOpacity?: number;
 };
 
-type TransformProps = {
+export type TransformProps = {
   /**
    * Moves the element by `x` and `y`.
    */
