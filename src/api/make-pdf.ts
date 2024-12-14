@@ -1,5 +1,5 @@
 import { FontStore } from '../font-store.ts';
-import { ImageLoader, ImageStore } from '../image-loader.ts';
+import { ImageStore } from '../image-loader.ts';
 import { layoutPages } from '../layout/layout.ts';
 import { readDocumentDefinition } from '../read-document.ts';
 import { renderDocument } from '../render/render-document.ts';
@@ -15,8 +15,7 @@ import type { DocumentDefinition } from './document.ts';
 export async function makePdf(definition: DocumentDefinition): Promise<Uint8Array> {
   const def = readAs(definition, 'definition', readDocumentDefinition);
   const fontStore = new FontStore(def.fonts ?? []);
-  const imageLoader = new ImageLoader(def.images ?? []);
-  const imageStore = new ImageStore(imageLoader);
+  const imageStore = new ImageStore(def.images ?? []);
   const guides = !!def.dev?.guides;
   const ctx = { fontStore, imageStore, guides };
   const pages = await layoutPages(def, ctx);

@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { Box } from '../box.ts';
-import { ImageLoader, ImageStore } from '../image-loader.ts';
+import { ImageStore } from '../image-loader.ts';
 import type { ImageSelector } from '../images.ts';
 import type { MakerCtx } from '../maker-ctx.ts';
 import type { ImageBlock } from '../read-block.ts';
@@ -13,7 +13,7 @@ describe('layout-image', () => {
   let ctx: MakerCtx;
 
   beforeEach(() => {
-    const imageStore = new ImageStore(new ImageLoader([]));
+    const imageStore = new ImageStore([]);
     imageStore.selectImage = vi.fn((selector: ImageSelector) => {
       const match = /^img-(\d+)-(\d+)$/.exec(selector.name);
       if (match) {

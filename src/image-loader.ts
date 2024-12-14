@@ -6,39 +6,12 @@ import type { Image, ImageDef, ImageFormat, ImageSelector } from './images.ts';
 import { isJpeg, readJpegInfo } from './images/jpeg.ts';
 import { isPng, readPngInfo } from './images/png.ts';
 
-export type LoadedImage = {
-  data: Uint8Array;
-};
-
-export class ImageLoader {
+export class ImageStore {
   readonly #images: ImageDef[];
+  readonly #imageCache: Record<string, Promise<Image>> = {};
 
   constructor(images: ImageDef[]) {
     this.#images = images;
-  }
-
-  async loadImage(selector: ImageSelector): Promise<LoadedImage> {
-    const imageDef = this.#images.find((image) => image.name === selector.name);
-    let data: Uint8Array;
-    if (imageDef) {
-      data = toUint8Array(imageDef.data);
-      return { data };
-    }
-    try {
-      data = await readFile(selector.name);
-      return { data };
-    } catch (error) {
-      throw new Error(`Could not load image '${selector.name}'`, { cause: error });
-    }
-  }
-}
-
-export class ImageStore {
-  readonly #imageLoader: ImageLoader;
-  readonly #imageCache: Record<string, Promise<Image>> = {};
-
-  constructor(imageLoader: ImageLoader) {
-    this.#imageLoader = imageLoader;
   }
 
   selectImage(selector: ImageSelector): Promise<Image> {
@@ -47,16 +20,22 @@ export class ImageStore {
   }
 
   async loadImage(selector: ImageSelector): Promise<Image> {
-    let loadedImage: LoadedImage;
-    try {
-      loadedImage = await this.#imageLoader.loadImage(selector);
-    } catch (error) {
-      throw new Error(`Could not load image '${selector.name}'`, { cause: error });
-    }
-    const { data } = loadedImage;
+    const data = await this.loadImageData(selector);
     const format = determineImageFormat(data);
     const { width, height } = format === 'png' ? readPngInfo(data) : readJpegInfo(data);
     return { name: selector.name, format, data, width, height };
+  }
+
+  async loadImageData(selector: ImageSelector): Promise<Uint8Array> {
+    const imageDef = this.#images.find((image) => image.name === selector.name);
+    if (imageDef) {
+      return toUint8Array(imageDef.data);
+    }
+    try {
+      return await readFile(selector.name);
+    } catch (error) {
+      throw new Error(`Could not load image '${selector.name}'`, { cause: error });
+    }
   }
 }
 
