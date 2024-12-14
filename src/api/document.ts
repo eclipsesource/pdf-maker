@@ -54,6 +54,8 @@ export type DocumentDefinition = {
   /**
    * The fonts to use in the document. There is no default. Each font that is used in the document
    * must be registered. Not needed for documents that contain only graphics.
+   *
+   * @deprecated Register fonts with `PdfMaker` instead.
    */
   fonts?: FontsDefinition;
 
@@ -153,11 +155,15 @@ export type CustomInfoProps = {
 
 /**
  * An object that defines the fonts to use in the document.
+ *
+ * @deprecated Register fonts with `PdfMaker` instead.
  */
 export type FontsDefinition = { [name: string]: FontDefinition[] };
 
 /**
  * The definition of a single font.
+ *
+ * @deprecated Register fonts with `PdfMaker` instead.
  */
 export type FontDefinition = {
   /**

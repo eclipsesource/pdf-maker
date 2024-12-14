@@ -1,17 +1,27 @@
 import fontkit from '@pdf-lib/fontkit';
 import { toUint8Array } from 'pdf-lib';
 
-import type { FontWeight } from './api/text.ts';
+import type { FontConfig } from './api/PdfMaker.ts';
+import type { FontStyle, FontWeight } from './api/text.ts';
 import type { Font, FontDef, FontSelector } from './fonts.ts';
 import { weightToNumber } from './fonts.ts';
 import { pickDefined } from './types.ts';
 
 export class FontStore {
   readonly #fontDefs: FontDef[];
-  readonly #fontCache: Record<string, Promise<Font>> = {};
+  #fontCache: Record<string, Promise<Font>> = {};
 
   constructor(fontDefs: FontDef[]) {
     this.#fontDefs = fontDefs;
+  }
+
+  registerFont(data: Uint8Array, config?: FontConfig): void {
+    const fkFont = fontkit.create(data, config?.name);
+    const family = config?.name ?? fkFont.familyName ?? 'Unknown';
+    const style = config?.style ?? extractStyle(fkFont);
+    const weight = weightToNumber(config?.weight ?? extractWeight(fkFont));
+    this.#fontDefs.push({ family, style, weight, data, fkFont });
+    this.#fontCache = {};
   }
 
   async selectFont(selector: FontSelector): Promise<Font> {
@@ -32,7 +42,7 @@ export class FontStore {
   _loadFont(selector: FontSelector): Promise<Font> {
     const selectedFont = selectFont(this.#fontDefs, selector);
     const data = toUint8Array(selectedFont.data);
-    const fkFont = fontkit.create(data);
+    const fkFont = selectedFont.fkFont ?? fontkit.create(data);
     return Promise.resolve(
       pickDefined({
         name: fkFont.fullName ?? fkFont.postscriptName ?? selectedFont.family,
@@ -108,4 +118,14 @@ function selectFontForWeight(fonts: FontDef[], weight: FontWeight): FontDef | un
     if (font) return font;
   }
   throw new Error(`Could not find font for weight ${weight}`);
+}
+
+function extractStyle(font: fontkit.Font): FontStyle {
+  if (font.italicAngle === 0) return 'normal';
+  if ((font.fullName ?? font.postscriptName)?.toLowerCase().includes('oblique')) return 'oblique';
+  return 'italic';
+}
+
+function extractWeight(font: fontkit.Font): number {
+  return (font['OS/2'] as any)?.usWeightClass ?? 400;
 }

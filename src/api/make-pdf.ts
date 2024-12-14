@@ -11,6 +11,9 @@ import type { DocumentDefinition } from './document.ts';
  *
  * @param definition The definition of the document to generate.
  * @returns The generated PDF document.
+ *
+ * @deprecated Create an instance of `PdfMaker` and call `makePdf` on
+ * that instance.
  */
 export async function makePdf(definition: DocumentDefinition): Promise<Uint8Array> {
   const def = readAs(definition, 'definition', readDocumentDefinition);

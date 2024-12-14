@@ -15,6 +15,17 @@ Minimum requirements bumped to Node 20 and npm 10.
 - The functions `text()`, `image()`, `rows()`, and `columns()` to create
   blocks with less code and better tool support.
 
+- The `PdfMaker` class to render multiple documents with the same
+  font configuration.
+
+  ```ts
+  const pdfMaker = new PdfMaker(config);
+  pdfMaker.registerFont(await readFile('path/to/MyFont.ttf'));
+  pdfMaker.registerFont(await readFile('path/to/MyFont-Bold.ttf'));
+  const pdf1 = await pdfMaker.makePdf(doc1);
+  const pdf2 = await pdfMaker.makePdf(doc2);
+  ```
+
 ### Deprecated
 
 - `TextAttrs` in favor of `TextProps`.
@@ -26,6 +37,9 @@ Minimum requirements bumped to Node 20 and npm 10.
 - `RectOpts` in favor of `RectProps`.
 - `CircleOpts` in favor of `CircleProps`.
 - `PathOpts` in favor of `PathProps`.
+- The `fonts` property in a document definition.
+- The `makePdf` function in favor of the `makePdf` method on the
+  `PdfMaker` class.
 
 ## [0.5.4] - 2024-02-25
 

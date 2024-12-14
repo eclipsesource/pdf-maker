@@ -15,6 +15,7 @@ export type FontDef = {
   style: FontStyle;
   weight: number;
   data: string | Uint8Array | ArrayBuffer;
+  fkFont?: fontkit.Font;
 };
 
 export type Font = {
