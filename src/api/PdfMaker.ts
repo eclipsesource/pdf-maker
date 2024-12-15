@@ -57,8 +57,18 @@ export class PdfMaker {
   async makePdf(definition: DocumentDefinition): Promise<Uint8Array> {
     const def = readAs(definition, 'definition', readDocumentDefinition);
     const ctx = { ...this.#ctx };
-    if (def.fonts) ctx.fontStore = new FontStore(def.fonts);
-    if (def.images) ctx.imageStore = new ImageStore(def.images);
+    if (def.fonts) {
+      ctx.fontStore = new FontStore(def.fonts);
+      console.warn(
+        'Registering fonts via document definition is deprecated. Use PdfMaker.registerFont() instead.',
+      );
+    }
+    if (def.images) {
+      ctx.imageStore = new ImageStore(def.images);
+      console.warn(
+        'Registering images via document definition is deprecated. Use URLs to include images instead.',
+      );
+    }
     if (def.dev?.guides != null) ctx.guides = def.dev.guides;
     const pages = await layoutPages(def, ctx);
     return await renderDocument(def, pages);

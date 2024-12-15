@@ -1,10 +1,5 @@
-import { FontStore } from '../font-store.ts';
-import { ImageStore } from '../image-store.ts';
-import { layoutPages } from '../layout/layout.ts';
-import { readDocumentDefinition } from '../read-document.ts';
-import { renderDocument } from '../render/render-document.ts';
-import { readAs } from '../types.ts';
 import type { DocumentDefinition } from './document.ts';
+import { PdfMaker } from './PdfMaker.ts';
 
 /**
  * Generates a PDF from the given document definition.
@@ -16,11 +11,9 @@ import type { DocumentDefinition } from './document.ts';
  * that instance.
  */
 export async function makePdf(definition: DocumentDefinition): Promise<Uint8Array> {
-  const def = readAs(definition, 'definition', readDocumentDefinition);
-  const fontStore = new FontStore(def.fonts ?? []);
-  const imageStore = new ImageStore(def.images ?? []);
-  const guides = !!def.dev?.guides;
-  const ctx = { fontStore, imageStore, guides };
-  const pages = await layoutPages(def, ctx);
-  return await renderDocument(def, pages);
+  console.warn(
+    'makePdf is deprecated. Create an instance of `PdfMaker` and call `makePdf` on that instance.',
+  );
+  const pdfMaker = new PdfMaker();
+  return await pdfMaker.makePdf(definition);
 }

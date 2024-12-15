@@ -63,6 +63,8 @@ export type DocumentDefinition = {
    * Pre-defined image data. These images can be used by their name in
    * the document. This is only needed if images cannot be loaded
    * directly from the file system.
+   *
+   * @deprecated Use URLs to include images.
    */
   images?: ImagesDefinition;
 
@@ -191,6 +193,8 @@ export type FontDefinition = {
  * Pre-defined image data. These images can be used by their name in the
  * document. This is only needed if images cannot be loaded directly
  * from the file system.
+ *
+ * @deprecated Use URLs to include images.
  */
 export type ImagesDefinition = { [name: string]: ImageDefinition };
 
@@ -201,6 +205,8 @@ export type ImageDefinition = {
   /**
    * The image data, as a Uint8Array, ArrayBuffer, or a base64-encoded string.
    * Supported image formats are PNG and JPEG.
+   *
+   *  @deprecated Use URLs to include images.
    */
   data: string | Uint8Array | ArrayBuffer;
 };

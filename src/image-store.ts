@@ -42,6 +42,9 @@ export class ImageStore {
         const { data } = await this.#dataLoader(url);
         return data;
       }
+      console.warn(
+        `Loading images from file names is deprecated ('${url}'). Use file:/ URLs instead.`,
+      );
       const data = await readRelativeFile('/', url.replace(/^\/+/, ''));
       return new Uint8Array(data);
     } catch (error) {

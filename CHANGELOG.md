@@ -51,6 +51,7 @@ Minimum build requirements have been raised to Node 20 and npm 10.
 - The `images` property in a document definition.
 - The `makePdf` function in favor of the `makePdf` method on the
   `PdfMaker` class.
+- Using file paths as image sources in favor of `file:` URLs.
 
 ## [0.5.4] - 2024-02-25
 
