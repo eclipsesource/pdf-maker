@@ -67,7 +67,7 @@ export type ImageBlock = {
 /**
  * Creates a block that contains an image.
  *
- * @param image The name or path of an image to display in this block.
+ * @param image The URL of the image to display in this block.
  * @param props Optional properties for the block.
  */
 export function image(image: string, props?: Omit<ImageBlock, 'image'>): ImageBlock {

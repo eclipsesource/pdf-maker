@@ -1,8 +1,8 @@
 import fontkit from '@pdf-lib/fontkit';
-import { toUint8Array } from 'pdf-lib';
 
 import type { FontConfig } from './api/PdfMaker.ts';
 import type { FontStyle, FontWeight } from './api/text.ts';
+import { parseBinaryData } from './binary-data.ts';
 import type { Font, FontDef, FontSelector } from './fonts.ts';
 import { weightToNumber } from './fonts.ts';
 import { pickDefined } from './types.ts';
@@ -41,7 +41,7 @@ export class FontStore {
 
   _loadFont(selector: FontSelector): Promise<Font> {
     const selectedFont = selectFont(this.#fontDefs, selector);
-    const data = toUint8Array(selectedFont.data);
+    const data = parseBinaryData(selectedFont.data);
     const fkFont = selectedFont.fkFont ?? fontkit.create(data);
     return Promise.resolve(
       pickDefined({

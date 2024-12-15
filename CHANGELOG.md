@@ -2,7 +2,8 @@
 
 ## [0.5.5] - Unreleased
 
-Minimum requirements bumped to Node 20 and npm 10.
+The minimum EcmaScript version has been raised to ES2022.
+Minimum build requirements have been raised to Node 20 and npm 10.
 
 ### Added
 
@@ -26,6 +27,15 @@ Minimum requirements bumped to Node 20 and npm 10.
   const pdf2 = await pdfMaker.makePdf(doc2);
   ```
 
+### Changed
+
+- Fonts should now be registered with the `registerFont()` method on the
+  `PdfMaker` class.
+
+- The `image` property of an image block now supports `data:`, `file:`,
+  and `http(s):` URLs. File names are relative to a resource root that
+  must be set by the `setResourceRoot()` method on the `PdfMaker` class.
+
 ### Deprecated
 
 - `TextAttrs` in favor of `TextProps`.
@@ -38,6 +48,7 @@ Minimum requirements bumped to Node 20 and npm 10.
 - `CircleOpts` in favor of `CircleProps`.
 - `PathOpts` in favor of `PathProps`.
 - The `fonts` property in a document definition.
+- The `images` property in a document definition.
 - The `makePdf` function in favor of the `makePdf` method on the
   `PdfMaker` class.
 

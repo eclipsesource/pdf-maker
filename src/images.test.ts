@@ -53,7 +53,7 @@ describe('registerImage', () => {
   it('embeds image in PDF document and attaches ref', async () => {
     const doc = fakePDFDocument();
     const data = await readFile(join(__dirname, './test/resources/liberty.jpg'));
-    const image: Image = { name: 'foo', format: 'jpeg', data, width: 100, height: 200 };
+    const image: Image = { url: 'foo', format: 'jpeg', data, width: 100, height: 200 };
 
     const pdfRef = registerImage(image, doc);
 

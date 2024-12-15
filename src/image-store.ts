@@ -1,7 +1,6 @@
-import { readFile } from 'node:fs/promises';
-
-import { toUint8Array } from 'pdf-lib';
-
+import { parseBinaryData } from './binary-data.ts';
+import { createDataLoader, type DataLoader } from './data-loader.ts';
+import { readRelativeFile } from './fs.ts';
 import type { Image, ImageDef, ImageFormat } from './images.ts';
 import { isJpeg, readJpegInfo } from './images/jpeg.ts';
 import { isPng, readPngInfo } from './images/png.ts';
@@ -9,31 +8,44 @@ import { isPng, readPngInfo } from './images/png.ts';
 export class ImageStore {
   readonly #images: ImageDef[];
   readonly #imageCache: Record<string, Promise<Image>> = {};
+  #dataLoader: DataLoader;
 
   constructor(images?: ImageDef[]) {
     this.#images = images ?? [];
+    this.#dataLoader = createDataLoader();
   }
 
-  selectImage(selector: string): Promise<Image> {
-    return (this.#imageCache[selector] ??= this.loadImage(selector));
+  setResourceRoot(root: string) {
+    this.#dataLoader = createDataLoader({ resourceRoot: root });
   }
 
-  async loadImage(selector: string): Promise<Image> {
-    const data = await this.loadImageData(selector);
+  selectImage(url: string): Promise<Image> {
+    return (this.#imageCache[url] ??= this.loadImage(url));
+  }
+
+  async loadImage(url: string): Promise<Image> {
+    const data = await this.loadImageData(url);
     const format = determineImageFormat(data);
     const { width, height } = format === 'png' ? readPngInfo(data) : readJpegInfo(data);
-    return { name: selector, format, data, width, height };
+    return { url, format, data, width, height };
   }
 
-  async loadImageData(selector: string): Promise<Uint8Array> {
-    const imageDef = this.#images.find((image) => image.name === selector);
+  async loadImageData(url: string): Promise<Uint8Array> {
+    const imageDef = this.#images.find((image) => image.name === url);
     if (imageDef) {
-      return toUint8Array(imageDef.data);
+      return parseBinaryData(imageDef.data);
     }
+
+    const urlSchema = /^(\w+):/.exec(url)?.[1];
     try {
-      return await readFile(selector);
+      if (urlSchema) {
+        const { data } = await this.#dataLoader(url);
+        return data;
+      }
+      const data = await readRelativeFile('/', url.replace(/^\/+/, ''));
+      return new Uint8Array(data);
     } catch (error) {
-      throw new Error(`Could not load image '${selector}'`, { cause: error });
+      throw new Error(`Could not load image '${url}'`, { cause: error });
     }
   }
 }

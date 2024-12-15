@@ -39,6 +39,16 @@ export class PdfMaker {
   }
 
   /**
+   * Sets the root directory to read resources from. This allows using
+   * `file:/` URLs with relative paths in the document definition.
+   *
+   * @param root The root directory to read resources from.
+   */
+  setResourceRoot(root: string): void {
+    this.#ctx.imageStore.setResourceRoot(root);
+  }
+
+  /**
    * Generates a PDF from the given document definition.
    *
    * @param definition The definition of the document to generate.

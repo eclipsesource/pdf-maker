@@ -25,7 +25,7 @@
     "npm": ">=10"
   },
   "scripts": {
-    "build": "rm -rf build/ dist/ && tsc && esbuild src/index.ts --bundle --sourcemap --platform=node --target=es2021,node18 --outdir=dist --format=esm --external:pdf-lib --external:@pdf-lib/fontkit && cp -a build/index.d.ts build/api/ dist/",
+    "build": "rm -rf build/ dist/ && tsc && esbuild src/index.ts --bundle --sourcemap --platform=browser --target=es2022 --outdir=dist --format=esm --external:pdf-lib --external:@pdf-lib/fontkit && cp -a build/index.d.ts build/api/ dist/",
     "lint": "eslint '{src,test}/**/*.{js,ts}' --max-warnings 0 && prettier --check .",
     "test": "vitest run test",
     "fix": "eslint '{src,test}/**/*.{js,ts}' --fix && prettier -w ."

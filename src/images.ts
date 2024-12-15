@@ -14,7 +14,7 @@ export type ImageDef = {
 };
 
 export type Image = {
-  name: string;
+  url: string;
   width: number;
   height: number;
   data: Uint8Array;
@@ -46,7 +46,7 @@ export function registerImage(image: Image, pdfDoc: PDFDocument) {
           : JpegEmbedder.for(image.data));
         embedder.embedIntoContext(pdfDoc.context, ref);
       } catch (error) {
-        throw new Error(`Could not embed image "${image.name}"`, { cause: error });
+        throw new Error(`Could not embed image "${image.url}"`, { cause: error });
       }
     },
   });
