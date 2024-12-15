@@ -16,7 +16,7 @@ export class FontStore {
   }
 
   registerFont(data: Uint8Array, config?: FontConfig): void {
-    const fkFont = fontkit.create(data, config?.name);
+    const fkFont = fontkit.create(data);
     const family = config?.name ?? fkFont.familyName ?? 'Unknown';
     const style = config?.style ?? extractStyle(fkFont);
     const weight = weightToNumber(config?.weight ?? extractWeight(fkFont));
@@ -63,7 +63,11 @@ function selectFont(fontDefs: FontDef[], selector: FontSelector): FontDef {
     ? fontDefs.filter((def) => def.family === selector.fontFamily)
     : fontDefs;
   if (!fontsWithMatchingFamily.length) {
-    throw new Error(`No font defined for '${selector.fontFamily}'`);
+    const uniqueFamilies = [...new Set(fontDefs.map((f) => f.family))];
+    throw new Error(
+      `No matching font found for family '${selector.fontFamily}'. ` +
+        `Registered families are: '${uniqueFamilies.join("', '")}'.`,
+    );
   }
   let fontsWithMatchingStyle = fontsWithMatchingFamily.filter(
     (def) => def.style === (selector.fontStyle ?? 'normal'),
@@ -78,13 +82,13 @@ function selectFont(fontDefs: FontDef[], selector: FontSelector): FontDef {
   if (!fontsWithMatchingStyle.length) {
     const { fontFamily: family, fontStyle: style } = selector;
     const selectorStr = `'${family}', style=${style ?? 'normal'}`;
-    throw new Error(`No font defined for ${selectorStr}`);
+    throw new Error(`No matching font found for ${selectorStr}`);
   }
   const selected = selectFontForWeight(fontsWithMatchingStyle, selector.fontWeight ?? 'normal');
   if (!selected) {
     const { fontFamily: family, fontStyle: style, fontWeight: weight } = selector;
     const selectorStr = `'${family}', style=${style ?? 'normal'}, weight=${weight ?? 'normal'}`;
-    throw new Error(`No font defined for ${selectorStr}`);
+    throw new Error(`No matching font found for ${selectorStr}`);
   }
   return selected;
 }

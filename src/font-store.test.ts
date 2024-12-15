@@ -1,20 +1,51 @@
+import { readFile } from 'node:fs/promises';
+import { join } from 'node:path';
+
 import fontkit from '@pdf-lib/fontkit';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { FontStore } from './font-store.ts';
 import type { FontDef } from './fonts.ts';
 import { mkData } from './test/test-utils.ts';
 
-describe('font-store', () => {
+describe('FontStore', () => {
+  let normalFont: FontDef;
+  let italicFont: FontDef;
+  let obliqueFont: FontDef;
+  let boldFont: FontDef;
+  let italicBoldFont: FontDef;
+  let obliqueBoldFont: FontDef;
+  let otherFont: FontDef;
+
+  beforeEach(() => {
+    normalFont = fakeFontDef('Test');
+    italicFont = fakeFontDef('Test', { style: 'italic' });
+    obliqueFont = fakeFontDef('Test', { style: 'oblique' });
+    boldFont = fakeFontDef('Test', { weight: 700 });
+    italicBoldFont = fakeFontDef('Test', { style: 'italic', weight: 700 });
+    obliqueBoldFont = fakeFontDef('Test', { style: 'oblique', weight: 700 });
+    otherFont = fakeFontDef('Other');
+  });
+
   describe('selectFont', () => {
-    let normalFont: FontDef;
-    let italicFont: FontDef;
-    let obliqueFont: FontDef;
-    let boldFont: FontDef;
-    let italicBoldFont: FontDef;
-    let obliqueBoldFont: FontDef;
-    let otherFont: FontDef;
     let store: FontStore;
+
+    beforeEach(() => {
+      store = new FontStore([
+        normalFont,
+        italicFont,
+        obliqueFont,
+        boldFont,
+        italicBoldFont,
+        obliqueBoldFont,
+        otherFont,
+      ]);
+      vi.spyOn(fontkit, 'create').mockReturnValue({ fake: true } as any);
+    });
+
+    afterEach(() => {
+      vi.restoreAllMocks();
+    });
 
     beforeEach(() => {
       vi.spyOn(fontkit, 'create').mockReturnValue({ fake: true } as any);
@@ -56,7 +87,9 @@ describe('font-store', () => {
       await expect(store.selectFont({ fontFamily: 'Unknown' })).rejects.toThrow(
         expect.objectContaining({
           message: "Could not load font for 'Unknown', style=normal, weight=normal",
-          cause: new Error("No font defined for 'Unknown'"),
+          cause: new Error(
+            "No matching font found for family 'Unknown'. Registered families are: 'Test', 'Other'.",
+          ),
         }),
       );
     });
@@ -67,7 +100,7 @@ describe('font-store', () => {
       await expect(store.selectFont({ fontFamily: 'Test', fontStyle: 'italic' })).rejects.toThrow(
         expect.objectContaining({
           message: "Could not load font for 'Test', style=italic, weight=normal",
-          cause: new Error("No font defined for 'Test', style=italic"),
+          cause: new Error("No matching font found for 'Test', style=italic"),
         }),
       );
     });
@@ -139,7 +172,9 @@ describe('font-store', () => {
       await expect(store.selectFont({ fontFamily: 'foo' })).rejects.toThrow(
         expect.objectContaining({
           message: "Could not load font for 'foo', style=normal, weight=normal",
-          cause: new Error("No font defined for 'foo'"),
+          cause: new Error(
+            "No matching font found for family 'foo'. Registered families are: 'Test', 'Other'.",
+          ),
         }),
       );
     });
@@ -163,6 +198,46 @@ describe('font-store', () => {
       ]);
 
       expect(font1).toBe(font2);
+    });
+  });
+
+  describe('registerFont', () => {
+    let store: FontStore;
+    let robotoRegular: Uint8Array;
+    let robotoLightItalic: Uint8Array;
+
+    beforeAll(async () => {
+      robotoRegular = await readFile(
+        join(__dirname, 'test/resources/fonts/roboto/Roboto-Regular.ttf'),
+      );
+      robotoLightItalic = await readFile(
+        join(__dirname, 'test/resources/fonts/roboto/Roboto-LightItalic.ttf'),
+      );
+    });
+
+    it('registers font with extracted config', async () => {
+      store = new FontStore();
+
+      store.registerFont(robotoRegular);
+      store.registerFont(robotoLightItalic);
+
+      const selected1 = await store.selectFont({ fontFamily: 'Roboto' });
+      const selected2 = await store.selectFont({ fontFamily: 'Roboto Light', fontStyle: 'italic' });
+      expect(selected1.data).toBe(robotoRegular);
+      expect(selected2.data).toBe(robotoLightItalic);
+    });
+
+    it('registers font with custom config', async () => {
+      store = new FontStore();
+
+      store.registerFont(robotoRegular, { name: 'Custom Name', weight: 'bold' });
+      store.registerFont(robotoLightItalic, { name: 'Custom Name', weight: 400, style: 'normal' });
+
+      const selected1 = await store.selectFont({ fontFamily: 'Custom Name' });
+      const selected2 = await store.selectFont({ fontFamily: 'Custom Name', fontWeight: 'bold' });
+
+      expect(selected1.data).toBe(robotoLightItalic);
+      expect(selected2.data).toBe(robotoRegular);
     });
   });
 });
