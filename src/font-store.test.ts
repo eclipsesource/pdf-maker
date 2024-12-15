@@ -230,8 +230,12 @@ describe('FontStore', () => {
     it('registers font with custom config', async () => {
       store = new FontStore();
 
-      store.registerFont(robotoRegular, { name: 'Custom Name', weight: 'bold' });
-      store.registerFont(robotoLightItalic, { name: 'Custom Name', weight: 400, style: 'normal' });
+      store.registerFont(robotoRegular, { family: 'Custom Name', weight: 'bold' });
+      store.registerFont(robotoLightItalic, {
+        family: 'Custom Name',
+        weight: 400,
+        style: 'normal',
+      });
 
       const selected1 = await store.selectFont({ fontFamily: 'Custom Name' });
       const selected2 = await store.selectFont({ fontFamily: 'Custom Name', fontWeight: 'bold' });

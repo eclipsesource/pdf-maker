@@ -17,7 +17,7 @@ export class FontStore {
 
   registerFont(data: Uint8Array, config?: FontConfig): void {
     const fkFont = fontkit.create(data);
-    const family = config?.name ?? fkFont.familyName ?? 'Unknown';
+    const family = config?.family ?? fkFont.familyName ?? 'Unknown';
     const style = config?.style ?? extractStyle(fkFont);
     const weight = weightToNumber(config?.weight ?? extractWeight(fkFont));
     this.#fontDefs.push({ family, style, weight, data, fkFont });

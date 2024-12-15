@@ -9,7 +9,7 @@ import type { DocumentDefinition } from './document.ts';
 import type { FontStyle, FontWeight } from './text.ts';
 
 export type FontConfig = {
-  name?: string;
+  family?: string;
   style?: FontStyle;
   weight?: FontWeight;
 };
