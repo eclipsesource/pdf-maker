@@ -10,8 +10,8 @@ export class ImageStore {
   readonly #images: ImageDef[];
   readonly #imageCache: Record<string, Promise<Image>> = {};
 
-  constructor(images: ImageDef[]) {
-    this.#images = images;
+  constructor(images?: ImageDef[]) {
+    this.#images = images ?? [];
   }
 
   selectImage(selector: string): Promise<Image> {

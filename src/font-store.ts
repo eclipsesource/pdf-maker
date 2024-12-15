@@ -11,8 +11,8 @@ export class FontStore {
   readonly #fontDefs: FontDef[];
   #fontCache: Record<string, Promise<Font>> = {};
 
-  constructor(fontDefs: FontDef[]) {
-    this.#fontDefs = fontDefs;
+  constructor(fontDefs?: FontDef[]) {
+    this.#fontDefs = fontDefs ?? [];
   }
 
   registerFont(data: Uint8Array, config?: FontConfig): void {

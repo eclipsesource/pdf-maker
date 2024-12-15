@@ -12,7 +12,7 @@ describe('layout-image', () => {
   let ctx: MakerCtx;
 
   beforeEach(() => {
-    const imageStore = new ImageStore([]);
+    const imageStore = new ImageStore();
     imageStore.selectImage = vi.fn((selector: string) => {
       const match = /^img-(\d+)-(\d+)$/.exec(selector);
       if (match) {

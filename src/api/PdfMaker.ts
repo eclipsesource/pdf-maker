@@ -21,8 +21,8 @@ export class PdfMaker {
   #ctx: MakerCtx;
 
   constructor() {
-    const fontStore = new FontStore([]);
-    const imageStore = new ImageStore([]);
+    const fontStore = new FontStore();
+    const imageStore = new ImageStore();
     this.#ctx = { fontStore, imageStore };
   }
 

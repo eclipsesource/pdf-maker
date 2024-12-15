@@ -12,7 +12,7 @@ describe('layout-columns', () => {
   let box: Box;
 
   beforeEach(() => {
-    const fontStore = new FontStore([]);
+    const fontStore = new FontStore();
     fontStore.selectFont = () => {
       return Promise.resolve(fakeFont('Test'));
     };

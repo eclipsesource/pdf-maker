@@ -42,7 +42,7 @@ describe('font-store', () => {
     });
 
     it('rejects when no fonts defined', async () => {
-      const store = new FontStore([]);
+      const store = new FontStore();
 
       await expect(store.selectFont({ fontFamily: 'Foo' })).rejects.toThrow(
         expect.objectContaining({

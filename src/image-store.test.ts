@@ -20,7 +20,7 @@ describe('image-loader', () => {
 
   describe('ImageStore', () => {
     it('rejects if image could not be loaded', async () => {
-      const store = new ImageStore([]);
+      const store = new ImageStore();
 
       await expect(store.selectImage('foo')).rejects.toThrow("Could not load image 'foo'");
     });
@@ -39,7 +39,7 @@ describe('image-loader', () => {
     });
 
     it('loads image from file system', async () => {
-      const store = new ImageStore([]);
+      const store = new ImageStore();
 
       const torusPath = join(baseDir, './test/resources/torus.png');
       const image = await store.selectImage(torusPath);

@@ -20,7 +20,7 @@ describe('text', () => {
   beforeEach(() => {
     normalFont = fakeFont('Test');
     const italicFont = fakeFont('Test', { style: 'italic' });
-    fontStore = new FontStore([]);
+    fontStore = new FontStore();
     fontStore.selectFont = (selector) => {
       return Promise.resolve(selector.fontStyle === 'italic' ? italicFont : normalFont);
     };

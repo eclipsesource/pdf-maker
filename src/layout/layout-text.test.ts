@@ -16,7 +16,7 @@ describe('layout-text', () => {
   beforeEach(() => {
     defaultFont = fakeFont('Test');
     const italicFont = fakeFont('Test', { style: 'italic' });
-    const fontStore = new FontStore([]);
+    const fontStore = new FontStore();
     fontStore.selectFont = (selector: FontSelector) => {
       return Promise.resolve(selector.fontStyle === 'italic' ? italicFont : defaultFont);
     };

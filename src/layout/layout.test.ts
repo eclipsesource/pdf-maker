@@ -17,7 +17,7 @@ describe('layout', () => {
   let box: Box;
 
   beforeEach(() => {
-    const fontStore = new FontStore([]);
+    const fontStore = new FontStore();
     fontStore._loadFont = () => Promise.resolve(fakeFont('Test'));
     ctx = { fontStore } as MakerCtx;
     box = { x: 20, y: 30, width: 400, height: 700 };
