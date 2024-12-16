@@ -1,11 +1,14 @@
 import { type Color, rgb } from 'pdf-lib';
 
 import { namedColors } from './api/colors.ts';
-import { typeError } from './types.ts';
+import { isObject, typeError } from './types.ts';
 
 export { type Color };
 
 export function readColor(input: unknown): Color {
+  if (isObject(input) && input.type === 'RGB') {
+    return input as unknown as Color;
+  }
   if (typeof input === 'string') {
     if (/^#[0-9a-f]{6}$/.test(input)) {
       const r = parseInt(input.slice(1, 3), 16) / 255;

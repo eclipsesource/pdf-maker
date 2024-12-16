@@ -22,6 +22,11 @@ describe('readColor', () => {
     expect(readColor('blue')).toEqual({ type: 'RGB', red: 0, green: 0, blue: 1 });
   });
 
+  it('accepts its own output', () => {
+    // See https://github.com/eclipsesource/pdf-maker/issues/95
+    expect(readColor(readColor('red'))).toEqual({ type: 'RGB', red: 1, green: 0, blue: 0 });
+  });
+
   it('throws on unsupported named color', () => {
     expect(() => readColor('' as any)).toThrowError("Expected valid color name, got: ''");
     expect(() => readColor('salmon' as any)).toThrowError(
