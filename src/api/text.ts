@@ -67,9 +67,8 @@ export type TextAttrs = TextProps;
  */
 export type TextProps = {
   /**
-   * The name of the font to use. If not specified, the first font
-   * registered in the document definition that matches the other font
-   * properties will be used.
+   * The name of the font to use. If not specified, the first registered
+   * font that matches the other font properties will be used.
    */
   fontFamily?: string;
 
