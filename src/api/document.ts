@@ -152,7 +152,7 @@ export type CustomInfoAttrs = CustomInfoProps;
  * `XX` to avoid name collisions.
  */
 export type CustomInfoProps = {
-  [name: string]: string;
+  [name: `XX${string}`]: string;
 };
 
 /**
