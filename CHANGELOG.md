@@ -10,11 +10,14 @@ Minimum build requirements have been raised to Node 20 and npm 10.
 - The functions `line()`, `rect()`, `circle()`, and `path()` to create
   graphics shapes with less code and better tool support.
 
+- The functions `text()`, `image()`, `rows()`, and `columns()` to create
+  blocks with less code and better tool support.
+
 - The function `span()` to create text spans with less code and better
   tool support.
 
-- The functions `text()`, `image()`, `rows()`, and `columns()` to create
-  blocks with less code and better tool support.
+- The functions `bold()` and `italic()` to conveniently create text
+  spans with bold or italic styles.
 
 - The `PdfMaker` class to render multiple documents with the same
   font configuration.

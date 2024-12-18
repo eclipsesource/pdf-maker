@@ -27,6 +27,24 @@ export function span(text: string | TextSpan | (string | TextSpan)[], props?: Te
 }
 
 /**
+ * Creates a span of text with the given text and a bold font weight.
+ *
+ * @param text The text to display in bold.
+ */
+export function bold(text: string | TextSpan | (string | TextSpan)[]): TextSpan {
+  return span(text, { fontWeight: 'bold' });
+}
+
+/**
+ * Creates a span of text with the given text and an italic font style.
+ *
+ * @param text The text to display in italics.
+ */
+export function italic(text: string | TextSpan | (string | TextSpan)[]): TextSpan {
+  return span(text, { fontStyle: 'italic' });
+}
+
+/**
  * The font weight is an integer between 0 and 1000. The keywords
  * `normal` (400) and `bold` (700) are also supported.
  */

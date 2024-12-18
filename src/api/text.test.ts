@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { span } from './text.ts';
+import { bold, italic, span } from './text.ts';
 
 describe('span', () => {
   it('creates text span with given string', () => {
@@ -34,5 +34,21 @@ describe('span', () => {
     });
 
     expect(sp).toEqual({ text: 'foo', fontWeight: 'bold', fontStyle: 'italic' });
+  });
+});
+
+describe('bold', () => {
+  it('creates text span with font weight bold', () => {
+    const sp = bold('foo');
+
+    expect(sp).toEqual({ text: 'foo', fontWeight: 'bold' });
+  });
+});
+
+describe('italic', () => {
+  it('creates text span with font style italic', () => {
+    const sp = italic('foo');
+
+    expect(sp).toEqual({ text: 'foo', fontStyle: 'italic' });
   });
 });
