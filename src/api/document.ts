@@ -74,13 +74,15 @@ export type DocumentDefinition = {
   info?: InfoProps & CustomInfoProps;
 
   /**
-   * Custom data to be added to the PDF *document catalog*. This property should only be used by
-   * PDF applications that need to include custom data in a PDF document.
-   * To avoid name collisions, keys should be prefixed with `XX`.
+   * Custom data to be added to the PDF *document catalog*. This
+   * property should only be used by PDF applications that need to
+   * include custom data in a PDF document. To avoid name collisions,
+   * keys should be prefixed with `XX`.
    *
-   * See [PDF 1.7, Appendix E - PDF Name Registry](https://archive.org/details/pdf1.7/page/n1017/mode/2up)
+   * See [PDF 1.7, Appendix E - PDF Name
+   * Registry](https://archive.org/details/pdf1.7/page/n1017/mode/2up)
    */
-  customData?: Record<string, string | Uint8Array>;
+  customData?: Record<`XX${string}`, string | Uint8Array>;
 
   dev?: {
     /**
@@ -151,9 +153,7 @@ export type CustomInfoAttrs = CustomInfoProps;
  * information dictionary*. These properties should be prefixed with
  * `XX` to avoid name collisions.
  */
-export type CustomInfoProps = {
-  [name: `XX${string}`]: string;
-};
+export type CustomInfoProps = Record<`XX${string}`, string>;
 
 /**
  * An object that defines the fonts to use in the document.
