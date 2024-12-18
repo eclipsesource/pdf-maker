@@ -1,10 +1,6 @@
 import { readFile, writeFile } from 'node:fs/promises';
 
-import { makePdf } from 'pdfmkr';
-
-const fontData = await readFile('./fonts/DejaVuSansCondensed.ttf');
-const fontDataBold = await readFile('./fonts/DejaVuSansCondensed-Bold.ttf');
-const fontDataOblique = await readFile('./fonts/DejaVuSansCondensed-Oblique.ttf');
+import { columns, PdfMaker, rows, text } from 'pdfmkr';
 
 const loremIpsum =
   'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor' +
@@ -15,55 +11,42 @@ const loremIpsum =
   'mollit anim id est laborum.';
 
 const def = {
-  fonts: {
-    'DejaVu-Sans': [
-      { data: fontData },
-      { data: fontDataOblique, italic: true },
-      { data: fontDataBold, bold: true },
-    ],
-  },
   margin: { x: '20mm', y: '0.5cm' },
   defaultStyle: {
     fontSize: 12,
   },
-  header: {
-    columns: [{ text: 'PDF Maker' }, { text: 'Anchors', textAlign: 'right', width: 'auto' }],
+  header: columns([text('PDF Maker'), text('Anchors', { textAlign: 'right', width: 'auto' })], {
     margin: { x: '20mm', top: '1cm' },
-  },
-  footer: ({ pageNumber, pageCount }) => ({
-    text: `${pageNumber}/${pageCount ?? 0}`,
-    textAlign: 'right',
-    margin: { x: '20mm', bottom: '1cm' },
   }),
+  footer: ({ pageNumber, pageCount }) =>
+    text(`${pageNumber}/${pageCount ?? 0}`, {
+      textAlign: 'right',
+      margin: { x: '20mm', bottom: '1cm' },
+    }),
   content: [
-    {
-      rows: [
-        {
-          text: 'Contents',
+    rows(
+      [
+        text('Contents', {
           fontSize: 18,
           margin: { bottom: 5 },
-        },
-        ...range(10).map((n) => ({
-          text: `Paragraph ${n + 1}`,
-          // Link to the paragraph with given id
-          link: `#par:${n + 1}`,
-        })),
+        }),
+        ...range(10).map((n) =>
+          text(`Paragraph ${n + 1}`, {
+            // Link to the paragraph with given id
+            link: `#par:${n + 1}`,
+          }),
+        ),
       ],
-      margin: { bottom: 10 },
-    },
-    ...range(10).map((n) => ({
-      rows: [
-        {
-          text: `Paragraph ${n + 1}`,
-          breakAfter: 'avoid',
-        },
-        { text: loremIpsum },
-      ],
-      // Create an anchor with given id
-      id: `par:${n + 1}`,
-      margin: { top: 5 },
-      fontSize: 10,
-    })),
+      { margin: { bottom: 10 } },
+    ),
+    ...range(10).map((n) =>
+      rows([text(`Paragraph ${n + 1}`, { breakAfter: 'avoid' }), text(loremIpsum)], {
+        // Create an anchor with given id
+        id: `par:${n + 1}`,
+        margin: { top: 5 },
+        fontSize: 10,
+      }),
+    ),
   ],
 };
 
@@ -71,5 +54,11 @@ function range(n) {
   return [...Array(n).keys()];
 }
 
-const pdf = await makePdf(def);
-writeFile('./out/anchors.pdf', pdf);
+const pdfMaker = new PdfMaker();
+
+pdfMaker.registerFont(await readFile('./fonts/DejaVuSansCondensed.ttf'));
+pdfMaker.registerFont(await readFile('./fonts/DejaVuSansCondensed-Bold.ttf'));
+pdfMaker.registerFont(await readFile('./fonts/DejaVuSansCondensed-Oblique.ttf'));
+
+const pdf = await pdfMaker.makePdf(def);
+await writeFile('./out/anchors.pdf', pdf);
