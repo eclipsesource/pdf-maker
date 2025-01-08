@@ -23,8 +23,7 @@ export async function renderDocument(def: DocumentDefinition, pages: Page[]): Pr
     PDFHexString.of(fileId.toUpperCase()),
   ]);
   const data = await pdfDoc.save();
-  // add trailing newline
-  return new Uint8Array([...data, 10]);
+  return appendNewline(data);
 }
 
 function setMetadata(doc: PDFDocument, info?: Metadata) {
@@ -73,4 +72,11 @@ async function sha256Hex(input: string): Promise<string> {
   const hashBuffer = await crypto.subtle.digest('SHA-256', buffer);
   const hashArray = Array.from(new Uint8Array(hashBuffer));
   return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
+}
+
+function appendNewline(data: Uint8Array): Uint8Array {
+  const result = new Uint8Array(data.length + 1);
+  result.set(data, 0);
+  result[data.length] = 10;
+  return result;
 }
