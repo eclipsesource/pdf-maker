@@ -1,6 +1,8 @@
 # Changelog
 
-## [0.5.5] - Unreleased
+## [0.5.6] - Unreleased
+
+## [0.5.5] - 2024-12-18
 
 The minimum EcmaScript version has been raised to ES2022.
 Minimum build requirements have been raised to Node 20 and npm 10.
@@ -260,3 +262,4 @@ First public version.
 [0.5.2]: https://github.com/eclipsesource/pdf-maker/releases/tag/v0.5.2
 [0.5.3]: https://github.com/eclipsesource/pdf-maker/releases/tag/v0.5.3
 [0.5.4]: https://github.com/eclipsesource/pdf-maker/releases/tag/v0.5.4
+[0.5.5]: https://github.com/eclipsesource/pdf-maker/releases/tag/v0.5.5
