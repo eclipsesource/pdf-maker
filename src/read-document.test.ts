@@ -113,6 +113,13 @@ describe('readDocumentDefinition', () => {
     ]);
   });
 
+  it(`includes onRenderDocument hook`, () => {
+    const onRenderDocument = () => {};
+    const def = readDocumentDefinition({ ...input, onRenderDocument });
+
+    expect(def.onRenderDocument).toBe(onRenderDocument);
+  });
+
   (['header', 'footer'] as const).forEach((name) => {
     it(`supports dynamic ${name}`, () => {
       const defaultStyle = { fontSize: 23 };

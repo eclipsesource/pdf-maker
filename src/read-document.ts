@@ -1,3 +1,5 @@
+import type { PDFDocument } from 'pdf-lib';
+
 import type { BoxEdges, Size } from './box.ts';
 import { parseEdges } from './box.ts';
 import type { FontDef } from './fonts.ts';
@@ -31,6 +33,7 @@ export type DocumentDefinition = {
     creationDate?: Date;
     modificationDate?: Date;
   }[];
+  onRenderDocument?: (pdfDoc: PDFDocument) => void;
 };
 
 export type Metadata = {
@@ -61,6 +64,7 @@ export function readDocumentDefinition(input: unknown): DocumentDefinition {
     dev: optional(types.object({ guides: optional(types.boolean()) })),
     customData: optional(readCustomData),
     embeddedFiles: optional(types.array(readEmbeddedFiles)),
+    onRenderDocument: optional(),
   });
   const tBlock = (block: unknown) => readBlock(block, def1.defaultStyle);
   const def2 = readObject(input, {

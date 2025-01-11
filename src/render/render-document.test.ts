@@ -68,4 +68,20 @@ describe('renderDocument', () => {
     expect(lookup('XXFoo').getContentsString()).toBe('Foo');
     expect(lookup('XXBar').getContents()).toEqual(Uint8Array.of(1, 2, 3));
   });
+
+  it('calls custom render hook', async () => {
+    const def = {
+      content: [],
+      onRenderDocument: (pdfDoc: PDFDocument) => {
+        pdfDoc.setTitle('Test Title');
+      },
+    };
+
+    const pdfData = await renderDocument(def, []);
+
+    const pdfDoc = await PDFDocument.load(pdfData, { updateMetadata: false });
+    const infoDict = pdfDoc.context.lookup(pdfDoc.context.trailerInfo.Info) as PDFDict;
+    const getInfo = (name: string) => infoDict.get(PDFName.of(name));
+    expect(getInfo('Title')).toEqual(PDFHexString.fromText('Test Title'));
+  });
 });
