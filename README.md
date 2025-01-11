@@ -5,7 +5,7 @@ PDF Maker is a library for generating PDF documents in JavaScript.
 ## Usage
 
 ```sh
-npm install pdf-maker
+npm install pdfmkr
 ```
 
 A `PdfMaker` instance creates PDF data from a given _document
