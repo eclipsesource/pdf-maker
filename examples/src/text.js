@@ -1,6 +1,6 @@
 import { readFile, writeFile } from 'node:fs/promises';
 
-import { PdfMaker, rows, span, text } from '../../src/index.ts';
+import { PdfMaker, rows, span, text } from 'pdfmkr';
 
 const document = {
   defaultStyle: {
@@ -64,9 +64,9 @@ const document = {
     // Text alignment
     rows(
       [
-        span('Text can be left-aligned …', { textAlign: 'left' }),
-        span('centered,', { textAlign: 'center' }),
-        span('… or right-aligned', { textAlign: 'right' }),
+        text('Text can be left-aligned …', { textAlign: 'left' }),
+        text('centered,', { textAlign: 'center' }),
+        text('… or right-aligned', { textAlign: 'right' }),
       ],
       { margin: { y: 10 } },
     ),
