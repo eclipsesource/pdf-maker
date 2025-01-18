@@ -2,6 +2,11 @@
 
 ## [0.5.6] - Unreleased
 
+### Added
+
+- Support for embedded files via the `embeddedFiles` property in the
+  document definition.
+
 ## [0.5.5] - 2024-12-18
 
 The minimum EcmaScript version has been raised to ES2022.

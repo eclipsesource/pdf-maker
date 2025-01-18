@@ -12,6 +12,16 @@ export async function renderDocument(def: DocumentDefinition, pages: Page[]): Pr
     setCustomData(def.customData, pdfDoc);
   }
   pages.forEach((page) => renderPage(page, pdfDoc));
+
+  for (const file of def.embeddedFiles ?? []) {
+    await pdfDoc.attach(file.content, file.fileName, {
+      mimeType: file.mimeType,
+      description: file.description,
+      creationDate: file.creationDate,
+      modificationDate: file.modificationDate,
+    });
+  }
+
   const idInfo = {
     creator: 'pdfmkr',
     time: new Date().toISOString(),

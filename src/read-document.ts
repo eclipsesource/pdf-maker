@@ -23,6 +23,14 @@ export type DocumentDefinition = {
   footer?: (info: PageInfo) => Block;
   content: Block[];
   customData?: Record<string, string | Uint8Array>;
+  embeddedFiles?: {
+    content: Uint8Array;
+    fileName: string;
+    mimeType: string;
+    description?: string;
+    creationDate?: Date;
+    modificationDate?: Date;
+  }[];
 };
 
 export type Metadata = {
@@ -52,6 +60,7 @@ export function readDocumentDefinition(input: unknown): DocumentDefinition {
     defaultStyle: optional(readInheritableAttrs),
     dev: optional(types.object({ guides: optional(types.boolean()) })),
     customData: optional(readCustomData),
+    embeddedFiles: optional(types.array(readEmbeddedFiles)),
   });
   const tBlock = (block: unknown) => readBlock(block, def1.defaultStyle);
   const def2 = readObject(input, {
@@ -91,4 +100,21 @@ function readCustomData(input: unknown) {
   return Object.fromEntries(
     Object.entries(readObject(input)).map(([key, value]) => [key, readAs(value, key, readValue)]),
   );
+}
+
+function readEmbeddedFiles(input: unknown) {
+  return readObject(input, {
+    url: optional(types.string()),
+    content: required(readData),
+    fileName: required(types.string()),
+    mimeType: required(types.string()),
+    description: optional(types.string()),
+    creationDate: optional(types.date()),
+    modificationDate: optional(types.date()),
+  });
+}
+
+function readData(input: unknown): Uint8Array {
+  if (input instanceof Uint8Array) return input;
+  throw typeError('Uint8Array', input);
 }

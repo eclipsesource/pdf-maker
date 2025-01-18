@@ -84,6 +84,12 @@ export type DocumentDefinition = {
    */
   customData?: Record<`XX${string}`, string | Uint8Array>;
 
+  /**
+   * Files to be stored directly within a PDF document. These files can
+   * be displayed and extracted by PDF viewers and other tools.
+   */
+  embeddedFiles?: EmbeddedFile[];
+
   dev?: {
     /**
      * When set to true, additional guides are drawn to help analyzing
@@ -93,6 +99,40 @@ export type DocumentDefinition = {
      */
     guides?: boolean;
   };
+};
+
+export type EmbeddedFile = {
+  /**
+   * The binary content of the file.
+   */
+  content: Uint8Array;
+
+  /**
+   * The MIME type of the file.
+   */
+  mimeType: string;
+
+  /**
+   * The name of the file as it will appear in the list of attachments
+   * in the PDF viewer.
+   */
+  fileName: string;
+
+  /**
+   * A brief description of the file's content or purpose. This text
+   * can also be displayed by the PDF viewer.
+   */
+  description?: string;
+
+  /**
+   * The date and time when the file was created.
+   */
+  creationDate?: Date;
+
+  /**
+   * The date and time when the file was last modified.
+   */
+  modificationDate?: Date;
 };
 
 /**

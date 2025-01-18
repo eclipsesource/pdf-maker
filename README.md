@@ -594,6 +594,40 @@ The following properties are supported:
 - `producer`: The name of the application that converted the original
   content into a PDF.
 
+## Embedded files
+
+Supplementary files can be stored directly within a PDF document. This
+can be useful for creating self-contained documents, such as for
+archival purposes. Those files can be added to the document using the
+`embeddedFiles` property, which accepts an array of objects, each
+representing a file with the following properties:
+
+- `content`: The binary content of the file as a `Uint8Array`.
+- `fileName`: The name of the file as it will appear in the
+  list of attachments in the PDF viewer.
+- `mimeType`: The MIME type of the file.
+- `description` (optional): A brief description of the file's content or
+  purpose. This information can be displayed to the user in the PDF
+  viewer.
+- `creationDate` (optional): The date and time when the file was created.
+- `modificationDate` (optional): The date and time when the file was last
+
+```ts
+const document = {
+  content: [text('Hello World!')],
+  embeddedFiles: [
+    {
+      fileName: "Study-Results-2025.csv",
+      mimeType: "text/csv",
+      content: /* binary data of the data */,
+      mimeType: 'image/png',
+      description: "CSV file containing the result data of the 2025 study.",
+      creationDate: new Date("2025-01-12"),
+    },
+  ],
+};
+```
+
 ## Dev tools
 
 ### Visual Debugging
