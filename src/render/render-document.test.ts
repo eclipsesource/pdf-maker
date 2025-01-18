@@ -72,8 +72,9 @@ describe('renderDocument', () => {
   it('calls custom render hook', async () => {
     const def = {
       content: [],
-      onRenderDocument: (pdfDoc: PDFDocument) => {
+      onRenderDocument: async (pdfDoc: PDFDocument) => {
         pdfDoc.setTitle('Test Title');
+        await new Promise((resolve) => setTimeout(resolve, 10));
       },
     };
 

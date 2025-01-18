@@ -35,7 +35,7 @@ export type DocumentDefinition = {
     modificationDate?: Date;
     relationship?: FileRelationShip;
   }[];
-  onRenderDocument?: (pdfDoc: PDFDocument) => void;
+  onRenderDocument?: (pdfDoc: PDFDocument) => void | Promise<void>;
 };
 
 export type Metadata = {

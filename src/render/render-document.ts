@@ -23,7 +23,8 @@ export async function renderDocument(def: DocumentDefinition, pages: Page[]): Pr
     });
   }
 
-  def.onRenderDocument?.(pdfDoc);
+  await def.onRenderDocument?.(pdfDoc);
+
   const idInfo = {
     creator: 'pdfmkr',
     time: new Date().toISOString(),
