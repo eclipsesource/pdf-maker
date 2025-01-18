@@ -1,4 +1,4 @@
-import type { PDFDict } from 'pdf-lib';
+import type { AFRelationship, PDFDict } from 'pdf-lib';
 import { PDFDocument, PDFHexString, PDFName } from 'pdf-lib';
 
 import type { Page } from '../page.ts';
@@ -19,6 +19,7 @@ export async function renderDocument(def: DocumentDefinition, pages: Page[]): Pr
       description: file.description,
       creationDate: file.creationDate,
       modificationDate: file.modificationDate,
+      afRelationship: file.relationship as AFRelationship | undefined,
     });
   }
 

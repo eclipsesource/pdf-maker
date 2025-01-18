@@ -1,5 +1,6 @@
 import type { PDFDocument } from 'pdf-lib';
 
+import type { FileRelationShip } from './api/document.ts';
 import type { BoxEdges, Size } from './box.ts';
 import { parseEdges } from './box.ts';
 import type { FontDef } from './fonts.ts';
@@ -32,6 +33,7 @@ export type DocumentDefinition = {
     description?: string;
     creationDate?: Date;
     modificationDate?: Date;
+    relationship?: FileRelationShip;
   }[];
   onRenderDocument?: (pdfDoc: PDFDocument) => void;
 };
@@ -106,15 +108,33 @@ function readCustomData(input: unknown) {
   );
 }
 
+/**
+ * From the PDF-A3 specification, section **3.1. Requirements -
+ * General**. See:
+ * https://www.pdfa.org/wp-content/uploads/2018/10/PDF20_AN002-AF.pdf
+ */
+const readFileRelationship = types.string({
+  enum: [
+    'Source',
+    'Data',
+    'Alternative',
+    'Supplement',
+    'EncryptedPayload',
+    'FormData',
+    'Schema',
+    'Unspecified',
+  ],
+});
+
 function readEmbeddedFiles(input: unknown) {
   return readObject(input, {
-    url: optional(types.string()),
     content: required(readData),
     fileName: required(types.string()),
     mimeType: required(types.string()),
     description: optional(types.string()),
     creationDate: optional(types.date()),
     modificationDate: optional(types.date()),
+    relationship: optional(readFileRelationship),
   });
 }
 

@@ -603,14 +603,18 @@ archival purposes. Those files can be added to the document using the
 representing a file with the following properties:
 
 - `content`: The binary content of the file as a `Uint8Array`.
-- `fileName`: The name of the file as it will appear in the
-  list of attachments in the PDF viewer.
+- `fileName`: The name of the file as it will appear in the list of
+  attachments in the PDF viewer.
 - `mimeType`: The MIME type of the file.
 - `description` (optional): A brief description of the file's content or
   purpose. This information can be displayed to the user in the PDF
   viewer.
-- `creationDate` (optional): The date and time when the file was created.
-- `modificationDate` (optional): The date and time when the file was last
+- `creationDate` (optional): The date and time when the file was
+  created.
+- `modificationDate` (optional): The date and time when the file was
+  last modified.
+- `relationship` (optional): A name that specifies the relationship
+  between the file and the document.
 
 ```ts
 const document = {

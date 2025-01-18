@@ -101,6 +101,30 @@ export type DocumentDefinition = {
   };
 };
 
+/**
+ * Describes the relationship between the embedded file and the PDF
+ * document.
+ * - `Source`: The embedded file is the source material for the
+ *   document.
+ * - `Data`: The embedded file contains data related to the document.
+ * - `Alternative`: The embedded file is an alternative representation
+ *   of the document.
+ * - `Supplement`: The embedded file supplements the document.
+ * - `EncryptedPayload`: The embedded file is an encrypted payload.
+ * - `FormData`: The embedded file contains form data.
+ * - `Schema`: The embedded file contains a schema.
+ * - `Unspecified`: No specific relationship.
+ */
+export type FileRelationShip =
+  | 'Source'
+  | 'Data'
+  | 'Alternative'
+  | 'Supplement'
+  | 'EncryptedPayload'
+  | 'FormData'
+  | 'Schema'
+  | 'Unspecified';
+
 export type EmbeddedFile = {
   /**
    * The binary content of the file.
@@ -133,6 +157,11 @@ export type EmbeddedFile = {
    * The date and time when the file was last modified.
    */
   modificationDate?: Date;
+
+  /**
+   * The relationship between the file and the PDF document.
+   */
+  relationship?: FileRelationShip;
 };
 
 /**
