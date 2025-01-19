@@ -29,28 +29,22 @@ export type Page = {
 
 export function addPageFont(page: Page, font: Font): PDFName {
   if (!page.pdfPage) throw new Error('Page not initialized');
-  if (!font.pdfRef) {
-    font.pdfRef = registerFont(font, page.pdfPage.doc);
-  }
   page.fonts ??= {};
-  const key = font.pdfRef.toString();
-  if (!(key in page.fonts)) {
-    page.fonts[key] = (page.pdfPage as any).node.newFontDictionary(font.name, font.pdfRef);
+  if (!(font.key in page.fonts)) {
+    const pdfRef = registerFont(font, page.pdfPage.doc);
+    page.fonts[font.key] = (page.pdfPage as any).node.newFontDictionary(font.name, pdfRef);
   }
-  return page.fonts[key];
+  return page.fonts[font.key];
 }
 
 export function addPageImage(page: Page, image: Image): PDFName {
   if (!page.pdfPage) throw new Error('Page not initialized');
-  if (!image.pdfRef) {
-    image.pdfRef = registerImage(image, page.pdfPage.doc);
-  }
   page.images ??= {};
-  const key = image.pdfRef.toString();
-  if (!(key in page.images)) {
-    page.images[key] = (page.pdfPage as any).node.newXObject('Image', image.pdfRef);
+  if (!(image.url in page.images)) {
+    const pdfRef = registerImage(image, page.pdfPage.doc);
+    page.images[image.url] = (page.pdfPage as any).node.newXObject('Image', pdfRef);
   }
-  return page.images[key];
+  return page.images[image.url];
 }
 
 type ExtGraphicsParams = { ca: number; CA: number };

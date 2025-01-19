@@ -183,6 +183,7 @@ describe('FontStore', () => {
       const font = await store.selectFont({ fontFamily: 'Test' });
 
       expect(font).toEqual({
+        key: 'Test:normal:normal',
         name: 'Test',
         style: 'normal',
         weight: 400,

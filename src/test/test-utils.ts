@@ -14,6 +14,7 @@ export function fakeFont(
 ): Font {
   const key = `${name}-${opts?.style ?? 'normal'}-${opts?.weight ?? 400}`;
   const font: Font = {
+    key,
     name,
     style: opts?.style ?? 'normal',
     weight: weightToNumber(opts?.weight ?? 'normal'),
@@ -23,7 +24,8 @@ export function fakeFont(
   if (opts.doc) {
     const pdfFont = fakePdfFont(name, font.fkFont);
     (opts.doc as any).fonts.push(pdfFont);
-    font.pdfRef = pdfFont.ref;
+    (opts.doc as any)._pdfmkr_registeredFonts ??= {};
+    (opts.doc as any)._pdfmkr_registeredFonts[font.key] = pdfFont.ref;
   }
   return font;
 }
@@ -79,8 +81,9 @@ export function fakePDFPage(document?: PDFDocument): PDFPage {
   const contentStream: any[] = [];
   let counter = 1;
   (node as any).newFontDictionary = (name: string) => PDFName.of(`${name}-${counter++}`);
-  (node as any).newXObject = (type: string, ref: string) =>
-    PDFName.of(`${type}-${ref}-${counter++}`);
+  let xObjectCounter = 1;
+  (node as any).newXObject = (tag: string, ref: PDFRef) =>
+    PDFName.of(`${tag}-${ref.objectNumber}-${ref.generationNumber}-${xObjectCounter++}`);
   (node as any).newExtGState = (type: string) => PDFName.of(`${type}-${counter++}`);
   return {
     doc,

@@ -1,4 +1,4 @@
-import type { Color, PDFContentStream, PDFFont, PDFName, PDFOperator } from 'pdf-lib';
+import type { Color, PDFContentStream, PDFName, PDFOperator } from 'pdf-lib';
 import {
   beginText,
   endText,
@@ -10,6 +10,7 @@ import {
   setTextRise,
   showText,
 } from 'pdf-lib';
+import { findRegisteredFont } from 'src/fonts.ts';
 
 import type { Pos } from '../box.ts';
 import type { TextObject } from '../frame.ts';
@@ -27,9 +28,7 @@ export function renderText(object: TextObject, page: Page, base: Pos) {
     contentStream.push(setTextMatrix(1, 0, 0, 1, x + row.x, y - row.y - row.baseline));
     row.segments?.forEach((seg) => {
       const fontKey = addPageFont(page, seg.font);
-      const pdfFont = (page.pdfPage as any)?.doc?.fonts?.find(
-        (font: PDFFont) => font.ref === seg.font.pdfRef,
-      );
+      const pdfFont = findRegisteredFont(seg.font, page.pdfPage!.doc)!;
       const encodedText = pdfFont.encodeText(seg.text);
       const operators = compact([
         setTextColorOp(state, seg.color),

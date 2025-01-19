@@ -17,10 +17,10 @@ describe('renderImage', () => {
     size = { width: 500, height: 800 };
     const pdfPage = fakePDFPage();
     page = { size, pdfPage } as Page;
-    image = { pdfRef: 23 } as unknown as Image;
+    image = { url: 'test-url' } as unknown as Image;
   });
 
-  it('renders single text object', () => {
+  it('renders single image object', () => {
     const obj: ImageObject = { type: 'image', image, x: 1, y: 2, width: 30, height: 40 };
 
     renderImage(obj, page, pos);
@@ -29,7 +29,7 @@ describe('renderImage', () => {
       'q',
       '1 0 0 1 11 738 cm',
       '30 0 0 40 0 0 cm',
-      '/Image-23-1 Do',
+      '/Image-1-0-1 Do',
       'Q',
     ]);
   });

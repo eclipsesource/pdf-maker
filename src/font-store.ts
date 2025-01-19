@@ -31,7 +31,7 @@ export class FontStore {
       selector.fontWeight ?? 'normal',
     ].join(':');
     try {
-      return await (this.#fontCache[cacheKey] ??= this._loadFont(selector));
+      return await (this.#fontCache[cacheKey] ??= this._loadFont(selector, cacheKey));
     } catch (error) {
       const { fontFamily: family, fontStyle: style, fontWeight: weight } = selector;
       const selectorStr = `'${family}', style=${style ?? 'normal'}, weight=${weight ?? 'normal'}`;
@@ -39,12 +39,13 @@ export class FontStore {
     }
   }
 
-  _loadFont(selector: FontSelector): Promise<Font> {
+  _loadFont(selector: FontSelector, key: string): Promise<Font> {
     const selectedFont = selectFont(this.#fontDefs, selector);
     const data = parseBinaryData(selectedFont.data);
     const fkFont = selectedFont.fkFont ?? fontkit.create(data);
     return Promise.resolve(
       pickDefined({
+        key,
         name: fkFont.fullName ?? fkFont.postscriptName ?? selectedFont.family,
         data,
         style: selector.fontStyle ?? 'normal',

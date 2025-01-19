@@ -19,7 +19,6 @@ export type Image = {
   height: number;
   data: Uint8Array;
   format: ImageFormat;
-  pdfRef?: PDFRef;
 };
 
 export function readImages(input: unknown): ImageDef[] {
@@ -36,7 +35,9 @@ function readImage(input: unknown) {
   }) as { data: Uint8Array; format?: ImageFormat };
 }
 
-export function registerImage(image: Image, pdfDoc: PDFDocument) {
+export function registerImage(image: Image, pdfDoc: PDFDocument): PDFRef {
+  const registeredImages = ((pdfDoc as any)._pdfmkr_registeredImages ??= {});
+  if (image.url in registeredImages) return registeredImages[image.url];
   const ref = pdfDoc.context.nextRef();
   (pdfDoc as any).images.push({
     async embed() {
@@ -50,5 +51,6 @@ export function registerImage(image: Image, pdfDoc: PDFDocument) {
       }
     },
   });
+  registeredImages[image.url] = ref;
   return ref;
 }
