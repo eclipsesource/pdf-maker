@@ -47,56 +47,58 @@ describe('readDocumentDefinition', () => {
 
   ['title', 'subject', 'author', 'creator', 'producer', 'custom'].forEach((name) => {
     it(`checks info/${name}`, () => {
-      expect(() => readDocumentDefinition({ ...input, info: { [name]: 23 } })).toThrowError(
-        `Invalid value for "info/${name}": Expected string`,
+      expect(() => readDocumentDefinition({ ...input, info: { [name]: 23 } })).toThrow(
+        new TypeError(`Invalid value for "info/${name}": Expected string, got: 23`),
       );
     });
   });
 
   it('checks info/keywords', () => {
-    expect(() => readDocumentDefinition({ ...input, info: { keywords: 23 } })).toThrowError(
-      'Invalid value for "info/keywords": Expected array',
+    expect(() => readDocumentDefinition({ ...input, info: { keywords: 23 } })).toThrow(
+      new TypeError('Invalid value for "info/keywords": Expected array, got: 23'),
     );
-    expect(() => readDocumentDefinition({ ...input, info: { keywords: [23] } })).toThrowError(
-      'Invalid value for "info/keywords/0": Expected string, got: 23',
+    expect(() => readDocumentDefinition({ ...input, info: { keywords: [23] } })).toThrow(
+      new TypeError('Invalid value for "info/keywords/0": Expected string, got: 23'),
     );
   });
 
   it('checks info/creationDate', () => {
-    expect(() => readDocumentDefinition({ ...input, info: { creationDate: 23 } })).toThrowError(
-      'Invalid value for "info/creationDate": Expected Date',
+    expect(() => readDocumentDefinition({ ...input, info: { creationDate: 23 } })).toThrow(
+      new TypeError('Invalid value for "info/creationDate": Expected Date, got: 23'),
     );
   });
 
   it('checks margin', () => {
     const margin = 'foo';
 
-    expect(() => readDocumentDefinition({ ...input, margin })).toThrowError(
-      'Invalid value for "margin":',
+    expect(() => readDocumentDefinition({ ...input, margin })).toThrow(
+      new TypeError('Invalid value for "margin": Expected number or length string, got: \'foo\''),
     );
   });
 
   it('checks defaultStyle', () => {
     const defaultStyle = { fontSize: -1 };
 
-    expect(() => readDocumentDefinition({ ...input, defaultStyle })).toThrowError(
-      'Invalid value for "defaultStyle/fontSize":',
+    expect(() => readDocumentDefinition({ ...input, defaultStyle })).toThrow(
+      new TypeError('Invalid value for "defaultStyle/fontSize": Expected number >= 0, got: -1'),
     );
   });
 
   it('checks content', () => {
     const content = 'foo';
 
-    expect(() => readDocumentDefinition({ ...input, content })).toThrowError(
-      'Invalid value for "content":',
+    expect(() => readDocumentDefinition({ ...input, content })).toThrow(
+      new TypeError('Invalid value for "content": Expected array, got: \'foo\''),
     );
   });
 
   it('checks content blocks', () => {
     const content = [{ text: 'foo' }, { text: 23 }];
 
-    expect(() => readDocumentDefinition({ ...input, content })).toThrowError(
-      'Invalid value for "content/1/text": Expected string',
+    expect(() => readDocumentDefinition({ ...input, content })).toThrow(
+      new TypeError(
+        'Invalid value for "content/1/text": Expected string, object with text property, or array of text, got: 23',
+      ),
     );
   });
 
@@ -144,8 +146,8 @@ describe('readDocumentDefinition', () => {
   it('checks customData', () => {
     const customData = { foo: 'abc', bar: 23 };
 
-    expect(() => readDocumentDefinition({ ...input, customData })).toThrowError(
-      'Invalid value for "customData/bar": Expected string or Uint8Array, got: 23',
+    expect(() => readDocumentDefinition({ ...input, customData })).toThrow(
+      new TypeError('Invalid value for "customData/bar": Expected string or Uint8Array, got: 23'),
     );
   });
 });

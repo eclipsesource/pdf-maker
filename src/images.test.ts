@@ -33,19 +33,23 @@ describe('readImages', () => {
   it('throws on invalid type', () => {
     const fn = () => readImages(23);
 
-    expect(fn).toThrowError('Expected object, got: 23');
+    expect(fn).toThrow(new TypeError('Expected object, got: 23'));
   });
 
   it('throws on invalid image definition', () => {
     const fn = () => readImages({ foo: 23 });
 
-    expect(fn).toThrowError('Invalid value for "foo": Expected object, got: 23');
+    expect(fn).toThrow(new TypeError('Invalid value for "foo": Expected object, got: 23'));
   });
 
   it('throws on invalid image data', () => {
     const fn = () => readImages({ foo: { data: 23 } });
 
-    expect(fn).toThrowError('Invalid value for "foo/data":');
+    expect(fn).toThrow(
+      new TypeError(
+        'Invalid value for "foo/data": Expected Uint8Array, ArrayBuffer, or base64-encoded string, got: 23',
+      ),
+    );
   });
 });
 

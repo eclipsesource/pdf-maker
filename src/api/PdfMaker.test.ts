@@ -1,8 +1,7 @@
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import { before } from 'node:test';
 
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { image, text } from './layout.ts';
 import { PdfMaker } from './PdfMaker.ts';
@@ -10,7 +9,7 @@ import { PdfMaker } from './PdfMaker.ts';
 describe('makePdf', () => {
   let pdfMaker: PdfMaker;
 
-  before(async () => {
+  beforeEach(async () => {
     pdfMaker = new PdfMaker();
     pdfMaker.setResourceRoot(join(__dirname, '../test/resources'));
     const fontData = await readFile(

@@ -76,8 +76,7 @@ describe('FontStore', () => {
       const store = new FontStore();
 
       await expect(store.selectFont({ fontFamily: 'Foo' })).rejects.toThrow(
-        expect.objectContaining({
-          message: "Could not load font for 'Foo', style=normal, weight=normal",
+        new Error("Could not load font for 'Foo', style=normal, weight=normal", {
           cause: new Error('No fonts defined'),
         }),
       );
@@ -85,8 +84,7 @@ describe('FontStore', () => {
 
     it('rejects for unknown font name', async () => {
       await expect(store.selectFont({ fontFamily: 'Unknown' })).rejects.toThrow(
-        expect.objectContaining({
-          message: "Could not load font for 'Unknown', style=normal, weight=normal",
+        new Error("Could not load font for 'Unknown', style=normal, weight=normal", {
           cause: new Error(
             "No matching font found for family 'Unknown'. Registered families are: 'Test', 'Other'.",
           ),
@@ -98,8 +96,7 @@ describe('FontStore', () => {
       store = new FontStore([normalFont, boldFont]);
 
       await expect(store.selectFont({ fontFamily: 'Test', fontStyle: 'italic' })).rejects.toThrow(
-        expect.objectContaining({
-          message: "Could not load font for 'Test', style=italic, weight=normal",
+        new Error("Could not load font for 'Test', style=italic, weight=normal", {
           cause: new Error("No matching font found for 'Test', style=italic"),
         }),
       );
@@ -170,8 +167,7 @@ describe('FontStore', () => {
 
     it('rejects if font could not be loaded', async () => {
       await expect(store.selectFont({ fontFamily: 'foo' })).rejects.toThrow(
-        expect.objectContaining({
-          message: "Could not load font for 'foo', style=normal, weight=normal",
+        new Error("Could not load font for 'foo', style=normal, weight=normal", {
           cause: new Error(
             "No matching font found for family 'foo'. Registered families are: 'Test', 'Other'.",
           ),

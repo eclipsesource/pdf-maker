@@ -10,8 +10,10 @@ describe('readPageSize', () => {
   });
 
   it('throws on unsupported paper size', () => {
-    expect(() => readPageSize('foo')).toThrowError("Expected valid paper size, got: 'foo'");
-    expect(() => readPageSize('a4')).toThrowError("Expected valid paper size, got: 'a4'");
+    expect(() => readPageSize('foo')).toThrow(
+      new TypeError("Expected valid paper size, got: 'foo'"),
+    );
+    expect(() => readPageSize('a4')).toThrow(new TypeError("Expected valid paper size, got: 'a4'"));
   });
 
   it('supports width and height', () => {
@@ -23,27 +25,27 @@ describe('readPageSize', () => {
   });
 
   it('throws on missing width or height', () => {
-    expect(() => readPageSize({ width: 23 })).toThrowError('Missing value for "height"');
-    expect(() => readPageSize({ height: 42 })).toThrowError('Missing value for "width"');
+    expect(() => readPageSize({ width: 23 })).toThrow(new TypeError('Missing value for "height"'));
+    expect(() => readPageSize({ height: 42 })).toThrow(new TypeError('Missing value for "width"'));
   });
 
   it('throws on zero or negative values for width or height', () => {
-    expect(() => readPageSize({ width: 0, height: 42 })).toThrowError(
-      'Expected positive width, got: 0',
+    expect(() => readPageSize({ width: 0, height: 42 })).toThrow(
+      new TypeError('Expected positive width, got: 0'),
     );
-    expect(() => readPageSize({ width: -1, height: 42 })).toThrowError(
-      'Expected positive width, got: -1',
+    expect(() => readPageSize({ width: -1, height: 42 })).toThrow(
+      new TypeError('Expected positive width, got: -1'),
     );
-    expect(() => readPageSize({ width: 23, height: 0 })).toThrowError(
-      'Expected positive height, got: 0',
+    expect(() => readPageSize({ width: 23, height: 0 })).toThrow(
+      new TypeError('Expected positive height, got: 0'),
     );
-    expect(() => readPageSize({ width: 23, height: -1 })).toThrowError(
-      'Expected positive height, got: -1',
+    expect(() => readPageSize({ width: 23, height: -1 })).toThrow(
+      new TypeError('Expected positive height, got: -1'),
     );
   });
 
   it('throws on invalid type', () => {
-    expect(() => readPageSize(23)).toThrowError('Expected valid page size, got: 23');
+    expect(() => readPageSize(23)).toThrow(new TypeError('Expected valid page size, got: 23'));
   });
 });
 
@@ -54,15 +56,17 @@ describe('parseOrientation', () => {
   });
 
   it('throws on unsupported orientation', () => {
-    expect(() => parseOrientation('foo')).toThrowError(
-      "Expected 'portrait' or 'landscape', got: 'foo'",
+    expect(() => parseOrientation('foo')).toThrow(
+      new TypeError("Expected 'portrait' or 'landscape', got: 'foo'"),
     );
   });
 
   it('throws on invalid type', () => {
-    expect(() => parseOrientation(23)).toThrowError("Expected 'portrait' or 'landscape', got: 23");
-    expect(() => parseOrientation(null)).toThrowError(
-      "Expected 'portrait' or 'landscape', got: null",
+    expect(() => parseOrientation(23)).toThrow(
+      new TypeError("Expected 'portrait' or 'landscape', got: 23"),
+    );
+    expect(() => parseOrientation(null)).toThrow(
+      new TypeError("Expected 'portrait' or 'landscape', got: null"),
     );
   });
 });

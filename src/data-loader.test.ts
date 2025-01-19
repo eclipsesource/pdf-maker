@@ -12,12 +12,12 @@ describe('createDataLoader', () => {
   const loader = createDataLoader();
 
   it('throws for invalid URLs', async () => {
-    await expect(loader('')).rejects.toThrow("Invalid URL: ''");
-    await expect(loader('http://')).rejects.toThrow("Invalid URL: 'http://'");
+    await expect(loader('')).rejects.toThrow(new Error("Invalid URL: ''"));
+    await expect(loader('http://')).rejects.toThrow(new Error("Invalid URL: 'http://'"));
   });
 
   it('throws for unsupported URL scheme', async () => {
-    await expect(loader('foo:bar')).rejects.toThrow("URL not supported: 'foo:bar'");
+    await expect(loader('foo:bar')).rejects.toThrow(new Error("URL not supported: 'foo:bar'"));
   });
 
   describe('http:', () => {
@@ -49,7 +49,7 @@ describe('createDataLoader', () => {
 
     it('throws if 404 received', async () => {
       await expect(loader('https://example.com/not-there')).rejects.toThrow(
-        'Received 404 Not Found',
+        new Error('Received 404 Not Found'),
       );
     });
   });
@@ -62,12 +62,12 @@ describe('createDataLoader', () => {
     });
 
     it('throws for invalid data: URLs', async () => {
-      await expect(loader('data:foo')).rejects.toThrow("Invalid data URL: 'data:foo'");
+      await expect(loader('data:foo')).rejects.toThrow(new Error("Invalid data URL: 'data:foo'"));
     });
 
     it('throws for unsupported encoding in data: URLs', async () => {
       await expect(loader('data:foo,bar')).rejects.toThrow(
-        "Unsupported encoding in data URL: 'data:foo,bar'",
+        new Error("Unsupported encoding in data URL: 'data:foo,bar'"),
       );
     });
   });

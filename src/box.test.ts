@@ -74,22 +74,26 @@ describe('parseEdges', () => {
   });
 
   it('throws on invalid lengths', () => {
-    expect(() => parseEdges('')).toThrowError("Expected number or length string, got: ''");
-    expect(() => parseEdges(Infinity)).toThrowError(
-      'Expected number or length string, got: Infinity',
+    expect(() => parseEdges('')).toThrow(
+      new TypeError("Expected number or length string, got: ''"),
+    );
+    expect(() => parseEdges(Infinity)).toThrow(
+      new TypeError('Expected number or length string, got: Infinity'),
     );
   });
 
   it('throws on invalid types', () => {
-    expect(() => parseEdges('')).toThrowError("Expected number or length string, got: ''");
-    expect(() => parseEdges(null)).toThrowError(
-      'Expected number, length string, or object, got: null',
+    expect(() => parseEdges('')).toThrow(
+      new TypeError("Expected number or length string, got: ''"),
     );
-    expect(() => parseEdges(true)).toThrowError(
-      'Expected number, length string, or object, got: true',
+    expect(() => parseEdges(null)).toThrow(
+      new TypeError('Expected number, length string, or object, got: null'),
     );
-    expect(() => parseEdges(() => 23)).toThrowError(
-      'Expected number, length string, or object, got: anonymous function',
+    expect(() => parseEdges(true)).toThrow(
+      new TypeError('Expected number, length string, or object, got: true'),
+    );
+    expect(() => parseEdges(() => 23)).toThrow(
+      new TypeError('Expected number, length string, or object, got: anonymous function'),
     );
   });
 });
@@ -125,23 +129,35 @@ describe('parseLength', () => {
   });
 
   it('throws on invalid strings', () => {
-    expect(() => parseLength('')).toThrowError("Expected number or length string, got: ''");
-    expect(() => parseLength('1')).toThrowError("Expected number or length string, got: '1'");
-    expect(() => parseLength('1xy')).toThrowError("Expected number or length string, got: '1xy'");
+    expect(() => parseLength('')).toThrow(
+      new TypeError("Expected number or length string, got: ''"),
+    );
+    expect(() => parseLength('1')).toThrow(
+      new TypeError("Expected number or length string, got: '1'"),
+    );
+    expect(() => parseLength('1xy')).toThrow(
+      new TypeError("Expected number or length string, got: '1xy'"),
+    );
   });
 
   it('throws on invalid numbers', () => {
-    expect(() => parseLength(Infinity)).toThrowError(
-      'Expected number or length string, got: Infinity',
+    expect(() => parseLength(Infinity)).toThrow(
+      new TypeError('Expected number or length string, got: Infinity'),
     );
-    expect(() => parseLength(NaN)).toThrowError('Expected number or length string, got: NaN');
+    expect(() => parseLength(NaN)).toThrow(
+      new TypeError('Expected number or length string, got: NaN'),
+    );
   });
 
   it('throws on invalid types', () => {
-    expect(() => parseLength(null)).toThrowError('Expected number or length string, got: null');
-    expect(() => parseLength(true)).toThrowError('Expected number or length string, got: true');
-    expect(() => parseLength(() => 23)).toThrowError(
-      'Expected number or length string, got: anonymous function',
+    expect(() => parseLength(null)).toThrow(
+      new TypeError('Expected number or length string, got: null'),
+    );
+    expect(() => parseLength(true)).toThrow(
+      new TypeError('Expected number or length string, got: true'),
+    );
+    expect(() => parseLength(() => 23)).toThrow(
+      new TypeError('Expected number or length string, got: anonymous function'),
     );
   });
 });

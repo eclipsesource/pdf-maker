@@ -28,14 +28,14 @@ describe('readColor', () => {
   });
 
   it('throws on unsupported named color', () => {
-    expect(() => readColor('' as any)).toThrowError("Expected valid color name, got: ''");
-    expect(() => readColor('salmon' as any)).toThrowError(
-      "Expected valid color name, got: 'salmon'",
+    expect(() => readColor('' as any)).toThrow(new TypeError("Expected valid color name, got: ''"));
+    expect(() => readColor('salmon' as any)).toThrow(
+      new TypeError("Expected valid color name, got: 'salmon'"),
     );
   });
 
   it('throws on invalid color type', () => {
-    expect(() => readColor({} as any)).toThrowError('Expected valid color, got: {}');
-    expect(() => readColor(23 as any)).toThrowError('Expected valid color, got: 23');
+    expect(() => readColor({} as any)).toThrow(new TypeError('Expected valid color, got: {}'));
+    expect(() => readColor(23 as any)).toThrow(new TypeError('Expected valid color, got: 23'));
   });
 });

@@ -22,17 +22,17 @@ describe('parseBinaryData', () => {
   });
 
   it('throws for arrays', () => {
-    expect(() => parseBinaryData([1, 2, 3])).toThrowError(
-      'Expected Uint8Array, ArrayBuffer, or base64-encoded string, got: [1, 2, 3]',
+    expect(() => parseBinaryData([1, 2, 3])).toThrow(
+      new TypeError('Expected Uint8Array, ArrayBuffer, or base64-encoded string, got: [1, 2, 3]'),
     );
   });
 
   it('throws for other types', () => {
-    expect(() => parseBinaryData(23)).toThrowError(
-      'Expected Uint8Array, ArrayBuffer, or base64-encoded string, got: 23',
+    expect(() => parseBinaryData(23)).toThrow(
+      new TypeError('Expected Uint8Array, ArrayBuffer, or base64-encoded string, got: 23'),
     );
-    expect(() => parseBinaryData(null)).toThrowError(
-      'Expected Uint8Array, ArrayBuffer, or base64-encoded string, got: null',
+    expect(() => parseBinaryData(null)).toThrow(
+      new TypeError('Expected Uint8Array, ArrayBuffer, or base64-encoded string, got: null'),
     );
   });
 });

@@ -21,19 +21,21 @@ describe('decodeBase64', () => {
     expect(decodeBase64(base64(array3))).toEqual(array3);
   });
 
-  it('fails if string is not a multiple of 4', () => {
+  it('throws if string is not a multiple of 4', () => {
     expect(() => decodeBase64('A')).toThrow(
-      'Invalid base64 string: length must be a multiple of 4',
+      new Error('Invalid base64 string: length must be a multiple of 4'),
     );
     expect(() => decodeBase64('AA')).toThrow(
-      'Invalid base64 string: length must be a multiple of 4',
+      new Error('Invalid base64 string: length must be a multiple of 4'),
     );
     expect(() => decodeBase64('AAA')).toThrow(
-      'Invalid base64 string: length must be a multiple of 4',
+      new Error('Invalid base64 string: length must be a multiple of 4'),
     );
   });
 
-  it('fails if string contains invalid characters', () => {
-    expect(() => decodeBase64('ABØ=')).toThrow("Invalid Base64 character 'Ø' at position 2");
+  it('throws if string contains invalid characters', () => {
+    expect(() => decodeBase64('ABØ=')).toThrow(
+      new Error("Invalid Base64 character 'Ø' at position 2"),
+    );
   });
 });

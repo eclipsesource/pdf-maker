@@ -36,7 +36,7 @@ describe('ImageStore', () => {
   });
 
   it('rejects if image could not be loaded', async () => {
-    await expect(store.selectImage('foo')).rejects.toThrow("Could not load image 'foo'");
+    await expect(store.selectImage('foo')).rejects.toThrow(new Error("Could not load image 'foo'"));
   });
 
   it('loads registered images (deprecated)', async () => {

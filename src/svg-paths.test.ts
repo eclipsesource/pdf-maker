@@ -47,10 +47,12 @@ describe('tokenize', () => {
   });
 
   it('throws for invalid commands', () => {
-    expect(() => tokenizeSvgPath('M 1 x 2')).toThrowError(
-      "Unexpected character: 'x' at position 4",
+    expect(() => tokenizeSvgPath('M 1 x 2')).toThrow(
+      new Error("Unexpected character: 'x' at position 4"),
     );
-    expect(() => tokenizeSvgPath('M1?2')).toThrowError("Unexpected character: '?' at position 2");
+    expect(() => tokenizeSvgPath('M1?2')).toThrow(
+      new Error("Unexpected character: '?' at position 2"),
+    );
   });
 });
 
@@ -116,8 +118,10 @@ describe('parseSvgPath', () => {
   });
 
   it('throws for unexpected parameters', () => {
-    expect(() => parseSvgPath('M 1 2 3')).toThrowError('Expected parameter at end');
-    expect(() => parseSvgPath('M 1 2 3 L 4 5')).toThrowError('Expected parameter at position 8');
+    expect(() => parseSvgPath('M 1 2 3')).toThrow(new Error('Expected parameter at end'));
+    expect(() => parseSvgPath('M 1 2 3 L 4 5')).toThrow(
+      new Error('Expected parameter at position 8'),
+    );
   });
 });
 

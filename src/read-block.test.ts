@@ -146,43 +146,61 @@ describe('readTextBlock', () => {
   it('checks text', () => {
     const input = { text: 23 };
 
-    expect(() => readTextBlock(input)).toThrowError('Invalid value for "text":');
+    expect(() => readTextBlock(input)).toThrow(
+      new TypeError(
+        'Invalid value for "text": Expected string, object with text property, or array of text, got: 23',
+      ),
+    );
   });
 
   it('checks graphics', () => {
     const input = { text: [], graphics: 'foo' };
 
-    expect(() => readTextBlock(input)).toThrowError('Invalid value for "graphics":');
+    expect(() => readTextBlock(input)).toThrow(
+      new TypeError('Invalid value for "graphics": Expected array, got: \'foo\''),
+    );
   });
 
   it('checks margin', () => {
     const input = { text: [], margin: 'foo' };
 
-    expect(() => readTextBlock(input)).toThrowError('Invalid value for "margin":');
+    expect(() => readTextBlock(input)).toThrow(
+      new TypeError('Invalid value for "margin": Expected number or length string, got: \'foo\''),
+    );
   });
 
   it('checks padding', () => {
     const input = { text: [], padding: 'foo' };
 
-    expect(() => readTextBlock(input)).toThrowError('Invalid value for "padding":');
+    expect(() => readTextBlock(input)).toThrow(
+      new TypeError('Invalid value for "padding": Expected number or length string, got: \'foo\''),
+    );
   });
 
   it('checks width', () => {
     const input = { text: [], width: 'foo' };
 
-    expect(() => readTextBlock(input)).toThrowError('Invalid value for "width":');
+    expect(() => readTextBlock(input)).toThrow(
+      new TypeError('Invalid value for "width": Expected number or length string, got: \'foo\''),
+    );
   });
 
   it('checks height', () => {
     const input = { text: [], height: 'foo' };
 
-    expect(() => readTextBlock(input)).toThrowError('Invalid value for "height":');
+    expect(() => readTextBlock(input)).toThrow(
+      new TypeError('Invalid value for "height": Expected number or length string, got: \'foo\''),
+    );
   });
 
   it('checks verticalAlign', () => {
     const input = { text: [], verticalAlign: 'foo' };
 
-    expect(() => readTextBlock(input)).toThrowError('Invalid value for "verticalAlign":');
+    expect(() => readTextBlock(input)).toThrow(
+      new TypeError(
+        "Invalid value for \"verticalAlign\": Expected one of ('top', 'middle', 'bottom'), got: 'foo'",
+      ),
+    );
   });
 });
 
@@ -244,8 +262,8 @@ describe('readText', () => {
   });
 
   it('throws on invalid type', () => {
-    expect(() => readText([23 as any], {})).toThrowError(
-      'Expected string, object with text property, or array of text, got: 23',
+    expect(() => readText([23 as any], {})).toThrow(
+      new TypeError('Expected string, object with text property, or array of text, got: 23'),
     );
   });
 });

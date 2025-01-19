@@ -14,15 +14,17 @@ const transformAttrs = {
 
 describe('readShape', () => {
   it('throws for invalid types', () => {
-    expect(() => readShape(23)).toThrowError('Expected object, got: 23');
-    expect(() => readShape('foo')).toThrowError("Expected object, got: 'foo'");
+    expect(() => readShape(23)).toThrow(new TypeError('Expected object, got: 23'));
+    expect(() => readShape('foo')).toThrow(new TypeError("Expected object, got: 'foo'"));
   });
 
   it('throws for unsupported type property', () => {
     const fn = () => readShape({ type: 'foo' });
 
-    expect(fn).toThrowError(
-      `Invalid value for "type": Expected one of ('rect', 'circle', 'line', 'polyline', 'path'), got: 'foo'`,
+    expect(fn).toThrow(
+      new TypeError(
+        `Invalid value for "type": Expected one of ('rect', 'circle', 'line', 'polyline', 'path'), got: 'foo'`,
+      ),
     );
   });
 
@@ -53,7 +55,7 @@ describe('readShape', () => {
 
       const fn = () => readShape(rect);
 
-      expect(fn).toThrowError(`Missing value for "${name}"`);
+      expect(fn).toThrow(new TypeError(`Missing value for "${name}"`));
     });
   });
 
@@ -84,7 +86,7 @@ describe('readShape', () => {
 
       const fn = () => readShape(circle);
 
-      expect(fn).toThrowError(`Missing value for "${name}"`);
+      expect(fn).toThrow(new TypeError(`Missing value for "${name}"`));
     });
   });
 
@@ -111,7 +113,7 @@ describe('readShape', () => {
 
       const fn = () => readShape(line);
 
-      expect(fn).toThrowError(`Missing value for "${name}"`);
+      expect(fn).toThrow(new TypeError(`Missing value for "${name}"`));
     });
   });
 
@@ -138,13 +140,13 @@ describe('readShape', () => {
   it(`throws for missing polyline property points`, () => {
     const fn = () => readShape({ type: 'polyline' });
 
-    expect(fn).toThrowError(`Missing value for "points"`);
+    expect(fn).toThrow(new TypeError(`Missing value for "points"`));
   });
 
   it(`throws for invalid point in polyline`, () => {
     const fn = () => readShape({ type: 'polyline', points: [{ x: 1, y: 'a' }] });
 
-    expect(fn).toThrowError(`Invalid value for "points/0/y": Expected number, got: 'a'`);
+    expect(fn).toThrow(new TypeError(`Invalid value for "points/0/y": Expected number, got: 'a'`));
   });
 
   it('parses path object', () => {
@@ -179,7 +181,9 @@ describe('readShape', () => {
 
       const fn = () => readShape(rect);
 
-      expect(fn).toThrowError(`Invalid value for "${name}": Expected valid color name, got: 'foo'`);
+      expect(fn).toThrow(
+        new TypeError(`Invalid value for "${name}": Expected valid color name, got: 'foo'`),
+      );
     });
   });
 
@@ -188,23 +192,25 @@ describe('readShape', () => {
 
     const fn = () => readShape(rect);
 
-    expect(fn).toThrowError('Invalid value for "lineWidth": Expected number >= 0, got: -1');
+    expect(fn).toThrow(
+      new TypeError('Invalid value for "lineWidth": Expected number >= 0, got: -1'),
+    );
   });
 
   it(`throws for invalid opacity properties`, () => {
     const rect = { type: 'rect', x: 1, y: 2, width: 10, height: 20 };
 
-    expect(() => readShape({ ...rect, lineOpacity: -1 })).toThrowError(
-      'Invalid value for "lineOpacity": Expected number >= 0, got: -1',
+    expect(() => readShape({ ...rect, lineOpacity: -1 })).toThrow(
+      new TypeError('Invalid value for "lineOpacity": Expected number >= 0, got: -1'),
     );
-    expect(() => readShape({ ...rect, lineOpacity: 1.5 })).toThrowError(
-      'Invalid value for "lineOpacity": Expected number <= 1, got: 1.5',
+    expect(() => readShape({ ...rect, lineOpacity: 1.5 })).toThrow(
+      new TypeError('Invalid value for "lineOpacity": Expected number <= 1, got: 1.5'),
     );
-    expect(() => readShape({ ...rect, fillOpacity: -1 })).toThrowError(
-      'Invalid value for "fillOpacity": Expected number >= 0, got: -1',
+    expect(() => readShape({ ...rect, fillOpacity: -1 })).toThrow(
+      new TypeError('Invalid value for "fillOpacity": Expected number >= 0, got: -1'),
     );
-    expect(() => readShape({ ...rect, fillOpacity: 1.5 })).toThrowError(
-      'Invalid value for "fillOpacity": Expected number <= 1, got: 1.5',
+    expect(() => readShape({ ...rect, fillOpacity: 1.5 })).toThrow(
+      new TypeError('Invalid value for "fillOpacity": Expected number <= 1, got: 1.5'),
     );
   });
 });
