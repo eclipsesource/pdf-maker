@@ -1,11 +1,18 @@
 # Changelog
 
-## [0.5.6] - Unreleased
+## [0.5.7] - Unreleased
+
+## [0.5.6] - 2025-01-19
 
 ### Added
 
 - Support for embedded files via the `embeddedFiles` property in the
   document definition.
+
+### Fixed
+
+- A bug that caused errors when reusing fonts or images across multiple
+  documents.
 
 ## [0.5.5] - 2024-12-18
 
@@ -268,3 +275,4 @@ First public version.
 [0.5.3]: https://github.com/eclipsesource/pdf-maker/releases/tag/v0.5.3
 [0.5.4]: https://github.com/eclipsesource/pdf-maker/releases/tag/v0.5.4
 [0.5.5]: https://github.com/eclipsesource/pdf-maker/releases/tag/v0.5.5
+[0.5.6]: https://github.com/eclipsesource/pdf-maker/releases/tag/v0.5.6
