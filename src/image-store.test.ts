@@ -14,16 +14,16 @@ describe('ImageStore', () => {
 
   beforeAll(async () => {
     [libertyJpg, torusPng] = await Promise.all([
-      readFile(join(baseDir, './test/resources/liberty.jpg')),
-      readFile(join(baseDir, './test/resources/torus.png')),
+      readFile(join(baseDir, './test/resources/liberty.jpg')).then((data) => new Uint8Array(data)),
+      readFile(join(baseDir, './test/resources/torus.png')).then((data) => new Uint8Array(data)),
     ]);
     vi.spyOn(globalThis, 'fetch').mockImplementation((req: RequestInfo | URL) => {
       const url = req instanceof URL ? req.href : (req as string);
       if (url.endsWith('/liberty.jpg')) {
-        return Promise.resolve(new Response(libertyJpg));
+        return Promise.resolve(new Response(Buffer.from(libertyJpg)));
       }
       if (url.endsWith('/torus.png')) {
-        return Promise.resolve(new Response(torusPng));
+        return Promise.resolve(new Response(Buffer.from(torusPng)));
       }
       return Promise.resolve(new Response('Not found', { status: 404, statusText: 'Not Found' }));
     });

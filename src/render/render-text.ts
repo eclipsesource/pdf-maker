@@ -10,9 +10,9 @@ import {
   setTextRise,
   showText,
 } from 'pdf-lib';
-import { findRegisteredFont } from 'src/fonts.ts';
 
 import type { Pos } from '../box.ts';
+import { findRegisteredFont } from '../fonts.ts';
 import type { TextObject } from '../frame.ts';
 import type { Page, TextState } from '../page.ts';
 import { addPageFont } from '../page.ts';
