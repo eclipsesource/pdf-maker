@@ -159,7 +159,13 @@ export function readNumber(input: unknown, options?: NumberOptions) {
 }
 
 export function readDate(value: unknown): Date {
-  if (value instanceof Date) return value as Date;
+  if (value instanceof Date) {
+    if (Number.isNaN(value.getTime())) {
+      throw typeError('valid Date', value);
+    }
+    return value as Date;
+  }
+
   throw typeError('Date', value);
 }
 
@@ -214,17 +220,14 @@ export function readObject<T extends Record<string, TypeDef<unknown>>>(
   if (options?.maxProperties != null && Object.keys(input).length > options.maxProperties) {
     throw typeError(`object with max. ${options.maxProperties} properties`, input);
   }
-  return properties ? mapObject(input, properties) : (input as any);
-}
-
-function mapObject(obj: Obj, properties: Record<string, TypeDef<unknown>>) {
+  if (!properties) return input as any;
   return pickDefined(
     Object.fromEntries(
       Object.entries(properties).map(([key, type]) => {
-        return [key, readFrom(obj, key, type)];
+        return [key, readFrom(input, key, type)];
       }),
     ),
-  );
+  ) as Partial<{ [P in keyof T]: ReturnType<T[P]> }>;
 }
 
 export function isObject(value: unknown): value is Record<string, unknown> {
@@ -232,7 +235,7 @@ export function isObject(value: unknown): value is Record<string, unknown> {
     value != null &&
     typeof value === 'object' &&
     !Array.isArray(value) &&
-    value.toString() === '[object Object]'
+    Object.prototype.toString.call(value) === '[object Object]'
   );
 }
 

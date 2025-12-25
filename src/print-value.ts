@@ -1,7 +1,13 @@
 export function printValue(value: unknown, refs?: unknown[]) {
   if (typeof value === 'string') return `'${value}'`;
   if (Array.isArray(value)) return printArray(value, refs);
-  if (value instanceof Date) return `Date ${value.toISOString()}`;
+  if (value instanceof Date) {
+    try {
+      return `Date ${value.toISOString()}`;
+    } catch {
+      return `Invalid Date`;
+    }
+  }
   if (value instanceof Function) {
     return value.name ? `function ${value.name}` : 'anonymous function';
   }

@@ -22,6 +22,7 @@ describe('printValue', () => {
     expect(printValue(new Date('2001-02-03T04:05:06.789Z'))).toEqual(
       'Date 2001-02-03T04:05:06.789Z',
     );
+    expect(printValue(new Date('invalid date'))).toEqual('Invalid Date');
   });
 
   it('prints functions', () => {

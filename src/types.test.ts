@@ -288,7 +288,7 @@ describe('readNumber', () => {
   });
 });
 
-describe('asDate', () => {
+describe('readDate', () => {
   it('returns date objects', () => {
     const date = new Date('2000-04-01T12:13:14.000Z');
 
@@ -304,6 +304,12 @@ describe('asDate', () => {
   it('throws for other types', () => {
     expect(() => readDate(23)).toThrow(new TypeError('Expected Date, got: 23'));
     expect(() => readDate(null)).toThrow(new TypeError('Expected Date, got: null'));
+  });
+
+  it('throws for invalid Date objects', () => {
+    expect(() => readDate(new Date('invalid date'))).toThrow(
+      new TypeError('Expected valid Date, got: Invalid Date'),
+    );
   });
 });
 
