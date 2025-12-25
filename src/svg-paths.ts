@@ -89,7 +89,7 @@ export function parseSvgPath(path: string) {
     const token = tokens[pos++];
     if (!token?.op) return;
     const op = token.op;
-    const params = svgOpsParams[op as Op];
+    const params = svgOpsParams[op];
     commands.push({ op, params: readParams(params) });
     if (op !== 'Z' && op !== 'z') {
       while (hasParam()) {

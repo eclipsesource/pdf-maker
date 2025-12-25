@@ -48,9 +48,10 @@ function createNamedDest(page: PDFPage, name: string, pos: Pos) {
   destNames.push(page.doc.context.obj([page.ref, 'XYZ', pos.x, pos.y, null]));
 }
 
-function getOrCreate(dict: PDFDict, name: string, creatorFn: () => any): unknown {
+function getOrCreate(dict: PDFDict, name: string, creatorFn: () => unknown): unknown {
   if (!dict.has(PDFName.of(name))) {
-    dict.set(PDFName.of(name), dict.context.obj(creatorFn()));
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+    dict.set(PDFName.of(name), dict.context.obj(creatorFn() as any));
   }
   return dict.get(PDFName.of(name));
 }

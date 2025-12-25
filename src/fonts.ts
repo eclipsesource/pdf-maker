@@ -55,10 +55,12 @@ export function readFont(input: unknown): Partial<FontDef> {
 }
 
 export function registerFont(font: Font, pdfDoc: PDFDocument): PDFRef {
+  // eslint-disable-next-line no-multi-assign
   const registeredFonts = ((pdfDoc as any)._pdfmkr_registeredFonts ??= {});
   if (font.key in registeredFonts) return registeredFonts[font.key];
   const ref = pdfDoc.context.nextRef();
   const embedder = new (CustomFontSubsetEmbedder as any)(font.fkFont, font.data);
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
   const pdfFont = PDFFont.of(ref, pdfDoc, embedder);
   (pdfDoc as any).fonts.push(pdfFont);
   registeredFonts[font.key] = ref;
@@ -66,6 +68,7 @@ export function registerFont(font: Font, pdfDoc: PDFDocument): PDFRef {
 }
 
 export function findRegisteredFont(font: Font, pdfDoc: PDFDocument): PDFFont | undefined {
+  // eslint-disable-next-line no-multi-assign
   const registeredFonts = ((pdfDoc as any)._pdfmkr_registeredFonts ??= {});
   const ref = registeredFonts[font.key];
   if (ref) {

@@ -20,7 +20,8 @@ import { compact } from '../utils.ts';
 
 export function renderText(object: TextObject, page: Page, base: Pos) {
   const contentStream: PDFContentStream = (page.pdfPage as any).getContentStream();
-  const state = (page.textState ??= {});
+  page.textState ??= {};
+  const state = page.textState;
   const x = base.x;
   const y = page.size.height - base.y;
   contentStream.push(beginText());

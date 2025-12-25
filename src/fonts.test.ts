@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
+import type { FontWeight } from './api/text.ts';
 import { readFonts, weightToNumber } from './fonts.ts';
 
 describe('readFonts', () => {
@@ -65,8 +66,12 @@ describe('weightToNumber', () => {
   });
 
   it('throws for invalid types', () => {
-    expect(() => weightToNumber('foo' as any)).toThrow(new Error("Invalid font weight: 'foo'"));
-    expect(() => weightToNumber(null as any)).toThrow(new Error('Invalid font weight: null'));
+    expect(() => weightToNumber('foo' as FontWeight)).toThrow(
+      new Error("Invalid font weight: 'foo'"),
+    );
+    expect(() => weightToNumber(null as unknown as FontWeight)).toThrow(
+      new Error('Invalid font weight: null'),
+    );
   });
 
   it('throws for invalid numbers', () => {

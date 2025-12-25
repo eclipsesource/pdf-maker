@@ -11,5 +11,6 @@
   "eslint.rules.customizations": [{ "rule": "*", "severity": "warn" }],
   "files.insertFinalNewline": true,
   "files.trimFinalNewlines": true,
-  "files.trimTrailingWhitespace": true
+  "files.trimTrailingWhitespace": true,
+  "cSpell.words": ["bbox", "pdfmkr"]
 }

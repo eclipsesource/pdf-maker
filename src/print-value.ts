@@ -15,7 +15,7 @@ export function printValue(value: unknown, refs?: unknown[]) {
   if (ArrayBuffer.isView(value)) {
     return `${value.constructor.name} ${printArray([...new Uint8Array(value.buffer)])}`;
   }
-  const str = `${value}`;
+  const str = String(value);
   if (str === '[object Object]') return printObject(value as Record<string, unknown>, refs);
   return str;
 }

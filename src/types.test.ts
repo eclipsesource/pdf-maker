@@ -121,7 +121,7 @@ describe('readFrom', () => {
 });
 
 describe('optional', () => {
-  const fn = (n: unknown) => `${n}`;
+  const fn = (n: unknown) => String(n);
 
   it('returns function that delegates to given function', () => {
     expect(optional(fn)(23)).toEqual('23');
@@ -143,7 +143,7 @@ describe('optional', () => {
 });
 
 describe('required', () => {
-  const fn = (n: unknown) => `${n}`;
+  const fn = (n: unknown) => String(n);
 
   it('returns function that delegates to given function', () => {
     expect(required(fn)(23)).toEqual('23');

@@ -163,7 +163,7 @@ export function readDate(value: unknown): Date {
     if (Number.isNaN(value.getTime())) {
       throw typeError('valid Date', value);
     }
-    return value as Date;
+    return value;
   }
 
   throw typeError('Date', value);
@@ -220,7 +220,7 @@ export function readObject<T extends Record<string, TypeDef<unknown>>>(
   if (options?.maxProperties != null && Object.keys(input).length > options.maxProperties) {
     throw typeError(`object with max. ${options.maxProperties} properties`, input);
   }
-  if (!properties) return input as any;
+  if (!properties) return input as Partial<{ [P in keyof T]: ReturnType<T[P]> }>;
   return pickDefined(
     Object.fromEntries(
       Object.entries(properties).map(([key, type]) => {

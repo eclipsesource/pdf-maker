@@ -268,7 +268,7 @@ describe('layout', () => {
         { type: 'polyline', points: [p(1, 2), p(3, 4)] },
       ];
 
-      const { frame } = await layoutBlock({ graphics } as any, box, ctx);
+      const { frame } = await layoutBlock({ graphics } as Block, box, ctx);
 
       expect(frame).toEqual(expect.objectContaining({ width: 400, height: 0 }));
       expect(frame.objects).toEqual([
@@ -291,7 +291,7 @@ describe('layout', () => {
       ];
       const padding = { left: 5, right: 5, top: 5, bottom: 5 };
 
-      const { frame } = await layoutBlock({ graphics, padding } as any, box, ctx);
+      const { frame } = await layoutBlock({ graphics, padding } as Block, box, ctx);
 
       expect(frame).toEqual(expect.objectContaining({ width: 400, height: 10 }));
       expect(frame.objects).toEqual([

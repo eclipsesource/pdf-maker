@@ -47,6 +47,7 @@ describe('layout-image', () => {
 
       await layoutImageContent(block, box, ctx);
 
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(ctx.imageStore.selectImage).toHaveBeenCalledWith('img-720-480');
     });
 

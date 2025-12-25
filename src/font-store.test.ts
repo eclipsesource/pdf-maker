@@ -40,6 +40,7 @@ describe('FontStore', () => {
         obliqueBoldFont,
         otherFont,
       ]);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       vi.spyOn(fontkit, 'create').mockReturnValue({ fake: true } as any);
     });
 
@@ -48,6 +49,7 @@ describe('FontStore', () => {
     });
 
     beforeEach(() => {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       vi.spyOn(fontkit, 'create').mockReturnValue({ fake: true } as any);
       normalFont = fakeFontDef('Test');
       italicFont = fakeFontDef('Test', { style: 'italic' });
@@ -246,6 +248,6 @@ describe('FontStore', () => {
 function fakeFontDef(family: string, options?: Partial<FontDef>): FontDef {
   const style = options?.style ?? 'normal';
   const weight = options?.weight ?? 400;
-  const data = options?.data ?? mkData([family, style, weight].join('_') as string);
+  const data = options?.data ?? mkData([family, style, weight].join('_'));
   return { family, style, weight, data };
 }

@@ -36,6 +36,7 @@ function readImage(input: unknown) {
 }
 
 export function registerImage(image: Image, pdfDoc: PDFDocument): PDFRef {
+  // eslint-disable-next-line no-multi-assign
   const registeredImages = ((pdfDoc as any)._pdfmkr_registeredImages ??= {});
   if (image.url in registeredImages) return registeredImages[image.url];
   const ref = pdfDoc.context.nextRef();
@@ -45,7 +46,7 @@ export function registerImage(image: Image, pdfDoc: PDFDocument): PDFRef {
         const embedder = await (image.format === 'png'
           ? PngEmbedder.for(image.data)
           : JpegEmbedder.for(image.data));
-        embedder.embedIntoContext(pdfDoc.context, ref);
+        await embedder.embedIntoContext(pdfDoc.context, ref);
       } catch (error) {
         throw new Error(`Could not embed image "${image.url}"`, { cause: error });
       }

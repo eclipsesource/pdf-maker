@@ -1,4 +1,4 @@
-import type { PDFName } from 'pdf-lib';
+import type { PDFName, PDFOperatorNames } from 'pdf-lib';
 import {
   appendBezierCurve,
   asPDFNumber,
@@ -75,7 +75,7 @@ function drawRect(obj: RectObject): PDFOperator[] {
 }
 
 function createRect(x: number, y: number, width: number, height: number) {
-  return PDFOperator.of('re' as any, [
+  return PDFOperator.of('re' as PDFOperatorNames, [
     asPDFNumber(x),
     asPDFNumber(y),
     asPDFNumber(width),

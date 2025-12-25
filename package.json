@@ -26,9 +26,10 @@
   },
   "scripts": {
     "build": "rm -rf build/ dist/ && tsc && esbuild src/index.ts --bundle --sourcemap --platform=browser --target=es2022 --outdir=dist --format=esm --external:pdf-lib --external:@pdf-lib/fontkit && cp -a build/index.d.ts build/api/ dist/",
-    "lint": "eslint '{src,test}/**/*.{js,ts}' --max-warnings 0 && prettier --check .",
+    "lint": "eslint . --max-warnings=0 && prettier --check .",
     "test": "vitest run test",
-    "fix": "eslint '{src,test}/**/*.{js,ts}' --fix && prettier -w ."
+    "format": "prettier -w .",
+    "fix": "eslint . --fix && prettier -w ."
   },
   "dependencies": {
     "@pdf-lib/fontkit": "^1.1.1",
