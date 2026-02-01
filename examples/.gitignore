@@ -1,6 +1,2 @@
-package-lock.json
-yarn.lock
-deno.lock
-bun.lockb
 fonts/
-*.pdf
+out/

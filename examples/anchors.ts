@@ -1,6 +1,13 @@
-import { readFile, writeFile } from 'node:fs/promises';
+/* eslint-disable no-console */
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-import { columns, PdfMaker, rows, text } from 'pdfmkr';
+import type { DocumentDefinition } from '../src/index.ts';
+import { columns, PdfMaker, rows, text } from '../src/index.ts';
+
+const exampleDir = fileURLToPath(new URL('.', import.meta.url));
+const outDir = join(exampleDir, 'out');
 
 const loremIpsum =
   'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor' +
@@ -10,7 +17,7 @@ const loremIpsum =
   ' Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt ' +
   'mollit anim id est laborum.';
 
-const def = {
+const def: DocumentDefinition = {
   margin: { x: '20mm', y: '0.5cm' },
   defaultStyle: {
     fontSize: 12,
@@ -50,15 +57,18 @@ const def = {
   ],
 };
 
-function range(n) {
+function range(n: number) {
   return [...Array(n).keys()];
 }
 
 const pdfMaker = new PdfMaker();
 
-pdfMaker.registerFont(await readFile('./fonts/DejaVuSansCondensed.ttf'));
-pdfMaker.registerFont(await readFile('./fonts/DejaVuSansCondensed-Bold.ttf'));
-pdfMaker.registerFont(await readFile('./fonts/DejaVuSansCondensed-Oblique.ttf'));
+pdfMaker.registerFont(await readFile(join(exampleDir, 'fonts/DejaVuSansCondensed.ttf')));
+pdfMaker.registerFont(await readFile(join(exampleDir, 'fonts/DejaVuSansCondensed-Bold.ttf')));
+pdfMaker.registerFont(await readFile(join(exampleDir, 'fonts/DejaVuSansCondensed-Oblique.ttf')));
 
 const pdf = await pdfMaker.makePdf(def);
-await writeFile('./out/anchors.pdf', pdf);
+await mkdir(outDir, { recursive: true });
+const outFile = join(outDir, 'anchors.pdf');
+await writeFile(outFile, pdf);
+console.log(`PDF written to ${outFile}`);

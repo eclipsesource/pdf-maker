@@ -29,7 +29,8 @@
     "lint": "eslint . --max-warnings=0 && prettier --check .",
     "test": "vitest run test",
     "format": "prettier -w .",
-    "fix": "eslint . --fix && prettier -w ."
+    "fix": "eslint . --fix && prettier -w .",
+    "examples": "./examples/run-all-examples.sh"
   },
   "dependencies": {
     "@pdf-lib/fontkit": "^1.1.1",

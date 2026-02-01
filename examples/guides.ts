@@ -1,8 +1,15 @@
-import { readFile, writeFile } from 'node:fs/promises';
+/* eslint-disable no-console */
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-import { columns, PdfMaker, text } from 'pdfmkr';
+import type { DocumentDefinition } from '../src/index.ts';
+import { columns, PdfMaker, text } from '../src/index.ts';
 
-const document = {
+const exampleDir = fileURLToPath(new URL('.', import.meta.url));
+const outDir = join(exampleDir, 'out');
+
+const document: DocumentDefinition = {
   // Enable guides to render indicators for blocks, paddings, and margins
   dev: { guides: true },
   defaultStyle: {
@@ -83,8 +90,11 @@ const document = {
 };
 
 const pdfMaker = new PdfMaker();
-pdfMaker.registerFont(await readFile('./fonts/DejaVuSansCondensed.ttf'));
-pdfMaker.registerFont(await readFile('./fonts/DejaVuSansCondensed-Bold.ttf'));
+pdfMaker.registerFont(await readFile(join(exampleDir, 'fonts/DejaVuSansCondensed.ttf')));
+pdfMaker.registerFont(await readFile(join(exampleDir, 'fonts/DejaVuSansCondensed-Bold.ttf')));
 
 const pdf = await pdfMaker.makePdf(document);
-await writeFile('./out/guides.pdf', pdf);
+await mkdir(outDir, { recursive: true });
+const outFile = join(outDir, 'guides.pdf');
+await writeFile(outFile, pdf);
+console.log(`PDF written to ${outFile}`);

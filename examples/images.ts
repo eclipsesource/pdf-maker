@@ -1,9 +1,15 @@
-import { readFile, writeFile } from 'node:fs/promises';
+/* eslint-disable no-console */
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-import { columns, image, PdfMaker, rect, rows, text } from 'pdfmkr';
+import { columns, image, PdfMaker, rect, rows, text } from '../src/index.ts';
+
+const exampleDir = fileURLToPath(new URL('.', import.meta.url));
+const outDir = join(exampleDir, 'out');
 
 // Draw a frame around a block
-const drawFrame = ({ width, height }) => [
+const drawFrame = ({ width, height }: { width: number; height: number }) => [
   rect(0, 0, width, height, { lineColor: 'gray', lineDash: [2] }),
 ];
 
@@ -56,11 +62,14 @@ const document = {
 };
 
 const pdfMaker = new PdfMaker();
-pdfMaker.setResourceRoot('.');
+pdfMaker.setResourceRoot(exampleDir);
 
-pdfMaker.registerFont(await readFile('./fonts/DejaVuSansCondensed.ttf'));
-pdfMaker.registerFont(await readFile('./fonts/DejaVuSansCondensed-Bold.ttf'));
-pdfMaker.registerFont(await readFile('./fonts/DejaVuSansCondensed-Oblique.ttf'));
+pdfMaker.registerFont(await readFile(join(exampleDir, 'fonts/DejaVuSansCondensed.ttf')));
+pdfMaker.registerFont(await readFile(join(exampleDir, 'fonts/DejaVuSansCondensed-Bold.ttf')));
+pdfMaker.registerFont(await readFile(join(exampleDir, 'fonts/DejaVuSansCondensed-Oblique.ttf')));
 
 const pdf = await pdfMaker.makePdf(document);
-await writeFile('./out/images.pdf', pdf);
+await mkdir(outDir, { recursive: true });
+const outFile = join(outDir, 'images.pdf');
+await writeFile(outFile, pdf);
+console.log(`PDF written to ${outFile}`);

@@ -1,8 +1,0 @@
-{
-  "name": "example",
-  "private": true,
-  "type": "module",
-  "dependencies": {
-    "pdfmkr": "^0.5.4"
-  }
-}

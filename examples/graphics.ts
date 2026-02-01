@@ -1,6 +1,12 @@
-import { readFile, writeFile } from 'node:fs/promises';
+/* eslint-disable no-console */
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-import { circle, line, path, PdfMaker, rect, text } from 'pdfmkr';
+import { circle, line, path, PdfMaker, rect, text } from '../src/index.ts';
+
+const exampleDir = fileURLToPath(new URL('.', import.meta.url));
+const outDir = join(exampleDir, 'out');
 
 const document = {
   defaultStyle: {
@@ -143,9 +149,12 @@ const document = {
 
 const pdfMaker = new PdfMaker();
 
-pdfMaker.registerFont(await readFile('./fonts/DejaVuSansCondensed.ttf'));
-pdfMaker.registerFont(await readFile('./fonts/DejaVuSansCondensed-Bold.ttf'));
-pdfMaker.registerFont(await readFile('./fonts/DejaVuSansCondensed-Oblique.ttf'));
+pdfMaker.registerFont(await readFile(join(exampleDir, 'fonts/DejaVuSansCondensed.ttf')));
+pdfMaker.registerFont(await readFile(join(exampleDir, 'fonts/DejaVuSansCondensed-Bold.ttf')));
+pdfMaker.registerFont(await readFile(join(exampleDir, 'fonts/DejaVuSansCondensed-Oblique.ttf')));
 
 const pdf = await pdfMaker.makePdf(document);
-await writeFile('./out/graphics.pdf', pdf);
+await mkdir(outDir, { recursive: true });
+const outFile = join(outDir, 'graphics.pdf');
+await writeFile(outFile, pdf);
+console.log(`PDF written to ${outFile}`);
