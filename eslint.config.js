@@ -13,7 +13,6 @@ export default tseslint.config(
       'out/',
       'build/',
       'coverage/',
-      'examples/',
       '**/*.local',
       '*~',
       'eslint.config.js',
@@ -78,6 +77,12 @@ export default tseslint.config(
       'import/no-default-export': 'error',
       'import/no-duplicates': 'error',
       'import/extensions': ['error', 'ignorePackages', { ts: 'always' }],
+    },
+  },
+  {
+    files: ['examples/**/*.ts'],
+    rules: {
+      'no-console': ['error', { allow: ['warn', 'error', 'log'] }],
     },
   },
 );

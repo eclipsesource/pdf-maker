@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
