@@ -1,3 +1,5 @@
+import { PDFPage } from '@ralfstx/pdf-core';
+
 import { paperSizes } from '../api/sizes.ts';
 import type { Box, Size } from '../box.ts';
 import { parseEdges, subtractEdges, ZERO_EDGES } from '../box.ts';
@@ -86,7 +88,13 @@ export async function layoutPages(def: DocumentDefinition, ctx: MakerCtx): Promi
       frame.objects = [createFrameGuides(frame, { margin: pageMargin, isPage: true })];
     }
     remainingBlocks = remainder;
-    pages.push({ size: pageSize, content: frame, header, footer });
+    pages.push({
+      size: pageSize,
+      content: frame,
+      header,
+      footer,
+      pdfPage: new PDFPage(pageInfo.pageSize.width, pageInfo.pageSize.height),
+    });
   };
 
   while (remainingBlocks?.length) {

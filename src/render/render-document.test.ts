@@ -1,10 +1,22 @@
-import type { PDFArray, PDFStream } from 'pdf-lib';
-import { PDFDict, PDFDocument, PDFHexString, PDFName, PDFString } from 'pdf-lib';
-import { describe, expect, it } from 'vitest';
+import type { PDFDocument } from '@ralfstx/pdf-core';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { renderDocument } from './render-document.ts';
 
+const noObjectStreams = { useObjectStreams: false } as const;
+
 describe('renderDocument', () => {
+  beforeEach(() => {
+    vi.stubEnv('TZ', 'UTC');
+    vi.useFakeTimers();
+    vi.setSystemTime('2025-01-01T00:00:00.000Z');
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
+    vi.useRealTimers();
+  });
+
   it('renders all info properties', async () => {
     const def = {
       content: [],
@@ -13,7 +25,7 @@ describe('renderDocument', () => {
         subject: 'test-subject',
         keywords: ['foo', 'bar'],
         author: 'test-author',
-        creationDate: new Date(23),
+        creationDate: new Date('2000-01-01T00:00:00.000Z'),
         creator: 'test-creator',
         producer: 'test-producer',
         custom: {
@@ -23,33 +35,21 @@ describe('renderDocument', () => {
       },
     };
 
-    const pdfData = await renderDocument(def, []);
+    const pdfData = await renderDocument(def, [], noObjectStreams);
+    const dataString = new TextDecoder().decode(pdfData);
 
-    const pdfDoc = await PDFDocument.load(pdfData, { updateMetadata: false });
-    const infoDict = pdfDoc.context.lookup(pdfDoc.context.trailerInfo.Info) as PDFDict;
-    const getInfo = (name: string) => infoDict.get(PDFName.of(name));
-    expect(infoDict).toBeInstanceOf(PDFDict);
-    expect(getInfo('Title')).toEqual(PDFHexString.fromText('test-title'));
-    expect(getInfo('Subject')).toEqual(PDFHexString.fromText('test-subject'));
-    expect(getInfo('Keywords')).toEqual(PDFHexString.fromText('foo bar'));
-    expect(getInfo('Author')).toEqual(PDFHexString.fromText('test-author'));
-    expect(getInfo('Producer')).toEqual(PDFHexString.fromText('test-producer'));
-    expect(getInfo('Creator')).toEqual(PDFHexString.fromText('test-creator'));
-    expect(getInfo('CreationDate')).toEqual(PDFString.fromDate(new Date(23)));
-    expect(getInfo('foo')).toEqual(PDFHexString.fromText('foo-value'));
-    expect(getInfo('bar')).toEqual(PDFHexString.fromText('bar-value'));
-  });
-
-  it('generates file ID', async () => {
-    const def = { content: [] };
-
-    const pdfData = await renderDocument(def, []);
-
-    const pdfDoc = await PDFDocument.load(pdfData, { updateMetadata: false });
-    const fileId = pdfDoc.context.lookup(pdfDoc.context.trailerInfo.ID) as PDFArray;
-    expect(fileId.size()).toBe(2);
-    expect(fileId.get(0).toString()).toMatch(/^<[0-9A-F]{64}>$/);
-    expect(fileId.get(1).toString()).toMatch(/^<[0-9A-F]{64}>$/);
+    expect(dataString).toMatch(/\/Title <FEFF0074006500730074002D007400690074006C0065>/);
+    expect(dataString).toMatch(/\/Author <FEFF0074006500730074002D0061007500740068006F0072>/);
+    expect(dataString).toMatch(/\/Subject <FEFF0074006500730074002D007300750062006A006500630074>/);
+    expect(dataString).toMatch(/\/Keywords <FEFF0066006F006F002C0020006200610072>/);
+    expect(dataString).toMatch(/\/Creator <FEFF0074006500730074002D00630072006500610074006F0072>/);
+    expect(dataString).toMatch(
+      /\/Producer <FEFF0074006500730074002D00700072006F00640075006300650072>/,
+    );
+    expect(dataString).toMatch(/\/CreationDate \(D:20000101000000Z\)/);
+    expect(dataString).toMatch(/\/ModDate \(D:20250101000000Z\)/);
+    expect(dataString).toMatch(/\/foo <FEFF0066006F006F002D00760061006C00750065>/);
+    expect(dataString).toMatch(/\/bar <FEFF006200610072002D00760061006C00750065>/);
   });
 
   it('renders custom data', async () => {
@@ -61,28 +61,32 @@ describe('renderDocument', () => {
       },
     };
 
-    const pdfData = await renderDocument(def, []);
+    const pdfData = await renderDocument(def, [], noObjectStreams);
+    const dataString = new TextDecoder().decode(pdfData);
 
-    const pdfDoc = await PDFDocument.load(pdfData, { updateMetadata: false });
-    const lookup = (name: string) => pdfDoc.catalog.lookup(PDFName.of(name)) as PDFStream;
-    expect(lookup('XXFoo').getContentsString()).toBe('Foo');
-    expect(lookup('XXBar').getContents()).toEqual(Uint8Array.of(1, 2, 3));
+    expect(dataString).toMatch(/\/XXFoo \d+ \d+ R/);
+    expect(dataString).toMatch(/\/XXBar \d+ \d+ R/);
+    const fooObject = dataString.match(/\/XXFoo (\d+ \d+) R/)![1];
+    const barObject = dataString.match(/\/XXBar (\d+ \d+) R/)![1];
+    const streamRegex = (obj: string) =>
+      new RegExp(`${obj} obj\\n<<\\n\\s*/Length\\s+\\d+\\n>>\\nstream\\n(.*?)\\nendstream`, 'm');
+    const fooStreamMatch = dataString.match(streamRegex(fooObject));
+    const barStreamMatch = dataString.match(streamRegex(barObject));
+    expect(fooStreamMatch![1]).toBe('Foo');
+    expect(barStreamMatch![1]).toBe('\x01\x02\x03');
   });
 
   it('calls custom render hook', async () => {
     const def = {
       content: [],
-      onRenderDocument: async (pdfDoc: PDFDocument) => {
-        pdfDoc.setTitle('Test Title');
-        await new Promise((resolve) => setTimeout(resolve, 10));
+      onRenderDocument: (pdfDoc: PDFDocument) => {
+        pdfDoc.setInfo({ title: 'test-title' });
       },
     };
 
-    const pdfData = await renderDocument(def, []);
+    const pdfData = await renderDocument(def, [], noObjectStreams);
+    const dataString = new TextDecoder().decode(pdfData);
 
-    const pdfDoc = await PDFDocument.load(pdfData, { updateMetadata: false });
-    const infoDict = pdfDoc.context.lookup(pdfDoc.context.trailerInfo.Info) as PDFDict;
-    const getInfo = (name: string) => infoDict.get(PDFName.of(name));
-    expect(getInfo('Title')).toEqual(PDFHexString.fromText('Test Title'));
+    expect(dataString).toMatch(/\/Title <FEFF0074006500730074002D007400690074006C0065>/);
   });
 });

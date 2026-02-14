@@ -1,6 +1,24 @@
 # Changelog
 
-## [0.5.7] - Unreleased
+## [0.6.0] - Unreleased
+
+### Changed
+
+- Replaced `pdf-lib` with `@ralfstx/pdf-core` as the underlying PDF
+  generation library. This results in faster PDF generation and a
+  smaller bundle size. It also opens up new possibilities for new
+  features such as font shaping.
+
+### Breaking
+
+- Font and image data must now be provided as `Uint8Array`.
+  Base64-encoded strings and `ArrayBuffer`s are no longer accepted.
+
+- Text height is now based on the OS/2 typographic metrics
+  (`sTypoAscender` / `sTypoDescender`) instead of the hhea table values.
+  This results in tighter line spacing for fonts whose hhea values
+  include extra spacing that was effectively double-counted with the
+  `lineHeight` multiplier.
 
 ## [0.5.6] - 2025-01-19
 

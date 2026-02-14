@@ -1,19 +1,19 @@
-import type { PDFDocument, PDFPage } from 'pdf-lib';
-import { PDFArray, PDFDict, PDFName, PDFRef } from 'pdf-lib';
+import type { PDFDocument } from '@ralfstx/pdf-core';
+import { PDFPage } from '@ralfstx/pdf-core';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { Size } from '../box.ts';
 import type { Font } from '../fonts.ts';
 import type { Frame } from '../frame.ts';
 import type { Page } from '../page.ts';
-import { fakeFont, fakePDFPage, getContentStream } from '../test/test-utils.ts';
+import { fakeFont, getContentStream } from '../test/test-utils.ts';
 import { renderFrame, renderPage } from './render-page.ts';
 
 describe('render-page', () => {
   let pdfPage: PDFPage;
 
   beforeEach(() => {
-    pdfPage = fakePDFPage();
+    pdfPage = new PDFPage(300, 400);
   });
 
   describe('renderPage', () => {
@@ -22,7 +22,7 @@ describe('render-page', () => {
 
     beforeEach(() => {
       size = { width: 300, height: 400 };
-      pdfDoc = { addPage: vi.fn().mockReturnValue(pdfPage) } as unknown as PDFDocument;
+      pdfDoc = { addPage: vi.fn() } as unknown as PDFDocument;
     });
 
     it('renders content', () => {
@@ -32,11 +32,13 @@ describe('render-page', () => {
           { type: 'graphics', shapes: [{ type: 'rect', x: 0, y: 0, width: 280, height: 300 }] },
         ],
       };
-      const page = { size, content };
+      const page = { size, content, pdfPage };
 
       renderPage(page, pdfDoc);
 
-      expect(getContentStream(page).join()).toEqual('q,1 0 0 -1 50 350 cm,q,0 0 280 300 re,S,Q,Q');
+      expect(getContentStream(page)).toEqual(
+        ['q', '1 0 0 -1 50 350 cm', 'q', '0 0 280 300 re', 'S', 'Q', 'Q'].join('\n'),
+      );
     });
 
     it('renders header', () => {
@@ -47,11 +49,13 @@ describe('render-page', () => {
           { type: 'graphics', shapes: [{ type: 'rect', x: 0, y: 0, width: 280, height: 30 }] },
         ],
       };
-      const page = { size, content, header };
+      const page = { size, content, header, pdfPage };
 
       renderPage(page, pdfDoc);
 
-      expect(getContentStream(page).join()).toEqual('q,1 0 0 -1 50 380 cm,q,0 0 280 30 re,S,Q,Q');
+      expect(getContentStream(page)).toEqual(
+        ['q', '1 0 0 -1 50 380 cm', 'q', '0 0 280 30 re', 'S', 'Q', 'Q'].join('\n'),
+      );
     });
 
     it('renders footer', () => {
@@ -62,11 +66,13 @@ describe('render-page', () => {
           { type: 'graphics', shapes: [{ type: 'rect', x: 0, y: 0, width: 280, height: 30 }] },
         ],
       };
-      const page = { size, content, footer };
+      const page = { size, content, footer, pdfPage };
 
       renderPage(page, pdfDoc);
 
-      expect(getContentStream(page).join()).toEqual('q,1 0 0 -1 50 50 cm,q,0 0 280 30 re,S,Q,Q');
+      expect(getContentStream(page)).toEqual(
+        ['q', '1 0 0 -1 50 50 cm', 'q', '0 0 280 30 re', 'S', 'Q', 'Q'].join('\n'),
+      );
     });
   });
 
@@ -78,7 +84,7 @@ describe('render-page', () => {
     beforeEach(() => {
       size = { width: 500, height: 800 };
       page = { size, pdfPage } as Page;
-      font = fakeFont('Test', { doc: pdfPage.doc });
+      font = fakeFont('Test');
     });
 
     it('renders text objects', () => {
@@ -103,8 +109,15 @@ describe('render-page', () => {
 
       renderFrame(frame, page);
 
-      expect(getContentStream(page).join()).toEqual(
-        'BT,1 0 0 1 15 762 Tm,0 0 0 rg,/Test-1 12 Tf,Test text Tj,ET',
+      expect(getContentStream(page)).toEqual(
+        [
+          'BT',
+          '1 0 0 1 15 762 Tm',
+          '0 0 0 rg',
+          '/Test-normal-400 12 Tf',
+          '[<005400650073007400200074006500780074>] TJ',
+          'ET',
+        ].join('\n'),
       );
     });
 
@@ -136,8 +149,15 @@ describe('render-page', () => {
       renderFrame(frame, page);
 
       // text rendered at (25, 750) + (10, 20)
-      expect(getContentStream(page).join()).toEqual(
-        'BT,1 0 0 1 25 742 Tm,0 0 0 rg,/Test-1 12 Tf,Test text Tj,ET',
+      expect(getContentStream(page)).toEqual(
+        [
+          'BT',
+          '1 0 0 1 25 742 Tm',
+          '0 0 0 rg',
+          '/Test-normal-400 12 Tf',
+          '[<005400650073007400200074006500780074>] TJ',
+          'ET',
+        ].join('\n'),
       );
     });
 
@@ -149,12 +169,7 @@ describe('render-page', () => {
 
       renderFrame(frame, page);
 
-      const names = (pdfPage.doc.catalog as any)
-        .get(PDFName.of('Names'))
-        .get(PDFName.of('Dests'))
-        .get(PDFName.of('Names'));
-      expect(names).toBeInstanceOf(PDFArray);
-      expect(names.toString()).toEqual('[ (test-dest) [ 1 0 R /XYZ 11 778 null ] ]');
+      expect([...page.pdfPage.destinations()]).toEqual([{ name: 'test-dest', x: 11, y: 778 }]);
     });
 
     it('renders link objects', () => {
@@ -165,28 +180,16 @@ describe('render-page', () => {
 
       renderFrame(frame, page);
 
-      const pageAnnotations = pdfPage.node.get(PDFName.of('Annots')) as PDFArray;
-      expect(pageAnnotations).toBeInstanceOf(PDFArray);
-      expect(pageAnnotations.size()).toBe(1);
-      const ref = pageAnnotations.get(0);
-      expect(ref).toBeInstanceOf(PDFRef);
-      const annotation = (pdfPage.doc.context as any).indirectObjects.get(ref);
-      expect(annotation.toString()).toEqual(
-        [
-          '<<',
-          '/Type /Annot',
-          '/Subtype /Link',
-          '/Rect [ 11 758 91 778 ]', // [10 + 1, 800 - 20 - 20 - 2, 11 + 80, 800 - 20 - 2]
-          '/A <<',
-          '/Type /Action',
-          '/S /URI',
-          '/URI (test-url)',
-          '>>',
-          '/C [ ]',
-          '/F 4',
-          '>>',
-        ].join('\n'),
-      );
+      expect([...page.pdfPage.links()]).toEqual([
+        {
+          height: 20,
+          type: 'url',
+          url: 'test-url',
+          width: 80,
+          x: 11,
+          y: 758,
+        },
+      ]);
     });
 
     it('renders internal link objects', () => {
@@ -197,27 +200,16 @@ describe('render-page', () => {
 
       renderFrame(frame, page);
 
-      const pageAnnotations = pdfPage.node.get(PDFName.of('Annots')) as PDFArray;
-      expect(pageAnnotations).toBeInstanceOf(PDFArray);
-      expect(pageAnnotations.size()).toBe(1);
-      const annotation = pdfPage.doc.context.lookup(pageAnnotations.get(0)) as PDFDict;
-      expect(annotation).toBeInstanceOf(PDFDict);
-      expect(annotation.toString()).toEqual(
-        [
-          '<<',
-          '/Type /Annot',
-          '/Subtype /Link',
-          '/Rect [ 11 758 91 778 ]', // [10 + 1, 800 - 20 - 20 - 2, 11 + 80, 800 - 20 - 2]
-          '/A <<',
-          '/Type /Action',
-          '/S /GoTo',
-          '/D (test-id)',
-          '>>',
-          '/C [ ]',
-          '/F 4',
-          '>>',
-        ].join('\n'),
-      );
+      expect([...page.pdfPage.links()]).toEqual([
+        {
+          type: 'destination',
+          x: 11,
+          y: 758,
+          width: 80,
+          height: 20,
+          destination: 'test-id',
+        },
+      ]);
     });
   });
 });

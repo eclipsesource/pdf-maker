@@ -1,10 +1,11 @@
+import { PDFPage } from '@ralfstx/pdf-core';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import type { Size } from '../box.ts';
 import type { Font } from '../fonts.ts';
 import type { TextObject } from '../frame.ts';
 import type { Page } from '../page.ts';
-import { fakeFont, fakePDFPage, getContentStream } from '../test/test-utils.ts';
+import { fakeFont, getContentStream } from '../test/test-utils.ts';
 import { renderText } from './render-text.ts';
 
 describe('render-text', () => {
@@ -14,9 +15,9 @@ describe('render-text', () => {
 
   beforeEach(() => {
     size = { width: 500, height: 800 };
-    const pdfPage = fakePDFPage();
+    const pdfPage = new PDFPage(size.width, size.height);
     page = { size, pdfPage } as Page;
-    font = fakeFont('fontA', { doc: pdfPage.doc });
+    font = fakeFont('fontA');
   });
 
   describe('renderText', () => {
@@ -31,14 +32,16 @@ describe('render-text', () => {
 
       renderText(obj, page, pos);
 
-      expect(getContentStream(page)).toEqual([
-        'BT',
-        '1 0 0 1 11 770 Tm',
-        '0 0 0 rg',
-        '/fontA-1 10 Tf',
-        'foo Tj',
-        'ET',
-      ]);
+      expect(getContentStream(page)).toEqual(
+        [
+          'BT',
+          '1 0 0 1 11 770 Tm',
+          '0 0 0 rg',
+          '/fontA-normal-400 10 Tf',
+          '[<0066006F006F>] TJ',
+          'ET',
+        ].join('\n'),
+      );
     });
 
     it('renders text rise', () => {
@@ -53,19 +56,21 @@ describe('render-text', () => {
 
       renderText(obj, page, pos);
 
-      expect(getContentStream(page)).toEqual([
-        'BT',
-        '1 0 0 1 11 770 Tm',
-        '0 0 0 rg',
-        '/fontA-1 10 Tf',
-        'aaa Tj',
-        '3 Ts', // set text rise
-        'bbb Tj',
-        'ccc Tj',
-        '0 Ts', // reset text rise
-        'ddd Tj',
-        'ET',
-      ]);
+      expect(getContentStream(page)).toEqual(
+        [
+          'BT',
+          '1 0 0 1 11 770 Tm',
+          '0 0 0 rg',
+          '/fontA-normal-400 10 Tf',
+          '[<006100610061>] TJ',
+          '3 Ts', // set text rise
+          '[<006200620062>] TJ',
+          '[<006300630063>] TJ',
+          '0 Ts', // reset text rise
+          '[<006400640064>] TJ',
+          'ET',
+        ].join('\n'),
+      );
     });
 
     it('renders letter spacing', () => {
@@ -82,19 +87,21 @@ describe('render-text', () => {
 
       renderText(obj, page, pos);
 
-      expect(getContentStream(page)).toEqual([
-        'BT',
-        '1 0 0 1 11 770 Tm',
-        '0 0 0 rg',
-        '/fontA-1 10 Tf',
-        'aaa Tj',
-        '3 Tc', // set letter spacing
-        'bbb Tj',
-        'ccc Tj',
-        '0 Tc', // reset letter spacing
-        'ddd Tj',
-        'ET',
-      ]);
+      expect(getContentStream(page)).toEqual(
+        [
+          'BT',
+          '1 0 0 1 11 770 Tm',
+          '0 0 0 rg',
+          '/fontA-normal-400 10 Tf',
+          '[<006100610061>] TJ',
+          '3 Tc', // set letter spacing
+          '[<006200620062>] TJ',
+          '[<006300630063>] TJ',
+          '0 Tc', // reset letter spacing
+          '[<006400640064>] TJ',
+          'ET',
+        ].join('\n'),
+      );
     });
 
     it('maintains text state throughout page', () => {
@@ -118,24 +125,28 @@ describe('render-text', () => {
       renderText(obj2, page, pos);
       renderText(obj3, page, pos);
 
-      expect(getContentStream(page)).toEqual([
-        'BT',
-        '1 0 0 1 11 770 Tm',
-        '0 0 0 rg',
-        '/fontA-1 10 Tf',
-        '3 Ts', // set text rise
-        'aaa Tj',
-        'ET',
-        'BT',
-        '1 0 0 1 11 770 Tm',
-        'bbb Tj',
-        'ET',
-        'BT',
-        '1 0 0 1 13 768 Tm',
-        '0 Ts', // reset text rise
-        'ccc Tj',
-        'ET',
-      ]);
+      expect(getContentStream(page)).toEqual(
+        [
+          'BT',
+          '1 0 0 1 11 770 Tm',
+          '0 0 0 rg',
+          '/fontA-normal-400 10 Tf',
+          '3 Ts', // set text rise
+          '[<006100610061>] TJ',
+          'ET',
+          'BT',
+          '1 0 0 1 11 770 Tm',
+          '/fontA-normal-400 10 Tf',
+          '[<006200620062>] TJ',
+          'ET',
+          'BT',
+          '1 0 0 1 13 768 Tm',
+          '/fontA-normal-400 10 Tf',
+          '0 Ts', // reset text rise
+          '[<006300630063>] TJ',
+          'ET',
+        ].join('\n'),
+      );
     });
 
     it('renders multiple rows with multiple text segments', () => {
@@ -151,18 +162,20 @@ describe('render-text', () => {
 
       renderText(obj, page, pos);
 
-      expect(getContentStream(page)).toEqual([
-        'BT',
-        '1 0 0 1 11 770 Tm',
-        '0 0 0 rg',
-        '/fontA-1 10 Tf',
-        'foo Tj',
-        'bar Tj',
-        '1 0 0 1 11 754 Tm',
-        'foo Tj',
-        'bar Tj',
-        'ET',
-      ]);
+      expect(getContentStream(page)).toEqual(
+        [
+          'BT',
+          '1 0 0 1 11 770 Tm',
+          '0 0 0 rg',
+          '/fontA-normal-400 10 Tf',
+          '[<0066006F006F>] TJ',
+          '[<006200610072>] TJ',
+          '1 0 0 1 11 754 Tm',
+          '[<0066006F006F>] TJ',
+          '[<006200610072>] TJ',
+          'ET',
+        ].join('\n'),
+      );
     });
   });
 });

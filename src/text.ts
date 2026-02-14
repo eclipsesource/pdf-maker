@@ -43,13 +43,13 @@ export async function extractTextSegments(
         letterSpacing,
       } = attrs;
       const font = await fontStore.selectFont({ fontFamily, fontStyle, fontWeight });
-      const height = getTextHeight(font.fkFont, fontSize);
+      const height = getTextHeight(font.pdfFont, fontSize);
 
       return splitChunks(text).map(
         (text) =>
           ({
             text,
-            width: getTextWidth(text, font.fkFont, fontSize) + text.length * (letterSpacing ?? 0),
+            width: getTextWidth(text, font.pdfFont, fontSize) + text.length * (letterSpacing ?? 0),
             height,
             lineHeight,
             font,

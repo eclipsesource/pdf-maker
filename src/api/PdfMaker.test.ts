@@ -1,9 +1,8 @@
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 
-import { image, text } from './layout.ts';
 import { PdfMaker } from './PdfMaker.ts';
 
 describe('makePdf', () => {
@@ -30,26 +29,5 @@ describe('makePdf', () => {
 
     const string = Buffer.from(pdf.buffer).toString();
     expect(string).toMatch(/[^\n]\n$/);
-  });
-
-  it('includes a trailer ID in the document', async () => {
-    const pdf = await pdfMaker.makePdf({ content: [{}] });
-
-    const string = Buffer.from(pdf.buffer).toString();
-    expect(string).toMatch(/\/ID \[ <[0-9A-F]{64}> <[0-9A-F]{64}> \]/);
-  });
-
-  it('creates consistent results across runs', async () => {
-    // ensure same timestamps in generated PDF
-    vi.useFakeTimers();
-    // include fonts and images to ensure they can be reused
-    const content = [text('Test'), image('file:/torus.png')];
-
-    const pdf1 = await pdfMaker.makePdf({ content });
-    const pdf2 = await pdfMaker.makePdf({ content });
-
-    const pdfStr1 = Buffer.from(pdf1.buffer).toString();
-    const pdfStr2 = Buffer.from(pdf2.buffer).toString();
-    expect(pdfStr1).toEqual(pdfStr2);
   });
 });

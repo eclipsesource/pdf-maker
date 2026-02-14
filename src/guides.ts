@@ -1,6 +1,5 @@
-import { rgb } from 'pdf-lib';
-
 import { ZERO_EDGES } from './box.ts';
+import { rgb } from './colors.ts';
 import type {
   CircleObject,
   Frame,

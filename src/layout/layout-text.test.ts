@@ -1,7 +1,7 @@
-import { rgb } from 'pdf-lib';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import type { Box } from '../box.ts';
+import { rgb } from '../colors.ts';
 import { FontStore } from '../font-store.ts';
 import type { Font, FontSelector } from '../fonts.ts';
 import type { MakerCtx } from '../maker-ctx.ts';

@@ -238,14 +238,12 @@ export type FontsDefinition = { [name: string]: FontDefinition[] };
  */
 export type FontDefinition = {
   /**
-   * The font data, as a Uint8Array, ArrayBuffer, or a base64-encoded
-   * string.
+   * The font data as a Uint8Array.
    *
-   * Supports TrueType (`.ttf`), OpenType (`.otf`), WOFF, WOFF2,
-   * TrueType Collection (`.ttc`), and Datafork TrueType (`.dfont`) font
-   * files (see https://github.com/Hopding/fontkit).
+   * Supports TrueType font files (`.ttf`) and OpenType (`.otf`) font
+   * files with TrueType outlines.
    */
-  data: string | Uint8Array | ArrayBuffer;
+  data: Uint8Array;
 
   /**
    * Whether this is a bold font.
@@ -272,12 +270,12 @@ export type ImagesDefinition = { [name: string]: ImageDefinition };
  */
 export type ImageDefinition = {
   /**
-   * The image data, as a Uint8Array, ArrayBuffer, or a base64-encoded string.
+   * The image data as a Uint8Array.
    * Supported image formats are PNG and JPEG.
    *
    *  @deprecated Use URLs to include images.
    */
-  data: string | Uint8Array | ArrayBuffer;
+  data: Uint8Array;
 };
 
 /**

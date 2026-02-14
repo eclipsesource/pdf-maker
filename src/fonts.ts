@@ -1,9 +1,7 @@
-import type fontkit from '@pdf-lib/fontkit';
-import type { PDFDocument, PDFRef } from 'pdf-lib';
-import { CustomFontSubsetEmbedder, PDFFont } from 'pdf-lib';
+import type { PDFFont } from '@ralfstx/pdf-core';
 
 import type { FontStyle, FontWeight } from './api/text.ts';
-import { parseBinaryData } from './binary-data.ts';
+import { readBinaryData } from './binary-data.ts';
 import { printValue } from './print-value.ts';
 import { optional, readAs, readBoolean, readObject, required, types } from './types.ts';
 
@@ -14,8 +12,7 @@ export type FontDef = {
   family: string;
   style: FontStyle;
   weight: number;
-  data: string | Uint8Array | ArrayBuffer;
-  fkFont?: fontkit.Font;
+  data: Uint8Array;
 };
 
 export type Font = {
@@ -23,8 +20,7 @@ export type Font = {
   name: string;
   style: FontStyle;
   weight: number;
-  data: Uint8Array;
-  fkFont: fontkit.Font;
+  pdfFont: PDFFont;
 };
 
 export type FontSelector = {
@@ -45,35 +41,13 @@ export function readFont(input: unknown): Partial<FontDef> {
   const obj = readObject(input, {
     italic: optional((value) => readBoolean(value) || undefined),
     bold: optional((value) => readBoolean(value) || undefined),
-    data: required(parseBinaryData),
+    data: required(readBinaryData),
   });
   return {
     style: obj.italic ? 'italic' : 'normal',
     weight: obj.bold ? 700 : 400,
     data: obj.data,
   } as FontDef;
-}
-
-export function registerFont(font: Font, pdfDoc: PDFDocument): PDFRef {
-  // eslint-disable-next-line no-multi-assign
-  const registeredFonts = ((pdfDoc as any)._pdfmkr_registeredFonts ??= {});
-  if (font.key in registeredFonts) return registeredFonts[font.key];
-  const ref = pdfDoc.context.nextRef();
-  const embedder = new (CustomFontSubsetEmbedder as any)(font.fkFont, font.data);
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-  const pdfFont = PDFFont.of(ref, pdfDoc, embedder);
-  (pdfDoc as any).fonts.push(pdfFont);
-  registeredFonts[font.key] = ref;
-  return ref;
-}
-
-export function findRegisteredFont(font: Font, pdfDoc: PDFDocument): PDFFont | undefined {
-  // eslint-disable-next-line no-multi-assign
-  const registeredFonts = ((pdfDoc as any)._pdfmkr_registeredFonts ??= {});
-  const ref = registeredFonts[font.key];
-  if (ref) {
-    return (pdfDoc as any).fonts?.find((font: PDFFont) => font.ref === ref);
-  }
 }
 
 export function weightToNumber(weight: FontWeight): number {

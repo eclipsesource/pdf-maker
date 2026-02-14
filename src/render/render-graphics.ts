@@ -1,30 +1,9 @@
-import type { PDFName, PDFOperatorNames } from 'pdf-lib';
-import {
-  appendBezierCurve,
-  asPDFNumber,
-  closePath,
-  concatTransformationMatrix,
-  fill,
-  fillAndStroke,
-  LineCapStyle,
-  LineJoinStyle,
-  lineTo,
-  moveTo,
-  PDFOperator,
-  popGraphicsState,
-  pushGraphicsState,
-  setDashPattern,
-  setFillingColor,
-  setGraphicsState,
-  setLineCap,
-  setLineJoin,
-  setLineWidth,
-  setStrokingColor,
-  stroke,
-} from 'pdf-lib';
+import type { ContentStream } from '@ralfstx/pdf-core';
+import { ExtGState } from '@ralfstx/pdf-core';
 
 import type { LineCap, LineJoin } from '../api/graphics.ts';
 import type { Pos } from '../box.ts';
+import { setFillingColor, setStrokingColor } from '../colors.ts';
 import type {
   CircleObject,
   FillAttrs,
@@ -37,123 +16,125 @@ import type {
   Shape,
 } from '../frame.ts';
 import type { Page } from '../page.ts';
-import { getExtGraphicsState } from '../page.ts';
-import { svgPathToPdfOps } from '../svg-paths.ts';
-import { compact, multiplyMatrices, round } from '../utils.ts';
+import { drawSvgPath } from '../svg-paths.ts';
+import { multiplyMatrices, round } from '../utils.ts';
 
 // See https://stackoverflow.com/a/27863181/247159
 const KAPPA = (4 * (Math.sqrt(2) - 1)) / 3;
 
 export function renderGraphics(object: GraphicsObject, page: Page, base: Pos) {
   const pos = tr(base, page);
-  const contentStream = (page.pdfPage as any).getContentStream();
-  contentStream.push(pushGraphicsState(), concatTransformationMatrix(1, 0, 0, -1, pos.x, pos.y));
+  const cs = page.pdfPage.contentStream;
+  cs.saveGraphicsState().applyTransformMatrix(1, 0, 0, -1, pos.x, pos.y);
   object.shapes.forEach((shape) => {
-    contentStream.push(pushGraphicsState(), ...setStyleAttrs(shape, page));
+    cs.saveGraphicsState();
+    setStyleAttrs(cs, shape);
     if (shape.type === 'rect') {
-      contentStream.push(...drawRect(shape));
+      drawRect(cs, shape);
     }
     if (shape.type === 'circle') {
-      contentStream.push(...drawCircle(shape));
+      drawCircle(cs, shape);
     }
     if (shape.type === 'line') {
-      contentStream.push(...drawLine(shape));
+      drawLine(cs, shape);
     }
     if (shape.type === 'polyline') {
-      contentStream.push(...drawPolyLine(shape));
+      drawPolyLine(cs, shape);
     }
     if (shape.type === 'path') {
-      contentStream.push(...drawPath(shape));
+      drawPath(cs, shape);
     }
-    contentStream.push(popGraphicsState());
+    cs.restoreGraphicsState();
   });
-  contentStream.push(popGraphicsState());
+  cs.restoreGraphicsState();
 }
 
-function drawRect(obj: RectObject): PDFOperator[] {
-  return compact([createRect(obj.x, obj.y, obj.width, obj.height), fillAndStrokePath(obj)]);
+function drawRect(cs: ContentStream, obj: RectObject): void {
+  cs.rect(obj.x, obj.y, obj.width, obj.height);
+  fillAndStrokePath(cs, obj);
 }
 
-function createRect(x: number, y: number, width: number, height: number) {
-  return PDFOperator.of('re' as PDFOperatorNames, [
-    asPDFNumber(x),
-    asPDFNumber(y),
-    asPDFNumber(width),
-    asPDFNumber(height),
-  ]);
-}
-
-function drawCircle(obj: CircleObject): PDFOperator[] {
+function drawCircle(cs: ContentStream, obj: CircleObject): void {
   const { cx, cy, r } = obj;
   const o = r * KAPPA;
-  return compact([
-    moveTo(cx - r, cy),
-    appendBezierCurve(cx - r, cy - o, cx - o, cy - r, cx, cy - r),
-    appendBezierCurve(cx + o, cy - r, cx + r, cy - o, cx + r, cy),
-    appendBezierCurve(cx + r, cy + o, cx + o, cy + r, cx, cy + r),
-    appendBezierCurve(cx - o, cy + r, cx - r, cy + o, cx - r, cy),
-    fillAndStrokePath(obj),
-  ]);
+
+  cs.moveTo(cx - r, cy);
+  cs.curveTo(cx - r, cy - o, cx - o, cy - r, cx, cy - r);
+  cs.curveTo(cx + o, cy - r, cx + r, cy - o, cx + r, cy);
+  cs.curveTo(cx + r, cy + o, cx + o, cy + r, cx, cy + r);
+  cs.curveTo(cx - o, cy + r, cx - r, cy + o, cx - r, cy);
+  fillAndStrokePath(cs, obj);
 }
 
-function drawLine(obj: LineObject): PDFOperator[] {
-  return compact([moveTo(obj.x1, obj.y1), lineTo(obj.x2, obj.y2), stroke()]);
+function drawLine(cs: ContentStream, obj: LineObject): void {
+  cs.moveTo(obj.x1, obj.y1);
+  cs.lineTo(obj.x2, obj.y2);
+  cs.stroke();
 }
 
-function drawPolyLine(obj: PolylineObject): PDFOperator[] {
-  return compact([
-    ...pathOperations(obj.points),
-    obj.closePath && closePath(),
-    fillAndStrokePath(obj),
-  ]);
+function drawPolyLine(cs: ContentStream, obj: PolylineObject): void {
+  pathOperations(cs, obj.points);
+  if (obj.closePath) cs.closePath();
+  fillAndStrokePath(cs, obj);
 }
 
-function drawPath(obj: PathObject): PDFOperator[] {
-  return compact([...svgPathToPdfOps(obj.commands), fillAndStrokePath(obj)]);
+function drawPath(cs: ContentStream, obj: PathObject) {
+  drawSvgPath(cs, obj.commands);
+  fillAndStrokePath(cs, obj);
 }
 
-function pathOperations(points: { x: number; y: number }[]): PDFOperator[] {
-  return points.reduce((a: PDFOperator[], p) => [...a, (a.length ? lineTo : moveTo)(p.x, p.y)], []);
+function pathOperations(cs: ContentStream, points: { x: number; y: number }[]): void {
+  let started = false;
+  for (const p of points) {
+    if (!started) {
+      cs.moveTo(p.x, p.y);
+      started = true;
+    } else {
+      cs.lineTo(p.x, p.y);
+    }
+  }
 }
 
-function fillAndStrokePath(obj: LineAttrs & FillAttrs): PDFOperator {
+function fillAndStrokePath(cs: ContentStream, obj: LineAttrs & FillAttrs) {
   const hasFill = !!obj.fillColor;
   const hasStroke = !!obj.lineColor || !!obj.lineWidth;
-  if (hasFill && hasStroke) return fillAndStroke();
-  if (hasFill) return fill();
-  return stroke(); // fall back to stroke to avoid invisible shapes
+  if (hasFill && hasStroke) return cs.fillAndStroke();
+  if (hasFill) return cs.fill();
+  return cs.stroke(); // fall back to stroke to avoid invisible shapes
 }
 
-const lineCapTr = {
-  butt: LineCapStyle.Butt,
-  round: LineCapStyle.Round,
-  square: LineCapStyle.Projecting,
-};
-const trLineCap = (lineCap: LineCap) => lineCapTr[lineCap];
+export const LineCapStyle = {
+  butt: 0,
+  round: 1,
+  square: 2,
+} as const;
 
-const lineJoinTr = {
-  miter: LineJoinStyle.Miter,
-  round: LineJoinStyle.Round,
-  bevel: LineJoinStyle.Bevel,
-};
-const trLineJoin = (lineJoin: LineJoin) => lineJoinTr[lineJoin];
+const trLineCap = (lineCap: LineCap) => LineCapStyle[lineCap];
 
-function setStyleAttrs(shape: Shape, page: Page): PDFOperator[] {
-  const extGraphicsState = getExtGraphicsStateForShape(page, shape);
+export const LineJoinStyle = {
+  miter: 0,
+  round: 1,
+  bevel: 2,
+} as const;
+
+const trLineJoin = (lineJoin: LineJoin) => LineJoinStyle[lineJoin];
+
+function setStyleAttrs(cs: ContentStream, shape: Shape): void {
+  const extGraphicsState = getExtGraphicsStateForShape(shape);
   const attrs = shape as LineAttrs & FillAttrs;
-  return compact([
-    createMatrix(shape),
-    extGraphicsState && setGraphicsState(extGraphicsState),
-    attrs.fillColor !== undefined && setFillingColor(attrs.fillColor),
-    attrs.lineColor !== undefined && setStrokingColor(attrs.lineColor),
-    attrs.lineWidth !== undefined && setLineWidth(attrs.lineWidth),
-    attrs.lineCap !== undefined && setLineCap(trLineCap(attrs.lineCap)),
-    attrs.lineJoin !== undefined && setLineJoin(trLineJoin(attrs.lineJoin)),
-    attrs.lineDash !== undefined && setDashPattern(attrs.lineDash, 0),
-  ]);
+
+  createMatrix(cs, shape);
+
+  if (extGraphicsState !== undefined) cs.setGraphicsState(extGraphicsState);
+  if (attrs.fillColor !== undefined) setFillingColor(cs, attrs.fillColor);
+  if (attrs.lineColor !== undefined) setStrokingColor(cs, attrs.lineColor);
+  if (attrs.lineWidth !== undefined) cs.setLineWidth(attrs.lineWidth);
+  if (attrs.lineCap !== undefined) cs.setLineCap(trLineCap(attrs.lineCap));
+  if (attrs.lineJoin !== undefined) cs.setLineJoin(trLineJoin(attrs.lineJoin));
+  if (attrs.lineDash !== undefined) cs.setDashPattern(attrs.lineDash, 0);
 }
 
-function createMatrix(shape: Shape) {
+function createMatrix(cs: ContentStream, shape: Shape) {
   const matrices = [];
   if ('translate' in shape && (shape.translate?.x || shape.translate?.y)) {
     const x = shape.translate.x ?? 0;
@@ -187,7 +168,7 @@ function createMatrix(shape: Shape) {
   }
   if (matrices.length) {
     const [a, b, c, d, e, f] = matrices.reduce(multiplyMatrices, [1, 0, 0, 1, 0, 0]);
-    return concatTransformationMatrix(round(a), round(b), round(c), round(d), round(e), round(f));
+    cs.applyTransformMatrix(round(a), round(b), round(c), round(d), round(e), round(f));
   }
 }
 
@@ -195,16 +176,16 @@ function tr(pos: Pos, page: Page): Pos {
   return { x: pos.x, y: page.size.height - pos.y };
 }
 
-function getExtGraphicsStateForShape(
-  page: Page,
-  shape: { lineOpacity?: number; fillOpacity?: number },
-): PDFName | undefined {
+function getExtGraphicsStateForShape(shape: {
+  lineOpacity?: number;
+  fillOpacity?: number;
+}): ExtGState | undefined {
   const { lineOpacity, fillOpacity } = shape;
   if (lineOpacity != null || fillOpacity != null) {
     const graphicsParams = {
-      CA: lineOpacity ?? 1,
-      ca: fillOpacity ?? 1,
+      strokeOpacity: lineOpacity ?? 1,
+      fillOpacity: fillOpacity ?? 1,
     };
-    return getExtGraphicsState(page, graphicsParams);
+    return new ExtGState(graphicsParams);
   }
 }

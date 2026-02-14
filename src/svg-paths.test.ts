@@ -1,6 +1,7 @@
+import { ContentStream } from '@ralfstx/pdf-core';
 import { describe, expect, it } from 'vitest';
 
-import { parseSvgPath, svgPathToPdfOps, tokenizeSvgPath } from './svg-paths.ts';
+import { drawSvgPath, parseSvgPath, tokenizeSvgPath } from './svg-paths.ts';
 
 describe('tokenize', () => {
   it('returns empty list of tokens', () => {
@@ -125,8 +126,14 @@ describe('parseSvgPath', () => {
   });
 });
 
-describe('svgPathToPdfOps', () => {
-  const pdfOps = (path: string) => svgPathToPdfOps(parseSvgPath(path)).map(String);
+describe('drawSvgPath', () => {
+  const pdfOps = (path: string) => {
+    const cs = new ContentStream();
+    drawSvgPath(cs, parseSvgPath(path));
+    return cs.instructions.map((instr) =>
+      [...instr.operands, instr.operator].map(String).join(' '),
+    );
+  };
 
   it('creates ops for M', () => {
     expect(pdfOps('M 1 2')).toEqual(['1 2 m']);

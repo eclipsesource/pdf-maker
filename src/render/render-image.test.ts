@@ -1,10 +1,11 @@
+import { PDFPage } from '@ralfstx/pdf-core';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import type { Size } from '../box.ts';
 import type { ImageObject } from '../frame.ts';
 import type { Image } from '../images.ts';
 import type { Page } from '../page.ts';
-import { fakePDFPage, getContentStream } from '../test/test-utils.ts';
+import { fakeImage, getContentStream } from '../test/test-utils.ts';
 import { renderImage } from './render-image.ts';
 
 describe('renderImage', () => {
@@ -15,9 +16,9 @@ describe('renderImage', () => {
 
   beforeEach(() => {
     size = { width: 500, height: 800 };
-    const pdfPage = fakePDFPage();
+    const pdfPage = new PDFPage(size.width, size.height);
     page = { size, pdfPage } as Page;
-    image = { url: 'test-url' } as unknown as Image;
+    image = fakeImage('test-image.jpg', 100, 150);
   });
 
   it('renders single image object', () => {
@@ -25,12 +26,8 @@ describe('renderImage', () => {
 
     renderImage(obj, page, pos);
 
-    expect(getContentStream(page)).toEqual([
-      'q',
-      '1 0 0 1 11 738 cm',
-      '30 0 0 40 0 0 cm',
-      '/Image-1-0-1 Do',
-      'Q',
-    ]);
+    expect(getContentStream(page)).toEqual(
+      ['q', '1 0 0 1 11 738 cm', '30 0 0 40 0 0 cm', '/image:100x150-43348634 Do', 'Q'].join('\n'),
+    );
   });
 });

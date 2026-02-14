@@ -1,8 +1,7 @@
-import fontkit from '@pdf-lib/fontkit';
+import { PDFEmbeddedFont } from '@ralfstx/pdf-core';
 
 import type { FontConfig } from './api/PdfMaker.ts';
-import type { FontStyle, FontWeight } from './api/text.ts';
-import { parseBinaryData } from './binary-data.ts';
+import type { FontWeight } from './api/text.ts';
 import type { Font, FontDef, FontSelector } from './fonts.ts';
 import { weightToNumber } from './fonts.ts';
 import { pickDefined } from './types.ts';
@@ -16,12 +15,12 @@ export class FontStore {
   }
 
   registerFont(data: Uint8Array, config?: FontConfig): void {
-    const fkFont = fontkit.create(data);
-    const family = config?.family ?? fkFont.familyName ?? 'Unknown';
-    const style = config?.style ?? extractStyle(fkFont);
-    const weight = weightToNumber(config?.weight ?? extractWeight(fkFont));
-    this.#fontDefs.push({ family, style, weight, data, fkFont });
-    this.#fontCache = {};
+    const pdfFont = new PDFEmbeddedFont(data);
+    const family = config?.family ?? pdfFont.familyName;
+    const style = config?.style ?? pdfFont.style;
+    const weight = weightToNumber(config?.weight ?? pdfFont.weight);
+    this.#fontDefs.push({ family, style, weight, data });
+    this.#fontCache = {}; // Invalidate cache
   }
 
   async selectFont(selector: FontSelector): Promise<Font> {
@@ -40,23 +39,21 @@ export class FontStore {
   }
 
   _loadFont(selector: FontSelector, key: string): Promise<Font> {
-    const selectedFont = selectFont(this.#fontDefs, selector);
-    const data = parseBinaryData(selectedFont.data);
-    const fkFont = selectedFont.fkFont ?? fontkit.create(data);
+    const selectedFontDef = selectFontDef(this.#fontDefs, selector);
+    const pdfFont = new PDFEmbeddedFont(selectedFontDef.data);
     return Promise.resolve(
       pickDefined({
         key,
-        name: fkFont.fullName ?? fkFont.postscriptName ?? selectedFont.family,
-        data,
+        name: pdfFont.fontName ?? selectedFontDef.family, // TODO ?? pdfFont.postscriptName
         style: selector.fontStyle ?? 'normal',
         weight: weightToNumber(selector.fontWeight ?? 400),
-        fkFont,
+        pdfFont,
       }),
     );
   }
 }
 
-function selectFont(fontDefs: FontDef[], selector: FontSelector): FontDef {
+function selectFontDef(fontDefs: FontDef[], selector: FontSelector): FontDef {
   if (!fontDefs.length) {
     throw new Error('No fonts defined');
   }
@@ -123,14 +120,4 @@ function selectFontForWeight(fonts: FontDef[], weight: FontWeight): FontDef | un
     if (font) return font;
   }
   throw new Error(`Could not find font for weight ${weight}`);
-}
-
-function extractStyle(font: fontkit.Font): FontStyle {
-  if (font.italicAngle === 0) return 'normal';
-  if ((font.fullName ?? font.postscriptName)?.toLowerCase().includes('oblique')) return 'oblique';
-  return 'italic';
-}
-
-function extractWeight(font: fontkit.Font): number {
-  return (font['OS/2'] as any)?.usWeightClass ?? 400;
 }

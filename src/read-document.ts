@@ -1,4 +1,4 @@
-import type { PDFDocument } from 'pdf-lib';
+import type { PDFDocument } from '@ralfstx/pdf-core';
 
 import type { FileRelationShip } from './api/document.ts';
 import type { BoxEdges, Size } from './box.ts';

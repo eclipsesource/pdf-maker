@@ -137,7 +137,7 @@ function layoutTextRow(segments: TextSegment[], box: Box) {
 }
 
 function getDescent(font: Font, fontSize: number) {
-  return Math.abs(((font.fkFont.descent ?? 0) * fontSize) / font.fkFont.unitsPerEm);
+  return Math.abs((font.pdfFont.descent * fontSize) / 1000);
 }
 
 /**

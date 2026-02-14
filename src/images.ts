@@ -1,7 +1,6 @@
-import type { PDFDocument, PDFRef } from 'pdf-lib';
-import { JpegEmbedder, PngEmbedder } from 'pdf-lib';
+import type { PDFImage } from '@ralfstx/pdf-core';
 
-import { parseBinaryData } from './binary-data.ts';
+import { readBinaryData } from './binary-data.ts';
 import { optional, readAs, readObject, required, types } from './types.ts';
 
 const imageFormats = ['jpeg', 'png'];
@@ -9,7 +8,7 @@ export type ImageFormat = (typeof imageFormats)[number];
 
 export type ImageDef = {
   name: string;
-  data: string | Uint8Array | ArrayBuffer;
+  data: Uint8Array;
   format: ImageFormat;
 };
 
@@ -17,8 +16,8 @@ export type Image = {
   url: string;
   width: number;
   height: number;
-  data: Uint8Array;
   format: ImageFormat;
+  pdfImage: PDFImage;
 };
 
 export function readImages(input: unknown): ImageDef[] {
@@ -30,28 +29,7 @@ export function readImages(input: unknown): ImageDef[] {
 
 function readImage(input: unknown) {
   return readObject(input, {
-    data: required(parseBinaryData),
+    data: required(readBinaryData),
     format: optional(types.string({ enum: imageFormats })),
   }) as { data: Uint8Array; format?: ImageFormat };
-}
-
-export function registerImage(image: Image, pdfDoc: PDFDocument): PDFRef {
-  // eslint-disable-next-line no-multi-assign
-  const registeredImages = ((pdfDoc as any)._pdfmkr_registeredImages ??= {});
-  if (image.url in registeredImages) return registeredImages[image.url];
-  const ref = pdfDoc.context.nextRef();
-  (pdfDoc as any).images.push({
-    async embed() {
-      try {
-        const embedder = await (image.format === 'png'
-          ? PngEmbedder.for(image.data)
-          : JpegEmbedder.for(image.data));
-        await embedder.embedIntoContext(pdfDoc.context, ref);
-      } catch (error) {
-        throw new Error(`Could not embed image "${image.url}"`, { cause: error });
-      }
-    },
-  });
-  registeredImages[image.url] = ref;
-  return ref;
 }

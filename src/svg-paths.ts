@@ -1,5 +1,4 @@
-import type { PDFOperator } from 'pdf-lib';
-import { appendBezierCurve, appendQuadraticCurve, closePath, lineTo, moveTo } from 'pdf-lib';
+import type { ContentStream } from '@ralfstx/pdf-core';
 
 import { arcToSegments, segmentToBezier } from './arcs.ts';
 
@@ -105,7 +104,7 @@ export function parseSvgPath(path: string) {
   return commands;
 }
 
-export function svgPathToPdfOps(commands: PathCommand[]): PDFOperator[] {
+export function drawSvgPath(cs: ContentStream, commands: PathCommand[]): void {
   let cx = 0;
   let cy = 0;
   let px = 0;
@@ -116,13 +115,13 @@ export function svgPathToPdfOps(commands: PathCommand[]): PDFOperator[] {
     cx = x;
     cy = y;
     lastCurve = undefined;
-    return [moveTo(cx, cy)];
+    cs.moveTo(cx, cy);
   };
   const opLineTo = (x: number, y: number) => {
     cx = x;
     cy = y;
     lastCurve = undefined;
-    return [lineTo(cx, cy)];
+    cs.lineTo(cx, cy);
   };
   const opBezierCurve = (x1: number, y1: number, x2: number, y2: number, x: number, y: number) => {
     cx = x;
@@ -130,7 +129,7 @@ export function svgPathToPdfOps(commands: PathCommand[]): PDFOperator[] {
     px = x2;
     py = y2;
     lastCurve = 'b';
-    return [appendBezierCurve(x1, y1, x2, y2, cx, cy)];
+    cs.curveTo(x1, y1, x2, y2, cx, cy);
   };
   const opQuadraticCurve = (x1: number, y1: number, x: number, y: number) => {
     cx = x;
@@ -138,84 +137,84 @@ export function svgPathToPdfOps(commands: PathCommand[]): PDFOperator[] {
     px = x1;
     py = y1;
     lastCurve = 'q';
-    return [appendQuadraticCurve(x1, y1, cx, cy)];
+    cs.smoothCurveToFinal(x1, y1, cx, cy);
   };
   const opArc = (rx: number, ry: number, a: number, l: number, s: number, x: number, y: number) => {
     const segments = arcToSegments(cx, cy, rx, ry, a, l, s, x, y);
     cx = x;
     cy = y;
     lastCurve = undefined;
-    return segments.flatMap((seg) => appendBezierCurve(...segmentToBezier(seg)));
+    segments.forEach((seg) => cs.curveTo(...segmentToBezier(seg)));
   };
   const opClosePath = () => {
     lastCurve = undefined;
-    return [closePath()];
+    cs.closePath();
   };
   const mirrorCx = (type: 'b' | 'q') => (lastCurve === type ? 2 * cx - px : cx);
   const mirrorCy = (type: 'b' | 'q') => (lastCurve === type ? 2 * cy - py : cy);
 
-  const ops: Record<Op, (params?: number[]) => PDFOperator[]> = {
+  const ops: Record<Op, (params?: number[]) => void> = {
     M: ([x, y]: number[]) => {
-      return opMoveTo(x, y);
+      opMoveTo(x, y);
     },
     m: ([dx, dy]: number[]) => {
-      return opMoveTo(cx + dx, cy + dy);
+      opMoveTo(cx + dx, cy + dy);
     },
     L: ([x, y]: number[]) => {
-      return opLineTo(x, y);
+      opLineTo(x, y);
     },
     l: ([dx, dy]: number[]) => {
-      return opLineTo(cx + dx, cy + dy);
+      opLineTo(cx + dx, cy + dy);
     },
     H: ([x]: number[]) => {
-      return opLineTo(x, cy);
+      opLineTo(x, cy);
     },
     h: ([dx]: number[]) => {
-      return opLineTo(cx + dx, cy);
+      opLineTo(cx + dx, cy);
     },
     V: ([y]: number[]) => {
-      return opLineTo(cx, y);
+      opLineTo(cx, y);
     },
     v: ([dy]: number[]) => {
-      return opLineTo(cx, cy + dy);
+      opLineTo(cx, cy + dy);
     },
     C: ([x1, y1, x2, y2, x, y]: number[]) => {
-      return opBezierCurve(x1, y1, x2, y2, x, y);
+      opBezierCurve(x1, y1, x2, y2, x, y);
     },
     c: ([dx1, dy1, dx2, dy2, dx, dy]: number[]) => {
-      return opBezierCurve(cx + dx1, cy + dy1, cx + dx2, cy + dy2, cx + dx, cy + dy);
+      opBezierCurve(cx + dx1, cy + dy1, cx + dx2, cy + dy2, cx + dx, cy + dy);
     },
     S: ([x2, y2, x, y]: number[]) => {
-      return opBezierCurve(mirrorCx('b'), mirrorCy('b'), x2, y2, x, y);
+      opBezierCurve(mirrorCx('b'), mirrorCy('b'), x2, y2, x, y);
     },
     s: ([dx2, dy2, dx, dy]: number[]) => {
-      return opBezierCurve(mirrorCx('b'), mirrorCy('b'), cx + dx2, cy + dy2, cx + dx, cy + dy);
+      opBezierCurve(mirrorCx('b'), mirrorCy('b'), cx + dx2, cy + dy2, cx + dx, cy + dy);
     },
     Q: ([x1, y1, x, y]: number[]) => {
-      return opQuadraticCurve(x1, y1, x, y);
+      opQuadraticCurve(x1, y1, x, y);
     },
     q: ([dx1, dy1, dx, dy]: number[]) => {
-      return opQuadraticCurve(cx + dx1, cy + dy1, cx + dx, cy + dy);
+      opQuadraticCurve(cx + dx1, cy + dy1, cx + dx, cy + dy);
     },
     T: ([x, y]: number[]) => {
-      return opQuadraticCurve(mirrorCx('q'), mirrorCy('q'), x, y);
+      opQuadraticCurve(mirrorCx('q'), mirrorCy('q'), x, y);
     },
     t: ([dx, dy]: number[]) => {
-      return opQuadraticCurve(mirrorCx('q'), mirrorCy('q'), cx + dx, cy + dy);
+      opQuadraticCurve(mirrorCx('q'), mirrorCy('q'), cx + dx, cy + dy);
     },
     A: ([rx, ry, angle, largeArc, sweep, x, y]: number[]) => {
-      return opArc(rx, ry, angle, largeArc, sweep, x, y);
+      opArc(rx, ry, angle, largeArc, sweep, x, y);
     },
     a: ([rx, ry, angle, largeArc, sweep, dx, dy]: number[]) => {
-      return opArc(rx, ry, angle, largeArc, sweep, cx + dx, cy + dy);
+      opArc(rx, ry, angle, largeArc, sweep, cx + dx, cy + dy);
     },
     Z: () => {
-      return opClosePath();
+      opClosePath();
     },
     z: () => {
-      return opClosePath();
+      opClosePath();
     },
-  } as Record<Op, (params?: number[]) => PDFOperator[]>;
+  } as Record<Op, (params?: number[]) => void>;
 
-  return commands.flatMap(({ op, params }) => ops[op](params));
+  commands.forEach(({ op, params }) => ops[op](params));
 }

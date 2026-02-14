@@ -1,11 +1,7 @@
-import { readFile } from 'node:fs/promises';
-import { join } from 'node:path';
-
 import { describe, expect, it } from 'vitest';
 
-import type { Image } from './images.ts';
-import { readImages, registerImage } from './images.ts';
-import { fakePDFDocument, mkData } from './test/test-utils.ts';
+import { readImages } from './images.ts';
+import { mkData } from './test/test-utils.ts';
 
 describe('readImages', () => {
   it('returns an empty array for missing images definition', () => {
@@ -45,22 +41,6 @@ describe('readImages', () => {
   it('throws on invalid image data', () => {
     const fn = () => readImages({ foo: { data: 23 } });
 
-    expect(fn).toThrow(
-      new TypeError(
-        'Invalid value for "foo/data": Expected Uint8Array, ArrayBuffer, or base64-encoded string, got: 23',
-      ),
-    );
-  });
-});
-
-describe('registerImage', () => {
-  it('embeds image in PDF document and attaches ref', async () => {
-    const doc = fakePDFDocument();
-    const data = await readFile(join(__dirname, './test/resources/liberty.jpg'));
-    const image: Image = { url: 'foo', format: 'jpeg', data, width: 100, height: 200 };
-
-    const pdfRef = registerImage(image, doc);
-
-    expect(pdfRef.toString()).toEqual('1 0 R');
+    expect(fn).toThrow(new TypeError('Invalid value for "foo/data": Expected Uint8Array, got: 23'));
   });
 });

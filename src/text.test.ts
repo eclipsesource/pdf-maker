@@ -1,6 +1,6 @@
-import { rgb } from 'pdf-lib';
 import { beforeEach, describe, expect, it } from 'vitest';
 
+import { rgb } from './colors.ts';
 import { FontStore } from './font-store.ts';
 import type { Font } from './fonts.ts';
 import { fakeFont } from './test/test-utils.ts';

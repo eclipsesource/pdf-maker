@@ -66,11 +66,9 @@ export default tseslint.config(
       '@typescript-eslint/parameter-properties': 'error',
       '@typescript-eslint/consistent-type-imports': ['error', { prefer: 'type-imports' }],
 
-      // TODO: revisit when we got rid of pdf-lib internals
+      // TODO: remove when we got rid of any in the code base
       '@typescript-eslint/no-unsafe-assignment': ['off'],
-      '@typescript-eslint/no-unsafe-call': ['off'],
       '@typescript-eslint/no-unsafe-member-access': ['off'],
-      '@typescript-eslint/no-unsafe-return': ['off'],
 
       'simple-import-sort/imports': 'error',
       'import/extensions': ['error', 'ignorePackages', { js: 'never', ts: 'always' }],

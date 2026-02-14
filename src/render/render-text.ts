@@ -1,80 +1,69 @@
-import type { Color, PDFContentStream, PDFName, PDFOperator } from 'pdf-lib';
-import {
-  beginText,
-  endText,
-  rgb,
-  setCharacterSpacing,
-  setFillingColor,
-  setFontAndSize,
-  setTextMatrix,
-  setTextRise,
-  showText,
-} from 'pdf-lib';
+import type { ContentStream, PDFFont } from '@ralfstx/pdf-core';
 
 import type { Pos } from '../box.ts';
-import { findRegisteredFont } from '../fonts.ts';
+import { type Color, rgb, setFillingColor } from '../colors.ts';
 import type { TextObject } from '../frame.ts';
 import type { Page, TextState } from '../page.ts';
-import { addPageFont } from '../page.ts';
-import { compact } from '../utils.ts';
 
 export function renderText(object: TextObject, page: Page, base: Pos) {
-  const contentStream: PDFContentStream = (page.pdfPage as any).getContentStream();
   page.textState ??= {};
   const state = page.textState;
   const x = base.x;
   const y = page.size.height - base.y;
-  contentStream.push(beginText());
+  const cs = page.pdfPage.contentStream;
+  cs.beginText();
+  // Reset font state so that the font is always set after beginText()
+  state.font = undefined;
+  state.size = undefined;
   object.rows?.forEach((row) => {
-    contentStream.push(setTextMatrix(1, 0, 0, 1, x + row.x, y - row.y - row.baseline));
+    cs.setTextMatrix(1, 0, 0, 1, x + row.x, y - row.y - row.baseline);
     row.segments?.forEach((seg) => {
-      const fontKey = addPageFont(page, seg.font);
-      const pdfFont = findRegisteredFont(seg.font, page.pdfPage!.doc)!;
-      const encodedText = pdfFont.encodeText(seg.text);
-      const operators = compact([
-        setTextColorOp(state, seg.color),
-        setTextFontAndSizeOp(state, fontKey, seg.fontSize),
-        setTextRiseOp(state, seg.rise),
-        setLetterSpacingOp(state, seg.letterSpacing),
-        showText(encodedText),
-      ]);
-      contentStream.push(...operators);
+      const pdfFont = seg.font.pdfFont;
+      if (!pdfFont) throw new Error('PDF font not initialized');
+      const glyphRun = pdfFont.shapeText(seg.text, { defaultFeatures: false });
+
+      setTextColorOp(cs, state, seg.color);
+      setTextFontAndSizeOp(cs, state, pdfFont, seg.fontSize);
+      setTextRiseOp(cs, state, seg.rise);
+      setLetterSpacingOp(cs, state, seg.letterSpacing);
+      cs.showPositionedText(glyphRun);
     });
   });
-  contentStream.push(endText());
+  cs.endText();
 }
 
-function setTextColorOp(state: TextState, color?: Color): PDFOperator | undefined {
+function setTextColorOp(cs: ContentStream, state: TextState, color?: Color): void {
   const effectiveColor = color ?? rgb(0, 0, 0);
   if (!equalsColor(state.color, effectiveColor)) {
     state.color = effectiveColor;
-    return setFillingColor(effectiveColor);
+    setFillingColor(cs, effectiveColor);
   }
 }
 
 function setTextFontAndSizeOp(
+  cs: ContentStream,
   state: TextState,
-  font: PDFName,
+  font: PDFFont,
   size: number,
-): PDFOperator | undefined {
-  if (state.font !== font?.toString() || state.size !== size) {
-    state.font = font?.toString();
+): void {
+  if (state.font !== font?.key || state.size !== size) {
+    state.font = font?.key;
     state.size = size;
-    return setFontAndSize(font, size);
+    cs.setFontAndSize(font, size);
   }
 }
 
-function setTextRiseOp(state: TextState, rise?: number): PDFOperator | undefined {
+function setTextRiseOp(cs: ContentStream, state: TextState, rise?: number): void {
   if ((state.rise ?? 0) !== (rise ?? 0)) {
     state.rise = rise;
-    return setTextRise(rise ?? 0);
+    cs.setTextRise(rise ?? 0);
   }
 }
 
-function setLetterSpacingOp(state: TextState, charSpace?: number): PDFOperator | undefined {
+function setLetterSpacingOp(cs: ContentStream, state: TextState, charSpace?: number): void {
   if ((state.charSpace ?? 0) !== (charSpace ?? 0)) {
     state.charSpace = charSpace;
-    return setCharacterSpacing(charSpace ?? 0);
+    cs.setCharacterSpacing(charSpace ?? 0);
   }
 }
 

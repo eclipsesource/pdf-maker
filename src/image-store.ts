@@ -1,9 +1,8 @@
-import { parseBinaryData } from './binary-data.ts';
+import { PDFImage } from '@ralfstx/pdf-core';
+
 import { createDataLoader, type DataLoader } from './data-loader.ts';
 import { readRelativeFile } from './fs.ts';
 import type { Image, ImageDef, ImageFormat } from './images.ts';
-import { isJpeg, readJpegInfo } from './images/jpeg.ts';
-import { isPng, readPngInfo } from './images/png.ts';
 
 export class ImageStore {
   readonly #images: ImageDef[];
@@ -26,14 +25,23 @@ export class ImageStore {
   async loadImage(url: string): Promise<Image> {
     const data = await this.loadImageData(url);
     const format = determineImageFormat(data);
-    const { width, height } = format === 'png' ? readPngInfo(data) : readJpegInfo(data);
-    return { url, format, data, width, height };
+    if (format === 'jpeg') {
+      const pdfImage = PDFImage.fromJpeg(data);
+      const { width, height } = pdfImage;
+      return { url, format, width, height, pdfImage };
+    }
+    if (format === 'png') {
+      const pdfImage = PDFImage.fromPng(data);
+      const { width, height } = pdfImage;
+      return { url, format, width, height, pdfImage };
+    }
+    throw new Error(`Unsupported image format: ${format}`);
   }
 
   async loadImageData(url: string): Promise<Uint8Array> {
     const imageDef = this.#images.find((image) => image.name === url);
     if (imageDef) {
-      return parseBinaryData(imageDef.data);
+      return imageDef.data;
     }
 
     const urlSchema = /^(\w+):/.exec(url)?.[1];
@@ -57,4 +65,20 @@ function determineImageFormat(data: Uint8Array): ImageFormat {
   if (isPng(data)) return 'png';
   if (isJpeg(data)) return 'jpeg';
   throw new Error('Unknown image format');
+}
+
+function isJpeg(data: Uint8Array): boolean {
+  return data[0] === 0xff && data[1] === 0xd8 && data[2] === 0xff;
+}
+
+function isPng(data: Uint8Array): boolean {
+  // check PNG signature
+  return hasBytes(data, 0, [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+}
+
+function hasBytes(data: Uint8Array, offset: number, bytes: number[]) {
+  for (let i = 0; i < bytes.length; i++) {
+    if (data[offset + i] !== bytes[i]) return false;
+  }
+  return true;
 }

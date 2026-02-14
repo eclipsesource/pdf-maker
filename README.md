@@ -668,10 +668,9 @@ const document = {
 
 ## Thanks
 
-This project is inspired by [pdfmake] and builds on [pdf-lib] and
-[fontkit]. It would not exist without the great work and the profound
-knowledge contributed by the authors of those projects.
+This project is inspired by [pdfmake] and [pdf-lib]. It would not exist
+without the great work and the profound knowledge contributed by the
+authors of those projects.
 
 [pdfmake]: https://github.com/bpampuch/pdfmake
 [pdf-lib]: https://github.com/Hopding/pdf-lib
-[fontkit]: https://github.com/Hopding/fontkit

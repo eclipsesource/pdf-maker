@@ -1,5 +1,5 @@
-import type { PDFDocument, PDFFont, PDFPage } from 'pdf-lib';
-import { PDFContext, PDFName, PDFRef } from 'pdf-lib';
+import type { PDFFont } from '@ralfstx/pdf-core';
+import { PDFImage, PDFRef } from '@ralfstx/pdf-core';
 
 import type { Font } from '../fonts.ts';
 import { weightToNumber } from '../fonts.ts';
@@ -8,44 +8,76 @@ import type { Image } from '../images.ts';
 import type { Page } from '../page.ts';
 import type { TextAttrs, TextSpan } from '../read-block.ts';
 
-export function fakeFont(
-  name: string,
-  opts: Partial<Omit<Font, 'name'>> & { doc?: PDFDocument } = {},
-): Font {
+export function fakeFont(name: string, opts?: Partial<Omit<Font, 'name'>>): Font {
   const key = `${name}-${opts?.style ?? 'normal'}-${opts?.weight ?? 400}`;
   const font: Font = {
     key,
     name,
     style: opts?.style ?? 'normal',
     weight: weightToNumber(opts?.weight ?? 'normal'),
-    data: opts.data ?? mkData(key),
-    fkFont: fakeFkFont(key),
+    pdfFont: fakePdfFont(key),
   };
-  if (opts.doc) {
-    const pdfFont = fakePdfFont(name, font.fkFont);
-    (opts.doc as any).fonts.push(pdfFont);
-    (opts.doc as any)._pdfmkr_registeredFonts ??= {};
-    (opts.doc as any)._pdfmkr_registeredFonts[font.key] = pdfFont.ref;
-  }
   return font;
 }
 
 export function fakeImage(name: string, width: number, height: number): Image {
+  const data = createTestJpeg(width, height);
   return {
     name,
     width,
     height,
-    data: mkData(name),
-  } as any;
+    format: 'jpeg',
+    url: 'test',
+    pdfImage: PDFImage.fromJpeg(data),
+  } as Image;
 }
 
-export function fakePdfFont(name: string, fkFont: fontkit.Font): PDFFont {
-  return {
-    name,
-    ref: PDFRef.of(name.split('').reduce((a, c) => a ^ c.charCodeAt(0), 0)),
-    embedder: { font: fkFont },
-    encodeText: (text: string) => text,
-  } as any;
+/**
+ * Creates a minimal JPEG structure with the specified dimensions and
+ * color components for testing header parsing. Note: This does not
+ * include DHT (Huffman tables) or DQT (quantization tables), so it
+ * cannot be decoded as an actual image.
+ */
+export function createTestJpeg(
+  width: number,
+  height: number,
+  components: 1 | 3 | 4 = 3,
+): Uint8Array {
+  const bytes: number[] = [];
+
+  // SOI (Start of Image)
+  bytes.push(0xff, 0xd8);
+
+  // APP0 (JFIF marker) - optional but common
+  bytes.push(0xff, 0xe0); // APP0 marker
+  bytes.push(0x00, 0x10); // Length (16 bytes)
+  bytes.push(0x4a, 0x46, 0x49, 0x46, 0x00); // "JFIF\0"
+  bytes.push(0x01, 0x01); // Version 1.1
+  bytes.push(0x00); // Aspect ratio units (0 = no units)
+  bytes.push(0x00, 0x01); // X density
+  bytes.push(0x00, 0x01); // Y density
+  bytes.push(0x00, 0x00); // Thumbnail dimensions
+
+  // SOF0 (Start of Frame - Baseline DCT)
+  bytes.push(0xff, 0xc0); // SOF0 marker
+  const sofLength = 8 + components * 3;
+  bytes.push((sofLength >> 8) & 0xff, sofLength & 0xff); // Length
+  bytes.push(0x08); // Bits per component (8)
+  bytes.push((height >> 8) & 0xff, height & 0xff); // Height
+  bytes.push((width >> 8) & 0xff, width & 0xff); // Width
+  bytes.push(components); // Number of components
+
+  // Component specifications
+  for (let i = 1; i <= components; i++) {
+    bytes.push(i); // Component ID
+    bytes.push(0x11); // Sampling factors (1x1)
+    bytes.push(0x00); // Quantization table selector
+  }
+
+  // EOI (End of Image)
+  bytes.push(0xff, 0xd9);
+
+  return new Uint8Array(bytes);
 }
 
 /**
@@ -54,43 +86,24 @@ export function fakePdfFont(name: string, fkFont: fontkit.Font): PDFFont {
  * a length of `10 * 5 = 50`.
  * Likewise, the descent is set to amount to `0.2 * fontSize`.
  */
-export function fakeFkFont(name: string): fontkit.Font {
+export function fakePdfFont(key: string): PDFFont {
   return {
-    name,
-    unitsPerEm: 1000,
-    maxY: 800,
-    descent: -200,
+    key,
+    fontName: 'FakeFont:' + key,
+    familyName: 'FakeFamily',
+    style: 'normal',
+    weight: 400,
     ascent: 800,
-    bbox: { minY: -200, maxY: 800 },
-    layout: (text: string) => ({
-      glyphs: text.split('').map((c) => ({ advanceWidth: 1000, id: c.charCodeAt(0) })),
-    }),
-  } as any;
-}
-
-export function fakePDFDocument(): PDFDocument {
-  const context = PDFContext.create();
-  const catalog = context.obj({});
-  const doc = { context, catalog, fonts: [], images: [] };
-  return doc as any;
-}
-
-export function fakePDFPage(document?: PDFDocument): PDFPage {
-  const doc = document ?? fakePDFDocument();
-  const node = doc.context.obj({});
-  const contentStream: any[] = [];
-  let counter = 1;
-  (node as any).newFontDictionary = (name: string) => PDFName.of(`${name}-${counter++}`);
-  let xObjectCounter = 1;
-  (node as any).newXObject = (tag: string, ref: PDFRef) =>
-    PDFName.of(`${tag}-${ref.objectNumber}-${ref.generationNumber}-${xObjectCounter++}`);
-  (node as any).newExtGState = (type: string) => PDFName.of(`${type}-${counter++}`);
-  return {
-    doc,
-    ref: PDFRef.of(1),
-    getContentStream: () => contentStream,
-    node,
-  } as unknown as PDFPage;
+    descent: -200,
+    lineGap: 0,
+    shapeText: (text: string) =>
+      [...text].map((c) => ({
+        glyphId: c.charCodeAt(0),
+        codePoints: [c.codePointAt(0)!],
+        advance: 1000,
+      })),
+    register: () => PDFRef.of(23),
+  };
 }
 
 export function extractTextRows(frame: Partial<Frame>) {
@@ -121,8 +134,20 @@ export function p(x: number, y: number) {
 }
 
 export function getContentStream(page: Page) {
-  const contentStream = (page.pdfPage as any).getContentStream();
-  return contentStream.map((o: any) => o.toString());
+  return page.pdfPage.contentStream.instructions
+    .map((instruction) => {
+      return [
+        ...instruction.operands.map((operand) =>
+          operand !== undefined
+            ? 'key' in operand
+              ? '/' + operand.key
+              : operand.toString()
+            : 'undefined',
+        ),
+        instruction.operator,
+      ].join(' ');
+    })
+    .join('\n');
 }
 
 export function mkData(value: string) {

@@ -1,10 +1,11 @@
-import { rgb } from 'pdf-lib';
+import { PDFPage } from '@ralfstx/pdf-core';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import type { Size } from '../box.ts';
+import { rgb } from '../colors.ts';
 import type { CircleObject, LineObject, PathObject, PolylineObject, RectObject } from '../frame.ts';
 import type { Page } from '../page.ts';
-import { fakePDFPage, getContentStream, p } from '../test/test-utils.ts';
+import { getContentStream, p } from '../test/test-utils.ts';
 import { renderGraphics } from './render-graphics.ts';
 
 describe('renderGraphics', () => {
@@ -16,7 +17,7 @@ describe('renderGraphics', () => {
 
   beforeEach(() => {
     size = { width: 500, height: 800 };
-    const pdfPage = fakePDFPage();
+    const pdfPage = new PDFPage(size.width, size.height);
     page = { size, pdfPage } as Page;
   });
 
@@ -26,7 +27,7 @@ describe('renderGraphics', () => {
 
       renderGraphics({ type: 'graphics', shapes: [rect] }, page, pos);
 
-      expect(getContentStream(page)).toEqual([...head, '1 2 3 4 re', 'S', ...tail]);
+      expect(getContentStream(page)).toEqual([...head, '1 2 3 4 re', 'S', ...tail].join('\n'));
     });
 
     it('renders rect with fillColor', () => {
@@ -37,7 +38,9 @@ describe('renderGraphics', () => {
 
       renderGraphics({ type: 'graphics', shapes: [rect] }, page, pos);
 
-      expect(getContentStream(page)).toEqual([...head, '1 0 0 rg', '1 2 3 4 re', 'f', ...tail]);
+      expect(getContentStream(page)).toEqual(
+        [...head, '1 0 0 rg', '1 2 3 4 re', 'f', ...tail].join('\n'),
+      );
     });
 
     it('renders rect with lineColor', () => {
@@ -48,7 +51,9 @@ describe('renderGraphics', () => {
 
       renderGraphics({ type: 'graphics', shapes: [rect] }, page, pos);
 
-      expect(getContentStream(page)).toEqual([...head, '1 0 0 RG', '1 2 3 4 re', 'S', ...tail]);
+      expect(getContentStream(page)).toEqual(
+        [...head, '1 0 0 RG', '1 2 3 4 re', 'S', ...tail].join('\n'),
+      );
     });
 
     it('renders rect with all properties', () => {
@@ -65,18 +70,20 @@ describe('renderGraphics', () => {
 
       renderGraphics({ type: 'graphics', shapes: [rect] }, page, pos);
 
-      expect(getContentStream(page)).toEqual([
-        ...head,
-        '/GS-1 gs',
-        '0 0 1 rg',
-        '1 0 0 RG',
-        '1 w',
-        '1 j',
-        '[1 2] 0 d',
-        '1 2 3 4 re',
-        'B',
-        ...tail,
-      ]);
+      expect(getContentStream(page)).toEqual(
+        [
+          ...head,
+          '/gs:CA:0.5,ca:0.5 gs',
+          '0 0 1 rg',
+          '1 0 0 RG',
+          '1 w',
+          '1 j',
+          '[1 2] 0 d',
+          '1 2 3 4 re',
+          'B',
+          ...tail,
+        ].join('\n'),
+      );
     });
   });
 
@@ -86,16 +93,18 @@ describe('renderGraphics', () => {
 
       renderGraphics({ type: 'graphics', shapes: [circle] }, page, pos);
 
-      expect(getContentStream(page)).toEqual([
-        ...head,
-        '-2 2 m',
-        '-2 0.3431457505076194 -0.6568542494923806 -1 1 -1 c',
-        '2.6568542494923806 -1 4 0.3431457505076194 4 2 c',
-        '4 3.6568542494923806 2.6568542494923806 5 1 5 c',
-        '-0.6568542494923806 5 -2 3.6568542494923806 -2 2 c',
-        'S',
-        ...tail,
-      ]);
+      expect(getContentStream(page)).toEqual(
+        [
+          ...head,
+          '-2 2 m',
+          '-2 0.34314575 -0.65685425 -1 1 -1 c',
+          '2.6568542 -1 4 0.34314575 4 2 c',
+          '4 3.6568542 2.6568542 5 1 5 c',
+          '-0.65685425 5 -2 3.6568542 -2 2 c',
+          'S',
+          ...tail,
+        ].join('\n'),
+      );
     });
 
     it('renders circle with all properties', () => {
@@ -111,21 +120,23 @@ describe('renderGraphics', () => {
 
       renderGraphics({ type: 'graphics', shapes: [circle] }, page, pos);
 
-      expect(getContentStream(page)).toEqual([
-        ...head,
-        '/GS-1 gs',
-        '0 0 1 rg',
-        '1 0 0 RG',
-        '1 w',
-        '[1 2] 0 d',
-        '-2 2 m',
-        '-2 0.3431457505076194 -0.6568542494923806 -1 1 -1 c',
-        '2.6568542494923806 -1 4 0.3431457505076194 4 2 c',
-        '4 3.6568542494923806 2.6568542494923806 5 1 5 c',
-        '-0.6568542494923806 5 -2 3.6568542494923806 -2 2 c',
-        'B',
-        ...tail,
-      ]);
+      expect(getContentStream(page)).toEqual(
+        [
+          ...head,
+          '/gs:CA:0.5,ca:0.5 gs',
+          '0 0 1 rg',
+          '1 0 0 RG',
+          '1 w',
+          '[1 2] 0 d',
+          '-2 2 m',
+          '-2 0.34314575 -0.65685425 -1 1 -1 c',
+          '2.6568542 -1 4 0.34314575 4 2 c',
+          '4 3.6568542 2.6568542 5 1 5 c',
+          '-0.65685425 5 -2 3.6568542 -2 2 c',
+          'B',
+          ...tail,
+        ].join('\n'),
+      );
     });
   });
 
@@ -135,7 +146,7 @@ describe('renderGraphics', () => {
 
       renderGraphics({ type: 'graphics', shapes: [line] }, page, pos);
 
-      expect(getContentStream(page)).toEqual([...head, '1 2 m', '3 4 l', 'S', ...tail]);
+      expect(getContentStream(page)).toEqual([...head, '1 2 m', '3 4 l', 'S', ...tail].join('\n'));
     });
 
     it('renders line with all properties', () => {
@@ -150,18 +161,20 @@ describe('renderGraphics', () => {
 
       renderGraphics({ type: 'graphics', shapes: [line] }, page, pos);
 
-      expect(getContentStream(page)).toEqual([
-        ...head,
-        '/GS-1 gs',
-        '1 0 0 RG',
-        '1 w',
-        '1 J',
-        '[1 2] 0 d',
-        '1 2 m',
-        '3 4 l',
-        'S',
-        ...tail,
-      ]);
+      expect(getContentStream(page)).toEqual(
+        [
+          ...head,
+          '/gs:CA:0.5,ca:1 gs',
+          '1 0 0 RG',
+          '1 w',
+          '1 J',
+          '[1 2] 0 d',
+          '1 2 m',
+          '3 4 l',
+          'S',
+          ...tail,
+        ].join('\n'),
+      );
     });
   });
 
@@ -171,7 +184,7 @@ describe('renderGraphics', () => {
 
       renderGraphics({ type: 'graphics', shapes: [polyline] }, page, pos);
 
-      expect(getContentStream(page)).toEqual([...head, '1 2 m', '3 4 l', 'S', ...tail]);
+      expect(getContentStream(page)).toEqual([...head, '1 2 m', '3 4 l', 'S', ...tail].join('\n'));
     });
 
     it('renders polyline with closePath', () => {
@@ -183,7 +196,9 @@ describe('renderGraphics', () => {
 
       renderGraphics({ type: 'graphics', shapes: [polyline] }, page, pos);
 
-      expect(getContentStream(page)).toEqual([...head, '1 2 m', '3 4 l', 'h', 'S', ...tail]);
+      expect(getContentStream(page)).toEqual(
+        [...head, '1 2 m', '3 4 l', 'h', 'S', ...tail].join('\n'),
+      );
     });
 
     it('renders polyline with all properties', () => {
@@ -199,19 +214,21 @@ describe('renderGraphics', () => {
 
       renderGraphics({ type: 'graphics', shapes: [polyline] }, page, pos);
 
-      expect(getContentStream(page)).toEqual([
-        ...head,
-        '0 0 1 rg',
-        '1 0 0 RG',
-        '1 w',
-        '1 J',
-        '1 j',
-        '[1 2] 0 d',
-        '1 2 m',
-        '3 4 l',
-        'B',
-        ...tail,
-      ]);
+      expect(getContentStream(page)).toEqual(
+        [
+          ...head,
+          '0 0 1 rg',
+          '1 0 0 RG',
+          '1 w',
+          '1 J',
+          '1 j',
+          '[1 2] 0 d',
+          '1 2 m',
+          '3 4 l',
+          'B',
+          ...tail,
+        ].join('\n'),
+      );
     });
   });
 
@@ -227,7 +244,9 @@ describe('renderGraphics', () => {
 
       renderGraphics({ type: 'graphics', shapes: [path] }, page, pos);
 
-      expect(getContentStream(page)).toEqual([...head, '0 20 m', '20 0 l', 'S', ...tail]);
+      expect(getContentStream(page)).toEqual(
+        [...head, '0 20 m', '20 0 l', 'S', ...tail].join('\n'),
+      );
     });
 
     it('renders curve', () => {
@@ -242,14 +261,9 @@ describe('renderGraphics', () => {
 
       renderGraphics({ type: 'graphics', shapes: [path] }, page, pos);
 
-      expect(getContentStream(page)).toEqual([
-        ...head,
-        '0 20 m',
-        '20 0 40 20 v',
-        '60 40 80 20 v',
-        'S',
-        ...tail,
-      ]);
+      expect(getContentStream(page)).toEqual(
+        [...head, '0 20 m', '20 0 40 20 v', '60 40 80 20 v', 'S', ...tail].join('\n'),
+      );
     });
 
     it('renders arc', () => {
@@ -263,14 +277,16 @@ describe('renderGraphics', () => {
 
       renderGraphics({ type: 'graphics', shapes: [path] }, page, pos);
 
-      expect(getContentStream(page)).toEqual([
-        ...head,
-        '10 20 m',
-        expect.stringMatching(/^14\.\d+ 12\.\d+ 21\.\d+ 11\.\d+ 27\.\d+ 16\.\d+ c$/),
-        expect.stringMatching(/^33\.\d+ 22\.\d+ 34\.\d+ 32\.\d+ 30 40 c$/),
-        'S',
-        ...tail,
-      ]);
+      expect(getContentStream(page)).toEqual(
+        [
+          ...head,
+          '10 20 m',
+          '14.142136 12.636203 21.977152 11.143819 27.5 16.666667 c',
+          '33.022847 22.189514 34.142135 32.636203 30 40 c',
+          'S',
+          ...tail,
+        ].join('\n'),
+      );
     });
   });
 
@@ -280,17 +296,9 @@ describe('renderGraphics', () => {
 
     renderGraphics({ type: 'graphics', shapes: [line, rect] }, page, pos);
 
-    expect(getContentStream(page)).toEqual([
-      ...head,
-      '1 2 m',
-      '3 4 l',
-      'S',
-      'Q',
-      'q',
-      '1 2 3 4 re',
-      'S',
-      ...tail,
-    ]);
+    expect(getContentStream(page)).toEqual(
+      [...head, '1 2 m', '3 4 l', 'S', 'Q', 'q', '1 2 3 4 re', 'S', ...tail].join('\n'),
+    );
   });
 
   describe('transformations', () => {
@@ -303,13 +311,9 @@ describe('renderGraphics', () => {
 
       renderGraphics({ type: 'graphics', shapes: [shape] }, page, pos);
 
-      expect(getContentStream(page)).toEqual([
-        ...head,
-        '1 0 0 1 1 2 cm',
-        '1 2 3 4 re',
-        'S',
-        ...tail,
-      ]);
+      expect(getContentStream(page)).toEqual(
+        [...head, '1 0 0 1 1 2 cm', '1 2 3 4 re', 'S', ...tail].join('\n'),
+      );
     });
 
     it('supports scale', () => {
@@ -320,13 +324,9 @@ describe('renderGraphics', () => {
 
       renderGraphics({ type: 'graphics', shapes: [shape] }, page, pos);
 
-      expect(getContentStream(page)).toEqual([
-        ...head,
-        '3 0 0 4 0 0 cm',
-        '1 2 3 4 re',
-        'S',
-        ...tail,
-      ]);
+      expect(getContentStream(page)).toEqual(
+        [...head, '3 0 0 4 0 0 cm', '1 2 3 4 re', 'S', ...tail].join('\n'),
+      );
     });
 
     it('supports rotate', () => {
@@ -337,13 +337,15 @@ describe('renderGraphics', () => {
 
       renderGraphics({ type: 'graphics', shapes: [shape] }, page, pos);
 
-      expect(getContentStream(page)).toEqual([
-        ...head,
-        '0.996195 0.087156 -0.087156 0.996195 0.632922 -0.496297 cm',
-        '1 2 3 4 re',
-        'S',
-        ...tail,
-      ]);
+      expect(getContentStream(page)).toEqual(
+        [
+          ...head,
+          '0.996195 0.087156 -0.087156 0.996195 0.632922 -0.496297 cm',
+          '1 2 3 4 re',
+          'S',
+          ...tail,
+        ].join('\n'),
+      );
     });
 
     it('supports skew', () => {
@@ -354,13 +356,9 @@ describe('renderGraphics', () => {
 
       renderGraphics({ type: 'graphics', shapes: [shape] }, page, pos);
 
-      expect(getContentStream(page)).toEqual([
-        ...head,
-        '1 0.158384 0.140541 1 0 0 cm',
-        '1 2 3 4 re',
-        'S',
-        ...tail,
-      ]);
+      expect(getContentStream(page)).toEqual(
+        [...head, '1 0.158384 0.140541 1 0 0 cm', '1 2 3 4 re', 'S', ...tail].join('\n'),
+      );
     });
 
     it('supports matrix', () => {
@@ -371,13 +369,9 @@ describe('renderGraphics', () => {
 
       renderGraphics({ type: 'graphics', shapes: [shape] }, page, pos);
 
-      expect(getContentStream(page)).toEqual([
-        ...head,
-        '1 2 3 4 5 6 cm',
-        '1 2 3 4 re',
-        'S',
-        ...tail,
-      ]);
+      expect(getContentStream(page)).toEqual(
+        [...head, '1 2 3 4 5 6 cm', '1 2 3 4 re', 'S', ...tail].join('\n'),
+      );
     });
 
     it('supports multiple transformations', () => {
@@ -390,13 +384,9 @@ describe('renderGraphics', () => {
 
       renderGraphics({ type: 'graphics', shapes: [shape] }, page, pos);
 
-      expect(getContentStream(page)).toEqual([
-        ...head,
-        '3 0.633538 0.421623 4 1 2 cm',
-        '1 2 3 4 re',
-        'S',
-        ...tail,
-      ]);
+      expect(getContentStream(page)).toEqual(
+        [...head, '3 0.633538 0.421623 4 1 2 cm', '1 2 3 4 re', 'S', ...tail].join('\n'),
+      );
     });
   });
 });

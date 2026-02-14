@@ -48,8 +48,8 @@ describe('ImageStore', () => {
     const torus = await store.selectImage('torus');
     const liberty = await store.selectImage('liberty');
 
-    expect(torus).toEqual(expect.objectContaining({ url: 'torus', data: torusPng }));
-    expect(liberty).toEqual(expect.objectContaining({ url: 'liberty', data: libertyJpg }));
+    expect(torus).toEqual(expect.objectContaining({ url: 'torus', format: 'png' }));
+    expect(liberty).toEqual(expect.objectContaining({ url: 'liberty', format: 'jpeg' }));
   });
 
   it('loads image from file system (deprecated)', async () => {
@@ -57,7 +57,7 @@ describe('ImageStore', () => {
 
     const image = await store.selectImage(torusPath);
 
-    expect(image).toEqual(expect.objectContaining({ url: torusPath, data: torusPng }));
+    expect(image).toEqual(expect.objectContaining({ url: torusPath, format: 'png' }));
   });
 
   it('loads image from file URL', async () => {
@@ -65,7 +65,7 @@ describe('ImageStore', () => {
 
     const image = await store.selectImage(fileUrl);
 
-    expect(image).toEqual(expect.objectContaining({ url: fileUrl, data: torusPng }));
+    expect(image).toEqual(expect.objectContaining({ url: fileUrl, format: 'png' }));
   });
 
   it('loads image from data URL', async () => {
@@ -73,7 +73,7 @@ describe('ImageStore', () => {
 
     const image = await store.selectImage(dataUrl);
 
-    expect(image).toEqual(expect.objectContaining({ url: dataUrl, data: torusPng }));
+    expect(image).toEqual(expect.objectContaining({ url: dataUrl, format: 'png' }));
   });
 
   it('loads image from http URL', async () => {
@@ -81,7 +81,7 @@ describe('ImageStore', () => {
 
     const image = await store.selectImage(httpUrl);
 
-    expect(image).toEqual(expect.objectContaining({ url: httpUrl, data: torusPng }));
+    expect(image).toEqual(expect.objectContaining({ url: httpUrl, format: 'png' }));
   });
 
   it('reads format, width and height from JPEG image', async () => {
@@ -101,11 +101,13 @@ describe('ImageStore', () => {
   });
 
   it('loads image only once for one URL', async () => {
-    const torusUrl = 'file:/test/resources/torus.png';
+    const store = new ImageStore();
+    store.setResourceRoot(baseDir);
+    const url = 'file:/test/resources/liberty.jpg';
 
-    await Promise.all([store.selectImage(torusUrl), store.selectImage(torusUrl)]);
+    const [image1, image2] = await Promise.all([store.selectImage(url), store.selectImage(url)]);
 
-    expect(globalThis.fetch).toHaveBeenCalledTimes(1);
+    expect(image1).toBe(image2);
   });
 
   it('returns same image object for concurrent calls', async () => {

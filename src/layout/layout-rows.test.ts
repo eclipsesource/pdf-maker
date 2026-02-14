@@ -119,7 +119,7 @@ describe('layout-rows', () => {
         );
       };
       const renderedIds = (frame?: Pick<Frame, 'children'>) =>
-        frame?.children?.map((c) => (c.objects?.find((o) => o.type === 'anchor') as any)?.name);
+        frame?.children?.map((c) => c.objects?.find((o) => o.type === 'anchor')?.name);
       const box = { x: 20, y: 30, width: 400, height: 700 };
 
       it('creates page break after last fitting block', async () => {

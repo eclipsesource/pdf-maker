@@ -1,12 +1,42 @@
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
-import fontkit from '@pdf-lib/fontkit';
+import type { PDFEmbeddedFont } from '@ralfstx/pdf-core';
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { FontStore } from './font-store.ts';
 import type { FontDef } from './fonts.ts';
 import { mkData } from './test/test-utils.ts';
+
+vi.mock('@ralfstx/pdf-core', async (importOriginal) => {
+  // eslint-disable-next-line @typescript-eslint/consistent-type-imports
+  const original = await importOriginal<typeof import('@ralfstx/pdf-core')>();
+  return {
+    ...original,
+    PDFEmbeddedFont: class MockPDFEmbeddedFont extends original.PDFEmbeddedFont {
+      constructor(data: Uint8Array) {
+        // For fake test data (small buffers), return mock values
+        // For real font data (larger buffers), use the real implementation
+        if (data.length < 100) {
+          // Reverse of mkData (new Uint8Array(value.split('').map((c) => c.charCodeAt(0))))
+          const key = String.fromCharCode(...data);
+
+          // Skip the parent constructor for fake data by using a proxy approach
+          return {
+            fontName: 'MockFont:' + key,
+            familyName: 'MockFamily',
+            style: 'normal',
+            weight: 400,
+            ascent: 800,
+            descent: -200,
+            lineGap: 0,
+          } as PDFEmbeddedFont;
+        }
+        super(data);
+      }
+    },
+  };
+});
 
 describe('FontStore', () => {
   let normalFont: FontDef;
@@ -17,40 +47,52 @@ describe('FontStore', () => {
   let obliqueBoldFont: FontDef;
   let otherFont: FontDef;
 
-  beforeEach(() => {
-    normalFont = fakeFontDef('Test');
-    italicFont = fakeFontDef('Test', { style: 'italic' });
-    obliqueFont = fakeFontDef('Test', { style: 'oblique' });
-    boldFont = fakeFontDef('Test', { weight: 700 });
-    italicBoldFont = fakeFontDef('Test', { style: 'italic', weight: 700 });
-    obliqueBoldFont = fakeFontDef('Test', { style: 'oblique', weight: 700 });
-    otherFont = fakeFontDef('Other');
+  describe('registerFont', () => {
+    let robotoRegular: Uint8Array;
+    let robotoLightItalic: Uint8Array;
+
+    beforeAll(async () => {
+      robotoRegular = await readFile(
+        join(__dirname, 'test/resources/fonts/roboto/Roboto-Regular.ttf'),
+      );
+      robotoLightItalic = await readFile(
+        join(__dirname, 'test/resources/fonts/roboto/Roboto-LightItalic.ttf'),
+      );
+    });
+
+    it('registers font with extracted config', async () => {
+      const store = new FontStore();
+      store.registerFont(robotoRegular);
+      store.registerFont(robotoLightItalic);
+
+      const selected1 = await store.selectFont({ fontFamily: 'Roboto' });
+      const selected2 = await store.selectFont({ fontFamily: 'Roboto Light', fontStyle: 'italic' });
+
+      expect(selected1.pdfFont.fontName).toBe('Roboto');
+      expect(selected2.pdfFont.fontName).toBe('Roboto Light Italic');
+    });
+
+    it('registers font with custom config', async () => {
+      const store = new FontStore();
+      store.registerFont(robotoRegular, { family: 'Custom Name', weight: 'bold' });
+      store.registerFont(robotoLightItalic, {
+        family: 'Custom Name',
+        weight: 400,
+        style: 'normal',
+      });
+
+      const selected1 = await store.selectFont({ fontFamily: 'Custom Name' });
+      const selected2 = await store.selectFont({ fontFamily: 'Custom Name', fontWeight: 'bold' });
+
+      expect(selected1.pdfFont.fontName).toBe('Roboto Light Italic');
+      expect(selected2.pdfFont.fontName).toBe('Roboto');
+    });
   });
 
   describe('selectFont', () => {
     let store: FontStore;
 
     beforeEach(() => {
-      store = new FontStore([
-        normalFont,
-        italicFont,
-        obliqueFont,
-        boldFont,
-        italicBoldFont,
-        obliqueBoldFont,
-        otherFont,
-      ]);
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-      vi.spyOn(fontkit, 'create').mockReturnValue({ fake: true } as any);
-    });
-
-    afterEach(() => {
-      vi.restoreAllMocks();
-    });
-
-    beforeEach(() => {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-      vi.spyOn(fontkit, 'create').mockReturnValue({ fake: true } as any);
       normalFont = fakeFontDef('Test');
       italicFont = fakeFontDef('Test', { style: 'italic' });
       obliqueFont = fakeFontDef('Test', { style: 'oblique' });
@@ -107,38 +149,34 @@ describe('FontStore', () => {
     it('selects different font variants', async () => {
       const fontFamily = 'Test';
 
-      await expect(store.selectFont({ fontFamily })).resolves.toEqual(
-        expect.objectContaining({ data: normalFont.data }),
-      );
-      await expect(store.selectFont({ fontFamily, fontWeight: 'bold' })).resolves.toEqual(
-        expect.objectContaining({ data: boldFont.data }),
-      );
-      await expect(store.selectFont({ fontFamily, fontStyle: 'italic' })).resolves.toEqual(
-        expect.objectContaining({ data: italicFont.data }),
-      );
-      await expect(
-        store.selectFont({ fontFamily, fontStyle: 'italic', fontWeight: 'bold' }),
-      ).resolves.toEqual(expect.objectContaining({ data: italicBoldFont.data }));
+      const font1 = await store.selectFont({ fontFamily });
+      const font2 = await store.selectFont({ fontFamily, fontWeight: 'bold' });
+      const font3 = await store.selectFont({ fontFamily, fontStyle: 'italic' });
+      const font4 = await store.selectFont({ fontFamily, fontStyle: 'italic', fontWeight: 'bold' });
+
+      expect(font1.pdfFont.fontName).toBe('MockFont:Test:normal:400');
+      expect(font2.pdfFont.fontName).toBe('MockFont:Test:normal:700');
+      expect(font3.pdfFont.fontName).toBe('MockFont:Test:italic:400');
+      expect(font4.pdfFont.fontName).toBe('MockFont:Test:italic:700');
     });
 
     it('selects first matching font if no family specified', async () => {
-      await expect(store.selectFont({})).resolves.toEqual(
-        expect.objectContaining({ data: normalFont.data }),
-      );
-      await expect(store.selectFont({ fontWeight: 'bold' })).resolves.toEqual(
-        expect.objectContaining({ data: boldFont.data }),
-      );
-      await expect(store.selectFont({ fontStyle: 'italic' })).resolves.toEqual(
-        expect.objectContaining({ data: italicFont.data }),
-      );
-      await expect(store.selectFont({ fontStyle: 'italic', fontWeight: 'bold' })).resolves.toEqual(
-        expect.objectContaining({ data: italicBoldFont.data }),
-      );
+      const font1 = await store.selectFont({});
+      expect(font1.pdfFont.fontName).toBe('MockFont:Test:normal:400');
+
+      const font2 = await store.selectFont({ fontWeight: 'bold' });
+      expect(font2.pdfFont.fontName).toBe('MockFont:Test:normal:700');
+
+      const font3 = await store.selectFont({ fontStyle: 'italic' });
+      expect(font3.pdfFont.fontName).toBe('MockFont:Test:italic:400');
+
+      const font4 = await store.selectFont({ fontStyle: 'italic', fontWeight: 'bold' });
+      expect(font4.pdfFont.fontName).toBe('MockFont:Test:italic:700');
     });
 
     it('selects font with matching font family', async () => {
       await expect(store.selectFont({ fontFamily: 'Other' })).resolves.toEqual(
-        expect.objectContaining({ data: otherFont.data }),
+        expect.objectContaining({ name: 'MockFont:Other:normal:400' }),
       );
     });
 
@@ -146,24 +184,26 @@ describe('FontStore', () => {
       store = new FontStore([normalFont, obliqueFont, boldFont, obliqueBoldFont]);
 
       await expect(store.selectFont({ fontFamily: 'Test', fontStyle: 'italic' })).resolves.toEqual(
-        expect.objectContaining({ data: obliqueFont.data }),
+        expect.objectContaining({ name: 'MockFont:Test:oblique:400' }),
       );
     });
 
     it('falls back to italic when no oblique font can be found', async () => {
       store = new FontStore([normalFont, italicFont, boldFont, italicBoldFont]);
 
-      await expect(store.selectFont({ fontFamily: 'Test', fontStyle: 'italic' })).resolves.toEqual(
-        expect.objectContaining({ data: italicFont.data }),
+      const font = await store.selectFont({ fontFamily: 'Test', fontStyle: 'italic' });
+
+      expect(font.pdfFont).toEqual(
+        expect.objectContaining({ fontName: 'MockFont:Test:italic:400' }),
       );
     });
 
     it('falls back when no matching font weight can be found', async () => {
       await expect(store.selectFont({ fontFamily: 'Other', fontWeight: 'bold' })).resolves.toEqual(
-        expect.objectContaining({ data: otherFont.data }),
+        expect.objectContaining({ name: 'MockFont:Other:normal:400' }),
       );
       await expect(store.selectFont({ fontFamily: 'Other', fontWeight: 200 })).resolves.toEqual(
-        expect.objectContaining({ data: otherFont.data }),
+        expect.objectContaining({ name: 'MockFont:Other:normal:400' }),
       );
     });
 
@@ -177,19 +217,6 @@ describe('FontStore', () => {
       );
     });
 
-    it('creates fontkit font object', async () => {
-      const font = await store.selectFont({ fontFamily: 'Test' });
-
-      expect(font).toEqual({
-        key: 'Test:normal:normal',
-        name: 'Test',
-        style: 'normal',
-        weight: 400,
-        data: normalFont.data,
-        fkFont: { fake: true },
-      });
-    });
-
     it('returns same font object for concurrent calls', async () => {
       const [font1, font2] = await Promise.all([
         store.selectFont({ fontFamily: 'Test' }),
@@ -199,55 +226,11 @@ describe('FontStore', () => {
       expect(font1).toBe(font2);
     });
   });
-
-  describe('registerFont', () => {
-    let store: FontStore;
-    let robotoRegular: Uint8Array;
-    let robotoLightItalic: Uint8Array;
-
-    beforeAll(async () => {
-      robotoRegular = await readFile(
-        join(__dirname, 'test/resources/fonts/roboto/Roboto-Regular.ttf'),
-      );
-      robotoLightItalic = await readFile(
-        join(__dirname, 'test/resources/fonts/roboto/Roboto-LightItalic.ttf'),
-      );
-    });
-
-    it('registers font with extracted config', async () => {
-      store = new FontStore();
-
-      store.registerFont(robotoRegular);
-      store.registerFont(robotoLightItalic);
-
-      const selected1 = await store.selectFont({ fontFamily: 'Roboto' });
-      const selected2 = await store.selectFont({ fontFamily: 'Roboto Light', fontStyle: 'italic' });
-      expect(selected1.data).toBe(robotoRegular);
-      expect(selected2.data).toBe(robotoLightItalic);
-    });
-
-    it('registers font with custom config', async () => {
-      store = new FontStore();
-
-      store.registerFont(robotoRegular, { family: 'Custom Name', weight: 'bold' });
-      store.registerFont(robotoLightItalic, {
-        family: 'Custom Name',
-        weight: 400,
-        style: 'normal',
-      });
-
-      const selected1 = await store.selectFont({ fontFamily: 'Custom Name' });
-      const selected2 = await store.selectFont({ fontFamily: 'Custom Name', fontWeight: 'bold' });
-
-      expect(selected1.data).toBe(robotoLightItalic);
-      expect(selected2.data).toBe(robotoRegular);
-    });
-  });
 });
 
 function fakeFontDef(family: string, options?: Partial<FontDef>): FontDef {
   const style = options?.style ?? 'normal';
   const weight = options?.weight ?? 400;
-  const data = options?.data ?? mkData([family, style, weight].join('_'));
+  const data = options?.data ?? mkData([family, style, weight].join(':'));
   return { family, style, weight, data };
 }

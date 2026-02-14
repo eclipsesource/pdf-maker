@@ -71,6 +71,7 @@ describe('layout', () => {
         {
           size: { width: 595.28, height: 841.89 },
           content: expect.objectContaining({ children: [] }),
+          pdfPage: expect.anything(),
         },
       ]);
     });
@@ -84,6 +85,7 @@ describe('layout', () => {
         {
           size: { width: 595.28, height: 841.89 },
           content: expect.objectContaining({ children: [expect.anything()] }),
+          pdfPage: expect.anything(),
         },
       ]);
     });

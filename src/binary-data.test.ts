@@ -1,38 +1,28 @@
 import { describe, expect, it } from 'vitest';
 
-import { parseBinaryData } from './binary-data.ts';
+import { readBinaryData } from './binary-data.ts';
 
-const data = Uint8Array.of(1, 183, 0);
-
-describe('parseBinaryData', () => {
+describe('readBinaryData', () => {
   it('returns original Uint8Array', () => {
-    expect(parseBinaryData(data)).toBe(data);
+    const data = Uint8Array.of(1, 183, 0);
+
+    expect(readBinaryData(data)).toBe(data);
   });
 
-  it('returns Uint8Array for ArrayBuffer', () => {
-    expect(parseBinaryData(data.buffer)).toEqual(data);
-  });
+  it('throws for ArrayBuffer', () => {
+    const buffer = Uint8Array.of(1, 183, 0).buffer;
 
-  it('returns Uint8Array for base64-encoded string', () => {
-    expect(parseBinaryData('Abc=`')).toEqual(data);
-  });
-
-  it('returns Uint8Array for data URL', () => {
-    expect(parseBinaryData('data:image/jpeg;base64,Abc=`')).toEqual(data);
-  });
-
-  it('throws for arrays', () => {
-    expect(() => parseBinaryData([1, 2, 3])).toThrow(
-      new TypeError('Expected Uint8Array, ArrayBuffer, or base64-encoded string, got: [1, 2, 3]'),
+    expect(() => readBinaryData(buffer)).toThrow(
+      new TypeError('Expected Uint8Array, got: ArrayBuffer [1, 183, 0]'),
     );
+  });
+
+  it('throws for strings', () => {
+    expect(() => readBinaryData('AbcA')).toThrow(new TypeError("Expected Uint8Array, got: 'AbcA'"));
   });
 
   it('throws for other types', () => {
-    expect(() => parseBinaryData(23)).toThrow(
-      new TypeError('Expected Uint8Array, ArrayBuffer, or base64-encoded string, got: 23'),
-    );
-    expect(() => parseBinaryData(null)).toThrow(
-      new TypeError('Expected Uint8Array, ArrayBuffer, or base64-encoded string, got: null'),
-    );
+    expect(() => readBinaryData(23)).toThrow(new TypeError('Expected Uint8Array, got: 23'));
+    expect(() => readBinaryData(null)).toThrow(new TypeError('Expected Uint8Array, got: null'));
   });
 });
