@@ -5,7 +5,6 @@ import type { PDFEmbeddedFont } from '@ralfstx/pdf-core';
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { FontStore } from './font-store.ts';
-import type { FontDef } from './fonts.ts';
 import { mkData } from './test/test-utils.ts';
 
 vi.mock('@ralfstx/pdf-core', async (importOriginal) => {
@@ -39,14 +38,6 @@ vi.mock('@ralfstx/pdf-core', async (importOriginal) => {
 });
 
 describe('FontStore', () => {
-  let normalFont: FontDef;
-  let italicFont: FontDef;
-  let obliqueFont: FontDef;
-  let boldFont: FontDef;
-  let italicBoldFont: FontDef;
-  let obliqueBoldFont: FontDef;
-  let otherFont: FontDef;
-
   describe('registerFont', () => {
     let robotoRegular: Uint8Array;
     let robotoLightItalic: Uint8Array;
@@ -93,23 +84,7 @@ describe('FontStore', () => {
     let store: FontStore;
 
     beforeEach(() => {
-      normalFont = fakeFontDef('Test');
-      italicFont = fakeFontDef('Test', { style: 'italic' });
-      obliqueFont = fakeFontDef('Test', { style: 'oblique' });
-      boldFont = fakeFontDef('Test', { weight: 700 });
-      italicBoldFont = fakeFontDef('Test', { style: 'italic', weight: 700 });
-      obliqueBoldFont = fakeFontDef('Test', { style: 'oblique', weight: 700 });
-      otherFont = fakeFontDef('Other');
-
-      store = new FontStore([
-        normalFont,
-        italicFont,
-        obliqueFont,
-        boldFont,
-        italicBoldFont,
-        obliqueBoldFont,
-        otherFont,
-      ]);
+      store = createTestStore();
     });
 
     afterEach(() => {
@@ -137,7 +112,9 @@ describe('FontStore', () => {
     });
 
     it('rejects when no matching font style can be found', async () => {
-      store = new FontStore([normalFont, boldFont]);
+      const store = new FontStore();
+      registerFakeFont(store, 'Test');
+      registerFakeFont(store, 'Test', { weight: 700 });
 
       await expect(store.selectFont({ fontFamily: 'Test', fontStyle: 'italic' })).rejects.toThrow(
         new Error("Could not load font for 'Test', style=italic, weight=normal", {
@@ -181,7 +158,11 @@ describe('FontStore', () => {
     });
 
     it('falls back to oblique when no italic font can be found', async () => {
-      store = new FontStore([normalFont, obliqueFont, boldFont, obliqueBoldFont]);
+      const store = new FontStore();
+      registerFakeFont(store, 'Test');
+      registerFakeFont(store, 'Test', { style: 'oblique' });
+      registerFakeFont(store, 'Test', { weight: 700 });
+      registerFakeFont(store, 'Test', { style: 'oblique', weight: 700 });
 
       await expect(store.selectFont({ fontFamily: 'Test', fontStyle: 'italic' })).resolves.toEqual(
         expect.objectContaining({ name: 'MockFont:Test:oblique:400' }),
@@ -189,7 +170,11 @@ describe('FontStore', () => {
     });
 
     it('falls back to italic when no oblique font can be found', async () => {
-      store = new FontStore([normalFont, italicFont, boldFont, italicBoldFont]);
+      const store = new FontStore();
+      registerFakeFont(store, 'Test');
+      registerFakeFont(store, 'Test', { style: 'italic' });
+      registerFakeFont(store, 'Test', { weight: 700 });
+      registerFakeFont(store, 'Test', { style: 'italic', weight: 700 });
 
       const font = await store.selectFont({ fontFamily: 'Test', fontStyle: 'italic' });
 
@@ -228,9 +213,25 @@ describe('FontStore', () => {
   });
 });
 
-function fakeFontDef(family: string, options?: Partial<FontDef>): FontDef {
+function registerFakeFont(
+  store: FontStore,
+  family: string,
+  options?: { style?: string; weight?: number },
+) {
   const style = options?.style ?? 'normal';
   const weight = options?.weight ?? 400;
-  const data = options?.data ?? mkData([family, style, weight].join(':'));
-  return { family, style, weight, data };
+  const data = mkData([family, style, weight].join(':'));
+  store.registerFont(data, { family, style: style as 'normal', weight });
+}
+
+function createTestStore(): FontStore {
+  const store = new FontStore();
+  registerFakeFont(store, 'Test');
+  registerFakeFont(store, 'Test', { style: 'italic' });
+  registerFakeFont(store, 'Test', { style: 'oblique' });
+  registerFakeFont(store, 'Test', { weight: 700 });
+  registerFakeFont(store, 'Test', { style: 'italic', weight: 700 });
+  registerFakeFont(store, 'Test', { style: 'oblique', weight: 700 });
+  registerFakeFont(store, 'Other');
+  return store;
 }

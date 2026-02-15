@@ -1,9 +1,7 @@
-import type { PDFFont } from '@ralfstx/pdf-core';
+import type { PDFEmbeddedFont, PDFFont } from '@ralfstx/pdf-core';
 
 import type { FontStyle, FontWeight } from './api/text.ts';
-import { readBinaryData } from './binary-data.ts';
 import { printValue } from './print-value.ts';
-import { optional, readAs, readBoolean, readObject, required, types } from './types.ts';
 
 /**
  * The resolved definition of a font.
@@ -13,6 +11,7 @@ export type FontDef = {
   style: FontStyle;
   weight: number;
   data: Uint8Array;
+  pdfFont?: PDFEmbeddedFont;
 };
 
 export type Font = {
@@ -28,27 +27,6 @@ export type FontSelector = {
   fontStyle?: FontStyle;
   fontWeight?: FontWeight;
 };
-
-export function readFonts(input: unknown): FontDef[] {
-  return Object.entries(readObject(input)).flatMap(([name, fontDef]) => {
-    return readAs(fontDef, name, required(types.array(readFont))).map(
-      (font) => ({ family: name, ...font }) as FontDef,
-    );
-  });
-}
-
-export function readFont(input: unknown): Partial<FontDef> {
-  const obj = readObject(input, {
-    italic: optional((value) => readBoolean(value) || undefined),
-    bold: optional((value) => readBoolean(value) || undefined),
-    data: required(readBinaryData),
-  });
-  return {
-    style: obj.italic ? 'italic' : 'normal',
-    weight: obj.bold ? 700 : 400,
-    data: obj.data,
-  } as FontDef;
-}
 
 export function weightToNumber(weight: FontWeight): number {
   if (weight === 'normal') {

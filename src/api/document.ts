@@ -52,14 +52,6 @@ export type DocumentDefinition = {
   margin?: Length | BoxLengths | ((info: PageInfo) => Length | BoxLengths);
 
   /**
-   * The fonts to use in the document. There is no default. Each font that is used in the document
-   * must be registered. Not needed for documents that contain only graphics.
-   *
-   * @deprecated Register fonts with `PdfMaker` instead.
-   */
-  fonts?: FontsDefinition;
-
-  /**
    * Metadata to include in the PDF's *document information dictionary*.
    */
   info?: InfoProps & CustomInfoProps;
@@ -214,38 +206,6 @@ export type CustomInfoAttrs = CustomInfoProps;
  * `XX` to avoid name collisions.
  */
 export type CustomInfoProps = Record<`XX${string}`, string>;
-
-/**
- * An object that defines the fonts to use in the document.
- *
- * @deprecated Register fonts with `PdfMaker` instead.
- */
-export type FontsDefinition = { [name: string]: FontDefinition[] };
-
-/**
- * The definition of a single font.
- *
- * @deprecated Register fonts with `PdfMaker` instead.
- */
-export type FontDefinition = {
-  /**
-   * The font data as a Uint8Array.
-   *
-   * Supports TrueType font files (`.ttf`) and OpenType (`.otf`) font
-   * files with TrueType outlines.
-   */
-  data: Uint8Array;
-
-  /**
-   * Whether this is a bold font.
-   */
-  bold?: boolean;
-
-  /**
-   * Whether this is an italic font.
-   */
-  italic?: boolean;
-};
 
 /**
  * Information about the current page, provided to functions that create

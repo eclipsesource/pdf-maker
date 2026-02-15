@@ -10,8 +10,8 @@ export class FontStore {
   readonly #fontDefs: FontDef[];
   #fontCache: Record<string, Promise<Font>> = {};
 
-  constructor(fontDefs?: FontDef[]) {
-    this.#fontDefs = fontDefs ?? [];
+  constructor() {
+    this.#fontDefs = [];
   }
 
   registerFont(data: Uint8Array, config?: FontConfig): void {
@@ -19,7 +19,7 @@ export class FontStore {
     const family = config?.family ?? pdfFont.familyName;
     const style = config?.style ?? pdfFont.style;
     const weight = weightToNumber(config?.weight ?? pdfFont.weight);
-    this.#fontDefs.push({ family, style, weight, data });
+    this.#fontDefs.push({ family, style, weight, data, pdfFont });
     this.#fontCache = {}; // Invalidate cache
   }
 
@@ -40,11 +40,11 @@ export class FontStore {
 
   _loadFont(selector: FontSelector, key: string): Promise<Font> {
     const selectedFontDef = selectFontDef(this.#fontDefs, selector);
-    const pdfFont = new PDFEmbeddedFont(selectedFontDef.data);
+    const pdfFont = selectedFontDef.pdfFont ?? new PDFEmbeddedFont(selectedFontDef.data);
     return Promise.resolve(
       pickDefined({
         key,
-        name: pdfFont.fontName ?? selectedFontDef.family, // TODO ?? pdfFont.postscriptName
+        name: pdfFont.fontName ?? selectedFontDef.family,
         style: selector.fontStyle ?? 'normal',
         weight: weightToNumber(selector.fontWeight ?? 400),
         pdfFont,

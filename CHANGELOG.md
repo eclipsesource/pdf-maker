@@ -18,6 +18,10 @@
   referred to by URL instead. The `ImagesDefinition` and
   `ImageDefinition` types have been removed.
 
+- The `fonts` property in the document definition. Fonts must now be
+  registered with `PdfMaker.registerFont()`. The `FontsDefinition` and
+  `FontDefinition` types have been removed.
+
 ### Breaking
 
 - Text height is now based on the OS/2 typographic metrics

@@ -55,14 +55,10 @@ export class PdfMaker {
    */
   async makePdf(definition: DocumentDefinition): Promise<Uint8Array> {
     const def = readAs(definition, 'definition', readDocumentDefinition);
-    let fontStore = this.#fontStore;
-    if (def.fonts) {
-      fontStore = new FontStore(def.fonts);
-      console.warn(
-        'Registering fonts via document definition is deprecated. Use PdfMaker.registerFont() instead.',
-      );
-    }
-    const ctx: MakerCtx = { fontStore, imageLoader: createImageLoader(this.#resourceRoot) };
+    const ctx: MakerCtx = {
+      fontStore: this.#fontStore,
+      imageLoader: createImageLoader(this.#resourceRoot),
+    };
     if (def.dev?.guides != null) ctx.guides = def.dev.guides;
     const pages = await layoutPages(def, ctx);
     return await renderDocument(def, pages);
