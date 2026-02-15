@@ -5,8 +5,6 @@ import type { BoxEdges, Size } from './box.ts';
 import { parseEdges } from './box.ts';
 import type { FontDef } from './fonts.ts';
 import { readFonts } from './fonts.ts';
-import type { ImageDef } from './images.ts';
-import { readImages } from './images.ts';
 import type { Block, TextAttrs } from './read-block.ts';
 import { readBlock, readInheritableAttrs } from './read-block.ts';
 import { parseOrientation, readPageSize } from './read-page-size.ts';
@@ -15,7 +13,6 @@ import { dynamic, optional, readAs, readObject, required, typeError, types } fro
 
 export type DocumentDefinition = {
   fonts?: FontDef[];
-  images?: ImageDef[];
   pageSize?: Size;
   pageOrientation?: 'portrait' | 'landscape';
   info?: Metadata;
@@ -58,7 +55,6 @@ export type PageInfo = {
 export function readDocumentDefinition(input: unknown): DocumentDefinition {
   const def1 = readObject(input, {
     fonts: optional(readFonts),
-    images: optional(readImages),
     pageSize: optional(readPageSize),
     pageOrientation: optional(parseOrientation),
     info: optional(readInfo),

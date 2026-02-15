@@ -60,15 +60,6 @@ export type DocumentDefinition = {
   fonts?: FontsDefinition;
 
   /**
-   * Pre-defined image data. These images can be used by their name in
-   * the document. This is only needed if images cannot be loaded
-   * directly from the file system.
-   *
-   * @deprecated Use URLs to include images.
-   */
-  images?: ImagesDefinition;
-
-  /**
    * Metadata to include in the PDF's *document information dictionary*.
    */
   info?: InfoProps & CustomInfoProps;
@@ -254,28 +245,6 @@ export type FontDefinition = {
    * Whether this is an italic font.
    */
   italic?: boolean;
-};
-
-/**
- * Pre-defined image data. These images can be used by their name in the
- * document. This is only needed if images cannot be loaded directly
- * from the file system.
- *
- * @deprecated Use URLs to include images.
- */
-export type ImagesDefinition = { [name: string]: ImageDefinition };
-
-/**
- * The definition of a single image.
- */
-export type ImageDefinition = {
-  /**
-   * The image data as a Uint8Array.
-   * Supported image formats are PNG and JPEG.
-   *
-   *  @deprecated Use URLs to include images.
-   */
-  data: Uint8Array;
 };
 
 /**

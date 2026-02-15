@@ -10,7 +10,7 @@ export async function layoutImageContent(
   box: Box,
   ctx: MakerCtx,
 ): Promise<LayoutContent> {
-  const image = await ctx.imageStore.selectImage(block.image);
+  const image = await ctx.imageLoader(block.image);
   const hasFixedWidth = block.width != null;
   const hasFixedHeight = block.height != null;
   const scale = getScale(image, box, hasFixedWidth, hasFixedHeight);

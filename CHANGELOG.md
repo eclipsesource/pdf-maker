@@ -9,10 +9,16 @@
   smaller bundle size. It also opens up new possibilities for new
   features such as font shaping.
 
-### Breaking
+### Removed
 
-- Font and image data must now be provided as `Uint8Array`.
-  Base64-encoded strings and `ArrayBuffer`s are no longer accepted.
+- Support for font and image data as base64-encoded strings and
+  `ArrayBuffer`. Data must now be provided as `Uint8Array`.
+
+- The `images` property in the document definition. Images should be
+  referred to by URL instead. The `ImagesDefinition` and
+  `ImageDefinition` types have been removed.
+
+### Breaking
 
 - Text height is now based on the OS/2 typographic metrics
   (`sTypoAscender` / `sTypoDescender`) instead of the hhea table values.

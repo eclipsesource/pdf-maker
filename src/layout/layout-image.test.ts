@@ -1,27 +1,26 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { Box } from '../box.ts';
-import { ImageStore } from '../image-store.ts';
 import type { MakerCtx } from '../maker-ctx.ts';
 import type { ImageBlock } from '../read-block.ts';
 import { fakeImage } from '../test/test-utils.ts';
 import { layoutImageContent } from './layout-image.ts';
+
+const mockImageLoader = vi.fn((selector: string) => {
+  const match = /^img-(\d+)-(\d+)$/.exec(selector);
+  if (match) {
+    return Promise.resolve(fakeImage(selector, Number(match[1]), Number(match[2])));
+  }
+  throw new Error(`Unknown image: ${selector}`);
+});
 
 describe('layout-image', () => {
   let box: Box;
   let ctx: MakerCtx;
 
   beforeEach(() => {
-    const imageStore = new ImageStore();
-    imageStore.selectImage = vi.fn((selector: string) => {
-      const match = /^img-(\d+)-(\d+)$/.exec(selector);
-      if (match) {
-        return Promise.resolve(fakeImage(selector, Number(match[1]), Number(match[2])));
-      }
-      throw new Error(`Unknown image: ${selector}`);
-    });
     box = { x: 20, y: 30, width: 400, height: 700 };
-    ctx = { imageStore } as MakerCtx;
+    ctx = { imageLoader: mockImageLoader } as unknown as MakerCtx;
   });
 
   describe('layoutImageContent', () => {
@@ -41,14 +40,13 @@ describe('layout-image', () => {
       });
     });
 
-    it('passes width and height to ImageStore', async () => {
+    it('calls imageLoader with the image URL', async () => {
       const block = { image: 'img-720-480', width: 30, height: 40 };
       box = { x: 20, y: 30, width: 200, height: 100 };
 
       await layoutImageContent(block, box, ctx);
 
-      // eslint-disable-next-line @typescript-eslint/unbound-method
-      expect(ctx.imageStore.selectImage).toHaveBeenCalledWith('img-720-480');
+      expect(mockImageLoader).toHaveBeenCalledWith('img-720-480');
     });
 
     ['img-720-480', 'img-72-48'].forEach((image) => {
