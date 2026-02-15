@@ -88,18 +88,6 @@ export type TextProps = {
   lineHeight?: number;
 
   /**
-   * Whether to use a bold variant of the selected font.
-   * @deprecated Use `fontWeight: 'bold'` instead.
-   */
-  bold?: boolean;
-
-  /**
-   * Whether to use an italic variant of the selected font.
-   * @deprecated Use `fontStyle: 'italic'` instead.
-   */
-  italic?: boolean;
-
-  /**
    * The text color.
    */
   color?: Color;
