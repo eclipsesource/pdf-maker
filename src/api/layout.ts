@@ -135,11 +135,6 @@ export function rows(rows: Block[], props?: Omit<RowsBlock, 'rows'>): RowsBlock 
 export type EmptyBlock = BlockProps;
 
 /**
- * @deprecated Use `BlockProps` instead.
- */
-export type BlockAttrs = BlockProps;
-
-/**
  * Properties that can be applied to a block.
  */
 export type BlockProps = {

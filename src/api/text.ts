@@ -58,11 +58,6 @@ export type FontWeight = number | 'normal' | 'bold';
 export type FontStyle = 'normal' | 'italic' | 'oblique';
 
 /**
- * @deprecated Use `TextProps` instead.
- */
-export type TextAttrs = TextProps;
-
-/**
  * Text properties that can be applied to a text.
  */
 export type TextProps = {

@@ -27,9 +27,6 @@ export type Line = {
 
 export type LineProps = Omit<StrokeProps, 'lineJoin'> & TransformProps;
 
-/** @deprecated Use `LineProps` instead. */
-export type LineOpts = LineProps;
-
 /**
  * Creates a line with the given coordinates and properties.
  *
@@ -68,9 +65,6 @@ export type Rect = {
 
 export type RectProps = Omit<StrokeProps, 'lineCap'> & FillProps & TransformProps;
 
-/** @deprecated Use `RectProps` instead. */
-export type RectOpts = RectProps;
-
 /**
  * Creates a rectangle with the given coordinates and properties.
  *
@@ -105,9 +99,6 @@ export type Circle = {
 
 export type CircleProps = Omit<StrokeProps, 'lineCap' | 'lineJoin'> & FillProps & TransformProps;
 
-/** @deprecated Use `CircleProps` instead. */
-export type CircleOpts = CircleProps;
-
 /**
  * Creates a circle with the given center, radius, and properties.
  *
@@ -132,9 +123,6 @@ export type Path = {
 } & PathProps;
 
 export type PathProps = StrokeProps & FillProps & TransformProps;
-
-/** @deprecated Use `PathProps` instead. */
-export type PathOpts = PathProps;
 
 /**
  * Creates a path with the given path data and properties.

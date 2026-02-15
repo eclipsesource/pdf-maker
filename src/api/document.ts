@@ -148,11 +148,6 @@ export type EmbeddedFile = {
 };
 
 /**
- * @deprecated Use `InfoProps` instead.
- */
-export type InfoAttrs = InfoProps;
-
-/**
  * Standard metadata properties to include in the PDF's *document
  * information dictionary*. These properties are usually displayed by
  * PDF viewers.
@@ -194,11 +189,6 @@ export type InfoProps = {
    */
   producer?: string;
 };
-
-/**
- * @deprecated Use `CustomInfoProps` instead.
- */
-export type CustomInfoAttrs = CustomInfoProps;
 
 /**
  * Custom metadata properties to include in the PDF's *document
