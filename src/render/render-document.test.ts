@@ -52,6 +52,16 @@ describe('renderDocument', () => {
     expect(dataString).toMatch(/\/bar <FEFF006200610072002D00760061006C00750065>/);
   });
 
+  it('sets dates even without info', async () => {
+    const def = { content: [] };
+
+    const pdfData = await renderDocument(def, [], noObjectStreams);
+    const dataString = new TextDecoder().decode(pdfData);
+
+    expect(dataString).toMatch(/\/CreationDate \(D:20250101000000Z\)/);
+    expect(dataString).toMatch(/\/ModDate \(D:20250101000000Z\)/);
+  });
+
   it('renders custom data', async () => {
     const def = {
       content: [],

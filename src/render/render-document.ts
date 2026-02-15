@@ -36,19 +36,17 @@ export async function renderDocument(
 
 function setMetadata(doc: PDFDocument, info?: Metadata) {
   const now = new Date();
-  if (info !== undefined) {
-    doc.setInfo({
-      creationDate: info.creationDate ?? now,
-      modDate: now,
-      title: info.title,
-      subject: info.subject,
-      keywords: info.keywords?.join(', '),
-      author: info.author,
-      creator: info.creator,
-      producer: info.producer,
-      ...info.custom,
-    });
-  }
+  doc.setInfo({
+    creationDate: info?.creationDate ?? now,
+    modDate: now,
+    title: info?.title,
+    subject: info?.subject,
+    keywords: info?.keywords?.join(', '),
+    author: info?.author,
+    creator: info?.creator,
+    producer: info?.producer,
+    ...info?.custom,
+  });
 }
 
 function setCustomData(data: Record<string, string | Uint8Array>, doc: PDFDocument) {
