@@ -22,6 +22,19 @@
   registered with `PdfMaker.registerFont()`. The `FontsDefinition` and
   `FontDefinition` types have been removed.
 
+- The deprecated standalone `makePdf` function. Use
+  `new PdfMaker().makePdf()` instead.
+
+- The deprecated `Polyline` and `PolyLineOpts` types from the graphics
+  API. Use `Path` instead.
+
+- The deprecated `bold` and `italic` text properties. Use
+  `fontWeight: 'bold'` and `fontStyle: 'italic'` instead.
+
+- The deprecated type aliases `InfoAttrs`, `CustomInfoAttrs`,
+  `LineOpts`, `RectOpts`, `CircleOpts`, `PathOpts`, `BlockAttrs`,
+  and `TextAttrs`. Use their `*Props` counterparts instead.
+
 ### Breaking
 
 - Text height is now based on the OS/2 typographic metrics

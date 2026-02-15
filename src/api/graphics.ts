@@ -1,6 +1,6 @@
 import type { Color } from './colors.ts';
 
-export type Shape = Rect | Circle | Line | Path | Polyline;
+export type Shape = Rect | Circle | Line | Path;
 
 /**
  * A straight line.
@@ -133,25 +133,6 @@ export type PathProps = StrokeProps & FillProps & TransformProps;
 export function path(d: string, props?: PathProps): Path {
   return { ...props, type: 'path', d };
 }
-
-/**
- * A polyline, i.e. a line consisting of multiple segments.
- * @deprecated Use `Path` instead.
- */
-export type Polyline = {
-  type: 'polyline';
-  /**
-   * The points of the polyline, each point as an object with `x` and `y` coordinates.
-   */
-  points: { x: number; y: number }[];
-  /**
-   * Whether to close the path by drawing a line from the last point to the first point.
-   */
-  closePath?: boolean;
-} & PolyLineOpts;
-
-/** @deprecated  Use `Path` instead of `PolyLine`. */
-export type PolyLineOpts = StrokeProps & FillProps & TransformProps;
 
 export type LineCap = 'butt' | 'round' | 'square';
 export type LineJoin = 'miter' | 'round' | 'bevel';
