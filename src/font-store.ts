@@ -1,14 +1,13 @@
-import { PDFEmbeddedFont } from '@ralfstx/pdf-core';
+import { PDFEmbeddedFont, type PDFFont } from '@ralfstx/pdf-core';
 
 import type { FontConfig } from './api/PdfMaker.ts';
 import type { FontWeight } from './api/text.ts';
-import type { Font, FontDef, FontSelector } from './fonts.ts';
+import type { FontDef, FontSelector } from './fonts.ts';
 import { weightToNumber } from './fonts.ts';
-import { pickDefined } from './types.ts';
 
 export class FontStore {
   readonly #fontDefs: FontDef[];
-  #fontCache: Record<string, Promise<Font>> = {};
+  #fontCache: Record<string, Promise<PDFFont>> = {};
 
   constructor() {
     this.#fontDefs = [];
@@ -23,14 +22,14 @@ export class FontStore {
     this.#fontCache = {}; // Invalidate cache
   }
 
-  async selectFont(selector: FontSelector): Promise<Font> {
+  async selectFont(selector: FontSelector): Promise<PDFFont> {
     const cacheKey = [
       selector.fontFamily ?? 'any',
       selector.fontStyle ?? 'normal',
       selector.fontWeight ?? 'normal',
     ].join(':');
     try {
-      return await (this.#fontCache[cacheKey] ??= this._loadFont(selector, cacheKey));
+      return await (this.#fontCache[cacheKey] ??= this._loadFont(selector));
     } catch (error) {
       const { fontFamily: family, fontStyle: style, fontWeight: weight } = selector;
       const selectorStr = `'${family}', style=${style ?? 'normal'}, weight=${weight ?? 'normal'}`;
@@ -38,18 +37,9 @@ export class FontStore {
     }
   }
 
-  _loadFont(selector: FontSelector, key: string): Promise<Font> {
+  _loadFont(selector: FontSelector): Promise<PDFFont> {
     const selectedFontDef = selectFontDef(this.#fontDefs, selector);
-    const pdfFont = selectedFontDef.pdfFont ?? new PDFEmbeddedFont(selectedFontDef.data);
-    return Promise.resolve(
-      pickDefined({
-        key,
-        name: pdfFont.fontName ?? selectedFontDef.family,
-        style: selector.fontStyle ?? 'normal',
-        weight: weightToNumber(selector.fontWeight ?? 400),
-        pdfFont,
-      }),
-    );
+    return Promise.resolve(selectedFontDef.pdfFont ?? new PDFEmbeddedFont(selectedFontDef.data));
   }
 }
 

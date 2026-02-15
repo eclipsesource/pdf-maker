@@ -1,7 +1,8 @@
+import type { PDFFont } from '@ralfstx/pdf-core';
+
 import type { FontStyle, FontWeight } from './api/text.ts';
 import { getTextHeight, getTextWidth } from './font-metrics.ts';
 import type { FontStore } from './font-store.ts';
-import type { Font } from './fonts.ts';
 import type { TextSpan } from './read-block.ts';
 import type { Color } from './read-color.ts';
 
@@ -13,7 +14,7 @@ export type TextSegment = {
   width: number;
   height: number;
   lineHeight: number;
-  font: Font;
+  font: PDFFont;
   fontSize: number;
   fontFamily: string;
   fontStyle?: FontStyle;
@@ -43,13 +44,13 @@ export async function extractTextSegments(
         letterSpacing,
       } = attrs;
       const font = await fontStore.selectFont({ fontFamily, fontStyle, fontWeight });
-      const height = getTextHeight(font.pdfFont, fontSize);
+      const height = getTextHeight(font, fontSize);
 
       return splitChunks(text).map(
         (text) =>
           ({
             text,
-            width: getTextWidth(text, font.pdfFont, fontSize) + text.length * (letterSpacing ?? 0),
+            width: getTextWidth(text, font, fontSize) + text.length * (letterSpacing ?? 0),
             height,
             lineHeight,
             font,

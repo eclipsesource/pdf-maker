@@ -1,5 +1,6 @@
+import type { PDFFont } from '@ralfstx/pdf-core';
+
 import type { Box, Size } from '../box.ts';
-import type { Font } from '../fonts.ts';
 import type { LinkObject, RenderObject, TextRowObject, TextSegmentObject } from '../frame.ts';
 import { createRowGuides } from '../guides.ts';
 import type { MakerCtx } from '../maker-ctx.ts';
@@ -136,8 +137,8 @@ function layoutTextRow(segments: TextSegment[], box: Box) {
   return { row, objects, remainder };
 }
 
-function getDescent(font: Font, fontSize: number) {
-  return Math.abs((font.pdfFont.descent * fontSize) / 1000);
+function getDescent(font: PDFFont, fontSize: number) {
+  return Math.abs((font.descent * fontSize) / 1000);
 }
 
 /**

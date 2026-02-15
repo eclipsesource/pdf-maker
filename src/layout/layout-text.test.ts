@@ -1,15 +1,16 @@
+import type { PDFFont } from '@ralfstx/pdf-core';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import type { Box } from '../box.ts';
 import { rgb } from '../colors.ts';
 import { FontStore } from '../font-store.ts';
-import type { Font, FontSelector } from '../fonts.ts';
+import type { FontSelector } from '../fonts.ts';
 import type { MakerCtx } from '../maker-ctx.ts';
 import { extractTextRows, fakeFont, range, span } from '../test/test-utils.ts';
 import { layoutTextContent } from './layout-text.ts';
 
 describe('layout-text', () => {
-  let defaultFont: Font;
+  let defaultFont: PDFFont;
   let box: Box;
   let ctx: MakerCtx;
 

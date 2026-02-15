@@ -59,8 +59,8 @@ describe('FontStore', () => {
       const selected1 = await store.selectFont({ fontFamily: 'Roboto' });
       const selected2 = await store.selectFont({ fontFamily: 'Roboto Light', fontStyle: 'italic' });
 
-      expect(selected1.pdfFont.fontName).toBe('Roboto');
-      expect(selected2.pdfFont.fontName).toBe('Roboto Light Italic');
+      expect(selected1.fontName).toBe('Roboto');
+      expect(selected2.fontName).toBe('Roboto Light Italic');
     });
 
     it('registers font with custom config', async () => {
@@ -75,8 +75,8 @@ describe('FontStore', () => {
       const selected1 = await store.selectFont({ fontFamily: 'Custom Name' });
       const selected2 = await store.selectFont({ fontFamily: 'Custom Name', fontWeight: 'bold' });
 
-      expect(selected1.pdfFont.fontName).toBe('Roboto Light Italic');
-      expect(selected2.pdfFont.fontName).toBe('Roboto');
+      expect(selected1.fontName).toBe('Roboto Light Italic');
+      expect(selected2.fontName).toBe('Roboto');
     });
   });
 
@@ -131,29 +131,29 @@ describe('FontStore', () => {
       const font3 = await store.selectFont({ fontFamily, fontStyle: 'italic' });
       const font4 = await store.selectFont({ fontFamily, fontStyle: 'italic', fontWeight: 'bold' });
 
-      expect(font1.pdfFont.fontName).toBe('MockFont:Test:normal:400');
-      expect(font2.pdfFont.fontName).toBe('MockFont:Test:normal:700');
-      expect(font3.pdfFont.fontName).toBe('MockFont:Test:italic:400');
-      expect(font4.pdfFont.fontName).toBe('MockFont:Test:italic:700');
+      expect(font1.fontName).toBe('MockFont:Test:normal:400');
+      expect(font2.fontName).toBe('MockFont:Test:normal:700');
+      expect(font3.fontName).toBe('MockFont:Test:italic:400');
+      expect(font4.fontName).toBe('MockFont:Test:italic:700');
     });
 
     it('selects first matching font if no family specified', async () => {
       const font1 = await store.selectFont({});
-      expect(font1.pdfFont.fontName).toBe('MockFont:Test:normal:400');
+      expect(font1.fontName).toBe('MockFont:Test:normal:400');
 
       const font2 = await store.selectFont({ fontWeight: 'bold' });
-      expect(font2.pdfFont.fontName).toBe('MockFont:Test:normal:700');
+      expect(font2.fontName).toBe('MockFont:Test:normal:700');
 
       const font3 = await store.selectFont({ fontStyle: 'italic' });
-      expect(font3.pdfFont.fontName).toBe('MockFont:Test:italic:400');
+      expect(font3.fontName).toBe('MockFont:Test:italic:400');
 
       const font4 = await store.selectFont({ fontStyle: 'italic', fontWeight: 'bold' });
-      expect(font4.pdfFont.fontName).toBe('MockFont:Test:italic:700');
+      expect(font4.fontName).toBe('MockFont:Test:italic:700');
     });
 
     it('selects font with matching font family', async () => {
       await expect(store.selectFont({ fontFamily: 'Other' })).resolves.toEqual(
-        expect.objectContaining({ name: 'MockFont:Other:normal:400' }),
+        expect.objectContaining({ fontName: 'MockFont:Other:normal:400' }),
       );
     });
 
@@ -165,7 +165,7 @@ describe('FontStore', () => {
       registerFakeFont(store, 'Test', { style: 'oblique', weight: 700 });
 
       await expect(store.selectFont({ fontFamily: 'Test', fontStyle: 'italic' })).resolves.toEqual(
-        expect.objectContaining({ name: 'MockFont:Test:oblique:400' }),
+        expect.objectContaining({ fontName: 'MockFont:Test:oblique:400' }),
       );
     });
 
@@ -178,17 +178,15 @@ describe('FontStore', () => {
 
       const font = await store.selectFont({ fontFamily: 'Test', fontStyle: 'italic' });
 
-      expect(font.pdfFont).toEqual(
-        expect.objectContaining({ fontName: 'MockFont:Test:italic:400' }),
-      );
+      expect(font).toEqual(expect.objectContaining({ fontName: 'MockFont:Test:italic:400' }));
     });
 
     it('falls back when no matching font weight can be found', async () => {
       await expect(store.selectFont({ fontFamily: 'Other', fontWeight: 'bold' })).resolves.toEqual(
-        expect.objectContaining({ name: 'MockFont:Other:normal:400' }),
+        expect.objectContaining({ fontName: 'MockFont:Other:normal:400' }),
       );
       await expect(store.selectFont({ fontFamily: 'Other', fontWeight: 200 })).resolves.toEqual(
-        expect.objectContaining({ name: 'MockFont:Other:normal:400' }),
+        expect.objectContaining({ fontName: 'MockFont:Other:normal:400' }),
       );
     });
 

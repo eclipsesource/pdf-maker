@@ -1,9 +1,8 @@
-import type { PDFDocument } from '@ralfstx/pdf-core';
+import type { PDFDocument, PDFFont } from '@ralfstx/pdf-core';
 import { PDFPage } from '@ralfstx/pdf-core';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { Size } from '../box.ts';
-import type { Font } from '../fonts.ts';
 import type { Frame } from '../frame.ts';
 import type { Page } from '../page.ts';
 import { fakeFont, getContentStream } from '../test/test-utils.ts';
@@ -79,7 +78,7 @@ describe('render-page', () => {
   describe('renderFrame', () => {
     let page: Page;
     let size: Size;
-    let font: Font;
+    let font: PDFFont;
 
     beforeEach(() => {
       size = { width: 500, height: 800 };

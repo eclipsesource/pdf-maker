@@ -1,22 +1,15 @@
 import type { PDFFont } from '@ralfstx/pdf-core';
 import { PDFImage, PDFRef } from '@ralfstx/pdf-core';
 
-import type { Font } from '../fonts.ts';
+import type { FontWeight } from '../api/text.ts';
 import { weightToNumber } from '../fonts.ts';
 import type { Frame } from '../frame.ts';
 import type { Page } from '../page.ts';
 import type { TextAttrs, TextSpan } from '../read-block.ts';
 
-export function fakeFont(name: string, opts?: Partial<Omit<Font, 'name'>>): Font {
-  const key = `${name}-${opts?.style ?? 'normal'}-${opts?.weight ?? 400}`;
-  const font: Font = {
-    key,
-    name,
-    style: opts?.style ?? 'normal',
-    weight: weightToNumber(opts?.weight ?? 'normal'),
-    pdfFont: fakePdfFont(key),
-  };
-  return font;
+export function fakeFont(name: string, opts?: { style?: string; weight?: FontWeight }): PDFFont {
+  const key = `${name}-${opts?.style ?? 'normal'}-${weightToNumber(opts?.weight ?? 'normal')}`;
+  return fakePdfFont(key);
 }
 
 export function fakeImage(width: number, height: number): PDFImage {

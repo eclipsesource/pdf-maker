@@ -1,4 +1,4 @@
-import type { PDFEmbeddedFont, PDFFont } from '@ralfstx/pdf-core';
+import type { PDFEmbeddedFont } from '@ralfstx/pdf-core';
 
 import type { FontStyle, FontWeight } from './api/text.ts';
 import { printValue } from './print-value.ts';
@@ -12,14 +12,6 @@ export type FontDef = {
   weight: number;
   data: Uint8Array;
   pdfFont?: PDFEmbeddedFont;
-};
-
-export type Font = {
-  key: string;
-  name: string;
-  style: FontStyle;
-  weight: number;
-  pdfFont: PDFFont;
 };
 
 export type FontSelector = {

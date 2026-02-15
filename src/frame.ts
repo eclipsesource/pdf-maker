@@ -1,6 +1,5 @@
-import type { PDFImage } from '@ralfstx/pdf-core';
+import type { PDFFont, PDFImage } from '@ralfstx/pdf-core';
 
-import type { Font } from './fonts.ts';
 import type { Color } from './read-color.ts';
 import type { PathCommand } from './svg-paths.ts';
 
@@ -37,7 +36,7 @@ export type TextRowObject = {
 
 export type TextSegmentObject = {
   text: string;
-  font: Font;
+  font: PDFFont;
   fontSize: number;
   color?: Color;
   rise?: number;

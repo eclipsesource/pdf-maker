@@ -1,8 +1,8 @@
+import type { PDFFont } from '@ralfstx/pdf-core';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import { rgb } from './colors.ts';
 import { FontStore } from './font-store.ts';
-import type { Font } from './fonts.ts';
 import { fakeFont } from './test/test-utils.ts';
 import type { TextSegment } from './text.ts';
 import {
@@ -14,7 +14,7 @@ import {
 } from './text.ts';
 
 describe('text', () => {
-  let normalFont: Font;
+  let normalFont: PDFFont;
   let fontStore: FontStore;
 
   beforeEach(() => {
