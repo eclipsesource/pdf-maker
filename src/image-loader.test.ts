@@ -30,9 +30,8 @@ describe('createImageLoader', () => {
 
     const image = await loadImage('file:/test/resources/torus.png');
 
-    expect(image).toEqual(
-      expect.objectContaining({ url: 'file:/test/resources/torus.png', format: 'png' }),
-    );
+    expect(image.width).toBe(256);
+    expect(image.height).toBe(192);
   });
 
   it('loads image from data URL', async () => {
@@ -41,7 +40,8 @@ describe('createImageLoader', () => {
 
     const image = await loadImage(dataUrl);
 
-    expect(image).toEqual(expect.objectContaining({ url: dataUrl, format: 'png' }));
+    expect(image.width).toBe(256);
+    expect(image.height).toBe(192);
   });
 
   it('loads image from http URL', async () => {
@@ -49,25 +49,26 @@ describe('createImageLoader', () => {
 
     const image = await loadImage('http://example.com/torus.png');
 
-    expect(image).toEqual(
-      expect.objectContaining({ url: 'http://example.com/torus.png', format: 'png' }),
-    );
+    expect(image.width).toBe(256);
+    expect(image.height).toBe(192);
   });
 
-  it('reads format, width and height from JPEG image', async () => {
+  it('reads width and height from JPEG image', async () => {
     const loadImage = createImageLoader(baseDir);
 
     const image = await loadImage('file:/test/resources/liberty.jpg');
 
-    expect(image).toEqual(expect.objectContaining({ format: 'jpeg', width: 160, height: 240 }));
+    expect(image.width).toBe(160);
+    expect(image.height).toBe(240);
   });
 
-  it('reads format, width and height from PNG image', async () => {
+  it('reads width and height from PNG image', async () => {
     const loadImage = createImageLoader(baseDir);
 
     const image = await loadImage('file:/test/resources/torus.png');
 
-    expect(image).toEqual(expect.objectContaining({ format: 'png', width: 256, height: 192 }));
+    expect(image.width).toBe(256);
+    expect(image.height).toBe(192);
   });
 
   it('returns same image for same URL', async () => {

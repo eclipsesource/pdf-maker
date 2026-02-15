@@ -1,22 +1,21 @@
 import { PDFImage } from '@ralfstx/pdf-core';
 
 import { createDataLoader, type DataLoader } from './data-loader.ts';
-import type { Image, ImageFormat } from './images.ts';
 
-export type ImageLoader = (url: string) => Promise<Image>;
+type ImageFormat = 'jpeg' | 'png';
+
+export type ImageLoader = (url: string) => Promise<PDFImage>;
 
 export function createImageLoader(resourceRoot?: string): ImageLoader {
   const dataLoader = createDataLoader(resourceRoot ? { resourceRoot } : undefined);
-  const cache: Record<string, Promise<Image>> = {};
+  const cache: Record<string, Promise<PDFImage>> = {};
   return (url) => (cache[url] ??= loadImage(url, dataLoader));
 }
 
-async function loadImage(url: string, dataLoader: DataLoader): Promise<Image> {
+async function loadImage(url: string, dataLoader: DataLoader): Promise<PDFImage> {
   const { data } = await dataLoader(url);
   const format = determineImageFormat(data);
-  const pdfImage = format === 'jpeg' ? PDFImage.fromJpeg(data) : PDFImage.fromPng(data);
-  const { width, height } = pdfImage;
-  return { url, format, width, height, pdfImage };
+  return format === 'jpeg' ? PDFImage.fromJpeg(data) : PDFImage.fromPng(data);
 }
 
 function determineImageFormat(data: Uint8Array): ImageFormat {

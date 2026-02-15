@@ -1,9 +1,8 @@
-import { PDFPage } from '@ralfstx/pdf-core';
+import { type PDFImage, PDFPage } from '@ralfstx/pdf-core';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import type { Size } from '../box.ts';
 import type { ImageObject } from '../frame.ts';
-import type { Image } from '../images.ts';
 import type { Page } from '../page.ts';
 import { fakeImage, getContentStream } from '../test/test-utils.ts';
 import { renderImage } from './render-image.ts';
@@ -12,13 +11,13 @@ describe('renderImage', () => {
   const pos = { x: 10, y: 20 };
   let page: Page;
   let size: Size;
-  let image: Image;
+  let image: PDFImage;
 
   beforeEach(() => {
     size = { width: 500, height: 800 };
     const pdfPage = new PDFPage(size.width, size.height);
     page = { size, pdfPage } as Page;
-    image = fakeImage('test-image.jpg', 100, 150);
+    image = fakeImage(100, 150);
   });
 
   it('renders single image object', () => {

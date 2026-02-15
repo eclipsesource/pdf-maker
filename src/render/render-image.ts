@@ -11,6 +11,6 @@ export function renderImage(object: ImageObject, page: Page, base: Pos) {
     .saveGraphicsState()
     .translate(x, y)
     .scale(width, height)
-    .drawImage(object.image.pdfImage)
+    .drawImage(object.image)
     .restoreGraphicsState();
 }

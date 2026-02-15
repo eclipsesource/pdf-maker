@@ -9,7 +9,7 @@ import { layoutImageContent } from './layout-image.ts';
 const mockImageLoader = vi.fn((selector: string) => {
   const match = /^img-(\d+)-(\d+)$/.exec(selector);
   if (match) {
-    return Promise.resolve(fakeImage(selector, Number(match[1]), Number(match[2])));
+    return Promise.resolve(fakeImage(Number(match[1]), Number(match[2])));
   }
   throw new Error(`Unknown image: ${selector}`);
 });

@@ -4,7 +4,6 @@ import { PDFImage, PDFRef } from '@ralfstx/pdf-core';
 import type { Font } from '../fonts.ts';
 import { weightToNumber } from '../fonts.ts';
 import type { Frame } from '../frame.ts';
-import type { Image } from '../images.ts';
 import type { Page } from '../page.ts';
 import type { TextAttrs, TextSpan } from '../read-block.ts';
 
@@ -20,16 +19,9 @@ export function fakeFont(name: string, opts?: Partial<Omit<Font, 'name'>>): Font
   return font;
 }
 
-export function fakeImage(name: string, width: number, height: number): Image {
+export function fakeImage(width: number, height: number): PDFImage {
   const data = createTestJpeg(width, height);
-  return {
-    name,
-    width,
-    height,
-    format: 'jpeg',
-    url: 'test',
-    pdfImage: PDFImage.fromJpeg(data),
-  } as Image;
+  return PDFImage.fromJpeg(data);
 }
 
 /**

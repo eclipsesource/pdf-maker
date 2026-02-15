@@ -1,5 +1,6 @@
+import type { PDFImage } from '@ralfstx/pdf-core';
+
 import type { Font } from './fonts.ts';
-import type { Image } from './images.ts';
 import type { Color } from './read-color.ts';
 import type { PathCommand } from './svg-paths.ts';
 
@@ -65,7 +66,7 @@ export type ImageObject = {
   y: number;
   width: number;
   height: number;
-  image: Image;
+  image: PDFImage;
 };
 
 export type GraphicsObject = {
