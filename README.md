@@ -176,6 +176,14 @@ text spans. The following text properties are supported:
   shift the baseline up, negative values shift it down.
 - `letterSpacing`: The character spacing in pt. Positive values increase
   the space between characters, negative values decrease it.
+- `fontKerning`: Controls kerning (pair-wise spacing adjustments). Can
+  be `normal` (default) or `none`.
+- `fontVariantLigatures`: Controls ligatures and contextual alternates.
+  Can be `normal` (default) or `none`.
+- `fontFeatureSettings`: Low-level control over OpenType font features.
+  An object where each key is a four-character OpenType feature tag and
+  the value enables (`true`) or disables (`false`) that feature
+  (e.g. `{ smcp: true, tnum: true }`).
 
 ### Images
 

@@ -1,5 +1,5 @@
 import type { PDFFont } from '@ralfstx/pdf-core';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { rgb } from './colors.ts';
 import { FontStore } from './font-store.ts';
@@ -7,6 +7,8 @@ import { fakeFont } from './test/test-utils.ts';
 import type { TextSegment } from './text.ts';
 import {
   breakLine,
+  buildShapeOptions,
+  convertToTextSpan,
   extractTextSegments,
   findLinebreakOpportunity,
   flattenTextSegments,
@@ -98,6 +100,145 @@ describe('text', () => {
       expect(segments).toHaveLength(2);
       expect(segments[0].glyphs).toHaveLength(3);
       expect(segments[1].glyphs).toHaveLength(3);
+    });
+
+    it('passes fontKerning none as shape options', async () => {
+      const shapeTextSpy = vi.fn(normalFont.shapeText.bind(normalFont));
+      normalFont.shapeText = shapeTextSpy;
+      const attrs = { fontSize: 10, fontKerning: 'none' as const };
+
+      await extractTextSegments([{ text: 'foo', attrs }], fontStore);
+
+      expect(shapeTextSpy).toHaveBeenCalledWith('foo', { features: { kern: false } });
+    });
+
+    it('passes fontVariantLigatures none as shape options', async () => {
+      const shapeTextSpy = vi.fn(normalFont.shapeText.bind(normalFont));
+      normalFont.shapeText = shapeTextSpy;
+      const attrs = { fontSize: 10, fontVariantLigatures: 'none' as const };
+
+      await extractTextSegments([{ text: 'foo', attrs }], fontStore);
+
+      expect(shapeTextSpy).toHaveBeenCalledWith('foo', {
+        features: { liga: false, clig: false, calt: false },
+      });
+    });
+
+    it('passes fontFeatureSettings as shape options', async () => {
+      const shapeTextSpy = vi.fn(normalFont.shapeText.bind(normalFont));
+      normalFont.shapeText = shapeTextSpy;
+      const attrs = { fontSize: 10, fontFeatureSettings: { smcp: true, tnum: true } };
+
+      await extractTextSegments([{ text: 'foo', attrs }], fontStore);
+
+      expect(shapeTextSpy).toHaveBeenCalledWith('foo', {
+        features: { smcp: true, tnum: true },
+      });
+    });
+
+    it('combines all shaping properties', async () => {
+      const shapeTextSpy = vi.fn(normalFont.shapeText.bind(normalFont));
+      normalFont.shapeText = shapeTextSpy;
+      const attrs = {
+        fontSize: 10,
+        fontKerning: 'none' as const,
+        fontVariantLigatures: 'none' as const,
+        fontFeatureSettings: { smcp: true },
+      };
+
+      await extractTextSegments([{ text: 'foo', attrs }], fontStore);
+
+      expect(shapeTextSpy).toHaveBeenCalledWith('foo', {
+        features: { smcp: true, liga: false, clig: false, calt: false, kern: false },
+      });
+    });
+
+    it('does not pass shape options when all defaults', async () => {
+      const shapeTextSpy = vi.fn(normalFont.shapeText.bind(normalFont));
+      normalFont.shapeText = shapeTextSpy;
+
+      await extractTextSegments([{ text: 'foo', attrs: { fontSize: 10 } }], fontStore);
+
+      expect(shapeTextSpy).toHaveBeenCalledWith('foo', undefined);
+    });
+
+    it('preserves shaping properties on segments', async () => {
+      const attrs = {
+        fontSize: 10,
+        fontKerning: 'none' as const,
+        fontVariantLigatures: 'none' as const,
+        fontFeatureSettings: { smcp: true },
+      };
+
+      const segments = await extractTextSegments([{ text: 'foo', attrs }], fontStore);
+
+      expect(segments[0]).toEqual(
+        expect.objectContaining({
+          fontKerning: 'none',
+          fontVariantLigatures: 'none',
+          fontFeatureSettings: { smcp: true },
+        }),
+      );
+    });
+  });
+
+  describe('convertToTextSpan', () => {
+    it('includes shaping properties in attrs', () => {
+      const segment = seg('foo', {
+        fontKerning: 'none',
+        fontVariantLigatures: 'none',
+        fontFeatureSettings: { smcp: true },
+      });
+
+      const span = convertToTextSpan(segment);
+
+      expect(span.attrs).toEqual(
+        expect.objectContaining({
+          fontKerning: 'none',
+          fontVariantLigatures: 'none',
+          fontFeatureSettings: { smcp: true },
+        }),
+      );
+    });
+  });
+
+  describe('buildShapeOptions', () => {
+    it('returns undefined when no options set', () => {
+      expect(buildShapeOptions({})).toBeUndefined();
+    });
+
+    it('returns undefined when default options set', () => {
+      expect(
+        buildShapeOptions({ fontKerning: 'normal', fontVariantLigatures: 'normal' }),
+      ).toBeUndefined();
+    });
+
+    it('disables kern for fontKerning none', () => {
+      expect(buildShapeOptions({ fontKerning: 'none' })).toEqual({ features: { kern: false } });
+    });
+
+    it('disables ligatures for fontVariantLigatures none', () => {
+      expect(buildShapeOptions({ fontVariantLigatures: 'none' })).toEqual({
+        features: { liga: false, clig: false, calt: false },
+      });
+    });
+
+    it('passes through fontFeatureSettings', () => {
+      expect(buildShapeOptions({ fontFeatureSettings: { smcp: true } })).toEqual({
+        features: { smcp: true },
+      });
+    });
+
+    it('lets high-level properties override fontFeatureSettings', () => {
+      const result = buildShapeOptions({
+        fontKerning: 'none',
+        fontVariantLigatures: 'none',
+        fontFeatureSettings: { kern: true, liga: true, smcp: true },
+      });
+
+      expect(result).toEqual({
+        features: { kern: false, liga: false, clig: false, calt: false, smcp: true },
+      });
     });
   });
 
@@ -195,6 +336,54 @@ describe('text', () => {
 
       expect(flattenTextSegments(segments)).toEqual(segments);
     });
+
+    it('does not merge segments with different fontKerning', () => {
+      const segments = [seg('foo', { fontKerning: 'none' }), seg('bar')];
+
+      expect(flattenTextSegments(segments)).toHaveLength(2);
+    });
+
+    it('does not merge segments with different fontVariantLigatures', () => {
+      const segments = [seg('foo', { fontVariantLigatures: 'none' }), seg('bar')];
+
+      expect(flattenTextSegments(segments)).toHaveLength(2);
+    });
+
+    it('merges segments with equal font', () => {
+      const segments = [
+        seg('foo', { font: fakeFont('Test') }),
+        seg('bar', { font: fakeFont('Test') }),
+      ];
+
+      expect(flattenTextSegments(segments)).toHaveLength(1);
+    });
+
+    it('merges segments with equal color', () => {
+      const segments = [
+        seg('foo', { color: rgb(1, 0, 0) }),
+        seg('bar', { color: rgb(1, 0, 0) }),
+      ];
+
+      expect(flattenTextSegments(segments)).toHaveLength(1);
+    });
+
+    it('merges segments with equal fontFeatureSettings', () => {
+      const segments = [
+        seg('foo', { fontFeatureSettings: { smcp: true } }),
+        seg('bar', { fontFeatureSettings: { smcp: true } }),
+      ];
+
+      expect(flattenTextSegments(segments)).toHaveLength(1);
+    });
+
+    it('does not merge segments with different fontFeatureSettings', () => {
+      const segments = [
+        seg('foo', { fontFeatureSettings: { smcp: true } }),
+        seg('bar', { fontFeatureSettings: { liga: true } }),
+      ];
+
+      expect(flattenTextSegments(segments)).toHaveLength(2);
+    });
   });
 
   describe('breakLine', () => {
@@ -248,7 +437,17 @@ describe('text', () => {
 });
 
 function seg(text: string, attrs?: Partial<TextSegment>): TextSegment {
-  const { font, fontSize = 10, height = 12, lineHeight = 14, link, color } = attrs ?? {};
+  const {
+    font,
+    fontSize = 10,
+    height = 12,
+    lineHeight = 14,
+    link,
+    color,
+    fontKerning,
+    fontVariantLigatures,
+    fontFeatureSettings,
+  } = attrs ?? {};
   const width = text.length * fontSize;
   const glyphs = [...text].map((c) => ({
     glyphId: c.charCodeAt(0),
@@ -256,5 +455,18 @@ function seg(text: string, attrs?: Partial<TextSegment>): TextSegment {
     advance: 1000,
   }));
   const type = text === '\n' ? 'newline' : /^\s+$/.test(text) ? 'whitespace' : 'text';
-  return { type, glyphs, width, height, lineHeight, font, fontSize, link, color } as TextSegment;
+  return {
+    type,
+    glyphs,
+    width,
+    height,
+    lineHeight,
+    font,
+    fontSize,
+    link,
+    color,
+    fontKerning,
+    fontVariantLigatures,
+    fontFeatureSettings,
+  } as TextSegment;
 }

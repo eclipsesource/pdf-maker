@@ -2,6 +2,17 @@
 
 ## [0.6.0] - Unreleased
 
+### Added
+
+- Text shaping (ligatures and kerning) is now enabled by default for
+  all text. The following text properties have been added to control
+  shaping behavior:
+  - `fontKerning`: Controls kerning (`'normal'` | `'none'`).
+  - `fontVariantLigatures`: Controls ligatures and contextual
+    alternates (`'normal'` | `'none'`).
+  - `fontFeatureSettings`: Low-level control over OpenType features
+    as a `Record<string, boolean>` (e.g. `{ smcp: true, tnum: true }`).
+
 ### Changed
 
 - Replaced `pdf-lib` with `@ralfstx/pdf-core` as the underlying PDF

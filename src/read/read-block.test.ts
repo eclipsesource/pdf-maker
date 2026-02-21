@@ -202,6 +202,68 @@ describe('readTextBlock', () => {
       ),
     );
   });
+
+  it('includes font shaping properties', () => {
+    const input = {
+      text: 'foo',
+      fontKerning: 'none',
+      fontVariantLigatures: 'none',
+      fontFeatureSettings: { smcp: true, tnum: true },
+    };
+
+    const result = readTextBlock(input);
+
+    expect(result.text).toEqual([
+      {
+        text: 'foo',
+        attrs: {
+          fontKerning: 'none',
+          fontVariantLigatures: 'none',
+          fontFeatureSettings: { smcp: true, tnum: true },
+        },
+      },
+    ]);
+  });
+
+  it('checks fontKerning', () => {
+    const input = { text: [], fontKerning: 'foo' };
+
+    expect(() => readTextBlock(input)).toThrow(
+      new TypeError(
+        "Invalid value for \"fontKerning\": Expected one of ('normal', 'none'), got: 'foo'",
+      ),
+    );
+  });
+
+  it('checks fontVariantLigatures', () => {
+    const input = { text: [], fontVariantLigatures: 'foo' };
+
+    expect(() => readTextBlock(input)).toThrow(
+      new TypeError(
+        "Invalid value for \"fontVariantLigatures\": Expected one of ('normal', 'none'), got: 'foo'",
+      ),
+    );
+  });
+
+  it('checks fontFeatureSettings type', () => {
+    const input = { text: [], fontFeatureSettings: 'liga 0' };
+
+    expect(() => readTextBlock(input)).toThrow(
+      new TypeError(
+        'Invalid value for "fontFeatureSettings": Expected object with boolean values, got: \'liga 0\'',
+      ),
+    );
+  });
+
+  it('checks fontFeatureSettings values', () => {
+    const input = { text: [], fontFeatureSettings: { smcp: 1 } };
+
+    expect(() => readTextBlock(input)).toThrow(
+      new TypeError(
+        'Invalid value for "fontFeatureSettings": Expected boolean for feature "smcp", got: 1',
+      ),
+    );
+  });
 });
 
 describe('readText', () => {

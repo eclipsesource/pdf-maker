@@ -2,7 +2,7 @@ import type { PDFFont, ShapedGlyph } from '@ralfstx/pdf-core';
 
 import type { FontStyle, FontWeight } from './api/text.ts';
 import type { FontStore } from './font-store.ts';
-import type { TextSpan } from './read/read-block.ts';
+import type { TextAttrs, TextSpan } from './read/read-block.ts';
 import type { Color } from './read/read-color.ts';
 
 const defaultFontSize = 18;
@@ -23,6 +23,9 @@ export type TextSegment = {
   link?: string;
   rise?: number;
   letterSpacing?: number;
+  fontKerning?: 'normal' | 'none';
+  fontVariantLigatures?: 'normal' | 'none';
+  fontFeatureSettings?: Record<string, boolean>;
 };
 
 export async function extractTextSegments(
@@ -42,13 +45,17 @@ export async function extractTextSegments(
         link,
         rise,
         letterSpacing,
+        fontKerning,
+        fontVariantLigatures,
+        fontFeatureSettings,
       } = attrs;
       const font = await fontStore.selectFont({ fontFamily, fontStyle, fontWeight });
       const height = getTextHeight(font, fontSize);
+      const shapeOpts = buildShapeOptions(attrs);
 
       return splitChunks(text).map((chunk) => {
         const type = chunk === '\n' ? 'newline' : /^\s+$/.test(chunk) ? 'whitespace' : 'text';
-        const glyphs = type === 'newline' ? [] : font.shapeText(chunk);
+        const glyphs = type === 'newline' ? [] : font.shapeText(chunk, shapeOpts);
         return {
           type,
           glyphs,
@@ -64,6 +71,9 @@ export async function extractTextSegments(
           link,
           rise,
           letterSpacing,
+          fontKerning,
+          fontVariantLigatures,
+          fontFeatureSettings,
         } as TextSegment;
       });
     }),
@@ -83,6 +93,9 @@ export function convertToTextSpan(segment: TextSegment): TextSpan {
     link,
     rise,
     letterSpacing,
+    fontKerning,
+    fontVariantLigatures,
+    fontFeatureSettings,
   } = segment;
   return {
     text: getGlyphRunText(glyphs),
@@ -96,6 +109,9 @@ export function convertToTextSpan(segment: TextSegment): TextSpan {
       link,
       rise,
       letterSpacing,
+      fontKerning,
+      fontVariantLigatures,
+      fontFeatureSettings,
     },
   };
 }
@@ -206,13 +222,16 @@ export function flattenTextSegments(segments: TextSegment[]): TextSegment[] {
   let prev: TextSegment;
   segments.forEach((segment) => {
     if (
-      segment.font === prev?.font &&
+      segment.font?.key === prev?.font?.key &&
       segment.fontSize === prev?.fontSize &&
       segment.lineHeight === prev?.lineHeight &&
-      segment.color === prev?.color &&
+      equalsColor(segment.color, prev?.color) &&
       segment.link === prev?.link &&
       segment.rise === prev?.rise &&
-      segment.letterSpacing === prev?.letterSpacing
+      segment.letterSpacing === prev?.letterSpacing &&
+      segment.fontKerning === prev?.fontKerning &&
+      segment.fontVariantLigatures === prev?.fontVariantLigatures &&
+      equalsFontFeatureSettings(segment.fontFeatureSettings, prev?.fontFeatureSettings)
     ) {
       prev.glyphs = [...prev.glyphs, ...segment.glyphs];
       prev.width += segment.width;
@@ -222,6 +241,23 @@ export function flattenTextSegments(segments: TextSegment[]): TextSegment[] {
     }
   });
   return result;
+}
+
+function equalsColor(a: Color | undefined, b: Color | undefined): boolean {
+  if (a === b) return true;
+  if (!a || !b) return false;
+  return a.red === b.red && a.green === b.green && a.blue === b.blue;
+}
+
+function equalsFontFeatureSettings(
+  a: Record<string, boolean> | undefined,
+  b: Record<string, boolean> | undefined,
+): boolean {
+  if (a === b) return true;
+  if (!a || !b) return false;
+  const keysA = Object.keys(a);
+  const keysB = Object.keys(b);
+  return keysA.length === keysB.length && keysA.every((key) => a[key] === b[key]);
 }
 
 export function getGlyphRunText(glyphs: ShapedGlyph[]): string {
@@ -243,4 +279,21 @@ function getTextHeight(font: PDFFont, fontSize: number): number {
   const descent = font.descent;
   const height = ascent - descent;
   return (height * fontSize) / 1000;
+}
+
+export function buildShapeOptions(
+  attrs: TextAttrs,
+): { features: Record<string, boolean> } | undefined {
+  const { fontKerning, fontVariantLigatures, fontFeatureSettings } = attrs;
+  const features: Record<string, boolean> = { ...fontFeatureSettings };
+  if (fontVariantLigatures === 'none') {
+    features.liga = false;
+    features.clig = false;
+    features.calt = false;
+  }
+  if (fontKerning === 'none') {
+    features.kern = false;
+  }
+  if (Object.keys(features).length === 0) return undefined;
+  return { features };
 }

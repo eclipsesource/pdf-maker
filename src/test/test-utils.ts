@@ -82,7 +82,7 @@ export function fakePdfFont(key: string): PDFFont {
     ascent: 800,
     descent: -200,
     lineGap: 0,
-    shapeText: (text: string) =>
+    shapeText: (text: string, _opts?: Record<string, unknown>) =>
       [...text].map((c) => ({
         glyphId: c.charCodeAt(0),
         codePoints: [c.codePointAt(0)!],

@@ -59,6 +59,9 @@ export type TextAttrs = {
   link?: string;
   rise?: number;
   letterSpacing?: number;
+  fontKerning?: 'normal' | 'none';
+  fontVariantLigatures?: 'normal' | 'none';
+  fontFeatureSettings?: Record<string, boolean>;
 };
 
 type BlockAttrs = {
@@ -195,6 +198,9 @@ export function readTextAttrs(input: Obj): TextAttrs {
     link: optional(types.string()),
     rise: optional(types.number()),
     letterSpacing: optional(types.number()),
+    fontKerning: optional(types.string({ enum: ['normal', 'none'] })),
+    fontVariantLigatures: optional(types.string({ enum: ['normal', 'none'] })),
+    fontFeatureSettings: optional(readFontFeatureSettings),
   });
   if (!obj.fontWeight && obj.bold) {
     obj.fontWeight = 700;
@@ -214,6 +220,18 @@ function readFontWeight(input: unknown): number {
     return input;
   }
   throw typeError("'normal', 'bold', or integer between 0 and 1000", input);
+}
+
+function readFontFeatureSettings(input: unknown): Record<string, boolean> {
+  if (!isObject(input)) {
+    throw typeError('object with boolean values', input);
+  }
+  for (const [key, value] of Object.entries(input)) {
+    if (typeof value !== 'boolean') {
+      throw typeError(`boolean for feature "${key}"`, value);
+    }
+  }
+  return input as Record<string, boolean>;
 }
 
 export function readInheritableAttrs(input: unknown): TextAttrs {

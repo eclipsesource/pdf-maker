@@ -112,4 +112,30 @@ export type TextProps = {
    * values decrease it.
    */
   letterSpacing?: number;
+
+  /**
+   * Controls kerning (pair-wise spacing adjustments between specific glyphs).
+   * When set to `normal` (the default), the kerning information in the font is applied.
+   * When set to `none`, kerning is disabled.
+   */
+  fontKerning?: 'normal' | 'none';
+
+  /**
+   * Controls ligatures and contextual alternates.
+   * When set to `normal` (the default), standard ligatures and contextual alternates defined
+   * in the font are enabled.
+   * When set to `none`, all ligatures and contextual alternates are disabled.
+   */
+  fontVariantLigatures?: 'normal' | 'none';
+
+  /**
+   * Low-level control over OpenType font features.
+   * Each key is a four-character OpenType feature tag (e.g. `smcp`, `tnum`), and the value
+   * enables (`true`) or disables (`false`) that feature.
+   *
+   * The `fontKerning` and `fontVariantLigatures` properties should be preferred over this one.
+   * The settings from `fontKerning` and `fontVariantLigatures` take precedence over entries
+   * in `fontFeatureSettings`.
+   */
+  fontFeatureSettings?: Record<string, boolean>;
 };
