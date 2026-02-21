@@ -3,9 +3,6 @@ import type { FontStyle, FontWeight } from '../api/text.ts';
 import type { BoxEdges } from '../box.ts';
 import { parseEdges, parseLength } from '../box.ts';
 import type { Shape } from '../frame.ts';
-import type { Color } from './read-color.ts';
-import { readColor } from './read-color.ts';
-import { readShape } from './read-graphics.ts';
 import type { Obj, TypeDef } from '../util/types.ts';
 import {
   dynamic,
@@ -18,6 +15,9 @@ import {
   typeError,
   types,
 } from '../util/types.ts';
+import type { Color } from './read-color.ts';
+import { readColor } from './read-color.ts';
+import { readShape } from './read-graphics.ts';
 
 export type Block = TextBlock | ImageBlock | ColumnsBlock | RowsBlock | EmptyBlock;
 

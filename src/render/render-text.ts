@@ -18,13 +18,11 @@ export function renderText(object: TextObject, page: Page, base: Pos) {
   object.rows?.forEach((row) => {
     cs.setTextMatrix(1, 0, 0, 1, x + row.x, y - row.y - row.baseline);
     row.segments?.forEach((seg) => {
-      const glyphRun = seg.font.shapeText(seg.text, { defaultFeatures: false });
-
       setTextColorOp(cs, state, seg.color);
       setTextFontAndSizeOp(cs, state, seg.font, seg.fontSize);
       setTextRiseOp(cs, state, seg.rise);
       setLetterSpacingOp(cs, state, seg.letterSpacing);
-      cs.showPositionedText(glyphRun);
+      cs.showPositionedText(seg.glyphs);
     });
   });
   cs.endText();

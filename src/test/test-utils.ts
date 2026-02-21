@@ -6,6 +6,7 @@ import { weightToNumber } from '../fonts.ts';
 import type { Frame } from '../frame.ts';
 import type { Page } from '../page.ts';
 import type { TextAttrs, TextSpan } from '../read/read-block.ts';
+import { getGlyphRunText } from '../text.ts';
 
 export function fakeFont(name: string, opts?: { style?: string; weight?: FontWeight }): PDFFont {
   const key = `${name}-${opts?.style ?? 'normal'}-${weightToNumber(opts?.weight ?? 'normal')}`;
@@ -99,7 +100,7 @@ export function extractTextRows(frame: Partial<Frame>) {
   frame.objects?.forEach((obj) => {
     if (obj.type === 'text') {
       obj.rows.forEach((row) => {
-        lines.push(row.segments.map((s) => s.text).join(', '));
+        lines.push(row.segments.map((s) => getGlyphRunText(s.glyphs)).join(', '));
       });
     }
   });

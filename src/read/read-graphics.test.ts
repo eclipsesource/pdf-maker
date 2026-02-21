@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
 
 import { rgb } from '../colors.ts';
-import { readShape } from './read-graphics.ts';
 import { p } from '../test/test-utils.ts';
+import { readShape } from './read-graphics.ts';
 
 const transformAttrs = {
   translate: { x: 1, y: 2 },

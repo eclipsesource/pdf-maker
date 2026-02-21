@@ -3,11 +3,13 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { paperSizes } from '../api/sizes.ts';
 import type { Box } from '../box.ts';
 import { FontStore } from '../font-store.ts';
+import type { Frame } from '../frame.ts';
 import type { MakerCtx } from '../maker-ctx.ts';
 import type { Block, TextAttrs, TextSpan } from '../read/read-block.ts';
 import type { PageInfo } from '../read/read-document.ts';
 import { readDocumentDefinition } from '../read/read-document.ts';
 import { fakeFont, p, range } from '../test/test-utils.ts';
+import { getGlyphRunText } from '../text.ts';
 import { isBreakPossible, layoutBlock, layoutPages } from './layout.ts';
 
 const defaultPageSize = paperSizes.A4;
@@ -187,12 +189,15 @@ describe('layout', () => {
         footer: ({ pageCount, pageNumber }: PageInfo) => ({ text: `${pageNumber}/${pageCount}` }),
       });
 
-      const pages = (await layoutPages(def, ctx)) as any;
+      const pages = await layoutPages(def, ctx);
 
-      expect(pages[0].header.objects[0].rows[0].segments[0].text).toEqual('1/2');
-      expect(pages[0].footer.objects[0].rows[0].segments[0].text).toEqual('1/2');
-      expect(pages[1].header.objects[0].rows[0].segments[0].text).toEqual('2/2');
-      expect(pages[1].footer.objects[0].rows[0].segments[0].text).toEqual('2/2');
+      const findFirstTextSegment = (frame: Frame) => {
+        return frame.objects?.find((o) => o.type === 'text')?.rows?.[0].segments?.[0];
+      };
+      expect(getGlyphRunText(findFirstTextSegment(pages[0].header!)!.glyphs)).toEqual('1/2');
+      expect(getGlyphRunText(findFirstTextSegment(pages[0].footer!)!.glyphs)).toEqual('1/2');
+      expect(getGlyphRunText(findFirstTextSegment(pages[1].header!)!.glyphs)).toEqual('2/2');
+      expect(getGlyphRunText(findFirstTextSegment(pages[1].footer!)!.glyphs)).toEqual('2/2');
     });
   });
 

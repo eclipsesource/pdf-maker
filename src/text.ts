@@ -1,7 +1,6 @@
-import type { PDFFont } from '@ralfstx/pdf-core';
+import type { PDFFont, ShapedGlyph } from '@ralfstx/pdf-core';
 
 import type { FontStyle, FontWeight } from './api/text.ts';
-import { getTextHeight, getTextWidth } from './font-metrics.ts';
 import type { FontStore } from './font-store.ts';
 import type { TextSpan } from './read/read-block.ts';
 import type { Color } from './read/read-color.ts';
@@ -10,7 +9,8 @@ const defaultFontSize = 18;
 const defaultLineHeight = 1.2;
 
 export type TextSegment = {
-  text: string;
+  type: 'text' | 'whitespace' | 'newline';
+  glyphs: ShapedGlyph[];
   width: number;
   height: number;
   lineHeight: number;
@@ -46,24 +46,26 @@ export async function extractTextSegments(
       const font = await fontStore.selectFont({ fontFamily, fontStyle, fontWeight });
       const height = getTextHeight(font, fontSize);
 
-      return splitChunks(text).map(
-        (text) =>
-          ({
-            text,
-            width: getTextWidth(text, font, fontSize) + text.length * (letterSpacing ?? 0),
-            height,
-            lineHeight,
-            font,
-            fontFamily,
-            fontStyle,
-            fontWeight,
-            fontSize,
-            color,
-            link,
-            rise,
-            letterSpacing,
-          }) as TextSegment,
-      );
+      return splitChunks(text).map((chunk) => {
+        const type = chunk === '\n' ? 'newline' : /^\s+$/.test(chunk) ? 'whitespace' : 'text';
+        const glyphs = type === 'newline' ? [] : font.shapeText(chunk);
+        return {
+          type,
+          glyphs,
+          width: getGlyphRunWidth(glyphs, fontSize) + glyphs.length * (letterSpacing ?? 0),
+          height,
+          lineHeight,
+          font,
+          fontFamily,
+          fontStyle,
+          fontWeight,
+          fontSize,
+          color,
+          link,
+          rise,
+          letterSpacing,
+        } as TextSegment;
+      });
     }),
   );
   return segments.flat();
@@ -71,7 +73,7 @@ export async function extractTextSegments(
 
 export function convertToTextSpan(segment: TextSegment): TextSpan {
   const {
-    text,
+    glyphs,
     fontSize,
     fontFamily,
     fontStyle,
@@ -83,7 +85,7 @@ export function convertToTextSpan(segment: TextSegment): TextSpan {
     letterSpacing,
   } = segment;
   return {
-    text,
+    text: getGlyphRunText(glyphs),
     attrs: {
       fontSize,
       fontFamily,
@@ -137,7 +139,7 @@ export function breakLine(segments: TextSegment[], maxWidth: number): TextSegmen
     // A line break is required before the first segment. Insert an
     // empty segment with the text height of the first segment to
     // represent a blank line and prevent collapsing of newlines.
-    const head = [{ ...segments[0], text: '', width: 0 }];
+    const head = [{ ...segments[0], type: 'text' as const, glyphs: [], width: 0 }];
     const tail = segments.slice(breakIdx + 1);
     return tail.length ? [head, tail] : [head];
   }
@@ -152,11 +154,10 @@ export function breakLine(segments: TextSegment[], maxWidth: number): TextSegmen
 function findLinebreak(segments: TextSegment[], maxWidth: number): number | undefined {
   let x = 0;
   for (const [idx, segment] of segments.entries()) {
-    const { text, width } = segment;
-    if (text === '\n') {
+    if (segment.type === 'newline') {
       return idx;
     }
-    x += width;
+    x += segment.width;
     if (x > maxWidth) {
       return findLinebreakOpportunity(segments, idx);
     }
@@ -190,7 +191,7 @@ export function findLinebreakOpportunity(
 }
 
 function isLineBreakOpportunity(segment: TextSegment): boolean {
-  return segment && /^\s+$/.test(segment.text);
+  return segment?.type === 'whitespace' || segment?.type === 'newline';
 }
 
 /**
@@ -213,7 +214,7 @@ export function flattenTextSegments(segments: TextSegment[]): TextSegment[] {
       segment.rise === prev?.rise &&
       segment.letterSpacing === prev?.letterSpacing
     ) {
-      prev.text += segment.text;
+      prev.glyphs = [...prev.glyphs, ...segment.glyphs];
       prev.width += segment.width;
     } else {
       prev = { ...segment };
@@ -221,4 +222,25 @@ export function flattenTextSegments(segments: TextSegment[]): TextSegment[] {
     }
   });
   return result;
+}
+
+export function getGlyphRunText(glyphs: ShapedGlyph[]): string {
+  return glyphs
+    .flatMap((g) => g.codePoints)
+    .map((cp) => String.fromCodePoint(cp))
+    .join('');
+}
+
+function getGlyphRunWidth(glyphs: ShapedGlyph[], fontSize: number): number {
+  return glyphs.reduce(
+    (sum, glyph) => sum + (glyph.advance + (glyph.advanceAdjust ?? 0)) * (fontSize / 1000),
+    0,
+  );
+}
+
+function getTextHeight(font: PDFFont, fontSize: number): number {
+  const ascent = font.ascent;
+  const descent = font.descent;
+  const height = ascent - descent;
+  return (height * fontSize) / 1000;
 }

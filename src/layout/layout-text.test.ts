@@ -65,7 +65,7 @@ describe('layout-text', () => {
           rows: [
             {
               ...{ x: 20, y: 30, width: 90, height: 12, baseline: 9 },
-              segments: [{ font: defaultFont, fontSize: 10, text: 'Test text' }],
+              segments: [expect.objectContaining({ font: defaultFont, fontSize: 10 })],
             },
           ],
         },
@@ -90,9 +90,9 @@ describe('layout-text', () => {
             {
               ...{ x: 20, y: 30, width: 270, height: 18, baseline: 13.5 },
               segments: [
-                { font: defaultFont, fontSize: 5, text: 'Text one' },
-                { font: defaultFont, fontSize: 10, text: 'Text two' },
-                { font: defaultFont, fontSize: 15, text: 'Text three' },
+                expect.objectContaining({ font: defaultFont, fontSize: 5 }),
+                expect.objectContaining({ font: defaultFont, fontSize: 10 }),
+                expect.objectContaining({ font: defaultFont, fontSize: 15 }),
               ],
             },
           ],
@@ -145,14 +145,13 @@ describe('layout-text', () => {
       const { frame } = await layoutTextContent(block, box, ctx);
 
       expect((frame.objects?.[0] as any).rows[0].segments).toEqual([
-        {
+        expect.objectContaining({
           font: defaultFont,
           fontSize: 10,
-          text: 'foo',
           color: { type: 'RGB', blue: 1, green: 0.5, red: 0 },
           rise: 3,
           letterSpacing: 5,
-        },
+        }),
       ]);
     });
 

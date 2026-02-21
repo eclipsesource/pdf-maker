@@ -3,7 +3,7 @@ import { PDFPage } from '@ralfstx/pdf-core';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import type { Size } from '../box.ts';
-import type { TextObject } from '../frame.ts';
+import type { TextObject, TextSegmentObject } from '../frame.ts';
 import type { Page } from '../page.ts';
 import { fakeFont, getContentStream } from '../test/test-utils.ts';
 import { renderText } from './render-text.ts';
@@ -24,10 +24,9 @@ describe('render-text', () => {
     const pos = { x: 10, y: 20 };
 
     it('renders single row with single text segment', () => {
-      const seg = { text: 'foo', font, fontSize: 10 };
       const obj: TextObject = {
         type: 'text',
-        rows: [{ segments: [seg], x: 1, y: 2, width: 30, height: 20, baseline: 8 }],
+        rows: [{ segments: [seg('foo')], x: 1, y: 2, width: 30, height: 20, baseline: 8 }],
       };
 
       renderText(obj, page, pos);
@@ -45,13 +44,18 @@ describe('render-text', () => {
     });
 
     it('renders text rise', () => {
-      const s1 = { text: 'aaa', font, fontSize: 10 };
-      const s2 = { text: 'bbb', font, fontSize: 10, rise: 3 };
-      const s3 = { text: 'ccc', font, fontSize: 10, rise: 3 };
-      const s4 = { text: 'ddd', font, fontSize: 10 };
       const obj: TextObject = {
         type: 'text',
-        rows: [{ segments: [s1, s2, s3, s4], x: 1, y: 2, width: 60, height: 12, baseline: 8 }],
+        rows: [
+          {
+            segments: [seg('aaa'), seg('bbb', { rise: 3 }), seg('ccc', { rise: 3 }), seg('ddd')],
+            x: 1,
+            y: 2,
+            width: 60,
+            height: 12,
+            baseline: 8,
+          },
+        ],
       };
 
       renderText(obj, page, pos);
@@ -74,14 +78,22 @@ describe('render-text', () => {
     });
 
     it('renders letter spacing', () => {
-      const seg1 = { text: 'aaa', font, fontSize: 10 };
-      const seg2 = { text: 'bbb', font, fontSize: 10, letterSpacing: 3 };
-      const seg3 = { text: 'ccc', font, fontSize: 10, letterSpacing: 3 };
-      const seg4 = { text: 'ddd', font, fontSize: 10 };
       const obj: TextObject = {
         type: 'text',
         rows: [
-          { segments: [seg1, seg2, seg3, seg4], x: 1, y: 2, width: 60, height: 12, baseline: 8 },
+          {
+            segments: [
+              seg('aaa'),
+              seg('bbb', { letterSpacing: 3 }),
+              seg('ccc', { letterSpacing: 3 }),
+              seg('ddd'),
+            ],
+            x: 1,
+            y: 2,
+            width: 60,
+            height: 12,
+            baseline: 8,
+          },
         ],
       };
 
@@ -105,20 +117,21 @@ describe('render-text', () => {
     });
 
     it('maintains text state throughout page', () => {
-      const s1 = { text: 'aaa', font, fontSize: 10, rise: 3 };
-      const s2 = { text: 'bbb', font, fontSize: 10, rise: 3 };
-      const s3 = { text: 'ccc', font, fontSize: 10 };
       const obj1: TextObject = {
         type: 'text',
-        rows: [{ segments: [s1], x: 1, y: 2, width: 60, height: 12, baseline: 8 }],
+        rows: [
+          { segments: [seg('aaa', { rise: 3 })], x: 1, y: 2, width: 60, height: 12, baseline: 8 },
+        ],
       };
       const obj2: TextObject = {
         type: 'text',
-        rows: [{ segments: [s2], x: 1, y: 2, width: 60, height: 12, baseline: 8 }],
+        rows: [
+          { segments: [seg('bbb', { rise: 3 })], x: 1, y: 2, width: 60, height: 12, baseline: 8 },
+        ],
       };
       const obj3: TextObject = {
         type: 'text',
-        rows: [{ segments: [s3], x: 3, y: 4, width: 60, height: 12, baseline: 8 }],
+        rows: [{ segments: [seg('ccc')], x: 3, y: 4, width: 60, height: 12, baseline: 8 }],
       };
 
       renderText(obj1, page, pos);
@@ -150,13 +163,11 @@ describe('render-text', () => {
     });
 
     it('renders multiple rows with multiple text segments', () => {
-      const seg1 = { text: 'foo', font, fontSize: 10 };
-      const seg2 = { text: 'bar', font, fontSize: 10 };
       const obj: TextObject = {
         type: 'text',
         rows: [
-          { segments: [seg1, seg2], x: 1, y: 2, width: 60, height: 12, baseline: 8 },
-          { segments: [seg1, seg2], x: 1, y: 18, width: 60, height: 12, baseline: 8 },
+          { segments: [seg('foo'), seg('bar')], x: 1, y: 2, width: 60, height: 12, baseline: 8 },
+          { segments: [seg('foo'), seg('bar')], x: 1, y: 18, width: 60, height: 12, baseline: 8 },
         ],
       };
 
@@ -178,4 +189,8 @@ describe('render-text', () => {
       );
     });
   });
+
+  function seg(text: string, props?: Partial<TextSegmentObject>): TextSegmentObject {
+    return { glyphs: font.shapeText(text), font, fontSize: 10, ...props };
+  }
 });

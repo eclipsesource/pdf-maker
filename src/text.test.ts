@@ -37,15 +37,15 @@ describe('text', () => {
       const segments = await extractTextSegments([{ text: 'foo', attrs: {} }], fontStore);
 
       expect(segments).toEqual([
-        {
-          text: 'foo',
+        expect.objectContaining({
           width: 3 * 18,
           height: 18,
           fontSize: 18,
           lineHeight: 1.2,
           font: normalFont,
-        },
+        }),
       ]);
+      expect(segments[0].glyphs).toHaveLength(3);
     });
 
     it('respects global text attrs', async () => {
@@ -95,10 +95,9 @@ describe('text', () => {
         fontStore,
       );
 
-      expect(segments).toEqual([
-        expect.objectContaining({ text: 'foo' }),
-        expect.objectContaining({ text: 'bar' }),
-      ]);
+      expect(segments).toHaveLength(2);
+      expect(segments[0].glyphs).toHaveLength(3);
+      expect(segments[1].glyphs).toHaveLength(3);
     });
   });
 
@@ -184,10 +183,11 @@ describe('text', () => {
     it('does not merge adjacent segments if incompatible', () => {
       const segments = [seg('foo', { color: rgb(1, 0, 0) }), seg(' '), seg('bar')];
 
-      expect(flattenTextSegments(segments)).toEqual([
-        seg('foo', { color: rgb(1, 0, 0) }),
-        seg(' bar'),
-      ]);
+      const result = flattenTextSegments(segments);
+      expect(result).toHaveLength(2);
+      expect(result[0]).toEqual(seg('foo', { color: rgb(1, 0, 0) }));
+      expect(result[1].glyphs).toEqual(seg(' bar').glyphs);
+      expect(result[1].width).toEqual(seg(' bar').width);
     });
 
     it('does not merge compatible segments if not adjacent', () => {
@@ -250,5 +250,11 @@ describe('text', () => {
 function seg(text: string, attrs?: Partial<TextSegment>): TextSegment {
   const { font, fontSize = 10, height = 12, lineHeight = 14, link, color } = attrs ?? {};
   const width = text.length * fontSize;
-  return { text, width, height, lineHeight, font, fontSize, link, color } as TextSegment;
+  const glyphs = [...text].map((c) => ({
+    glyphId: c.charCodeAt(0),
+    codePoints: [c.codePointAt(0)!],
+    advance: 1000,
+  }));
+  const type = text === '\n' ? 'newline' : /^\s+$/.test(text) ? 'whitespace' : 'text';
+  return { type, glyphs, width, height, lineHeight, font, fontSize, link, color } as TextSegment;
 }
