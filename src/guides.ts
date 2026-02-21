@@ -8,8 +8,8 @@ import type {
   RectObject,
   TextRowObject,
 } from './frame.ts';
-import type { Block } from './read-block.ts';
-import { compact } from './utils.ts';
+import type { Block } from './read/read-block.ts';
+import { compact } from './util/utils.ts';
 
 export function createFrameGuides(
   frame: Frame,

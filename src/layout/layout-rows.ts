@@ -2,8 +2,8 @@ import type { Box } from '../box.ts';
 import { ZERO_EDGES } from '../box.ts';
 import type { Frame } from '../frame.ts';
 import type { MakerCtx } from '../maker-ctx.ts';
-import type { Block, RowsBlock } from '../read-block.ts';
-import { compact, omit } from '../utils.ts';
+import type { Block, RowsBlock } from '../read/read-block.ts';
+import { compact, omit } from '../util/utils.ts';
 import type { LayoutContent } from './layout.ts';
 import { isBreakPossible, layoutBlock } from './layout.ts';
 

@@ -4,7 +4,7 @@ import type { Box } from '../box.ts';
 import { FontStore } from '../font-store.ts';
 import type { Frame } from '../frame.ts';
 import type { MakerCtx } from '../maker-ctx.ts';
-import type { Block } from '../read-block.ts';
+import type { Block } from '../read/read-block.ts';
 import { extractTextRows, fakeFont, range, span } from '../test/test-utils.ts';
 import { layoutRowsContent } from './layout-rows.ts';
 

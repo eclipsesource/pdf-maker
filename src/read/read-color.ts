@@ -1,6 +1,6 @@
-import { namedColors } from './api/colors.ts';
-import { type Color, rgb } from './colors.ts';
-import { isObject, typeError } from './types.ts';
+import { namedColors } from '../api/colors.ts';
+import { type Color, rgb } from '../colors.ts';
+import { isObject, typeError } from '../util/types.ts';
 
 export { type Color };
 

@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { Box } from '../box.ts';
 import type { MakerCtx } from '../maker-ctx.ts';
-import type { ImageBlock } from '../read-block.ts';
+import type { ImageBlock } from '../read/read-block.ts';
 import { fakeImage } from '../test/test-utils.ts';
 import { layoutImageContent } from './layout-image.ts';
 

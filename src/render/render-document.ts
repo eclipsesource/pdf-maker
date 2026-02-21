@@ -2,7 +2,7 @@ import type { PDFContext, PDFDict, WriteOptions } from '@ralfstx/pdf-core';
 import { PDFDocument, PDFStream } from '@ralfstx/pdf-core';
 
 import type { Page } from '../page.ts';
-import type { DocumentDefinition, Metadata } from '../read-document.ts';
+import type { DocumentDefinition, Metadata } from '../read/read-document.ts';
 import { renderPage } from './render-page.ts';
 
 export async function renderDocument(

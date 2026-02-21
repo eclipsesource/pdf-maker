@@ -1,7 +1,7 @@
 import type { PDFEmbeddedFont } from '@ralfstx/pdf-core';
 
 import type { FontStyle, FontWeight } from './api/text.ts';
-import { printValue } from './print-value.ts';
+import { printValue } from './util/print-value.ts';
 
 /**
  * The resolved definition of a font.

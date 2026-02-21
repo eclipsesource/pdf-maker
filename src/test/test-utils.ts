@@ -5,7 +5,7 @@ import type { FontWeight } from '../api/text.ts';
 import { weightToNumber } from '../fonts.ts';
 import type { Frame } from '../frame.ts';
 import type { Page } from '../page.ts';
-import type { TextAttrs, TextSpan } from '../read-block.ts';
+import type { TextAttrs, TextSpan } from '../read/read-block.ts';
 
 export function fakeFont(name: string, opts?: { style?: string; weight?: FontWeight }): PDFFont {
   const key = `${name}-${opts?.style ?? 'normal'}-${weightToNumber(opts?.weight ?? 'normal')}`;

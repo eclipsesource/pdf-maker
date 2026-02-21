@@ -1,5 +1,5 @@
-import type { Obj } from './types.ts';
-import { isObject, typeError } from './types.ts';
+import type { Obj } from './util/types.ts';
+import { isObject, typeError } from './util/types.ts';
 
 export type Pos = { x: number; y: number };
 export type Size = { width: number; height: number };

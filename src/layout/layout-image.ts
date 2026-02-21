@@ -3,7 +3,7 @@ import type { PDFImage } from '@ralfstx/pdf-core';
 import type { Box, Pos, Size } from '../box.ts';
 import type { ImageObject, RenderObject } from '../frame.ts';
 import type { MakerCtx } from '../maker-ctx.ts';
-import type { ImageBlock } from '../read-block.ts';
+import type { ImageBlock } from '../read/read-block.ts';
 import type { LayoutContent } from './layout.ts';
 
 export async function layoutImageContent(

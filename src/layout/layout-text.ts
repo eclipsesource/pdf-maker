@@ -4,10 +4,10 @@ import type { Box, Size } from '../box.ts';
 import type { LinkObject, RenderObject, TextRowObject, TextSegmentObject } from '../frame.ts';
 import { createRowGuides } from '../guides.ts';
 import type { MakerCtx } from '../maker-ctx.ts';
-import type { TextBlock } from '../read-block.ts';
+import type { TextBlock } from '../read/read-block.ts';
 import type { TextSegment } from '../text.ts';
 import { breakLine, convertToTextSpan, extractTextSegments, flattenTextSegments } from '../text.ts';
-import { omit } from '../utils.ts';
+import { omit } from '../util/utils.ts';
 import type { LayoutContent } from './layout.ts';
 
 export async function layoutTextContent(

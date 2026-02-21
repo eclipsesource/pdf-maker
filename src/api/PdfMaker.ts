@@ -2,9 +2,9 @@ import { FontStore } from '../font-store.ts';
 import { createImageLoader } from '../image-loader.ts';
 import { layoutPages } from '../layout/layout.ts';
 import type { MakerCtx } from '../maker-ctx.ts';
-import { readDocumentDefinition } from '../read-document.ts';
+import { readDocumentDefinition } from '../read/read-document.ts';
 import { renderDocument } from '../render/render-document.ts';
-import { readAs } from '../types.ts';
+import { readAs } from '../util/types.ts';
 import type { DocumentDefinition } from './document.ts';
 import type { FontStyle, FontWeight } from './text.ts';
 

@@ -1,6 +1,6 @@
 import type { PDFFont, PDFImage } from '@ralfstx/pdf-core';
 
-import type { Color } from './read-color.ts';
+import type { Color } from './read/read-color.ts';
 import type { PathCommand } from './svg-paths.ts';
 
 /**

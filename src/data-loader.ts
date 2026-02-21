@@ -1,5 +1,5 @@
-import { decodeBase64 } from './base64.ts';
-import { readRelativeFile } from './fs.ts';
+import { decodeBase64 } from './util/base64.ts';
+import { readRelativeFile } from './util/fs.ts';
 
 export type DataLoaderConfig = {
   resourceRoot?: string;

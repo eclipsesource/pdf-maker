@@ -3,8 +3,8 @@ import type { PDFFont } from '@ralfstx/pdf-core';
 import type { FontStyle, FontWeight } from './api/text.ts';
 import { getTextHeight, getTextWidth } from './font-metrics.ts';
 import type { FontStore } from './font-store.ts';
-import type { TextSpan } from './read-block.ts';
-import type { Color } from './read-color.ts';
+import type { TextSpan } from './read/read-block.ts';
+import type { Color } from './read/read-color.ts';
 
 const defaultFontSize = 18;
 const defaultLineHeight = 1.2;

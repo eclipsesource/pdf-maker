@@ -17,7 +17,7 @@ import type {
 } from '../frame.ts';
 import type { Page } from '../page.ts';
 import { drawSvgPath } from '../svg-paths.ts';
-import { multiplyMatrices, round } from '../utils.ts';
+import { multiplyMatrices, round } from '../util/utils.ts';
 
 // See https://stackoverflow.com/a/27863181/247159
 const KAPPA = (4 * (Math.sqrt(2) - 1)) / 3;

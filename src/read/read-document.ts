@@ -1,13 +1,21 @@
 import type { PDFDocument } from '@ralfstx/pdf-core';
 
-import type { FileRelationShip } from './api/document.ts';
-import type { BoxEdges, Size } from './box.ts';
-import { parseEdges } from './box.ts';
+import type { FileRelationShip } from '../api/document.ts';
+import type { BoxEdges, Size } from '../box.ts';
+import { parseEdges } from '../box.ts';
 import type { Block, TextAttrs } from './read-block.ts';
 import { readBlock, readInheritableAttrs } from './read-block.ts';
 import { parseOrientation, readPageSize } from './read-page-size.ts';
-import type { Obj } from './types.ts';
-import { dynamic, optional, readAs, readObject, required, typeError, types } from './types.ts';
+import type { Obj } from '../util/types.ts';
+import {
+  dynamic,
+  optional,
+  readAs,
+  readObject,
+  required,
+  typeError,
+  types,
+} from '../util/types.ts';
 
 export type DocumentDefinition = {
   pageSize?: Size;
