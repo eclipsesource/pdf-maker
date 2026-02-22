@@ -109,7 +109,10 @@ describe('text', () => {
 
       await extractTextSegments([{ text: 'foo', attrs }], fontStore);
 
-      expect(shapeTextSpy).toHaveBeenCalledWith('foo', { features: { kern: false } });
+      expect(shapeTextSpy).toHaveBeenCalledWith('foo', {
+        scriptTag: 'latn',
+        features: { kern: false },
+      });
     });
 
     it('passes fontVariantLigatures none as shape options', async () => {
@@ -120,6 +123,7 @@ describe('text', () => {
       await extractTextSegments([{ text: 'foo', attrs }], fontStore);
 
       expect(shapeTextSpy).toHaveBeenCalledWith('foo', {
+        scriptTag: 'latn',
         features: { liga: false, clig: false, calt: false },
       });
     });
@@ -132,6 +136,7 @@ describe('text', () => {
       await extractTextSegments([{ text: 'foo', attrs }], fontStore);
 
       expect(shapeTextSpy).toHaveBeenCalledWith('foo', {
+        scriptTag: 'latn',
         features: { smcp: true, tnum: true },
       });
     });
@@ -149,17 +154,37 @@ describe('text', () => {
       await extractTextSegments([{ text: 'foo', attrs }], fontStore);
 
       expect(shapeTextSpy).toHaveBeenCalledWith('foo', {
+        scriptTag: 'latn',
         features: { smcp: true, liga: false, clig: false, calt: false, kern: false },
       });
     });
 
-    it('does not pass shape options when all defaults', async () => {
+    it('passes scriptTag for Latin text', async () => {
       const shapeTextSpy = vi.fn(normalFont.shapeText.bind(normalFont));
       normalFont.shapeText = shapeTextSpy;
 
       await extractTextSegments([{ text: 'foo', attrs: { fontSize: 10 } }], fontStore);
 
-      expect(shapeTextSpy).toHaveBeenCalledWith('foo', undefined);
+      expect(shapeTextSpy).toHaveBeenCalledWith('foo', { scriptTag: 'latn' });
+    });
+
+    it('passes scriptTag for Cyrillic text', async () => {
+      const shapeTextSpy = vi.fn(normalFont.shapeText.bind(normalFont));
+      normalFont.shapeText = shapeTextSpy;
+
+      await extractTextSegments([{ text: 'Мир', attrs: { fontSize: 10 } }], fontStore);
+
+      expect(shapeTextSpy).toHaveBeenCalledWith('Мир', { scriptTag: 'cyrl' });
+    });
+
+    it('splits mixed-script text into separate shapeText calls', async () => {
+      const shapeTextSpy = vi.fn(normalFont.shapeText.bind(normalFont));
+      normalFont.shapeText = shapeTextSpy;
+
+      await extractTextSegments([{ text: 'HiМир', attrs: { fontSize: 10 } }], fontStore);
+
+      expect(shapeTextSpy).toHaveBeenCalledWith('Hi', { scriptTag: 'latn' });
+      expect(shapeTextSpy).toHaveBeenCalledWith('Мир', { scriptTag: 'cyrl' });
     });
 
     it('preserves shaping properties on segments', async () => {
@@ -239,6 +264,25 @@ describe('text', () => {
       expect(result).toEqual({
         features: { kern: false, liga: false, clig: false, calt: false, smcp: true },
       });
+    });
+
+    it('includes scriptTag when provided', () => {
+      expect(buildShapeOptions({}, 'latn')).toEqual({ scriptTag: 'latn' });
+    });
+
+    it('omits DFLT scriptTag', () => {
+      expect(buildShapeOptions({}, 'DFLT')).toBeUndefined();
+    });
+
+    it('combines scriptTag with features', () => {
+      expect(buildShapeOptions({ fontKerning: 'none' }, 'arab')).toEqual({
+        scriptTag: 'arab',
+        features: { kern: false },
+      });
+    });
+
+    it('returns undefined when no scriptTag and no features', () => {
+      expect(buildShapeOptions({}, undefined)).toBeUndefined();
     });
   });
 
@@ -359,10 +403,7 @@ describe('text', () => {
     });
 
     it('merges segments with equal color', () => {
-      const segments = [
-        seg('foo', { color: rgb(1, 0, 0) }),
-        seg('bar', { color: rgb(1, 0, 0) }),
-      ];
+      const segments = [seg('foo', { color: rgb(1, 0, 0) }), seg('bar', { color: rgb(1, 0, 0) })];
 
       expect(flattenTextSegments(segments)).toHaveLength(1);
     });

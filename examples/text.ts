@@ -89,6 +89,17 @@ const document = {
         margin: { y: 10 },
       },
     ),
+    // Text kerning and ligatures
+    rows(
+      [
+        text('AV, Ta with kerning, fi, ffi with ligatures.'),
+        text('AV, Ta without kerning, fi, ffi without ligatures.', {
+          fontKerning: 'none',
+          fontVariantLigatures: 'none',
+        }),
+      ],
+      { margin: { y: 10 } },
+    ),
   ],
 };
 

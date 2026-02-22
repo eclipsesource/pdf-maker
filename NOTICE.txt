@@ -1,0 +1,7 @@
+This project includes data derived from the Unicode Character Database.
+
+Copyright © Unicode, Inc.
+Licensed under the Unicode License.
+https://www.unicode.org/license.html
+
+See scripts/generate-script-ranges.ts for details on how the data was derived.

@@ -4,6 +4,7 @@ import type { FontStyle, FontWeight } from './api/text.ts';
 import type { FontStore } from './font-store.ts';
 import type { TextAttrs, TextSpan } from './read/read-block.ts';
 import type { Color } from './read/read-color.ts';
+import { scriptToOpenTypeTag, segmentByScript } from './script-detection.ts';
 
 const defaultFontSize = 18;
 const defaultLineHeight = 1.2;
@@ -51,30 +52,33 @@ export async function extractTextSegments(
       } = attrs;
       const font = await fontStore.selectFont({ fontFamily, fontStyle, fontWeight });
       const height = getTextHeight(font, fontSize);
-      const shapeOpts = buildShapeOptions(attrs);
 
-      return splitChunks(text).map((chunk) => {
-        const type = chunk === '\n' ? 'newline' : /^\s+$/.test(chunk) ? 'whitespace' : 'text';
-        const glyphs = type === 'newline' ? [] : font.shapeText(chunk, shapeOpts);
-        return {
-          type,
-          glyphs,
-          width: getGlyphRunWidth(glyphs, fontSize) + glyphs.length * (letterSpacing ?? 0),
-          height,
-          lineHeight,
-          font,
-          fontFamily,
-          fontStyle,
-          fontWeight,
-          fontSize,
-          color,
-          link,
-          rise,
-          letterSpacing,
-          fontKerning,
-          fontVariantLigatures,
-          fontFeatureSettings,
-        } as TextSegment;
+      return segmentByScript(text).flatMap((run) => {
+        const scriptTag = scriptToOpenTypeTag(run.script);
+        const shapeOpts = buildShapeOptions(attrs, scriptTag);
+        return splitChunks(run.text).map((chunk) => {
+          const type = chunk === '\n' ? 'newline' : /^\s+$/.test(chunk) ? 'whitespace' : 'text';
+          const glyphs = type === 'newline' ? [] : font.shapeText(chunk, shapeOpts);
+          return {
+            type,
+            glyphs,
+            width: getGlyphRunWidth(glyphs, fontSize) + glyphs.length * (letterSpacing ?? 0),
+            height,
+            lineHeight,
+            font,
+            fontFamily,
+            fontStyle,
+            fontWeight,
+            fontSize,
+            color,
+            link,
+            rise,
+            letterSpacing,
+            fontKerning,
+            fontVariantLigatures,
+            fontFeatureSettings,
+          } as TextSegment;
+        });
       });
     }),
   );
@@ -283,7 +287,8 @@ function getTextHeight(font: PDFFont, fontSize: number): number {
 
 export function buildShapeOptions(
   attrs: TextAttrs,
-): { features: Record<string, boolean> } | undefined {
+  scriptTag?: string,
+): { scriptTag?: string; features?: Record<string, boolean> } | undefined {
   const { fontKerning, fontVariantLigatures, fontFeatureSettings } = attrs;
   const features: Record<string, boolean> = { ...fontFeatureSettings };
   if (fontVariantLigatures === 'none') {
@@ -294,6 +299,11 @@ export function buildShapeOptions(
   if (fontKerning === 'none') {
     features.kern = false;
   }
-  if (Object.keys(features).length === 0) return undefined;
-  return { features };
+  const hasFeatures = Object.keys(features).length > 0;
+  const hasScriptTag = scriptTag != null && scriptTag !== 'DFLT';
+  if (!hasFeatures && !hasScriptTag) return undefined;
+  return {
+    ...(hasScriptTag ? { scriptTag } : undefined),
+    ...(hasFeatures ? { features } : undefined),
+  };
 }
