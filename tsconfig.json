@@ -3,14 +3,12 @@
     "module": "NodeNext",
     "target": "ES2022",
     "lib": ["ES2024", "DOM", "DOM.Iterable"],
-    "outDir": "build",
     "paths": {
       "src/*": ["./src/*"]
     },
-    "declaration": true,
     "sourceMap": true,
     "allowImportingTsExtensions": true,
-    "emitDeclarationOnly": true,
+    "noEmit": true,
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
@@ -19,6 +17,6 @@
     "skipLibCheck": true,
     "stripInternal": true
   },
-  "include": ["src/**/*.ts", "src/**/*.d.ts"],
+  "include": ["src/**/*.ts", "src/**/*.d.ts", "scripts/**/*.ts", "examples/**/*.ts"],
   "exclude": ["node_modules", "dist"]
 }
