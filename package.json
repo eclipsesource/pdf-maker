@@ -28,6 +28,7 @@
     "build": "rm -rf build/ dist/ && tsc -p tsconfig.build.json && esbuild src/index.ts --bundle --sourcemap --platform=browser --target=es2022 --outdir=dist --format=esm --external:@ralfstx/pdf-core && cp -a build/index.d.ts build/api/ dist/",
     "lint": "eslint . --max-warnings=0 && prettier --check .",
     "test": "vitest run test",
+    "verify": "npm run lint && npm run test && npm run examples && npm run build",
     "format": "prettier -w .",
     "fix": "eslint . --fix && prettier -w .",
     "examples": "./examples/run-all-examples.sh"
