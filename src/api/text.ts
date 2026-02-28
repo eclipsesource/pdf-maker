@@ -83,7 +83,10 @@ export type TextProps = {
   fontSize?: number;
 
   /**
-   * The line height as a multiple of the font size. Defaults to `1.2`.
+   * The line height as a factor of the text height. The text height is
+   * derived from the font's vertical metrics (ascent, descent, and line
+   * gap). Values greater than `1` increase the spacing between lines,
+   * values less than `1` decrease it. Defaults to `1`.
    */
   lineHeight?: number;
 

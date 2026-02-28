@@ -39,8 +39,8 @@ describe('layout', () => {
       const pages = await layoutPages(def, ctx);
 
       expect(pages[0].content.children).toEqual([
-        expect.objectContaining({ height: 14 * 1.2 }),
-        expect.objectContaining({ height: 14 * 1.2 }),
+        expect.objectContaining({ height: 14 }),
+        expect.objectContaining({ height: 14 }),
       ]);
     });
 
@@ -120,7 +120,7 @@ describe('layout', () => {
           x: 20,
           y: 20,
           width: pageWidth - 40,
-          height: 12,
+          height: 10,
         }),
       );
       expect(pages[0].footer).toBeUndefined();
@@ -141,9 +141,9 @@ describe('layout', () => {
       expect(pages[0].footer).toEqual(
         expect.objectContaining({
           x: 20,
-          y: pageHeight - 20 - 12,
+          y: pageHeight - 20 - 10,
           width: pageWidth - 40,
-          height: 12,
+          height: 10,
         }),
       );
     });
@@ -165,15 +165,15 @@ describe('layout', () => {
           x: 20,
           y: 20,
           width: pageWidth - 40,
-          height: 12,
+          height: 10,
         }),
       );
       expect(pages[0].footer).toEqual(
         expect.objectContaining({
           x: 20,
-          y: pageHeight - 20 - 12,
+          y: pageHeight - 20 - 10,
           width: pageWidth - 40,
-          height: 12,
+          height: 10,
         }),
       );
     });

@@ -123,11 +123,11 @@ describe('layout-columns', () => {
 
       expect(frame).toEqual({
         children: [
-          expect.objectContaining({ x: 20 + 5, y: 30 + 7, width: 200 - 5 - 6, height: 12 }),
-          expect.objectContaining({ x: 20 + 200 + 5, y: 30 + 7, width: 200 - 5 - 6, height: 12 }),
+          expect.objectContaining({ x: 20 + 5, y: 30 + 7, width: 200 - 5 - 6, height: 10 }),
+          expect.objectContaining({ x: 20 + 200 + 5, y: 30 + 7, width: 200 - 5 - 6, height: 10 }),
         ],
         width: box.width,
-        height: 12 + 7 + 8,
+        height: 10 + 7 + 8,
       });
     });
 
@@ -145,8 +145,8 @@ describe('layout-columns', () => {
       expect(frame).toEqual({
         children: [
           expect.objectContaining({ x: 20 + 5, y: 30 + 7, width: 89, height: 25 }),
-          expect.objectContaining({ x: 20 + 100 + 5, y: 30 + 7, width: 150 - 5 - 6, height: 12 }),
-          expect.objectContaining({ x: 20 + 250 + 5, y: 30 + 7, width: 150 - 5 - 6, height: 12 }),
+          expect.objectContaining({ x: 20 + 100 + 5, y: 30 + 7, width: 150 - 5 - 6, height: 10 }),
+          expect.objectContaining({ x: 20 + 250 + 5, y: 30 + 7, width: 150 - 5 - 6, height: 10 }),
         ],
         width: box.width,
         height: 25 + 7 + 8,
@@ -165,11 +165,11 @@ describe('layout-columns', () => {
 
       expect(frame).toEqual({
         children: [
-          expect.objectContaining({ x: 20 + 5, y: 30 + 7, width: 200 - 5 - 6, height: 12 }),
-          expect.objectContaining({ x: 20 + 200 + 5, y: 30 + 7, width: 200 - 5 - 6, height: 12 }),
+          expect.objectContaining({ x: 20 + 5, y: 30 + 7, width: 200 - 5 - 6, height: 10 }),
+          expect.objectContaining({ x: 20 + 200 + 5, y: 30 + 7, width: 200 - 5 - 6, height: 10 }),
         ],
         width: box.width,
-        height: 27,
+        height: 25,
       });
     });
 
@@ -186,8 +186,8 @@ describe('layout-columns', () => {
       expect(frame).toEqual({
         children: [
           expect.objectContaining({ y: box.y, height: 100 }),
-          expect.objectContaining({ y: box.y + (100 - 12) / 2, height: 12 }),
-          expect.objectContaining({ y: box.y + 100 - 12, height: 12 }),
+          expect.objectContaining({ y: box.y + (100 - 10) / 2, height: 10 }),
+          expect.objectContaining({ y: box.y + 100 - 10, height: 10 }),
         ],
         width: box.width,
         height: 100,

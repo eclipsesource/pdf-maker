@@ -20,6 +20,7 @@ const def: DocumentDefinition = {
   margin: { x: '20mm', y: '0.5cm' },
   defaultStyle: {
     fontSize: 12,
+    lineHeight: 1.1,
   },
   header: columns([text('PDF Maker'), text('Anchors', { textAlign: 'right', width: 'auto' })], {
     margin: { x: '20mm', top: '1cm' },

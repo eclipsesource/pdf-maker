@@ -32,7 +32,7 @@ describe('layout-text', () => {
 
       const { frame } = await layoutTextContent(block, box, ctx);
 
-      expect(frame).toEqual(expect.objectContaining({ width: box.width, height: 12 }));
+      expect(frame).toEqual(expect.objectContaining({ width: box.width, height: 10 }));
     });
 
     it('creates frame with intrinsic width for block with autoWidth', async () => {
@@ -41,7 +41,7 @@ describe('layout-text', () => {
 
       const { frame } = await layoutTextContent(block, box, ctx);
 
-      expect(frame).toEqual(expect.objectContaining({ width: 30, height: 12 }));
+      expect(frame).toEqual(expect.objectContaining({ width: 30, height: 10 }));
     });
 
     it('does not include padding in frame height', async () => {
@@ -51,7 +51,7 @@ describe('layout-text', () => {
 
       const { frame } = await layoutTextContent(block, box, ctx);
 
-      expect(frame.height).toEqual(12);
+      expect(frame.height).toEqual(10);
     });
 
     it('includes text baseline', async () => {
@@ -64,7 +64,7 @@ describe('layout-text', () => {
           type: 'text',
           rows: [
             {
-              ...{ x: 20, y: 30, width: 90, height: 12, baseline: 9 },
+              ...{ x: 20, y: 30, width: 90, height: 10, baseline: 8 },
               segments: [expect.objectContaining({ font: defaultFont, fontSize: 10 })],
             },
           ],
@@ -88,7 +88,7 @@ describe('layout-text', () => {
           type: 'text',
           rows: [
             {
-              ...{ x: 20, y: 30, width: 270, height: 18, baseline: 13.5 },
+              ...{ x: 20, y: 30, width: 270, height: 15, baseline: 12 },
               segments: [
                 expect.objectContaining({ font: defaultFont, fontSize: 5 }),
                 expect.objectContaining({ font: defaultFont, fontSize: 10 }),
@@ -109,7 +109,7 @@ describe('layout-text', () => {
 
       expect(frame.objects).toEqual([
         { type: 'text', rows: [expect.objectContaining({ x: 20, y: 30 })] },
-        { type: 'link', x: 20, y: 30 + 1, width: 30, height: 10, url: 'test-link' },
+        { type: 'link', x: 20, y: 30, width: 30, height: 10, url: 'test-link' },
       ]);
     });
 
@@ -125,7 +125,7 @@ describe('layout-text', () => {
 
       expect(frame.objects).toEqual([
         { type: 'text', rows: [expect.objectContaining({ x: 20, y: 30 })] },
-        { type: 'link', x: 20, y: 30 + 1, width: 70, height: 10, url: 'test-link' },
+        { type: 'link', x: 20, y: 30, width: 70, height: 10, url: 'test-link' },
       ]);
     });
 
@@ -189,7 +189,7 @@ describe('layout-text', () => {
             expect.objectContaining({
               x: margin.right + (box.width - 30) / 2,
               width: 30,
-              height: 12,
+              height: 10,
             }),
           ],
         },

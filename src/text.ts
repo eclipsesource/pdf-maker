@@ -8,7 +8,7 @@ import type { Color } from './read/read-color.ts';
 import { scriptToOpenTypeTag, segmentByScript } from './script-detection.ts';
 
 const defaultFontSize = 18;
-const defaultLineHeight = 1.2;
+const defaultLineHeight = 1.0;
 
 export type TextSegment = {
   type: 'text' | 'whitespace' | 'newline';
@@ -280,9 +280,7 @@ function getGlyphRunWidth(glyphs: ShapedGlyph[], fontSize: number): number {
 }
 
 function getTextHeight(font: PDFFont, fontSize: number): number {
-  const ascent = font.ascent;
-  const descent = font.descent;
-  const height = ascent - descent;
+  const height = font.ascent - font.descent + font.lineGap;
   return (height * fontSize) / 1000;
 }
 

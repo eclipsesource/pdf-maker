@@ -43,7 +43,7 @@ describe('text', () => {
           width: 3 * 18,
           height: 18,
           fontSize: 18,
-          lineHeight: 1.2,
+          lineHeight: 1,
           font: normalFont,
         }),
       ]);

@@ -54,11 +54,13 @@
 
 ### Breaking
 
-- Text height is now based on the OS/2 typographic metrics
-  (`sTypoAscender` / `sTypoDescender`) instead of the hhea table values.
-  This results in tighter line spacing for fonts whose hhea values
-  include extra spacing that was effectively double-counted with the
-  `lineHeight` multiplier.
+- The text height is now correctly based on the OS/2 typographic metrics
+  (`sTypoAscender` / `sTypoDescender` / `sTypoLineGap`) instead of the
+  hhea table values.
+- The default `lineHeight` multiplier has changed from `1.2` to `1`.
+  Together with the switch from hhea to OS/2 typographic metrics, these
+  changes make line spacing follow the font's own vertical metrics
+  instead of applying a fixed CSS-style multiplier.
 
 ## [0.5.6] - 2025-01-19
 

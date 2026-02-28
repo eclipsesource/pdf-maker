@@ -168,7 +168,7 @@ text spans. The following text properties are supported:
   `900`. The literal values `normal` and `bold` are also supported.
 - `fontSize`: The font size in pt.
 - `lineHeight`: The line height as a multiple of the font size (default:
-  `1.2`).
+  `1`).
 - `color`: The text [color](#colors).
 - `link`: Renders the text as a link to the given target. Can be a URL
   or an [anchor](#anchors) reference.
