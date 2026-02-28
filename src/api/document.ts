@@ -7,6 +7,16 @@ import type { TextProps } from './text.ts';
  */
 export type DocumentDefinition = {
   /**
+   * The default language of the document, expressed as a BCP 47 tag
+   * (e.g. `'en'`, `'de'`, `'ar'`, `'zh-Hans'`).
+   *
+   * Setting the language helps assistive technologies and improves
+   * language-aware text shaping when no more specific language is
+   * provided.
+   */
+  language?: string;
+
+  /**
    * A content block that is printed at the top of each page.
    * A function can be passed to create page-specific headers.
    */

@@ -138,4 +138,17 @@ export type TextProps = {
    * in `fontFeatureSettings`.
    */
   fontFeatureSettings?: Record<string, boolean>;
+
+  /**
+   * The language of this text, expressed as a BCP 47 tag (e.g. `'en'`,
+   * `'tr'`, `'sr'`, `'ar'`).
+   *
+   * The language may influence text shaping in fonts that provide
+   * language-specific typographic behavior. For example, some fonts
+   * adjust glyph forms for Turkish or Serbian.
+   *
+   * If not set, the parent's language is used, or the document’s
+   * default language if none of the ancestors specify a language.
+   */
+  language?: string;
 };

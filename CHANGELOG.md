@@ -13,6 +13,12 @@
   - `fontFeatureSettings`: Low-level control over OpenType features
     as a `Record<string, boolean>` (e.g. `{ smcp: true, tnum: true }`).
 
+- A `language` property (BCP 47 tag) on both the document definition
+  and text properties. The document-level language is written to the
+  PDF catalog (for accessibility). Fonts that provide language-specific
+  typographic behavior (e.g. for Turkish or Serbian) will use the
+  correct glyph forms for the specified language.
+
 ### Changed
 
 - Replaced `pdf-lib` with `@ralfstx/pdf-core` as the underlying PDF

@@ -20,6 +20,7 @@ import { parseOrientation, readPageSize } from './read-page-size.ts';
 export type DocumentDefinition = {
   pageSize?: Size;
   pageOrientation?: 'portrait' | 'landscape';
+  language?: string;
   info?: Metadata;
   defaultStyle?: TextAttrs;
   dev?: { guides?: boolean };
@@ -61,6 +62,7 @@ export function readDocumentDefinition(input: unknown): DocumentDefinition {
   const def1 = readObject(input, {
     pageSize: optional(readPageSize),
     pageOrientation: optional(parseOrientation),
+    language: optional(types.string({ pattern: /^[a-zA-Z]{2,3}(-[a-zA-Z0-9]{1,8})*$/ })),
     info: optional(readInfo),
     defaultStyle: optional(readInheritableAttrs),
     dev: optional(types.object({ guides: optional(types.boolean()) })),
@@ -68,6 +70,9 @@ export function readDocumentDefinition(input: unknown): DocumentDefinition {
     embeddedFiles: optional(types.array(readEmbeddedFiles)),
     onRenderDocument: optional(),
   });
+  if (def1.language && !def1.defaultStyle?.language) {
+    def1.defaultStyle = { ...def1.defaultStyle, language: def1.language };
+  }
   const tBlock = (block: unknown) => readBlock(block, def1.defaultStyle);
   const def2 = readObject(input, {
     margin: optional(dynamic(parseEdges)),

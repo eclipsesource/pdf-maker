@@ -86,6 +86,24 @@ describe('renderDocument', () => {
     expect(barStreamMatch![1]).toBe('\x01\x02\x03');
   });
 
+  it('sets Lang in catalog when language is specified', async () => {
+    const def = { content: [], language: 'de' };
+
+    const pdfData = await renderDocument(def, [], noObjectStreams);
+    const dataString = new TextDecoder().decode(pdfData);
+
+    expect(dataString).toMatch(/\/Lang \(de\)/);
+  });
+
+  it('does not set Lang in catalog when language is not specified', async () => {
+    const def = { content: [] };
+
+    const pdfData = await renderDocument(def, [], noObjectStreams);
+    const dataString = new TextDecoder().decode(pdfData);
+
+    expect(dataString).not.toMatch(/\/Lang/);
+  });
+
   it('calls custom render hook', async () => {
     const def = {
       content: [],

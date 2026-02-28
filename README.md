@@ -184,6 +184,10 @@ text spans. The following text properties are supported:
   An object where each key is a four-character OpenType feature tag and
   the value enables (`true`) or disables (`false`) that feature
   (e.g. `{ smcp: true, tnum: true }`).
+- `language`: The language of the text as a BCP 47 tag (e.g. `'en'`,
+  `'tr'`, `'sr'`). The language may influence text shaping in fonts
+  that provide language-specific typographic behavior. If not set, the
+  document's default language is used.
 
 ### Images
 
@@ -570,6 +574,17 @@ text([
 ]);
 ...
 ```
+
+## Language
+
+The `language` property sets the default language of the document as a
+BCP 47 tag (e.g. `'en'`, `'de'`, `'ar'`). It is written to the PDF
+catalog for accessibility support.
+
+The language can also be set on individual text blocks or spans using
+the `language` [text property](#text-properties). Fonts that provide
+language-specific typographic behavior (e.g. for Turkish or Serbian)
+will use the correct glyph forms based on the language of the text.
 
 ## Metadata
 

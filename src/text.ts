@@ -2,6 +2,7 @@ import type { PDFFont, ShapedGlyph } from '@ralfstx/pdf-core';
 
 import type { FontStyle, FontWeight } from './api/text.ts';
 import type { FontStore } from './font-store.ts';
+import { languageToOpenTypeTag } from './language-tags.gen.ts';
 import type { TextAttrs, TextSpan } from './read/read-block.ts';
 import type { Color } from './read/read-color.ts';
 import { scriptToOpenTypeTag, segmentByScript } from './script-detection.ts';
@@ -288,8 +289,8 @@ function getTextHeight(font: PDFFont, fontSize: number): number {
 export function buildShapeOptions(
   attrs: TextAttrs,
   scriptTag?: string,
-): { scriptTag?: string; features?: Record<string, boolean> } | undefined {
-  const { fontKerning, fontVariantLigatures, fontFeatureSettings } = attrs;
+): { scriptTag?: string; langSysTag?: string; features?: Record<string, boolean> } | undefined {
+  const { fontKerning, fontVariantLigatures, fontFeatureSettings, language } = attrs;
   const features: Record<string, boolean> = { ...fontFeatureSettings };
   if (fontVariantLigatures === 'none') {
     features.liga = false;
@@ -299,11 +300,14 @@ export function buildShapeOptions(
   if (fontKerning === 'none') {
     features.kern = false;
   }
+  const langSysTag = language ? languageToOpenTypeTag(language) : undefined;
   const hasFeatures = Object.keys(features).length > 0;
   const hasScriptTag = scriptTag != null && scriptTag !== 'DFLT';
-  if (!hasFeatures && !hasScriptTag) return undefined;
+  const hasLangSysTag = langSysTag != null;
+  if (!hasFeatures && !hasScriptTag && !hasLangSysTag) return undefined;
   return {
     ...(hasScriptTag ? { scriptTag } : undefined),
+    ...(hasLangSysTag ? { langSysTag } : undefined),
     ...(hasFeatures ? { features } : undefined),
   };
 }

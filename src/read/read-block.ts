@@ -62,6 +62,7 @@ export type TextAttrs = {
   fontKerning?: 'normal' | 'none';
   fontVariantLigatures?: 'normal' | 'none';
   fontFeatureSettings?: Record<string, boolean>;
+  language?: string;
 };
 
 type BlockAttrs = {
@@ -201,6 +202,7 @@ export function readTextAttrs(input: Obj): TextAttrs {
     fontKerning: optional(types.string({ enum: ['normal', 'none'] })),
     fontVariantLigatures: optional(types.string({ enum: ['normal', 'none'] })),
     fontFeatureSettings: optional(readFontFeatureSettings),
+    language: optional(types.string({ pattern: /^[a-zA-Z]{2,3}(-[a-zA-Z0-9]{1,8})*$/ })),
   });
   if (!obj.fontWeight && obj.bold) {
     obj.fontWeight = 700;

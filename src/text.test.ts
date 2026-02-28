@@ -187,6 +187,21 @@ describe('text', () => {
       expect(shapeTextSpy).toHaveBeenCalledWith('Мир', { scriptTag: 'cyrl' });
     });
 
+    it('passes langSysTag when language is set', async () => {
+      const shapeTextSpy = vi.fn(normalFont.shapeText.bind(normalFont));
+      normalFont.shapeText = shapeTextSpy;
+
+      await extractTextSegments(
+        [{ text: 'foo', attrs: { fontSize: 10, language: 'de' } }],
+        fontStore,
+      );
+
+      expect(shapeTextSpy).toHaveBeenCalledWith('foo', {
+        scriptTag: 'latn',
+        langSysTag: 'DEU',
+      });
+    });
+
     it('preserves shaping properties on segments', async () => {
       const attrs = {
         fontSize: 10,
@@ -283,6 +298,28 @@ describe('text', () => {
 
     it('returns undefined when no scriptTag and no features', () => {
       expect(buildShapeOptions({}, undefined)).toBeUndefined();
+    });
+
+    it('includes langSysTag when language is set', () => {
+      expect(buildShapeOptions({ language: 'de' })).toEqual({ langSysTag: 'DEU' });
+    });
+
+    it('combines langSysTag with scriptTag', () => {
+      expect(buildShapeOptions({ language: 'de' }, 'latn')).toEqual({
+        scriptTag: 'latn',
+        langSysTag: 'DEU',
+      });
+    });
+
+    it('combines langSysTag with features', () => {
+      expect(buildShapeOptions({ language: 'de', fontKerning: 'none' })).toEqual({
+        langSysTag: 'DEU',
+        features: { kern: false },
+      });
+    });
+
+    it('ignores unknown language', () => {
+      expect(buildShapeOptions({ language: 'xx' })).toBeUndefined();
     });
   });
 

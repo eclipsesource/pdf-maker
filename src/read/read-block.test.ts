@@ -264,6 +264,50 @@ describe('readTextBlock', () => {
       ),
     );
   });
+
+  it('includes language property', () => {
+    const input = { text: 'foo', language: 'de' };
+
+    const result = readTextBlock(input);
+
+    expect(result.text).toEqual([{ text: 'foo', attrs: { language: 'de' } }]);
+  });
+
+  it('inherits language from default attrs', () => {
+    const input = { text: 'foo' };
+    const defaultAttrs = { language: 'de' };
+
+    const result = readTextBlock(input, defaultAttrs);
+
+    expect(result.text).toEqual([{ text: 'foo', attrs: { language: 'de' } }]);
+  });
+
+  it('allows span to override inherited language', () => {
+    const input = { text: { text: 'foo', language: 'fr' } };
+    const defaultAttrs = { language: 'de' };
+
+    const result = readTextBlock(input, defaultAttrs);
+
+    expect(result.text).toEqual([{ text: 'foo', attrs: { language: 'fr' } }]);
+  });
+
+  it('checks language type', () => {
+    const input = { text: [], language: 23 };
+
+    expect(() => readTextBlock(input)).toThrow(
+      new TypeError('Invalid value for "language": Expected string, got: 23'),
+    );
+  });
+
+  it('rejects invalid language format', () => {
+    const input = { text: [], language: '123' };
+
+    expect(() => readTextBlock(input)).toThrow(
+      new TypeError(
+        'Invalid value for "language": Expected string matching pattern /^[a-zA-Z]{2,3}(-[a-zA-Z0-9]{1,8})*$/, got: \'123\'',
+      ),
+    );
+  });
 });
 
 describe('readText', () => {

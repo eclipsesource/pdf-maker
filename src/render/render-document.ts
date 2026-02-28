@@ -1,5 +1,5 @@
 import type { PDFContext, PDFDict, WriteOptions } from '@ralfstx/pdf-core';
-import { PDFDocument, PDFStream } from '@ralfstx/pdf-core';
+import { PDFDocument, PDFStream, PDFString } from '@ralfstx/pdf-core';
 
 import type { Page } from '../page.ts';
 import type { DocumentDefinition, Metadata } from '../read/read-document.ts';
@@ -12,6 +12,9 @@ export async function renderDocument(
 ): Promise<Uint8Array> {
   const pdfDoc = new PDFDocument();
   setMetadata(pdfDoc, def.info);
+  if (def.language) {
+    setLanguage(def.language, pdfDoc);
+  }
   if (def.customData) {
     setCustomData(def.customData, pdfDoc);
   }
@@ -46,6 +49,13 @@ function setMetadata(doc: PDFDocument, info?: Metadata) {
     creator: info?.creator,
     producer: info?.producer,
     ...info?.custom,
+  });
+}
+
+function setLanguage(language: string, doc: PDFDocument) {
+  doc.unsafeOnRender((renderContext) => {
+    const catalog = renderContext.catalog as PDFDict;
+    catalog.set('Lang', PDFString.of(language));
   });
 }
 

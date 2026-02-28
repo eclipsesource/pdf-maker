@@ -150,4 +150,39 @@ describe('readDocumentDefinition', () => {
       new TypeError('Invalid value for "customData/bar": Expected string or Uint8Array, got: 23'),
     );
   });
+
+  it('accepts language', () => {
+    const def = readDocumentDefinition({ ...input, language: 'de' });
+
+    expect(def.language).toBe('de');
+  });
+
+  it('flows language into defaultStyle', () => {
+    const content = [{ text: 'foo' }];
+    const def = readDocumentDefinition({ ...input, language: 'de', content });
+
+    expect(def.content).toEqual([{ text: [{ text: 'foo', attrs: { language: 'de' } }] }]);
+  });
+
+  it('does not override language in defaultStyle', () => {
+    const content = [{ text: 'foo' }];
+    const defaultStyle = { language: 'fr' };
+    const def = readDocumentDefinition({ ...input, language: 'de', defaultStyle, content });
+
+    expect(def.content).toEqual([{ text: [{ text: 'foo', attrs: { language: 'fr' } }] }]);
+  });
+
+  it('checks language type', () => {
+    expect(() => readDocumentDefinition({ ...input, language: 23 })).toThrow(
+      new TypeError('Invalid value for "language": Expected string, got: 23'),
+    );
+  });
+
+  it('rejects invalid language format', () => {
+    expect(() => readDocumentDefinition({ ...input, language: '123' })).toThrow(
+      new TypeError(
+        'Invalid value for "language": Expected string matching pattern /^[a-zA-Z]{2,3}(-[a-zA-Z0-9]{1,8})*$/, got: \'123\'',
+      ),
+    );
+  });
 });
