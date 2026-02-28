@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.6.0] - Unreleased
+## [0.6.0] - 2026-02-28
 
 ### Added
 
@@ -318,7 +318,7 @@ a build error. Do to npm's policy, the version number cannot be reused.
 
 First public version.
 
-[Unreleased]: https://github.com/eclipsesource/pdf-maker
+[0.6.0]: https://github.com/eclipsesource/pdf-maker/releases/tag/v0.6.0
 [0.1.0]: https://github.com/eclipsesource/pdf-maker/releases/tag/v0.1.0
 [0.2.0]: https://github.com/eclipsesource/pdf-maker/releases/tag/v0.2.0
 [0.3.0]: https://github.com/eclipsesource/pdf-maker/releases/tag/v0.3.0
