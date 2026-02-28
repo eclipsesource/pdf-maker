@@ -304,8 +304,9 @@ export function buildShapeOptions(
   const hasLangSysTag = langSysTag != null;
   if (!hasFeatures && !hasScriptTag && !hasLangSysTag) return undefined;
   return {
-    ...(hasScriptTag ? { scriptTag } : undefined),
-    ...(hasLangSysTag ? { langSysTag } : undefined),
+    // TODO: workaround for pdf-core expecting 4-character tags. Remove padding once that is fixed.
+    ...(hasScriptTag ? { scriptTag: scriptTag.padEnd(4, ' ') } : undefined),
+    ...(hasLangSysTag ? { langSysTag: langSysTag.padEnd(4, ' ') } : undefined),
     ...(hasFeatures ? { features } : undefined),
   };
 }

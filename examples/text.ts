@@ -97,6 +97,8 @@ const document = {
           fontKerning: 'none',
           fontVariantLigatures: 'none',
         }),
+        text([text('Cyrillic default: '), text('бгдпт', { fontStyle: 'italic' })]),
+        text([text('Serbian: '), text('бгдпт', { fontStyle: 'italic', language: 'sr' })]),
       ],
       { margin: { y: 10 } },
     ),
