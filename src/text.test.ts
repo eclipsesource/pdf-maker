@@ -198,7 +198,7 @@ describe('text', () => {
 
       expect(shapeTextSpy).toHaveBeenCalledWith('foo', {
         scriptTag: 'latn',
-        langSysTag: 'DEU',
+        langSysTag: 'DEU ',
       });
     });
 
@@ -301,19 +301,19 @@ describe('text', () => {
     });
 
     it('includes langSysTag when language is set', () => {
-      expect(buildShapeOptions({ language: 'de' })).toEqual({ langSysTag: 'DEU' });
+      expect(buildShapeOptions({ language: 'de' })).toEqual({ langSysTag: 'DEU ' });
     });
 
     it('combines langSysTag with scriptTag', () => {
       expect(buildShapeOptions({ language: 'de' }, 'latn')).toEqual({
         scriptTag: 'latn',
-        langSysTag: 'DEU',
+        langSysTag: 'DEU ',
       });
     });
 
     it('combines langSysTag with features', () => {
       expect(buildShapeOptions({ language: 'de', fontKerning: 'none' })).toEqual({
-        langSysTag: 'DEU',
+        langSysTag: 'DEU ',
         features: { kern: false },
       });
     });
