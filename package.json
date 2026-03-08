@@ -34,7 +34,7 @@
     "examples": "./examples/run-all-examples.sh"
   },
   "dependencies": {
-    "@ralfstx/pdf-core": "^0.1.0"
+    "@ralfstx/pdf-core": "^0.2.0"
   },
   "devDependencies": {
     "@types/node": "^25.0.3",

@@ -2,6 +2,11 @@
 
 ## [0.6.1] - 2026-03-08
 
+### Changed
+
+- Upgraded `@ralfstx/pdf-core` dependency from 0.1.x to 0.2.x. PDFs now
+  include XMP metadata derived from the document info properties.
+
 ### Fixed
 
 - TypeScript declaration files (`.d.ts`) for the public API were missing
