@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.1] - 2026-03-08
+
+### Fixed
+
+- TypeScript declaration files (`.d.ts`) for the public API were missing
+  from the published package, breaking type resolution for consumers.
+
 ## [0.6.0] - 2026-02-28
 
 ### Added
@@ -318,6 +325,7 @@ a build error. Do to npm's policy, the version number cannot be reused.
 
 First public version.
 
+[0.6.1]: https://github.com/eclipsesource/pdf-maker/releases/tag/v0.6.1
 [0.6.0]: https://github.com/eclipsesource/pdf-maker/releases/tag/v0.6.0
 [0.1.0]: https://github.com/eclipsesource/pdf-maker/releases/tag/v0.1.0
 [0.2.0]: https://github.com/eclipsesource/pdf-maker/releases/tag/v0.2.0

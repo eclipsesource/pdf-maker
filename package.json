@@ -1,6 +1,6 @@
 {
   "name": "pdfmkr",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "description": "Generate PDF documents from JavaScript objects",
   "license": "MIT",
   "repository": {
@@ -25,7 +25,7 @@
     "npm": ">=10"
   },
   "scripts": {
-    "build": "rm -rf build/ dist/ && tsc -p tsconfig.build.json && esbuild src/index.ts --bundle --sourcemap --platform=browser --target=es2022 --outdir=dist --format=esm --external:@ralfstx/pdf-core && cp -a build/index.d.ts build/api/ dist/",
+    "build": "rm -rf build/ dist/ && tsc -p tsconfig.build.json && esbuild src/index.ts --bundle --sourcemap --platform=browser --target=es2022 --outdir=dist --format=esm --external:@ralfstx/pdf-core && cp build/index.d.ts dist/ && cp -a build/api dist/api",
     "lint": "eslint . --max-warnings=0 && prettier --check .",
     "test": "vitest run test",
     "verify": "npm run lint && npm run test && npm run examples && npm run build",
