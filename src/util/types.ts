@@ -45,13 +45,18 @@ export function readAs<T = unknown>(value: unknown, name: string, type?: TypeDef
     return asType(value, type);
   } catch (error: unknown) {
     if (error instanceof Error && error.message === 'Missing value') {
+      // No need to preserve the cause for the known "Missing value" error
+      // eslint-disable-next-line preserve-caught-error
       throw new TypeError(`Missing value for "${name}"`);
     }
     if (error instanceof Error && error.message?.startsWith('Invalid value for "')) {
       const tail = error.message.replace(/^Invalid value for "/, '');
+      // No need to preserve the cause for this known error format
+      // eslint-disable-next-line preserve-caught-error
       throw new TypeError(`Invalid value for "${name}/${tail}`);
     }
     const errorStr = error instanceof Error ? error.message : String(error);
+    // eslint-disable-next-line preserve-caught-error
     throw new TypeError(`Invalid value for "${name}": ${errorStr}`);
   }
 }

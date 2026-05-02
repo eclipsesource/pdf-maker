@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-return */
+// This module intentionally uses dynamic Node.js imports for browser compatibility.
 export const readRelativeFile = async (rootDir: string, relPath: string) => {
   let fs;
   let path;

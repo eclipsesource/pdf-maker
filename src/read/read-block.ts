@@ -252,7 +252,7 @@ export function readText(text: unknown, attrs: TextAttrs): TextSpan[] {
     return [{ text, attrs }];
   }
   if (isObject(text) && 'text' in text) {
-    return readText((text as Obj).text, { ...attrs, ...readTextAttrs(text as Obj) });
+    return readText(text.text, { ...attrs, ...readTextAttrs(text) });
   }
   throw typeError('string, object with text property, or array of text', text);
 }
