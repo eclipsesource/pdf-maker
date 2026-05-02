@@ -1,5 +1,14 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+
+- `outputIntents` property on `DocumentDefinition` for declaring PDF
+  output intents (e.g. for PDF/A or PDF/X conformance). Accepts raw ICC
+  profile data as `Uint8Array`, removing the need for consumers to
+  depend on `@ralfstx/pdf-core`.
+
 ## [0.6.1] - 2026-03-08
 
 ### Changed

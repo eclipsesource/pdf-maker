@@ -83,6 +83,12 @@ export type DocumentDefinition = {
    */
   embeddedFiles?: EmbeddedFile[];
 
+  /**
+   * Output intents that describe the intended output conditions for the
+   * document (e.g. for PDF/A or PDF/X conformance).
+   */
+  outputIntents?: OutputIntent[];
+
   dev?: {
     /**
      * When set to true, additional guides are drawn to help analyzing
@@ -228,4 +234,42 @@ export type PageInfo = {
    * Before that, it is `undefined`.
    */
   readonly pageCount?: number;
+};
+
+/**
+ * An output intent that describes the intended output condition for the
+ * document. Output intents are required for PDF/A and PDF/X conformance.
+ */
+export type OutputIntent = {
+  /**
+   * The output intent subtype, e.g. `'GTS_PDFA1'` for PDF/A or
+   * `'GTS_PDFX'` for PDF/X.
+   */
+  subtype: string;
+
+  /**
+   * An identifier for the intended output condition, e.g.
+   * `'sRGB IEC61966-2.1'`.
+   */
+  outputConditionIdentifier: string;
+
+  /**
+   * The raw ICC profile data for the destination output condition.
+   */
+  iccProfile: Uint8Array;
+
+  /**
+   * A human-readable description of the intended output condition.
+   */
+  outputCondition?: string;
+
+  /**
+   * A URL for an ICC profile registry where the condition is defined.
+   */
+  registryName?: string;
+
+  /**
+   * Additional information about the intended output condition.
+   */
+  info?: string;
 };

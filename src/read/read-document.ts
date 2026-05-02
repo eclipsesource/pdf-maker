@@ -38,6 +38,14 @@ export type DocumentDefinition = {
     modificationDate?: Date;
     relationship?: FileRelationShip;
   }[];
+  outputIntents?: {
+    subtype: string;
+    outputConditionIdentifier: string;
+    iccProfile: Uint8Array;
+    outputCondition?: string;
+    registryName?: string;
+    info?: string;
+  }[];
   onRenderDocument?: (pdfDoc: PDFDocument) => void | Promise<void>;
 };
 
@@ -68,6 +76,7 @@ export function readDocumentDefinition(input: unknown): DocumentDefinition {
     dev: optional(types.object({ guides: optional(types.boolean()) })),
     customData: optional(readCustomData),
     embeddedFiles: optional(types.array(readEmbeddedFiles)),
+    outputIntents: optional(types.array(readOutputIntent)),
     onRenderDocument: optional(),
   });
   if (def1.language && !def1.defaultStyle?.language) {
@@ -146,4 +155,47 @@ function readEmbeddedFiles(input: unknown) {
 function readData(input: unknown): Uint8Array {
   if (input instanceof Uint8Array) return input;
   throw typeError('Uint8Array', input);
+}
+
+function readOutputIntent(input: unknown) {
+  const intent = readObject(input, {
+    subtype: required(types.string()),
+    outputConditionIdentifier: required(types.string()),
+    iccProfile: required(readIccProfile),
+    outputCondition: optional(types.string()),
+    registryName: optional(types.string()),
+    info: optional(types.string()),
+  });
+  return intent;
+}
+
+function readIccProfile(input: unknown): Uint8Array {
+  if (!(input instanceof Uint8Array)) {
+    throw typeError('Uint8Array', input);
+  }
+  if (input.length < 128) {
+    throw new TypeError('ICC profile is too short');
+  }
+  const view = new DataView(input.buffer, input.byteOffset, input.byteLength);
+  const signature = String.fromCharCode(
+    view.getUint8(36),
+    view.getUint8(37),
+    view.getUint8(38),
+    view.getUint8(39),
+  );
+  if (signature !== 'acsp') {
+    throw new TypeError(`Invalid ICC profile: expected signature 'acsp', got '${signature}'`);
+  }
+  const colorSpace = String.fromCharCode(
+    view.getUint8(16),
+    view.getUint8(17),
+    view.getUint8(18),
+    view.getUint8(19),
+  );
+  if (!['RGB ', 'CMYK', 'GRAY'].includes(colorSpace)) {
+    throw new TypeError(
+      `Unsupported ICC profile color space '${colorSpace.trim()}', expected RGB, CMYK, or GRAY`,
+    );
+  }
+  return input;
 }

@@ -5,6 +5,19 @@ import { renderDocument } from './render-document.ts';
 
 const noObjectStreams = { useObjectStreams: false } as const;
 
+function mkIccProfile(colorSpace = 'RGB '): Uint8Array {
+  const data = new Uint8Array(128);
+  data[16] = colorSpace.charCodeAt(0);
+  data[17] = colorSpace.charCodeAt(1);
+  data[18] = colorSpace.charCodeAt(2);
+  data[19] = colorSpace.charCodeAt(3);
+  data[36] = 0x61; // a
+  data[37] = 0x63; // c
+  data[38] = 0x73; // s
+  data[39] = 0x70; // p
+  return data;
+}
+
 describe('renderDocument', () => {
   beforeEach(() => {
     vi.stubEnv('TZ', 'UTC');
@@ -116,5 +129,33 @@ describe('renderDocument', () => {
     const dataString = new TextDecoder().decode(pdfData);
 
     expect(dataString).toMatch(/\/Title <FEFF0074006500730074002D007400690074006C0065>/);
+  });
+
+  it('renders output intents', async () => {
+    const iccProfile = mkIccProfile('RGB ');
+    const def = {
+      content: [],
+      outputIntents: [
+        {
+          subtype: 'GTS_PDFA1',
+          outputConditionIdentifier: 'sRGB IEC61966-2.1',
+          iccProfile,
+          outputCondition: 'sRGB',
+          registryName: 'http://www.color.org',
+          info: 'sRGB IEC61966-2.1',
+        },
+      ],
+    };
+
+    const pdfData = await renderDocument(def, [], noObjectStreams);
+    const dataString = new TextDecoder().decode(pdfData);
+
+    expect(dataString).toMatch(/\/OutputIntents/);
+    expect(dataString).toMatch(/\/S \/GTS_PDFA1/);
+    expect(dataString).toMatch(/\/OutputConditionIdentifier \(sRGB IEC61966-2.1\)/);
+    expect(dataString).toMatch(/\/OutputCondition \(sRGB\)/);
+    expect(dataString).toMatch(/\/RegistryName \(http:\/\/www.color.org\)/);
+    expect(dataString).toMatch(/\/Info <FEFF/);
+    expect(dataString).toMatch(/\/DestOutputProfile/);
   });
 });

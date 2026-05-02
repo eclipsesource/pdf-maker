@@ -185,4 +185,120 @@ describe('readDocumentDefinition', () => {
       ),
     );
   });
+
+  describe('outputIntents', () => {
+    it('accepts valid output intent', () => {
+      const iccProfile = mkIccProfile('RGB ');
+      const outputIntents = [
+        {
+          subtype: 'GTS_PDFA1',
+          outputConditionIdentifier: 'sRGB IEC61966-2.1',
+          iccProfile,
+          outputCondition: 'sRGB',
+          registryName: 'http://www.color.org',
+          info: 'sRGB IEC61966-2.1',
+        },
+      ];
+
+      const def = readDocumentDefinition({ ...input, outputIntents });
+
+      expect(def.outputIntents).toEqual(outputIntents);
+    });
+
+    it('accepts output intent with only required fields', () => {
+      const iccProfile = mkIccProfile('RGB ');
+      const outputIntents = [
+        { subtype: 'GTS_PDFA1', outputConditionIdentifier: 'sRGB', iccProfile },
+      ];
+
+      const def = readDocumentDefinition({ ...input, outputIntents });
+
+      expect(def.outputIntents).toEqual(outputIntents);
+    });
+
+    it('checks subtype is required', () => {
+      const outputIntents = [{ outputConditionIdentifier: 'sRGB', iccProfile: mkIccProfile() }];
+
+      expect(() => readDocumentDefinition({ ...input, outputIntents })).toThrow(
+        /Missing value for "subtype"/,
+      );
+    });
+
+    it('checks outputConditionIdentifier is required', () => {
+      const outputIntents = [{ subtype: 'GTS_PDFA1', iccProfile: mkIccProfile() }];
+
+      expect(() => readDocumentDefinition({ ...input, outputIntents })).toThrow(
+        /Missing value for "outputConditionIdentifier"/,
+      );
+    });
+
+    it('checks iccProfile is required', () => {
+      const outputIntents = [{ subtype: 'GTS_PDFA1', outputConditionIdentifier: 'sRGB' }];
+
+      expect(() => readDocumentDefinition({ ...input, outputIntents })).toThrow(
+        /Missing value for "iccProfile"/,
+      );
+    });
+
+    it('rejects non-Uint8Array iccProfile', () => {
+      const outputIntents = [
+        { subtype: 'GTS_PDFA1', outputConditionIdentifier: 'sRGB', iccProfile: 'not-bytes' },
+      ];
+
+      expect(() => readDocumentDefinition({ ...input, outputIntents })).toThrow(
+        /Invalid value for "outputIntents\/0\/iccProfile": Expected Uint8Array/,
+      );
+    });
+
+    it('rejects ICC profile that is too short', () => {
+      const outputIntents = [
+        {
+          subtype: 'GTS_PDFA1',
+          outputConditionIdentifier: 'sRGB',
+          iccProfile: new Uint8Array(10),
+        },
+      ];
+
+      expect(() => readDocumentDefinition({ ...input, outputIntents })).toThrow(
+        /Invalid value for "outputIntents\/0\/iccProfile": ICC profile is too short/,
+      );
+    });
+
+    it('rejects ICC profile with invalid signature', () => {
+      const iccProfile = new Uint8Array(128);
+      const outputIntents = [
+        { subtype: 'GTS_PDFA1', outputConditionIdentifier: 'sRGB', iccProfile },
+      ];
+
+      expect(() => readDocumentDefinition({ ...input, outputIntents })).toThrow(
+        /Invalid value for "outputIntents\/0\/iccProfile": Invalid ICC profile: expected signature 'acsp'/,
+      );
+    });
+
+    it('rejects ICC profile with unsupported color space', () => {
+      const iccProfile = mkIccProfile('Lab ');
+      const outputIntents = [
+        { subtype: 'GTS_PDFA1', outputConditionIdentifier: 'sRGB', iccProfile },
+      ];
+
+      expect(() => readDocumentDefinition({ ...input, outputIntents })).toThrow(
+        /Invalid value for "outputIntents\/0\/iccProfile": Unsupported ICC profile color space 'Lab'/,
+      );
+    });
+  });
 });
+
+function mkIccProfile(colorSpace = 'RGB '): Uint8Array {
+  const data = new Uint8Array(128);
+  // color space signature at offset 16
+  data[16] = colorSpace.charCodeAt(0);
+  data[17] = colorSpace.charCodeAt(1);
+  data[18] = colorSpace.charCodeAt(2);
+  data[19] = colorSpace.charCodeAt(3);
+  // 'acsp' signature at offset 36
+  data[36] = 0x61; // a
+  data[37] = 0x63; // c
+  data[38] = 0x73; // s
+  data[39] = 0x70; // p
+  return data;
+}

@@ -1,5 +1,5 @@
 import type { PDFContext, PDFDict, WriteOptions } from '@ralfstx/pdf-core';
-import { PDFDocument, PDFStream } from '@ralfstx/pdf-core';
+import { ICCColorSpace, PDFDocument, PDFStream } from '@ralfstx/pdf-core';
 
 import type { Page } from '../page.ts';
 import type { DocumentDefinition, Metadata } from '../read/read-document.ts';
@@ -26,6 +26,20 @@ export async function renderDocument(
       creationDate: file.creationDate,
       modDate: file.modificationDate,
       afRelationship: file.relationship,
+    });
+  }
+
+  for (const intent of def.outputIntents ?? []) {
+    pdfDoc.addOutputIntent({
+      subtype: intent.subtype,
+      outputConditionIdentifier: intent.outputConditionIdentifier,
+      destOutputProfile: ICCColorSpace.of({
+        data: intent.iccProfile,
+        numComponents: iccNumComponents(intent.iccProfile),
+      }),
+      outputCondition: intent.outputCondition,
+      registryName: intent.registryName,
+      info: intent.info,
     });
   }
 
@@ -61,4 +75,17 @@ function setCustomData(data: Record<string, string | Uint8Array>, doc: PDFDocume
       catalog.set(key, ref);
     });
   }
+}
+
+function iccNumComponents(data: Uint8Array): 1 | 3 | 4 {
+  const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
+  const colorSpace = String.fromCharCode(
+    view.getUint8(16),
+    view.getUint8(17),
+    view.getUint8(18),
+    view.getUint8(19),
+  );
+  if (colorSpace === 'RGB ') return 3;
+  if (colorSpace === 'CMYK') return 4;
+  return 1;
 }
