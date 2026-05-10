@@ -1,4 +1,4 @@
-import type { PDFFont, ShapedGlyph } from '@ralfstx/pdf-core';
+import { getTextWidth, type PDFFont, type ShapedGlyph } from '@ralfstx/pdf-core';
 
 import type { FontStyle, FontWeight } from './api/text.ts';
 import type { FontStore } from './font-store.ts';
@@ -63,7 +63,7 @@ export async function extractTextSegments(
           return {
             type,
             glyphs,
-            width: getGlyphRunWidth(glyphs, fontSize) + glyphs.length * (letterSpacing ?? 0),
+            width: getTextWidth(glyphs, fontSize) + (letterSpacing ?? 0) * glyphs.length,
             height,
             lineHeight,
             font,
@@ -270,13 +270,6 @@ export function getGlyphRunText(glyphs: ShapedGlyph[]): string {
     .flatMap((g) => g.codePoints)
     .map((cp) => String.fromCodePoint(cp))
     .join('');
-}
-
-function getGlyphRunWidth(glyphs: ShapedGlyph[], fontSize: number): number {
-  return glyphs.reduce(
-    (sum, glyph) => sum + (glyph.advance + (glyph.advanceAdjust ?? 0)) * (fontSize / 1000),
-    0,
-  );
 }
 
 function getTextHeight(font: PDFFont, fontSize: number): number {
