@@ -8,6 +8,9 @@
   output intents (e.g. for PDF/A or PDF/X conformance). Accepts raw ICC
   profile data as `Uint8Array`, removing the need for consumers to
   depend on `@ralfstx/pdf-core`.
+- `xmpFragments` property on `DocumentDefinition` for merging custom
+  XMP metadata into the document's auto-generated XMP. This is needed
+  e.g. for declaring PDF/A conformance level alongside output intents.
 
 ## [0.6.1] - 2026-03-08
 

@@ -89,6 +89,13 @@ export type DocumentDefinition = {
    */
   outputIntents?: OutputIntent[];
 
+  /**
+   * Custom XMP metadata fragments to merge into the document's
+   * auto-generated XMP metadata. Each fragment declares a namespace
+   * and provides raw XML content for that namespace.
+   */
+  xmpFragments?: XmpFragment[];
+
   dev?: {
     /**
      * When set to true, additional guides are drawn to help analyzing
@@ -272,4 +279,26 @@ export type OutputIntent = {
    * Additional information about the intended output condition.
    */
   info?: string;
+};
+
+/**
+ * A fragment of XMP metadata scoped to a single namespace, to be
+ * merged into the document's auto-generated XMP.
+ */
+export type XmpFragment = {
+  /**
+   * The namespace URI (e.g. `'http://www.aiim.org/pdfa/ns/id/'`).
+   */
+  namespaceUri: string;
+
+  /**
+   * The namespace prefix used in the XML content (e.g. `'pdfaid'`).
+   */
+  prefix: string;
+
+  /**
+   * Raw XML content to place inside the `rdf:Description` element.
+   * The caller is responsible for ensuring the XML is well-formed.
+   */
+  unsafeInnerXML: string;
 };

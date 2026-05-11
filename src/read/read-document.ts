@@ -46,6 +46,11 @@ export type DocumentDefinition = {
     registryName?: string;
     info?: string;
   }[];
+  xmpFragments?: {
+    namespaceUri: string;
+    prefix: string;
+    unsafeInnerXML: string;
+  }[];
   onRenderDocument?: (pdfDoc: PDFDocument) => void | Promise<void>;
 };
 
@@ -77,6 +82,7 @@ export function readDocumentDefinition(input: unknown): DocumentDefinition {
     customData: optional(readCustomData),
     embeddedFiles: optional(types.array(readEmbeddedFiles)),
     outputIntents: optional(types.array(readOutputIntent)),
+    xmpFragments: optional(types.array(readXmpFragment)),
     onRenderDocument: optional(),
   });
   if (def1.language && !def1.defaultStyle?.language) {
@@ -198,4 +204,12 @@ function readIccProfile(input: unknown): Uint8Array {
     );
   }
   return input;
+}
+
+function readXmpFragment(input: unknown) {
+  return readObject(input, {
+    namespaceUri: required(types.string()),
+    prefix: required(types.string()),
+    unsafeInnerXML: required(types.string()),
+  });
 }

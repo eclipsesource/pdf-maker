@@ -43,6 +43,10 @@ export async function renderDocument(
     });
   }
 
+  for (const fragment of def.xmpFragments ?? []) {
+    pdfDoc.addXMPFragment(fragment);
+  }
+
   await def.onRenderDocument?.(pdfDoc);
 
   return pdfDoc.write(writeOptions);

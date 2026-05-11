@@ -286,6 +286,58 @@ describe('readDocumentDefinition', () => {
       );
     });
   });
+
+  describe('xmpFragments', () => {
+    it('accepts valid xmpFragments', () => {
+      const xmpFragments = [
+        {
+          namespaceUri: 'http://www.aiim.org/pdfa/ns/id/',
+          prefix: 'pdfaid',
+          unsafeInnerXML: '<pdfaid:part>3</pdfaid:part>',
+        },
+      ];
+
+      const def = readDocumentDefinition({ ...input, xmpFragments });
+
+      expect(def.xmpFragments).toEqual(xmpFragments);
+    });
+
+    it('checks namespaceUri is required', () => {
+      const xmpFragments = [{ prefix: 'pdfaid', unsafeInnerXML: '<pdfaid:part>3</pdfaid:part>' }];
+
+      expect(() => readDocumentDefinition({ ...input, xmpFragments })).toThrow(
+        /Missing value for "namespaceUri"/,
+      );
+    });
+
+    it('checks prefix is required', () => {
+      const xmpFragments = [
+        { namespaceUri: 'http://example.com/', unsafeInnerXML: '<x:y>1</x:y>' },
+      ];
+
+      expect(() => readDocumentDefinition({ ...input, xmpFragments })).toThrow(
+        /Missing value for "prefix"/,
+      );
+    });
+
+    it('checks unsafeInnerXML is required', () => {
+      const xmpFragments = [{ namespaceUri: 'http://example.com/', prefix: 'x' }];
+
+      expect(() => readDocumentDefinition({ ...input, xmpFragments })).toThrow(
+        /Missing value for "unsafeInnerXML"/,
+      );
+    });
+
+    it('rejects non-string values', () => {
+      const xmpFragments = [
+        { namespaceUri: 123, prefix: 'pdfaid', unsafeInnerXML: '<pdfaid:part>3</pdfaid:part>' },
+      ];
+
+      expect(() => readDocumentDefinition({ ...input, xmpFragments })).toThrow(
+        /Invalid value for "xmpFragments\/0\/namespaceUri"/,
+      );
+    });
+  });
 });
 
 function mkIccProfile(colorSpace = 'RGB '): Uint8Array {

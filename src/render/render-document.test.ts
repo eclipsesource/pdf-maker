@@ -158,4 +158,25 @@ describe('renderDocument', () => {
     expect(dataString).toMatch(/\/Info <FEFF/);
     expect(dataString).toMatch(/\/DestOutputProfile/);
   });
+
+  it('renders XMP fragments', async () => {
+    const def = {
+      content: [],
+      xmpFragments: [
+        {
+          namespaceUri: 'http://www.aiim.org/pdfa/ns/id/',
+          prefix: 'pdfaid',
+          unsafeInnerXML:
+            '<pdfaid:part>3</pdfaid:part>\n<pdfaid:conformance>B</pdfaid:conformance>',
+        },
+      ],
+    };
+
+    const pdfData = await renderDocument(def, [], noObjectStreams);
+    const dataString = new TextDecoder().decode(pdfData);
+
+    expect(dataString).toContain('pdfaid:part');
+    expect(dataString).toContain('pdfaid:conformance');
+    expect(dataString).toContain('http://www.aiim.org/pdfa/ns/id/');
+  });
 });
