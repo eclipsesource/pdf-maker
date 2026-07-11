@@ -114,9 +114,10 @@ describe('layout-rows', () => {
 
     describe('page breaks', () => {
       const makeBlocks = (n: number, idPrefix?: string) => {
-        return range(n).map(
-          (n): Block => ({ id: idPrefix ? `${idPrefix}.${n}` : `${n}`, height: 100 }),
-        );
+        return range(n).map((n): Block => ({
+          id: idPrefix ? `${idPrefix}.${n}` : `${n}`,
+          height: 100,
+        }));
       };
       const renderedIds = (frame?: Pick<Frame, 'children'>) =>
         frame?.children?.map((c) => c.objects?.find((o) => o.type === 'anchor')?.name);
