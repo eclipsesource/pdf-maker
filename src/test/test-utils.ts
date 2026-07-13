@@ -81,6 +81,7 @@ export function fakePdfFont(key: string): PDFFont {
     weight: 400,
     ascent: 800,
     descent: -200,
+    capHeight: 700,
     lineGap: 0,
     shapeText: (text: string, _opts?: Record<string, unknown>) =>
       [...text].map((c) => ({
