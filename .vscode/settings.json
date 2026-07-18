@@ -12,5 +12,5 @@
   "files.insertFinalNewline": true,
   "files.trimFinalNewlines": true,
   "files.trimTrailingWhitespace": true,
-  "cSpell.words": ["bbox", "pdfmkr"]
+  "cSpell.words": ["bbox", "pdfmkr", "xobject"]
 }

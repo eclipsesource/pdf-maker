@@ -17,6 +17,14 @@ export type XmlElement = {
 };
 
 /**
+ * Returns the child nodes of the given element that are elements,
+ * skipping text nodes.
+ */
+export function childElements(element: XmlElement): XmlElement[] {
+  return element.children.filter((child): child is XmlElement => typeof child !== 'string');
+}
+
+/**
  * The error thrown when the XML input is malformed.
  */
 export class XmlParseError extends Error {

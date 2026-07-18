@@ -20,6 +20,16 @@ export function omit<T extends Record<string, unknown>>(
   return result;
 }
 
+/**
+ * The relative distance of the bezier control points that approximates
+ * a quarter of a circle, see https://stackoverflow.com/a/27863181/247159
+ */
+export const KAPPA = (4 * (Math.sqrt(2) - 1)) / 3;
+
+/**
+ * Returns the product of two transformation matrices. The second
+ * matrix is applied to coordinates first, then the first.
+ */
 export function multiplyMatrices(matrix1: number[], matrix2: number[]): number[] {
   const result = [];
   const [a, b, c, d, e, f] = matrix1;

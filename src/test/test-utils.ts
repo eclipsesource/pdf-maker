@@ -1,4 +1,4 @@
-import type { PDFFont } from '@ralfstx/pdf-core';
+import type { ContentStream, PDFFont } from '@ralfstx/pdf-core';
 import { PDFImage, PDFRef } from '@ralfstx/pdf-core';
 
 import type { FontWeight } from '../api/text.ts';
@@ -121,7 +121,11 @@ export function p(x: number, y: number) {
 }
 
 export function getContentStream(page: Page) {
-  return page.pdfPage.contentStream.instructions
+  return formatContentStream(page.pdfPage.contentStream);
+}
+
+export function formatContentStream(contentStream: ContentStream) {
+  return contentStream.instructions
     .map((instruction) => {
       return [
         ...instruction.operands.map((operand) =>

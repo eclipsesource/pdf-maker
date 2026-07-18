@@ -17,10 +17,7 @@ import type {
 } from '../frame.ts';
 import type { Page } from '../page.ts';
 import { drawSvgPath } from '../svg-paths.ts';
-import { multiplyMatrices, round } from '../util/utils.ts';
-
-// See https://stackoverflow.com/a/27863181/247159
-const KAPPA = (4 * (Math.sqrt(2) - 1)) / 3;
+import { KAPPA, multiplyMatrices, round } from '../util/utils.ts';
 
 export function renderGraphics(object: GraphicsObject, page: Page, base: Pos) {
   const pos = tr(base, page);
