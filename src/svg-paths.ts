@@ -104,7 +104,33 @@ export function parseSvgPath(path: string) {
   return commands;
 }
 
-export function drawSvgPath(cs: ContentStream, commands: PathCommand[]): void {
+/**
+ * Receives the drawing operations of a path in absolute coordinates.
+ * Relative commands are resolved, the control points of smooth curve
+ * commands are mirrored, and arcs are converted to bezier segments, so
+ * that implementations only have to handle these five operations.
+ *
+ * Operations that continue from the current point do not repeat it.
+ * Implementations that need the start point of a segment have to
+ * remember the end point of the preceding operation.
+ */
+export type PathVisitor = {
+  moveTo(x: number, y: number): void;
+  lineTo(x: number, y: number): void;
+  curveTo(x1: number, y1: number, x2: number, y2: number, x: number, y: number): void;
+  quadraticCurveTo(x1: number, y1: number, x: number, y: number): void;
+  /**
+   * Closes the current subpath with a line to its start point. That
+   * point is passed in, since it becomes the new current point.
+   */
+  closePath(sx: number, sy: number): void;
+};
+
+/**
+ * Traverses the given path commands and reports each drawing operation
+ * to the given visitor in absolute coordinates.
+ */
+export function walkSvgPath(commands: PathCommand[], visitor: PathVisitor): void {
   // Current point, subpath start, and previous control point (for
   // mirroring in smooth curve commands)
   let cx = 0;
@@ -116,115 +142,136 @@ export function drawSvgPath(cs: ContentStream, commands: PathCommand[]): void {
   let lastCurve: 'b' | 'q' | undefined = undefined;
 
   const opMoveTo = (x: number, y: number) => {
+    visitor.moveTo(x, y);
     cx = x;
     cy = y;
     sx = x;
     sy = y;
     lastCurve = undefined;
-    cs.moveTo(cx, cy);
   };
   const opLineTo = (x: number, y: number) => {
+    visitor.lineTo(x, y);
     cx = x;
     cy = y;
     lastCurve = undefined;
-    cs.lineTo(cx, cy);
   };
   const opBezierCurve = (x1: number, y1: number, x2: number, y2: number, x: number, y: number) => {
+    visitor.curveTo(x1, y1, x2, y2, x, y);
     cx = x;
     cy = y;
     px = x2;
     py = y2;
     lastCurve = 'b';
-    cs.curveTo(x1, y1, x2, y2, cx, cy);
   };
   const opQuadraticCurve = (x1: number, y1: number, x: number, y: number) => {
+    visitor.quadraticCurveTo(x1, y1, x, y);
     cx = x;
     cy = y;
     px = x1;
     py = y1;
     lastCurve = 'q';
-    cs.smoothCurveToFinal(x1, y1, cx, cy);
   };
   const opArc = (rx: number, ry: number, a: number, l: number, s: number, x: number, y: number) => {
     const segments = arcToSegments(cx, cy, rx, ry, a, l, s, x, y);
+    segments.forEach((seg) => visitor.curveTo(...segmentToBezier(seg)));
     cx = x;
     cy = y;
     lastCurve = undefined;
-    segments.forEach((seg) => cs.curveTo(...segmentToBezier(seg)));
   };
   const opClosePath = () => {
-    // The current point returns to the start of the subpath, which is
-    // also where the `h` operator leaves it in the content stream
+    visitor.closePath(sx, sy);
+    // The current point returns to the start of the subpath
     cx = sx;
     cy = sy;
     lastCurve = undefined;
-    cs.closePath();
   };
   const mirrorCx = (type: 'b' | 'q') => (lastCurve === type ? 2 * cx - px : cx);
   const mirrorCy = (type: 'b' | 'q') => (lastCurve === type ? 2 * cy - py : cy);
 
-  const ops: Record<Op, (params?: number[]) => void> = {
-    M: ([x, y]: number[]) => {
-      opMoveTo(x, y);
-    },
-    m: ([dx, dy]: number[]) => {
-      opMoveTo(cx + dx, cy + dy);
-    },
-    L: ([x, y]: number[]) => {
-      opLineTo(x, y);
-    },
-    l: ([dx, dy]: number[]) => {
-      opLineTo(cx + dx, cy + dy);
-    },
-    H: ([x]: number[]) => {
-      opLineTo(x, cy);
-    },
-    h: ([dx]: number[]) => {
-      opLineTo(cx + dx, cy);
-    },
-    V: ([y]: number[]) => {
-      opLineTo(cx, y);
-    },
-    v: ([dy]: number[]) => {
-      opLineTo(cx, cy + dy);
-    },
-    C: ([x1, y1, x2, y2, x, y]: number[]) => {
-      opBezierCurve(x1, y1, x2, y2, x, y);
-    },
-    c: ([dx1, dy1, dx2, dy2, dx, dy]: number[]) => {
-      opBezierCurve(cx + dx1, cy + dy1, cx + dx2, cy + dy2, cx + dx, cy + dy);
-    },
-    S: ([x2, y2, x, y]: number[]) => {
-      opBezierCurve(mirrorCx('b'), mirrorCy('b'), x2, y2, x, y);
-    },
-    s: ([dx2, dy2, dx, dy]: number[]) => {
-      opBezierCurve(mirrorCx('b'), mirrorCy('b'), cx + dx2, cy + dy2, cx + dx, cy + dy);
-    },
-    Q: ([x1, y1, x, y]: number[]) => {
-      opQuadraticCurve(x1, y1, x, y);
-    },
-    q: ([dx1, dy1, dx, dy]: number[]) => {
-      opQuadraticCurve(cx + dx1, cy + dy1, cx + dx, cy + dy);
-    },
-    T: ([x, y]: number[]) => {
-      opQuadraticCurve(mirrorCx('q'), mirrorCy('q'), x, y);
-    },
-    t: ([dx, dy]: number[]) => {
-      opQuadraticCurve(mirrorCx('q'), mirrorCy('q'), cx + dx, cy + dy);
-    },
-    A: ([rx, ry, angle, largeArc, sweep, x, y]: number[]) => {
-      opArc(rx, ry, angle, largeArc, sweep, x, y);
-    },
-    a: ([rx, ry, angle, largeArc, sweep, dx, dy]: number[]) => {
-      opArc(rx, ry, angle, largeArc, sweep, cx + dx, cy + dy);
-    },
-    Z: () => {
-      opClosePath();
-    },
-    z: () => {
-      opClosePath();
-    },
-  } as Record<Op, (params?: number[]) => void>;
+  for (const { op, params = [] } of commands) {
+    const [p0, p1, p2, p3, p4, p5, p6] = params;
+    switch (op) {
+      case 'M':
+        opMoveTo(p0, p1);
+        break;
+      case 'm':
+        opMoveTo(cx + p0, cy + p1);
+        break;
+      case 'L':
+        opLineTo(p0, p1);
+        break;
+      case 'l':
+        opLineTo(cx + p0, cy + p1);
+        break;
+      case 'H':
+        opLineTo(p0, cy);
+        break;
+      case 'h':
+        opLineTo(cx + p0, cy);
+        break;
+      case 'V':
+        opLineTo(cx, p0);
+        break;
+      case 'v':
+        opLineTo(cx, cy + p0);
+        break;
+      case 'C':
+        opBezierCurve(p0, p1, p2, p3, p4, p5);
+        break;
+      case 'c':
+        opBezierCurve(cx + p0, cy + p1, cx + p2, cy + p3, cx + p4, cy + p5);
+        break;
+      case 'S':
+        opBezierCurve(mirrorCx('b'), mirrorCy('b'), p0, p1, p2, p3);
+        break;
+      case 's':
+        opBezierCurve(mirrorCx('b'), mirrorCy('b'), cx + p0, cy + p1, cx + p2, cy + p3);
+        break;
+      case 'Q':
+        opQuadraticCurve(p0, p1, p2, p3);
+        break;
+      case 'q':
+        opQuadraticCurve(cx + p0, cy + p1, cx + p2, cy + p3);
+        break;
+      case 'T':
+        opQuadraticCurve(mirrorCx('q'), mirrorCy('q'), p0, p1);
+        break;
+      case 't':
+        opQuadraticCurve(mirrorCx('q'), mirrorCy('q'), cx + p0, cy + p1);
+        break;
+      case 'A':
+        opArc(p0, p1, p2, p3, p4, p5, p6);
+        break;
+      case 'a':
+        opArc(p0, p1, p2, p3, p4, cx + p5, cy + p6);
+        break;
+      case 'Z':
+      case 'z':
+        opClosePath();
+        break;
+    }
+  }
+}
 
-  commands.forEach(({ op, params }) => ops[op](params));
+/**
+ * Draws the given path commands into the given content stream.
+ */
+export function drawSvgPath(cs: ContentStream, commands: PathCommand[]): void {
+  walkSvgPath(commands, {
+    moveTo: (x, y) => {
+      cs.moveTo(x, y);
+    },
+    lineTo: (x, y) => {
+      cs.lineTo(x, y);
+    },
+    curveTo: (x1, y1, x2, y2, x, y) => {
+      cs.curveTo(x1, y1, x2, y2, x, y);
+    },
+    quadraticCurveTo: (x1, y1, x, y) => {
+      cs.smoothCurveToFinal(x1, y1, x, y);
+    },
+    closePath: () => {
+      cs.closePath();
+    },
+  });
 }
