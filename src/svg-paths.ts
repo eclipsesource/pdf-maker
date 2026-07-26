@@ -107,8 +107,9 @@ export function parseSvgPath(path: string) {
 /**
  * Receives the drawing operations of a path in absolute coordinates.
  * Relative commands are resolved, the control points of smooth curve
- * commands are mirrored, and arcs are converted to bezier segments, so
- * that implementations only have to handle these five operations.
+ * commands are mirrored, quadratic curves are converted to cubic ones,
+ * and arcs are converted to bezier segments, so that implementations
+ * only have to handle these four operations.
  *
  * Operations that continue from the current point do not repeat it.
  * Implementations that need the start point of a segment have to
@@ -118,7 +119,6 @@ export type PathVisitor = {
   moveTo(x: number, y: number): void;
   lineTo(x: number, y: number): void;
   curveTo(x1: number, y1: number, x2: number, y2: number, x: number, y: number): void;
-  quadraticCurveTo(x1: number, y1: number, x: number, y: number): void;
   /**
    * Closes the current subpath with a line to its start point. That
    * point is passed in, since it becomes the new current point.
@@ -164,7 +164,17 @@ export function walkSvgPath(commands: PathCommand[], visitor: PathVisitor): void
     lastCurve = 'b';
   };
   const opQuadraticCurve = (x1: number, y1: number, x: number, y: number) => {
-    visitor.quadraticCurveTo(x1, y1, x, y);
+    // PDF has no quadratic curve operator, so convert to the equivalent
+    // cubic curve. Note that the quadratic control point is kept for
+    // mirroring, as `T` reflects that one.
+    visitor.curveTo(
+      cx + (2 / 3) * (x1 - cx),
+      cy + (2 / 3) * (y1 - cy),
+      x + (2 / 3) * (x1 - x),
+      y + (2 / 3) * (y1 - y),
+      x,
+      y,
+    );
     cx = x;
     cy = y;
     px = x1;
@@ -266,9 +276,6 @@ export function drawSvgPath(cs: ContentStream, commands: PathCommand[]): void {
     },
     curveTo: (x1, y1, x2, y2, x, y) => {
       cs.curveTo(x1, y1, x2, y2, x, y);
-    },
-    quadraticCurveTo: (x1, y1, x, y) => {
-      cs.smoothCurveToFinal(x1, y1, x, y);
     },
     closePath: () => {
       cs.closePath();

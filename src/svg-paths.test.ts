@@ -198,26 +198,39 @@ describe('drawSvgPath', () => {
     expect(pdfOps('S 1 2 3 4 s 5 6 7 8')).toEqual(['0 0 1 2 3 4 c', '5 6 8 10 10 12 c']);
   });
 
+  // PDF has no quadratic curve operator, so quadratic curves are
+  // converted to equivalent cubic ones
+
   it('creates ops for Q', () => {
-    expect(pdfOps('Q 1 2 3 4')).toEqual(['1 2 3 4 v']);
+    expect(pdfOps('Q 1 2 3 4')).toEqual(['0.66666667 1.3333333 1.6666667 2.6666667 3 4 c']);
   });
 
   it('creates ops for q', () => {
-    expect(pdfOps('q 1 2 3 4')).toEqual(['1 2 3 4 v']);
-    expect(pdfOps('M 1 2 q 3 4 5 6')).toEqual(['1 2 m', '4 6 6 8 v']);
-    expect(pdfOps('Q 1 2 3 4 q 5 6 7 8')).toEqual(['1 2 3 4 v', '8 10 10 12 v']);
+    expect(pdfOps('q 1 2 3 4')).toEqual(['0.66666667 1.3333333 1.6666667 2.6666667 3 4 c']);
+    expect(pdfOps('M 1 2 q 3 4 5 6')).toEqual(['1 2 m', '3 4.6666667 4.6666667 6.6666667 6 8 c']);
+    expect(pdfOps('Q 1 2 3 4 q 5 6 7 8')).toEqual([
+      '0.66666667 1.3333333 1.6666667 2.6666667 3 4 c',
+      '6.3333333 8 8.6666667 10.666667 10 12 c',
+    ]);
   });
 
   it('creates ops for T', () => {
-    expect(pdfOps('T 1 2')).toEqual(['0 0 1 2 v']);
-    expect(pdfOps('M 1 2 T 3 4')).toEqual(['1 2 m', '1 2 3 4 v']);
-    expect(pdfOps('T 1 2 T 3 4')).toEqual(['0 0 1 2 v', '2 4 3 4 v']);
+    expect(pdfOps('T 1 2')).toEqual(['0 0 0.33333333 0.66666667 1 2 c']);
+    expect(pdfOps('M 1 2 T 3 4')).toEqual(['1 2 m', '1 2 1.6666667 2.6666667 3 4 c']);
+    // The second T mirrors the quadratic control point to 2,4
+    expect(pdfOps('T 1 2 T 3 4')).toEqual([
+      '0 0 0.33333333 0.66666667 1 2 c',
+      '1.6666667 3.3333333 2.3333333 4 3 4 c',
+    ]);
   });
 
   it('creates ops for t', () => {
-    expect(pdfOps('t 1 2')).toEqual(['0 0 1 2 v']);
-    expect(pdfOps('M 1 2 t 3 4')).toEqual(['1 2 m', '1 2 4 6 v']);
-    expect(pdfOps('T 1 2 t 3 4')).toEqual(['0 0 1 2 v', '2 4 4 6 v']);
+    expect(pdfOps('t 1 2')).toEqual(['0 0 0.33333333 0.66666667 1 2 c']);
+    expect(pdfOps('M 1 2 t 3 4')).toEqual(['1 2 m', '1 2 2 3.3333333 4 6 c']);
+    expect(pdfOps('T 1 2 t 3 4')).toEqual([
+      '0 0 0.33333333 0.66666667 1 2 c',
+      '1.6666667 3.3333333 2.6666667 4.6666667 4 6 c',
+    ]);
   });
 
   it('creates ops for A', () => {

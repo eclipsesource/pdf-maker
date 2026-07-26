@@ -262,7 +262,15 @@ describe('renderGraphics', () => {
       renderGraphics({ type: 'graphics', shapes: [path] }, page, pos);
 
       expect(getContentStream(page)).toEqual(
-        [...head, '0 20 m', '20 0 40 20 v', '60 40 80 20 v', 'S', ...tail].join('\n'),
+        [
+          ...head,
+          '0 20 m',
+          // Quadratic curves are converted to equivalent cubic ones
+          '13.333333 6.6666667 26.666667 6.6666667 40 20 c',
+          '53.333333 33.333333 66.666667 33.333333 80 20 c',
+          'S',
+          ...tail,
+        ].join('\n'),
       );
     });
 

@@ -35,13 +35,6 @@ export function getPathBBox(commands: PathCommand[]): Box | undefined {
     addY(y);
   };
 
-  const addCurve = (x1: number, y1: number, x2: number, y2: number, x: number, y: number) => {
-    addPoint(lx, ly);
-    addPoint(x, y);
-    cubicExtrema(lx, x1, x2, x).forEach(addX);
-    cubicExtrema(ly, y1, y2, y).forEach(addY);
-  };
-
   walkSvgPath(commands, {
     moveTo: (x, y) => {
       addPoint(x, y);
@@ -55,20 +48,10 @@ export function getPathBBox(commands: PathCommand[]): Box | undefined {
       ly = y;
     },
     curveTo: (x1, y1, x2, y2, x, y) => {
-      addCurve(x1, y1, x2, y2, x, y);
-      lx = x;
-      ly = y;
-    },
-    quadraticCurveTo: (x1, y1, x, y) => {
-      // Convert to an equivalent cubic curve
-      addCurve(
-        lx + (2 / 3) * (x1 - lx),
-        ly + (2 / 3) * (y1 - ly),
-        x + (2 / 3) * (x1 - x),
-        y + (2 / 3) * (y1 - y),
-        x,
-        y,
-      );
+      addPoint(lx, ly);
+      addPoint(x, y);
+      cubicExtrema(lx, x1, x2, x).forEach(addX);
+      cubicExtrema(ly, y1, y2, y).forEach(addY);
       lx = x;
       ly = y;
     },

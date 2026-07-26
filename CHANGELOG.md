@@ -1,5 +1,15 @@
 # Changelog
 
+## [Unreleased]
+
+### Fixed
+
+- Quadratic curve commands (`Q`, `q`, `T`, `t`) in the `d` property of a
+  `path` shape were rendered as a different curve. PDF has no quadratic
+  curve operator, and the cubic one that was emitted used the current
+  point as its first control point instead of the converted quadratic
+  control points.
+
 ## [0.6.2] - 2026-06-11
 
 ### Added
