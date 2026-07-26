@@ -10,7 +10,6 @@ import { ContentStream, ExtGState, PDFFormXObject, PDFShadingPattern } from '@ra
 import type { Box, Size } from '../box.ts';
 import type { Color } from '../colors.ts';
 import { setFillingColor, setStrokingColor } from '../colors.ts';
-import { drawSvgPath, parseSvgPath, type PathCommand } from '../svg-paths.ts';
 import { KAPPA, round } from '../util/utils.ts';
 import type { XmlElement } from '../util/xml.ts';
 import { childElements } from '../util/xml.ts';
@@ -32,6 +31,7 @@ import { getPathBBox } from './svg-bbox.ts';
 import type { SvgPaint } from './svg-colors.ts';
 import { black, parseSvgColor, parseSvgPaint } from './svg-colors.ts';
 import { buildGradientPattern, isGradientElement } from './svg-gradients.ts';
+import { drawSvgPath, parseSvgPath, type PathCommand } from './svg-paths.ts';
 
 /**
  * An SVG image compiled into a reusable form XObject, with its

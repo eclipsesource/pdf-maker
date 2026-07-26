@@ -1,6 +1,12 @@
+/**
+ * Support for SVG path data: parsing the `d` attribute micro-syntax
+ * into path commands, resolving their semantics, and drawing them into
+ * a content stream. Used both for the `path` shape of the graphics API
+ * and for the path elements of an SVG image.
+ */
 import type { ContentStream } from '@ralfstx/pdf-core';
 
-import { arcToSegments, segmentToBezier } from './arcs.ts';
+import { arcToSegments, segmentToBezier } from './svg-arcs.ts';
 
 const svgOpsParams = {
   M: 2,

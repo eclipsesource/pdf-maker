@@ -55,10 +55,15 @@ DocumentDefinition (user input)
 - `src/read/` -- Phase 1: input validation and normalization.
 - `src/layout/` -- Phase 2: layout engine.
 - `src/render/` -- Phase 3: PDF generation.
+- `src/svg/` -- SVG format support: parsers for path data, attributes
+  and colors, and the compiler that translates an SVG
+  document into a form XObject. Used by the SVG image
+  support and by the `path` shape of the graphics API,
+  which takes SVG path data.
 - `src/util/` -- Small helpers (type validation, base64, etc.).
 - `src/*.ts` -- Shared internal types and modules used across phases
   (Frame, Page, Box, FontStore, text processing, colors,
-  image loading, SVG path parsing).
+  image loading).
 
 ### Phase 1: Read
 

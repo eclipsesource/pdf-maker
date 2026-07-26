@@ -4,8 +4,8 @@
  * `objectBoundingBox` units.
  */
 import type { Box } from '../box.ts';
-import type { PathCommand } from '../svg-paths.ts';
-import { walkSvgPath } from '../svg-paths.ts';
+import type { PathCommand } from './svg-paths.ts';
+import { walkSvgPath } from './svg-paths.ts';
 
 /**
  * Returns the bounding box of the given path commands, or `undefined`

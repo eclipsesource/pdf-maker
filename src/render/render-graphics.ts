@@ -16,7 +16,7 @@ import type {
   Shape,
 } from '../frame.ts';
 import type { Page } from '../page.ts';
-import { drawSvgPath } from '../svg-paths.ts';
+import { drawSvgPath } from '../svg/svg-paths.ts';
 import { KAPPA, multiplyMatrices, round } from '../util/utils.ts';
 
 export function renderGraphics(object: GraphicsObject, page: Page, base: Pos) {

@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
 
-import { parseSvgPath } from '../svg-paths.ts';
 import { round } from '../util/utils.ts';
 import { getPathBBox } from './svg-bbox.ts';
+import { parseSvgPath } from './svg-paths.ts';
 
 describe('getPathBBox', () => {
   it('returns undefined for an empty path', () => {

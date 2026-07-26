@@ -6,7 +6,7 @@ import type {
   RectObject,
   Shape,
 } from '../frame.ts';
-import { parseSvgPath } from '../svg-paths.ts';
+import { parseSvgPath } from '../svg/svg-paths.ts';
 import type { Obj } from '../util/types.ts';
 import { optional, readFrom, readObject, required, types } from '../util/types.ts';
 import { omit } from '../util/utils.ts';

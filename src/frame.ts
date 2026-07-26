@@ -1,7 +1,7 @@
 import type { PDFFont, PDFImage, ShapedGlyph } from '@ralfstx/pdf-core';
 
 import type { Color } from './read/read-color.ts';
-import type { PathCommand } from './svg-paths.ts';
+import type { PathCommand } from './svg/svg-paths.ts';
 
 /**
  * Frames are created during the layout process. They have a position
