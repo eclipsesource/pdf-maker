@@ -246,4 +246,10 @@ describe('drawSvgPath', () => {
   it('creates ops for z', () => {
     expect(pdfOps('z')).toEqual(['h']);
   });
+
+  it('resets the current point to the subpath start after Z', () => {
+    expect(pdfOps('M 0 0 L 50 50 Z l 10 10')).toEqual(['0 0 m', '50 50 l', 'h', '10 10 l']);
+    expect(pdfOps('M 10 20 L 50 50 Z h 5')).toEqual(['10 20 m', '50 50 l', 'h', '15 20 l']);
+    expect(pdfOps('M 10 20 L 50 50 Z m 1 2')).toEqual(['10 20 m', '50 50 l', 'h', '11 22 m']);
+  });
 });

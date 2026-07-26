@@ -105,8 +105,12 @@ export function parseSvgPath(path: string) {
 }
 
 export function drawSvgPath(cs: ContentStream, commands: PathCommand[]): void {
+  // Current point, subpath start, and previous control point (for
+  // mirroring in smooth curve commands)
   let cx = 0;
   let cy = 0;
+  let sx = 0;
+  let sy = 0;
   let px = 0;
   let py = 0;
   let lastCurve: 'b' | 'q' | undefined = undefined;
@@ -114,6 +118,8 @@ export function drawSvgPath(cs: ContentStream, commands: PathCommand[]): void {
   const opMoveTo = (x: number, y: number) => {
     cx = x;
     cy = y;
+    sx = x;
+    sy = y;
     lastCurve = undefined;
     cs.moveTo(cx, cy);
   };
@@ -147,6 +153,10 @@ export function drawSvgPath(cs: ContentStream, commands: PathCommand[]): void {
     segments.forEach((seg) => cs.curveTo(...segmentToBezier(seg)));
   };
   const opClosePath = () => {
+    // The current point returns to the start of the subpath, which is
+    // also where the `h` operator leaves it in the content stream
+    cx = sx;
+    cy = sy;
     lastCurve = undefined;
     cs.closePath();
   };
