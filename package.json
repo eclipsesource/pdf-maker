@@ -28,7 +28,8 @@
     "build": "./scripts/build.sh",
     "lint": "eslint . --max-warnings=0 && prettier --check .",
     "test": "vitest run test",
-    "verify": "npm run lint && npm run test && npm run examples && npm run build",
+    "typecheck": "tsc -p tsconfig.build.json --noEmit && tsc -p tsconfig.node.json --noEmit",
+    "verify": "npm run typecheck && npm run lint && npm run test && npm run examples && npm run build",
     "format": "prettier -w .",
     "fix": "eslint . --fix && prettier -w .",
     "examples": "./examples/run-all-examples.sh"
