@@ -6,7 +6,7 @@
  * unsupported or malformed values can be ignored silently.
  */
 import type { Size } from '../box.ts';
-import { multiplyMatrices, round } from '../util/utils.ts';
+import { checkPdfNumbers, multiplyMatrices, round } from '../util/utils.ts';
 import type { XmlElement } from '../util/xml.ts';
 
 export type Matrix = [number, number, number, number, number, number];
@@ -28,10 +28,15 @@ export function combineMatrices(first: Matrix, second: Matrix): Matrix {
 
 /**
  * Rounds all components of a matrix to the precision used in content
- * streams.
+ * streams. Throws if the result is not a valid PDF number, which is
+ * where computed matrices are guarded: a transform can overflow when it
+ * is combined with another, and even in the rounding itself, since
+ * `round()` multiplies by the precision factor.
  */
 export function roundMatrix(matrix: Matrix): Matrix {
-  return matrix.map((value) => round(value)) as Matrix;
+  const rounded = matrix.map((value) => round(value)) as Matrix;
+  checkPdfNumbers(rounded, 'Invalid transformation matrix');
+  return rounded;
 }
 
 /**

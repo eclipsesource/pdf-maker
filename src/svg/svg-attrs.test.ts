@@ -193,6 +193,32 @@ describe('parseTransform', () => {
   });
 });
 
+describe('roundMatrix', () => {
+  it('rounds all components', () => {
+    expect(roundMatrix([1 / 3, 0, 0, 1 / 3, 0, 0])).toEqual([0.333333, 0, 0, 0.333333, 0, 0]);
+  });
+
+  it('throws for a matrix that is not finite', () => {
+    // rotate() overflows to NaN for extreme angles, combining two large
+    // matrices overflows to Infinity
+    expect(() => roundMatrix(parseTransform('rotate(1e308)')!)).toThrow(
+      'Invalid transformation matrix: [NaN, NaN, NaN, NaN, NaN, NaN]',
+    );
+    expect(() => roundMatrix(parseTransform('scale(1e200) scale(1e200)')!)).toThrow(
+      'Invalid transformation matrix: [Infinity, 0, 0, Infinity, 0, 0]',
+    );
+  });
+
+  it('throws for a matrix that exceeds the range of a PDF number', () => {
+    expect(() => roundMatrix([1, 0, 0, 1, 1e30, 0])).toThrow(
+      'Invalid transformation matrix: [1, 0, 0, 1, 1e+30, 0]',
+    );
+    // round() multiplies by the precision factor, so a value this large
+    // is finite going in and infinite coming out
+    expect(() => roundMatrix([1e307, 0, 0, 1e307, 0, 0])).toThrow('Invalid transformation matrix');
+  });
+});
+
 describe('combineMatrices', () => {
   it('applies the first matrix to coordinates first', () => {
     const scale = [2, 0, 0, 2, 0, 0] as const;

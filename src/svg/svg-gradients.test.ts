@@ -99,6 +99,17 @@ describe('buildGradientPattern', () => {
     expect(build('<linearGradient id="g"/>')).toBeUndefined();
   });
 
+  // A shading pattern keeps its matrix unvalidated, like a form XObject
+  it('throws when the pattern matrix cannot be applied', () => {
+    const svg = `<linearGradient id="g" gradientTransform="rotate(1e308)">${redToBlue}</linearGradient>`;
+    expect(() => build(svg)).toThrow('Invalid transformation matrix');
+    expect(() =>
+      build(`<linearGradient id="g">${redToBlue}</linearGradient>`, {
+        ctm: [1e307, 0, 0, 1, 0, 0],
+      }),
+    ).toThrow('Invalid transformation matrix');
+  });
+
   it('returns undefined for objectBoundingBox units without a usable bbox', () => {
     const svg = `<linearGradient id="g">${redToBlue}</linearGradient>`;
     expect(build(svg, { bbox: undefined })).toBeUndefined();

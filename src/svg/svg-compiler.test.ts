@@ -90,6 +90,22 @@ describe('compileSvgContent', () => {
       expect(bbox).toEqual([0, 0, 100, 50]);
       expect(matrix).toEqual([1, 0, 0, -1, 0, 50]);
     });
+
+    // A form XObject keeps its bbox and matrix unvalidated, so without
+    // these checks the numbers would be rejected only when the document
+    // is written, with nothing left to point at the image
+    it('throws when the viewport matrix exceeds the range of a PDF number', () => {
+      expect(() => compile('<svg width="1e307" viewBox="0 0 1 1e-5"/>')).toThrow(
+        'Invalid transformation matrix',
+      );
+    });
+
+    it('throws when the bbox exceeds the range of a PDF number', () => {
+      // The matrix stays valid here, only the bbox overflows
+      expect(() => compile('<svg width="1" height="1" viewBox="1e308 0 1e308 1e308"/>')).toThrow(
+        'Invalid bounding box: [1e+308, 0, Infinity, 1e+308]',
+      );
+    });
   });
 
   describe('shapes', () => {
@@ -151,6 +167,26 @@ describe('compileSvgContent', () => {
       );
       expect(instructions(svg('<rect width="30" height="20" rx="-5"/>'))).toBe(
         ['q', '0 0 0 rg', '0 0 30 20 re', 'f', 'Q'].join('\n'),
+      );
+    });
+
+    // Numbers this large cannot be drawn, so the SVG is rejected rather
+    // than rendered without the attribute, which would place the shape
+    // at a nonsensical size or position. pdf-core rejects content stream
+    // operands as they are written, which makes it the check here.
+    it('throws for lengths that cannot be drawn', () => {
+      expect(() => instructions(svg('<rect width="1e999" height="20"/>'))).toThrow(
+        'PDFNumber must be a finite number',
+      );
+      expect(() => instructions(svg('<rect width="30" height="20" x="1e999"/>'))).toThrow(
+        'PDFNumber must be a finite number',
+      );
+      expect(() => instructions(svg('<rect width="30" height="20" x="3e9"/>'))).toThrow(
+        'PDFNumber out of range',
+      );
+      // Finite geometry that overflows in the coordinate calculation
+      expect(() => instructions(svg('<circle cx="1e308" r="1e308"/>'))).toThrow(
+        'PDFNumber must be a finite number',
       );
     });
 
@@ -356,6 +392,30 @@ describe('compileSvgContent', () => {
       expect(instructions(svg('<g><rect width="10" height="10"/></g>'))).toBe(
         ['q', '0 0 0 rg', '0 0 10 10 re', 'f', 'Q'].join('\n'),
       );
+    });
+
+    it('throws for a transform that cannot be applied', () => {
+      const shape = (transform: string) =>
+        instructions(svg(`<rect width="10" height="10" transform="${transform}"/>`));
+      expect(() => shape('rotate(1e308)')).toThrow('Invalid transformation matrix');
+      expect(() => shape('scale(1e200) scale(1e200)')).toThrow('Invalid transformation matrix');
+      // Finite matrix, overflows in the rounding
+      expect(() => shape('scale(1e307)')).toThrow('Invalid transformation matrix');
+      // Finite and in range, but beyond what a PDF number can hold
+      expect(() => shape('translate(1e30)')).toThrow('Invalid transformation matrix');
+    });
+
+    it('throws for a transform on a group or use element', () => {
+      expect(() =>
+        instructions(svg('<g transform="rotate(1e308)"><rect width="10" height="10"/></g>')),
+      ).toThrow('Invalid transformation matrix');
+      expect(() =>
+        instructions(
+          svg(
+            '<defs><rect id="r" width="5" height="5"/></defs><use href="#r" transform="rotate(1e308)"/>',
+          ),
+        ),
+      ).toThrow('Invalid transformation matrix');
     });
   });
 

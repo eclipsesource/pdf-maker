@@ -10,7 +10,7 @@ import { ContentStream, ExtGState, PDFFormXObject, PDFShadingPattern } from '@ra
 import type { Box, Size } from '../box.ts';
 import type { Color } from '../colors.ts';
 import { setFillingColor, setStrokingColor } from '../colors.ts';
-import { KAPPA, round } from '../util/utils.ts';
+import { checkPdfNumbers, KAPPA, round } from '../util/utils.ts';
 import type { XmlElement } from '../util/xml.ts';
 import { childElements } from '../util/xml.ts';
 import type { Matrix } from './svg-attrs.ts';
@@ -96,6 +96,10 @@ export function compileSvgContent(root: XmlElement): SvgContent {
     height - offsetY + scale * minY,
   ]);
   const bbox: [number, number, number, number] = [minX, minY, minX + vbWidth, minY + vbHeight];
+  // Extreme viewport or viewBox values can exceed the range of a PDF
+  // number here even though each of them is valid on its own. The
+  // matrix is checked by roundMatrix() above.
+  checkPdfNumbers(bbox, 'Invalid bounding box');
 
   const contentStream = new ContentStream();
   const viewport = { width: vbWidth, height: vbHeight };

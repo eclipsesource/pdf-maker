@@ -1,3 +1,5 @@
+import { PDFNumber } from '@ralfstx/pdf-core';
+
 /**
  * Returns a copy of the given array with all falsy values (i.e.
  * `false`, `null`, `undefined`, `""`, `0`, and `NaN`) removed.
@@ -48,4 +50,21 @@ export function multiplyMatrices(matrix1: number[], matrix2: number[]): number[]
 export function round(n: number, precision = 6): number {
   const factor = Math.pow(10, precision);
   return Math.round(n * factor) / factor;
+}
+
+/**
+ * Throws if any of the given values is not a valid PDF number, i.e. not
+ * finite or outside the range PDF numbers support. Content stream
+ * operands are checked by pdf-core as they are written, but numbers
+ * that are only stored in an object, such as the matrix of a form
+ * XObject, would be rejected when the document is written, far away
+ * from their origin. Checking them delegates to pdf-core to keep the
+ * limits in one place.
+ */
+export function checkPdfNumbers(values: number[], message: string): void {
+  try {
+    values.forEach((value) => PDFNumber.of(value));
+  } catch (error) {
+    throw new Error(`${message}: [${values.join(', ')}]`, { cause: error });
+  }
 }
