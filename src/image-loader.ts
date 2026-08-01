@@ -26,11 +26,23 @@ export function isSvgImage(image: LoadedImage): image is SvgImage {
 }
 
 async function loadImage(url: string, dataLoader: DataLoader): Promise<LoadedImage> {
-  const { data } = await dataLoader(url);
-  if (isPng(data)) return PDFImage.fromPng(data);
-  if (isJpeg(data)) return PDFImage.fromJpeg(data);
-  if (isXml(data)) return compileSvg(parseXml(new TextDecoder().decode(data)));
-  throw new Error('Unknown image format');
+  try {
+    const { data } = await dataLoader(url);
+    if (isPng(data)) return PDFImage.fromPng(data);
+    if (isJpeg(data)) return PDFImage.fromJpeg(data);
+    if (isXml(data)) return compileSvg(parseXml(new TextDecoder().decode(data)));
+    throw new Error('Unknown image format');
+  } catch (error) {
+    throw new Error(`Could not load image from ${printUrl(url)}`, { cause: error });
+  }
+}
+
+/**
+ * Shortens a URL for error messages. Data URLs carry the entire image
+ * and are far too long to print.
+ */
+function printUrl(url: string): string {
+  return url.length > 80 ? `${url.slice(0, 80)}…` : url;
 }
 
 function isJpeg(data: Uint8Array): boolean {

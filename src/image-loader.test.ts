@@ -85,13 +85,42 @@ describe('createImageLoader', () => {
   it('rejects for unsupported URL', async () => {
     const loadImage = createImageLoader();
 
-    await expect(loadImage('foo')).rejects.toThrow("Invalid URL: 'foo'");
+    await expect(loadImage('foo')).rejects.toThrow(
+      expect.objectContaining({
+        message: 'Could not load image from foo',
+        cause: expect.objectContaining({ message: "Invalid URL: 'foo'" }),
+      }),
+    );
   });
 
   it('rejects for unsupported image format', async () => {
     const loadImage = createImageLoader();
 
-    await expect(loadImage(svgDataUrl('GIF89a'))).rejects.toThrow('Unknown image format');
+    await expect(loadImage(svgDataUrl('GIF89a'))).rejects.toThrow(
+      expect.objectContaining({
+        cause: expect.objectContaining({ message: 'Unknown image format' }),
+      }),
+    );
+  });
+
+  it('names the image in errors from a failed request', async () => {
+    const loadImage = createImageLoader();
+
+    await expect(loadImage('http://example.com/missing.png')).rejects.toThrow(
+      expect.objectContaining({
+        message: 'Could not load image from http://example.com/missing.png',
+        cause: expect.objectContaining({ message: 'Received 404 Not Found' }),
+      }),
+    );
+  });
+
+  it('shortens long data URLs in the error message', async () => {
+    const loadImage = createImageLoader();
+    // A data URL carries the entire image, printing it in full would
+    // bury the message
+    const url = svgDataUrl(`<svg viewBox="1e308 0 1e308 1e308">${'<rect/>'.repeat(20)}</svg>`);
+
+    await expect(loadImage(url)).rejects.toThrow(`Could not load image from ${url.slice(0, 80)}…`);
   });
 
   describe('SVG images', () => {
@@ -159,7 +188,11 @@ describe('createImageLoader', () => {
       const loadImage = createImageLoader();
 
       await expect(loadImage(svgDataUrl('<svg><rect/></rekt></svg>'))).rejects.toThrow(
-        /Mismatched closing tag/,
+        expect.objectContaining({
+          cause: expect.objectContaining({
+            message: expect.stringMatching(/Mismatched closing tag/),
+          }),
+        }),
       );
     });
 
@@ -167,7 +200,25 @@ describe('createImageLoader', () => {
       const loadImage = createImageLoader();
 
       await expect(loadImage(svgDataUrl('<html><body/></html>'))).rejects.toThrow(
-        "Expected root element 'svg', got 'html'",
+        expect.objectContaining({
+          cause: expect.objectContaining({ message: "Expected root element 'svg', got 'html'" }),
+        }),
+      );
+    });
+
+    it('rejects for numbers that cannot be drawn', async () => {
+      const loadImage = createImageLoader();
+      const url = svgDataUrl('<svg viewBox="1e308 0 1e308 1e308"/>');
+
+      await expect(loadImage(url)).rejects.toThrow(
+        expect.objectContaining({
+          message: `Could not load image from ${url}`,
+          cause: expect.objectContaining({
+            message: expect.stringMatching(/^Invalid transformation matrix/),
+            // The reason from pdf-core is kept as the cause of the cause
+            cause: expect.objectContaining({ message: 'PDFNumber must be a finite number' }),
+          }),
+        }),
       );
     });
   });
