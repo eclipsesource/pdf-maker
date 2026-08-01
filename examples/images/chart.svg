@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="260" height="140" viewBox="0 0 260 140">
+  <defs>
+    <!-- Gradient coordinates default to the bounding box of the shape -->
+    <linearGradient id="area" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#93c5fd" />
+      <stop offset="100%" stop-color="#eff6ff" />
+    </linearGradient>
+
+    <!-- With userSpaceOnUse, they are in user space instead -->
+    <linearGradient id="line" gradientUnits="userSpaceOnUse" x1="8" y1="0" x2="212" y2="0">
+      <stop offset="0" stop-color="#2563eb" />
+      <stop offset="1" stop-color="#06b6d4" />
+    </linearGradient>
+
+    <!-- A gradient can inherit the stops of another gradient -->
+    <linearGradient id="marker" href="#line" x1="0" y1="0" x2="1" y2="1" />
+
+    <!-- Radial gradients support an off-center focal point -->
+    <radialGradient id="orb" cx="0.5" cy="0.5" r="0.5" fx="0.34" fy="0.3">
+      <stop offset="0" stop-color="#fff7ed" />
+      <stop offset="1" stop-color="#fb923c" />
+    </radialGradient>
+
+    <!-- Referenced shapes are only drawn where they are used -->
+    <circle id="dot" r="3.5" fill="#fff" stroke="#2563eb" stroke-width="2" />
+  </defs>
+
+  <rect x="0.5" y="0.5" width="259" height="139" rx="10" fill="#fff" stroke="#e2e8f0" />
+  <circle cx="26" cy="26" r="12" fill="url(#orb)" />
+
+  <!-- The whole chart is placed with a single transform -->
+  <g transform="translate(24 14)">
+    <path d="M 8 78 C 25 78, 42 54, 59 54 C 76 54, 93 66, 110 66
+             C 127 66, 144 36, 161 36 C 178 36, 195 24, 212 24 L 212 98 L 8 98 Z"
+          fill="url(#area)" />
+
+    <!-- Group opacity is applied to all descendants -->
+    <g opacity="0.5" stroke="#64748b" stroke-dasharray="4 4">
+      <line x1="0" y1="26" x2="212" y2="26" />
+      <line x1="0" y1="50" x2="212" y2="50" />
+      <line x1="0" y1="74" x2="212" y2="74" />
+    </g>
+    <line x1="0" y1="98" x2="212" y2="98" stroke="#94a3b8" stroke-width="1.5" />
+
+    <path d="M 8 78 C 25 78, 42 54, 59 54 C 76 54, 93 66, 110 66
+             C 127 66, 144 36, 161 36 C 178 36, 195 24, 212 24"
+          fill="none" stroke="url(#line)" stroke-width="2.5" stroke-linecap="round"
+          stroke-linejoin="round" />
+
+    <use href="#dot" x="8" y="78" />
+    <use href="#dot" x="59" y="54" />
+    <use href="#dot" x="110" y="66" />
+    <use href="#dot" x="161" y="36" />
+
+    <!-- The last data point is marked with a rotated square -->
+    <rect x="206" y="18" width="12" height="12" transform="rotate(45 212 24)"
+          fill="url(#marker)" />
+  </g>
+</svg>

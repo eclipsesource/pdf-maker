@@ -2,60 +2,100 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { columns, image, PdfMaker, rect, rows, text } from '../src/index.ts';
+import { columns, image, PdfMaker, rect, text } from '../src/index.ts';
 
 const exampleDir = fileURLToPath(new URL('.', import.meta.url));
 const outDir = join(exampleDir, 'out');
 
 // Draw a frame around a block
 const drawFrame = ({ width, height }: { width: number; height: number }) => [
-  rect(0, 0, width, height, { lineColor: 'gray', lineDash: [2] }),
+  rect(0, 0, width, height, { lineColor: '#cccccc', lineDash: [2] }),
 ];
 
 const document = {
   defaultStyle: {
-    fontSize: 14,
+    fontSize: 12,
   },
   content: [
     text('Images', {
       fontWeight: 'bold',
       fontSize: 24,
-      margin: { bottom: 10 },
+      margin: { bottom: 20 },
       textAlign: 'center',
     }),
-    text('JPG and PNG images are supported. They render in 72 DPI by default.', {
-      margin: { y: 10 },
-    }),
-    columns([image('file:/images/liberty.jpg'), image('file:/images/torus.png')], {
-      margin: { y: 10 },
-    }),
-    text('Images are scaled proportionally to fit into the bounds of the block.', {
-      margin: { y: 10 },
+    text('JPG, PNG, and SVG images are supported.', {
+      margin: { top: 20 },
     }),
     columns(
       [
-        image('file:/images/liberty.jpg', { height: 120, margin: { x: 5 }, graphics: drawFrame }),
-        image('file:/images/torus.png', {
+        image('file:/images/liberty.jpg', {
           height: 120,
-          width: 100,
+          width: 80,
+          margin: { x: 5 },
+        }),
+        image('file:/images/torus.png', {
+          width: 160,
+          margin: { x: 5 },
+        }),
+        image('file:/images/chart.svg', {
+          width: 180,
+          margin: { x: 5 },
+        }),
+      ],
+      { margin: { x: 10, y: 10 } },
+    ),
+    text('Images are always scaled proportionally to fit into the bounds of the block.', {
+      margin: { top: 20 },
+    }),
+    columns(
+      [
+        image('file:/images/liberty.jpg', {
+          width: 140,
+          height: 120,
+          margin: { x: 5 },
+          graphics: drawFrame,
+        }),
+        image('file:/images/torus.png', {
+          width: 140,
+          height: 120,
+          margin: { x: 5 },
+          graphics: drawFrame,
+        }),
+        image('file:/images/chart.svg', {
+          width: 140,
+          height: 120,
           margin: { x: 5 },
           graphics: drawFrame,
         }),
       ],
-      { margin: { x: 75, y: 10 } },
+      { margin: { x: 10, y: 10 } },
     ),
-    text('Images can be aligned horizontally using "imageAlign".', { margin: { y: 10 } }),
-    rows(
+    text('Images can be aligned horizontally using "imageAlign".', { margin: { top: 20 } }),
+    columns(
       [
-        image('file:/images/liberty.jpg', { height: 55, imageAlign: 'left', graphics: drawFrame }),
         image('file:/images/liberty.jpg', {
-          height: 55,
+          width: 140,
+          height: 120,
+          margin: { x: 5 },
+          imageAlign: 'left',
+          graphics: drawFrame,
+        }),
+        image('file:/images/liberty.jpg', {
+          width: 140,
+          height: 120,
+          margin: { x: 5 },
           imageAlign: 'center',
           graphics: drawFrame,
         }),
-        image('file:/images/liberty.jpg', { height: 55, imageAlign: 'right', graphics: drawFrame }),
+        image('file:/images/liberty.jpg', {
+          width: 140,
+          height: 120,
+          margin: { x: 5 },
+          imageAlign: 'right',
+          graphics: drawFrame,
+        }),
       ],
-      { margin: { x: 75, y: 10 } },
+      { margin: { x: 10, y: 10 } },
     ),
   ],
 };

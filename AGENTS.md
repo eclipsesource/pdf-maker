@@ -159,6 +159,11 @@ Text goes through several processing steps before layout:
 
 - Loads the image (with caching), scales it to fit the available area
   while preserving the aspect ratio, and handles alignment.
+- The image loader (`src/image-loader.ts`) determines the format from the
+  data: JPEG and PNG become a `PDFImage`, SVG (anything that starts with
+  `<`) is parsed and compiled into a form XObject wrapped in an
+  `SvgImage`. Both carry an intrinsic size in pt, which is all the layout
+  phase needs; the render phase tells them apart with `isSvgImage()`.
 
 ### Phase 3: Render
 

@@ -3,13 +3,15 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Box } from '../box.ts';
 import type { MakerCtx } from '../maker-ctx.ts';
 import type { ImageBlock } from '../read/read-block.ts';
-import { fakeImage } from '../test/test-utils.ts';
+import { fakeImage, fakeSvgImage } from '../test/test-utils.ts';
 import { layoutImageContent } from './layout-image.ts';
 
 const mockImageLoader = vi.fn((selector: string) => {
-  const match = /^img-(\d+)-(\d+)$/.exec(selector);
+  const match = /^(img|svg)-(\d+)-(\d+)$/.exec(selector);
   if (match) {
-    return Promise.resolve(fakeImage(Number(match[1]), Number(match[2])));
+    const [width, height] = [Number(match[2]), Number(match[3])];
+    const image = match[1] === 'svg' ? fakeSvgImage(width, height) : fakeImage(width, height);
+    return Promise.resolve(image);
   }
   throw new Error(`Unknown image: ${selector}`);
 });
@@ -49,7 +51,7 @@ describe('layout-image', () => {
       expect(mockImageLoader).toHaveBeenCalledWith('img-720-480');
     });
 
-    ['img-720-480', 'img-72-48'].forEach((image) => {
+    ['img-720-480', 'img-72-48', 'svg-720-480'].forEach((image) => {
       describe(`with ${image}`, () => {
         it('scales image to fixed width', async () => {
           const block = { image, width: 1 };
@@ -140,6 +142,25 @@ describe('layout-image', () => {
       expect(frame.objects).toEqual([
         expect.objectContaining({ type: 'image', x: 20 + 400 - 72, y: 30 }),
       ]);
+    });
+
+    it('does not scale SVG image up if no fixed bounds', async () => {
+      const block = { image: 'svg-72-48' };
+
+      const { frame } = await layoutImageContent(block, box, ctx);
+
+      expect(frame).toEqual({
+        objects: [
+          expect.objectContaining({
+            type: 'image',
+            image: expect.objectContaining({ width: 72, height: 48 }),
+            width: 72,
+            height: 48,
+          }),
+        ],
+        width: box.width,
+        height: 48,
+      });
     });
 
     it('does not aligns image in block with auto width', async () => {

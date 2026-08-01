@@ -43,12 +43,10 @@ export function text(
  */
 export type ImageBlock = {
   /**
-   * The name of an image to display in this block. If the given image
-   * name has been registered with the global `images` property, the
-   * registered image will be used. Otherwise, the image name is
-   * interpreted as a file name and the image is loaded from the file
-   * system. Relative paths are resolved relative to the current working
-   * directory.
+   * The URL of the image to display in this block. Supported URL schemes
+   * are `data:`, `http:`, `https:`, and `file:`. Paths in `file:` URLs
+   * are resolved relative to the resource root. Images are supported in
+   * JPG, PNG, and SVG format.
    *
    * When any of the properties `width` and `height` are specified, the
    * image will be scaled proportionally to be contained in the given

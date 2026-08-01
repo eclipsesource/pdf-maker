@@ -1,5 +1,6 @@
-import type { PDFFont, PDFImage, ShapedGlyph } from '@ralfstx/pdf-core';
+import type { PDFFont, ShapedGlyph } from '@ralfstx/pdf-core';
 
+import type { LoadedImage } from './image-loader.ts';
 import type { Color } from './read/read-color.ts';
 import type { PathCommand } from './svg/svg-paths.ts';
 
@@ -65,7 +66,7 @@ export type ImageObject = {
   y: number;
   width: number;
   height: number;
-  image: PDFImage;
+  image: LoadedImage;
 };
 
 export type GraphicsObject = {

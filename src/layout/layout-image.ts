@@ -1,7 +1,6 @@
-import type { PDFImage } from '@ralfstx/pdf-core';
-
 import type { Box, Pos, Size } from '../box.ts';
 import type { ImageObject, RenderObject } from '../frame.ts';
+import type { LoadedImage } from '../image-loader.ts';
 import type { MakerCtx } from '../maker-ctx.ts';
 import type { ImageBlock } from '../read/read-block.ts';
 import type { LayoutContent } from './layout.ts';
@@ -47,6 +46,6 @@ function align(box: Box, size: Size, alignment?: string): Pos {
   return { x: box.x + xShift, y: box.y + yShift };
 }
 
-function createImageObject(image: PDFImage, pos: Pos, size: Size): ImageObject {
+function createImageObject(image: LoadedImage, pos: Pos, size: Size): ImageObject {
   return { type: 'image', image, x: pos.x, y: pos.y, width: size.width, height: size.height };
 }

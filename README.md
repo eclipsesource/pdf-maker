@@ -194,9 +194,9 @@ text spans. The following text properties are supported:
 Images can be included in image blocks, which can be created using the
 `image()` function. This function accepts the image URL and an optional
 object containing [image](#image-properties) and
-[block](#block-properties) properties. Images are supported in JPG and
-PNG format. URLs can be `data:`, `http:`, `https:`, or `file:` URLs. The
-size of an image can be confined using the `width` and `height`
+[block](#block-properties) properties. Images are supported in JPG, PNG,
+and SVG format. URLs can be `data:`, `http:`, `https:`, or `file:` URLs.
+The size of an image can be confined using the `width` and `height`
 properties.
 
 ```ts
@@ -211,6 +211,25 @@ image data is embedded in the PDF only once.
 - `imageAlign`: Aligns the image within the block. The alignment of the
   image within the block. Supported values are `left`, `center`, and
   `right`. The default is `center`.
+
+#### SVG images
+
+SVG images are translated into PDF vector graphics, so they stay sharp
+at any size. Shapes and paths, groups and `use` references, transforms,
+presentation attributes and inline styles, opacity, and linear and
+radial gradients are supported. This covers most icons, logos, and
+illustrations.
+
+Not supported are `text` elements, clipping paths, masks, filters, CSS
+`style` rules, animations, and scripting. These features are ignored
+silently: an image that uses them renders incomplete rather than
+failing. Malformed XML, in contrast, is reported as an error.
+
+The size of an SVG image is taken from its `width` and `height`
+attributes, falling back to the size of its `viewBox`, and finally to
+300 × 150 pt. Content outside the `viewBox` is clipped, and a `viewBox`
+is always scaled proportionally and centered, regardless of
+`preserveAspectRatio`.
 
 ### Graphics
 

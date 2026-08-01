@@ -10,6 +10,14 @@
   point as its first control point instead of the converted quadratic
   control points.
 
+### Added
+
+- Image blocks now support SVG images in addition to JPG and PNG. SVG
+  images are translated into PDF vector graphics, so they stay sharp at
+  any size, and an SVG that is used multiple times is embedded only
+  once. Text, clipping paths, masks, filters, and CSS style rules are
+  not supported. See the [README](README.md#svg-images) for details.
+
 ## [0.6.2] - 2026-06-11
 
 ### Added

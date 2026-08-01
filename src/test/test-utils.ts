@@ -6,7 +6,10 @@ import { weightToNumber } from '../fonts.ts';
 import type { Frame } from '../frame.ts';
 import type { Page } from '../page.ts';
 import type { TextAttrs, TextSpan } from '../read/read-block.ts';
+import type { SvgImage } from '../svg/svg-compiler.ts';
+import { compileSvg } from '../svg/svg-compiler.ts';
 import { getGlyphRunText } from '../text.ts';
+import { parseXml } from '../util/xml.ts';
 
 export function fakeFont(name: string, opts?: { style?: string; weight?: FontWeight }): PDFFont {
   const key = `${name}-${opts?.style ?? 'normal'}-${weightToNumber(opts?.weight ?? 'normal')}`;
@@ -16,6 +19,11 @@ export function fakeFont(name: string, opts?: { style?: string; weight?: FontWei
 export function fakeImage(width: number, height: number): PDFImage {
   const data = createTestJpeg(width, height);
   return PDFImage.fromJpeg(data);
+}
+
+export function fakeSvgImage(width: number, height: number): SvgImage {
+  const svg = `<svg width="${width}" height="${height}"><rect width="${width}" height="${height}"/></svg>`;
+  return compileSvg(parseXml(svg));
 }
 
 /**
