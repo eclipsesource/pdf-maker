@@ -1,14 +1,6 @@
 # Changelog
 
-## [Unreleased]
-
-### Fixed
-
-- Quadratic curve commands (`Q`, `q`, `T`, `t`) in the `d` property of a
-  `path` shape were rendered as a different curve. PDF has no quadratic
-  curve operator, and the cubic one that was emitted used the current
-  point as its first control point instead of the converted quadratic
-  control points.
+## [0.6.3] - 2026-08-02
 
 ### Added
 
@@ -17,6 +9,14 @@
   any size, and an SVG that is used multiple times is embedded only
   once. Text, clipping paths, masks, filters, and CSS style rules are
   not supported. See the [README](README.md#svg-images) for details.
+
+### Fixed
+
+- Quadratic curve commands (`Q`, `q`, `T`, `t`) in the `d` property of a
+  `path` shape were rendered as a different curve. PDF has no quadratic
+  curve operator, and the cubic one that was emitted used the current
+  point as its first control point instead of the converted quadratic
+  control points.
 
 ## [0.6.2] - 2026-06-11
 
@@ -380,3 +380,4 @@ First public version.
 [0.6.0]: https://github.com/eclipsesource/pdf-maker/releases/tag/v0.6.0
 [0.6.1]: https://github.com/eclipsesource/pdf-maker/releases/tag/v0.6.1
 [0.6.2]: https://github.com/eclipsesource/pdf-maker/releases/tag/v0.6.2
+[0.6.3]: https://github.com/eclipsesource/pdf-maker/releases/tag/v0.6.3
