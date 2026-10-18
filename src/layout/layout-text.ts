@@ -99,36 +99,42 @@ async function layoutText(block: TextBlock, box: Box, ctx: MakerCtx) {
  */
 function layoutTextRow(segments: TextSegment[], box: Box) {
   const [lineSegments, remainder] = breakLine(segments, box.width);
-  const pos = { x: 0, y: 0 };
-  const size = { width: 0, height: 0 };
-  let baseline = 0;
-  let rowHeight = 0;
+  const flatSegments = flattenTextSegments(lineSegments);
+  // As in CSS, the row must fit the highest part above the baseline and the deepest part
+  // below it, which may come from different segments. Both can be negative for line
+  // heights below 1, so don't start at zero.
+  let baseline = -Infinity;
+  let depth = -Infinity;
+  flatSegments.forEach(({ height, lineHeight, font, fontSize }) => {
+    const halfLeading = (height * lineHeight - height) / 2;
+    const descent = getDescent(font, fontSize);
+    baseline = Math.max(baseline, height - descent + halfLeading);
+    depth = Math.max(depth, descent + halfLeading);
+  });
+  if (!flatSegments.length) {
+    baseline = 0;
+    depth = 0;
+  }
+  let x = 0;
   const links: LinkObject[] = [];
   const segmentObjects: TextSegmentObject[] = [];
-  flattenTextSegments(lineSegments).forEach((seg) => {
-    const { glyphs, width, height, lineHeight, font, fontSize, link, color, rise, letterSpacing } =
-      seg;
+  flatSegments.forEach((seg) => {
+    const { glyphs, width, height, font, fontSize, link, color, rise, letterSpacing } = seg;
     segmentObjects.push({ glyphs, font, fontSize, color, rise, letterSpacing });
-    const offset = (height * lineHeight - height) / 2;
     if (link) {
-      const linkPos = { x: box.x + pos.x, y: box.y - pos.y + offset };
-      links.push({ type: 'link', ...linkPos, width, height, url: link });
+      const y = box.y + baseline - height + getDescent(font, fontSize);
+      links.push({ type: 'link', x: box.x + x, y, width, height, url: link });
     }
-    pos.x += width;
-    size.width += width;
-    size.height = Math.max(size.height, height);
-    baseline = Math.max(baseline, getDescent(font, fontSize) + offset);
-    rowHeight = Math.max(rowHeight, height * lineHeight);
+    x += width;
   });
-  const objects = flattenLinks(links);
   const row: TextRowObject = {
     ...box,
-    width: size.width,
-    height: rowHeight,
-    baseline: rowHeight - baseline,
+    width: x,
+    height: baseline + depth,
+    baseline,
     segments: segmentObjects,
   };
-  return { row, objects, remainder };
+  return { row, objects: flattenLinks(links), remainder };
 }
 
 function getDescent(font: PDFFont, fontSize: number) {

@@ -32,6 +32,8 @@
 - Lines could break at no-break spaces (`U+00A0`, `U+2007`, `U+202F`).
 - Whitespace split across text spans was only partly removed at line
   breaks, which shifted right-aligned and centered lines.
+- Text with mixed font sizes or line heights could overlap the line
+  above it.
 - Links in right-aligned or centered text were placed at the wrong
   position.
 - Text in monospaced fonts was drawn with overlapping glyphs, and text

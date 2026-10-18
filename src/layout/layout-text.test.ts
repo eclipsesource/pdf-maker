@@ -101,6 +101,43 @@ describe('layout-text', () => {
       ]);
     });
 
+    it('creates row with small line height', async () => {
+      const block = { text: [span('foo', { fontSize: 10, lineHeight: 0.5 })] };
+
+      const { frame } = await layoutTextContent(block, box, ctx);
+
+      expect(frame.objects).toEqual([
+        { type: 'text', rows: [expect.objectContaining({ height: 5, baseline: 5.5 })] },
+      ]);
+    });
+
+    it('creates row with zero line height', async () => {
+      const block = { text: [span('foo', { fontSize: 10, lineHeight: 0 })] };
+
+      const { frame } = await layoutTextContent(block, box, ctx);
+
+      expect(frame.objects).toEqual([
+        { type: 'text', rows: [expect.objectContaining({ height: 0, baseline: 3 })] },
+      ]);
+    });
+
+    it('fits row to segments with different line heights', async () => {
+      const block = {
+        text: [
+          span('foo', { fontSize: 10, lineHeight: 3 }),
+          span('bar', { fontSize: 25, link: 'test-link' }),
+        ],
+      };
+
+      const { frame } = await layoutTextContent(block, box, ctx);
+
+      // foo: 18 above and 12 below the baseline, bar: 20 above and 5 below
+      expect(frame.objects).toEqual([
+        { type: 'text', rows: [expect.objectContaining({ height: 32, baseline: 20 })] },
+        expect.objectContaining({ type: 'link', y: box.y, height: 25 }),
+      ]);
+    });
+
     it('creates link objects', async () => {
       const block = {
         text: [span('foo', { link: 'test-link', fontSize: 10 })],
