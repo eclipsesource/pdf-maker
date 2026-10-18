@@ -357,6 +357,11 @@ describe('text', () => {
       expect(splitChunks('aaa  bbb  ccc')).toEqual(['aaa', '  ', 'bbb', '  ', 'ccc']);
     });
 
+    it('does not split at no-break spaces', () => {
+      expect(splitChunks('aaa\u00a0bbb')).toEqual(['aaa\u00a0bbb']);
+      expect(splitChunks('aaa\u202f\u2007bbb ccc')).toEqual(['aaa\u202f\u2007bbb', ' ', 'ccc']);
+    });
+
     it('splits newlines', () => {
       expect(splitChunks('aaa\nbbb')).toEqual(['aaa', '\n', 'bbb']);
       expect(splitChunks('aaa \n bbb')).toEqual(['aaa', '\n', 'bbb']);

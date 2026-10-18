@@ -10,6 +10,9 @@ import { scriptToOpenTypeTag, segmentByScript } from './script-detection.ts';
 const defaultFontSize = 18;
 const defaultLineHeight = 1.0;
 
+// Whitespace that allows line breaks. Excludes no-break spaces (U+00A0, U+2007, U+202F).
+const breakingSpaces = /[^\S\u00a0\u2007\u202f]+/;
+
 export type TextSegment = {
   type: 'text' | 'whitespace' | 'newline';
   glyphs: ShapedGlyph[];
@@ -60,7 +63,7 @@ export async function extractTextSegments(
         const scriptTag = scriptToOpenTypeTag(run.script);
         const shapeOpts = buildShapeOptions(attrs, scriptTag);
         return splitChunks(run.text).map((chunk) => {
-          const type = chunk === '\n' ? 'newline' : /^\s+$/.test(chunk) ? 'whitespace' : 'text';
+          const type = chunk === '\n' ? 'newline' : isBreakingSpace(chunk) ? 'whitespace' : 'text';
           const glyphs = type === 'newline' ? [] : font.shapeText(chunk, shapeOpts);
           return {
             type,
@@ -128,10 +131,10 @@ export function convertToTextSpan(segment: TextSegment): TextSpan {
 }
 
 /**
- * Split the given text into chunks of subsequent whitespace (`\s`) and non-whitespace (`\S`)
- * characters. For example, the string `foo bar` would be split into `['foo', ' ', 'bar']`.
- * Newlines (`\n`) are preserved, each in a chunk of its own. Any whitespace that surrounds
- * newlines is removed.
+ * Split the given text into chunks of subsequent whitespace and non-whitespace characters.
+ * No-break spaces are treated as non-whitespace. For example, the string `foo bar` would be
+ * split into `['foo', ' ', 'bar']`. Newlines (`\n`) are preserved, each in a chunk of its own.
+ * Any whitespace that surrounds newlines is removed.
  *
  * @param text The input string
  * @returns an array of chunks
@@ -139,7 +142,7 @@ export function convertToTextSpan(segment: TextSegment): TextSpan {
 export function splitChunks(text: string): string[] {
   const segments: string[] = [];
   let tail = text;
-  let match = /\s+/.exec(tail);
+  let match = breakingSpaces.exec(tail);
   while (match) {
     if (match.index) {
       segments.push(tail.slice(0, match.index));
@@ -152,12 +155,16 @@ export function splitChunks(text: string): string[] {
       segments.push(wsSegment);
     }
     tail = tail.slice(match.index + match[0].length);
-    match = /\s+/.exec(tail);
+    match = breakingSpaces.exec(tail);
   }
   if (tail) {
     segments.push(tail);
   }
   return segments;
+}
+
+function isBreakingSpace(chunk: string): boolean {
+  return breakingSpaces.exec(chunk)?.[0] === chunk;
 }
 
 export function breakLine(segments: TextSegment[], maxWidth: number): TextSegment[][] {

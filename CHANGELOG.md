@@ -29,6 +29,7 @@
   dropped. Forced breaks are now ignored inside such blocks.
 - Text split across pages lost its line breaks and its `language` on
   the following pages.
+- Lines could break at no-break spaces (`U+00A0`, `U+2007`, `U+202F`).
 - Links in right-aligned or centered text were placed at the wrong
   position.
 - Text in monospaced fonts was drawn with overlapping glyphs, and text
