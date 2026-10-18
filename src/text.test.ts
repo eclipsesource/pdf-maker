@@ -240,6 +240,10 @@ describe('text', () => {
         }),
       );
     });
+
+    it('converts newline segment to newline text', () => {
+      expect(convertToTextSpan(seg('\n')).text).toBe('\n');
+    });
   });
 
   describe('buildShapeOptions', () => {
@@ -394,6 +398,12 @@ describe('text', () => {
       const segments = [seg('foo'), seg(' '), seg('bar')];
 
       expect(flattenTextSegments(segments)).toEqual([seg('foo bar')]);
+    });
+
+    it('does not merge newline segments', () => {
+      const segments = [seg('foo'), seg('\n'), seg('bar')];
+
+      expect(flattenTextSegments(segments)).toEqual(segments);
     });
 
     it('does not merge segments with different lineHeight', () => {

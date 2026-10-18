@@ -6,6 +6,7 @@ import { rgb } from '../colors.ts';
 import { FontStore } from '../font-store.ts';
 import type { FontSelector } from '../fonts.ts';
 import type { MakerCtx } from '../maker-ctx.ts';
+import type { TextBlock } from '../read/read-block.ts';
 import { extractTextRows, fakeFont, range, span } from '../test/test-utils.ts';
 import { layoutTextContent } from './layout-text.ts';
 
@@ -306,6 +307,17 @@ describe('layout-text', () => {
           },
         ],
       });
+    });
+
+    it('keeps newlines in remainder', async () => {
+      box.height = 10;
+      const text = [span('foo\nbar\nbaz')];
+      const block = { text };
+
+      const { remainder } = await layoutTextContent(block, box, ctx);
+
+      const remainingText = (remainder as TextBlock).text.map((s) => s.text).join('');
+      expect(remainingText).toBe('bar\nbaz');
     });
 
     it('does not break if breakInside = avoid', async () => {

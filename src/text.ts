@@ -88,6 +88,7 @@ export async function extractTextSegments(
 
 export function convertToTextSpan(segment: TextSegment): TextSpan {
   const {
+    type,
     glyphs,
     fontSize,
     fontFamily,
@@ -103,7 +104,7 @@ export function convertToTextSpan(segment: TextSegment): TextSpan {
     fontFeatureSettings,
   } = segment;
   return {
-    text: getGlyphRunText(glyphs),
+    text: type === 'newline' ? '\n' : getGlyphRunText(glyphs),
     attrs: {
       fontSize,
       fontFamily,
@@ -227,6 +228,8 @@ export function flattenTextSegments(segments: TextSegment[]): TextSegment[] {
   let prev: TextSegment;
   segments.forEach((segment) => {
     if (
+      segment.type !== 'newline' &&
+      prev?.type !== 'newline' &&
       segment.font?.key === prev?.font?.key &&
       segment.fontSize === prev?.fontSize &&
       segment.lineHeight === prev?.lineHeight &&
