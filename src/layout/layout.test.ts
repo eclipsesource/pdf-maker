@@ -105,6 +105,37 @@ describe('layout', () => {
       expect(pages).toHaveLength(2);
     });
 
+    it('moves columns to next page if a text in a rows column does not fit', async () => {
+      const lines = range(10).map((n) => `line ${n}`);
+      const def = readDocumentDefinition({
+        content: [
+          { height: 680 },
+          { columns: [{ rows: [{ text: lines.join('\n') }] }, { width: 50, height: 20 }] },
+        ],
+        margin: 50,
+      });
+
+      const pages = await layoutPages(def, ctx);
+
+      expect(pages).toHaveLength(2);
+      expect(collectText(pages[0].content)).toEqual([]);
+      expect(collectText(pages[1].content)).toEqual(lines);
+    });
+
+    it('moves columns to next page if a text column does not fit', async () => {
+      const lines = range(10).map((n) => `line ${n}`);
+      const def = readDocumentDefinition({
+        content: [{ height: 680 }, { columns: [{ text: lines.join('\n') }, { width: 50 }] }],
+        margin: 50,
+      });
+
+      const pages = await layoutPages(def, ctx);
+
+      expect(pages).toHaveLength(2);
+      expect(collectText(pages[0].content)).toEqual([]);
+      expect(collectText(pages[1].content)).toEqual(lines);
+    });
+
     it('lays out header', async () => {
       const def = readDocumentDefinition({
         margin: 50,
@@ -367,4 +398,12 @@ describe('layout', () => {
 
 function span(text: string, attrs?: TextAttrs): TextSpan {
   return { text, attrs: { ...attrs } };
+}
+
+function collectText(frame: Frame): string[] {
+  const rows = (frame.objects ?? []).flatMap((obj) => (obj.type === 'text' ? obj.rows : []));
+  return [
+    ...rows.map((row) => row.segments.map((seg) => getGlyphRunText(seg.glyphs)).join('')),
+    ...(frame.children ?? []).flatMap((child) => collectText(child)),
+  ];
 }

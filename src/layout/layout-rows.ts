@@ -33,8 +33,10 @@ export async function layoutRowsContent(
     };
 
     const autoWidth = row.width == null && (row.autoWidth || block.autoWidth);
+    // Pass `avoid` down, callers like columns discard the remainder of a broken row.
+    const avoidBreak = block.breakInside === 'avoid' ? { breakInside: 'avoid' as const } : {};
     const { frame, remainder } = await layoutBlock(
-      { ...row, autoWidth },
+      { ...row, autoWidth, ...avoidBreak },
       { ...nextPos, ...maxSize },
       ctx,
     );

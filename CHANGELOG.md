@@ -1,5 +1,14 @@
 # Changelog
 
+## [Unreleased]
+
+### Fixed
+
+- Text in a rows block inside columns could be cut off at a page break,
+  even with `breakInside: 'avoid'`. The lines that did not fit were
+  silently dropped. The columns block is now moved to the next page as a
+  whole.
+
 ## [0.6.3] - 2026-08-02
 
 ### Added
