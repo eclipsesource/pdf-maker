@@ -42,12 +42,11 @@ async function layoutText(block: TextBlock, box: Box, ctx: MakerCtx) {
       : await extractTextSegments(block.text, ctx.fontStore, ctx.shapeCache);
   const rows: TextRowObject[] = [];
   const rowLinks: LinkObject[][] = [];
-  let remainingSegments = segments;
+  let start = 0;
   const remainingSpace = { ...box };
   const size: Size = { width: 0, height: 0 };
-  while (remainingSegments?.length) {
-    const layoutResult = layoutTextRow(remainingSegments, remainingSpace);
-    const { row, objects: rowObjects, remainder } = layoutResult;
+  while (start < segments.length) {
+    const { row, objects: rowObjects, next } = layoutTextRow(segments, start, remainingSpace);
 
     if (row.height > remainingSpace.height) {
       // This row doesn't fit in the remaining space. Break here if
@@ -60,7 +59,7 @@ async function layoutText(block: TextBlock, box: Box, ctx: MakerCtx) {
 
     rows.push(row);
     rowLinks.push(rowObjects);
-    remainingSegments = remainder;
+    start = next;
     remainingSpace.height -= row.height;
     remainingSpace.y += row.height;
     size.width = Math.max(size.width, row.width);
@@ -79,7 +78,7 @@ async function layoutText(block: TextBlock, box: Box, ctx: MakerCtx) {
   }
   const objects = rowLinks.flat();
 
-  const remainder = remainingSegments?.length ? remainingSegments : undefined;
+  const remainder = start < segments.length ? segments.slice(start) : undefined;
 
   return { rows, objects, size, remainder };
 }
@@ -99,9 +98,9 @@ async function layoutText(block: TextBlock, box: Box, ctx: MakerCtx) {
  *                                                                    ˅
  * ---------------------------------------------------------------------
  */
-function layoutTextRow(segments: TextSegment[], box: Box) {
-  const [lineSegments, remainder] = breakLine(segments, box.width);
-  const flatSegments = flattenTextSegments(lineSegments);
+function layoutTextRow(segments: TextSegment[], start: number, box: Box) {
+  const { line, next } = breakLine(segments, box.width, start);
+  const flatSegments = flattenTextSegments(line);
   // As in CSS, the row must fit the highest part above the baseline and the deepest part
   // below it, which may come from different segments. Both can be negative for line
   // heights below 1, so don't start at zero.
@@ -136,7 +135,7 @@ function layoutTextRow(segments: TextSegment[], box: Box) {
     baseline,
     segments: segmentObjects,
   };
-  return { row, objects: flattenLinks(links), remainder };
+  return { row, objects: flattenLinks(links), next };
 }
 
 function getDescent(font: PDFFont, fontSize: number) {

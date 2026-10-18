@@ -151,42 +151,43 @@ function isBreakingSpace(chunk: string): boolean {
   return breakingSpaces.exec(chunk)?.[0] === chunk;
 }
 
-export function breakLine(segments: TextSegment[], maxWidth: number): TextSegment[][] {
-  const breakIdx = findLinebreak(segments, maxWidth);
+/**
+ * Finds the line that starts at the given index and fits into the given width. Returns the
+ * segments of the line and the index where the next line starts.
+ */
+export function breakLine(
+  segments: TextSegment[],
+  maxWidth: number,
+  start = 0,
+): { line: TextSegment[]; next: number } {
+  const breakIdx = findLinebreak(segments, start, maxWidth);
   if (breakIdx === undefined) {
-    return [segments];
+    return { line: segments.slice(start), next: segments.length };
   }
   // Whitespace around a line break is not rendered and must not count in the line width.
-  const head = trimWhitespace(segments.slice(0, breakIdx), 'end');
-  const tail = trimWhitespace(segments.slice(breakIdx + 1), 'start');
+  let end = breakIdx;
+  while (end > start && segments[end - 1].type === 'whitespace') end--;
+  let next = breakIdx + 1;
+  while (segments[next]?.type === 'whitespace') next++;
   // A line without visible content, such as a blank line between two newlines, still
   // needs the height of its text. Insert an empty segment to keep it.
-  const line = head.length
-    ? head
-    : [{ ...segments[0], type: 'text' as const, glyphs: [], width: 0 }];
-  return tail.length ? [line, tail] : [line];
+  const line =
+    end > start
+      ? segments.slice(start, end)
+      : [{ ...segments[start], type: 'text' as const, glyphs: [], width: 0 }];
+  return { line, next };
 }
 
-function trimWhitespace(segments: TextSegment[], side: 'start' | 'end'): TextSegment[] {
-  let start = 0;
-  let end = segments.length;
-  if (side === 'start') {
-    while (start < end && segments[start].type === 'whitespace') start++;
-  } else {
-    while (end > start && segments[end - 1].type === 'whitespace') end--;
-  }
-  return segments.slice(start, end);
-}
-
-function findLinebreak(segments: TextSegment[], maxWidth: number): number | undefined {
+function findLinebreak(segments: TextSegment[], start: number, maxWidth: number) {
   let x = 0;
-  for (const [idx, segment] of segments.entries()) {
+  for (let idx = start; idx < segments.length; idx++) {
+    const segment = segments[idx];
     if (segment.type === 'newline') {
       return idx;
     }
     x += segment.width;
     if (x > maxWidth) {
-      return findLinebreakOpportunity(segments, idx);
+      return findLinebreakOpportunity(segments, idx, start);
     }
   }
 }
@@ -197,14 +198,16 @@ function findLinebreak(segments: TextSegment[], maxWidth: number): number | unde
  *
  * @param segments A list of text segments.
  * @param index The index of the element to start at.
+ * @param start The index of the first segment of the line, no earlier segment is considered.
  * @returns The index of the next segment that allows for linebreak if found, `undefined` otherwise.
  */
 export function findLinebreakOpportunity(
   segments: TextSegment[],
   index: number,
+  start = 0,
 ): number | undefined {
   // If the segment at the given index does not allow for a linebreak, look for a previous one.
-  for (let i = index; i >= 0; i--) {
+  for (let i = index; i >= start; i--) {
     if (isLineBreakOpportunity(segments[i])) {
       return i;
     }
@@ -247,10 +250,11 @@ export function flattenTextSegments(segments: TextSegment[]): TextSegment[] {
       equalsFontFeatureSettings(segment.fontFeatureSettings, prev?.fontFeatureSettings) &&
       segment.language === prev?.language
     ) {
-      prev.glyphs = [...prev.glyphs, ...segment.glyphs];
+      for (const glyph of segment.glyphs) prev.glyphs.push(glyph);
       prev.width += segment.width;
     } else {
-      prev = { ...segment };
+      // Copy the glyphs, they may be shared with other segments through the shape cache.
+      prev = { ...segment, glyphs: [...segment.glyphs] };
       result.push(prev);
     }
   });

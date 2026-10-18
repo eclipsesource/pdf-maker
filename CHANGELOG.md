@@ -17,6 +17,9 @@
   styles are now selected via `fontFamily` and `fontWeight`. A family
   name passed in the `family` option of `registerFont()` still takes
   precedence.
+- Documents with lots of text are created about 4 to 10 times faster.
+  Shaped words are cached within a document, and long text blocks are
+  broken into lines in linear time.
 
 ### Fixed
 

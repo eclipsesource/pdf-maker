@@ -389,6 +389,10 @@ describe('text', () => {
       expect(findLinebreakOpportunity([seg(' '), seg('a'), seg('a')], 2)).toEqual(0);
     });
 
+    it('does not return opportunity before start index', () => {
+      expect(findLinebreakOpportunity([seg(' '), seg('a'), seg('a'), seg(' ')], 2, 1)).toEqual(3);
+    });
+
     it('returns next opportunity if no previous one', () => {
       expect(findLinebreakOpportunity([seg('a'), seg('a'), seg(' ')], 1)).toEqual(2);
       expect(findLinebreakOpportunity([seg('a'), seg('a'), seg(' ')], 0)).toEqual(2);
@@ -398,6 +402,12 @@ describe('text', () => {
   describe('flattenTextSegments', () => {
     it('handles empty array', () => {
       expect(flattenTextSegments([])).toEqual([]);
+    });
+
+    it('merges very long segments', () => {
+      const segments = [seg('a'), seg('x'.repeat(200_000))];
+
+      expect(flattenTextSegments(segments)[0].glyphs).toHaveLength(200_001);
     });
 
     it('merges subsequent segments if compatible', () => {
@@ -487,52 +497,59 @@ describe('text', () => {
   });
 
   describe('breakLine', () => {
+    it('breaks line that starts at given index', () => {
+      const segments = [seg('aaa'), seg(' '), seg('bbb'), seg(' '), seg('ccc')];
+
+      expect(breakLine(segments, 30, 2)).toEqual({ line: [seg('bbb')], next: 4 });
+      expect(breakLine(segments, 80, 2)).toEqual({ line: segments.slice(2), next: 5 });
+    });
+
     it('handles empty array', () => {
-      expect(breakLine([], 10)).toEqual([[]]);
+      expect(breakFirstLine([], 10)).toEqual([[]]);
     });
 
     it('breaks at whitespace segment', () => {
       const segments = [seg('aaa'), seg(' '), seg('bbb')];
 
-      expect(breakLine(segments, 30)).toEqual([[seg('aaa')], [seg('bbb')]]);
-      expect(breakLine(segments, 40)).toEqual([[seg('aaa')], [seg('bbb')]]);
-      expect(breakLine(segments, 50)).toEqual([[seg('aaa')], [seg('bbb')]]);
+      expect(breakFirstLine(segments, 30)).toEqual([[seg('aaa')], [seg('bbb')]]);
+      expect(breakFirstLine(segments, 40)).toEqual([[seg('aaa')], [seg('bbb')]]);
+      expect(breakFirstLine(segments, 50)).toEqual([[seg('aaa')], [seg('bbb')]]);
     });
 
     it('breaks at newline segment', () => {
       const segments = [seg('aaa'), seg('\n'), seg('bbb')];
 
-      expect(breakLine(segments, 30)).toEqual([[seg('aaa')], [seg('bbb')]]);
-      expect(breakLine(segments, 40)).toEqual([[seg('aaa')], [seg('bbb')]]);
-      expect(breakLine(segments, 80)).toEqual([[seg('aaa')], [seg('bbb')]]);
+      expect(breakFirstLine(segments, 30)).toEqual([[seg('aaa')], [seg('bbb')]]);
+      expect(breakFirstLine(segments, 40)).toEqual([[seg('aaa')], [seg('bbb')]]);
+      expect(breakFirstLine(segments, 80)).toEqual([[seg('aaa')], [seg('bbb')]]);
     });
 
     it('breaks at leading newline segment', () => {
       const segments = [seg('\n'), seg('aaa')];
 
-      expect(breakLine(segments, 20)).toEqual([[seg('')], [seg('aaa')]]);
+      expect(breakFirstLine(segments, 20)).toEqual([[seg('')], [seg('aaa')]]);
     });
 
     it('keeps unbreakable text on same line', () => {
       const segments = [seg('aaa'), seg(' '), seg('bbb')];
 
-      expect(breakLine(segments, 20)).toEqual([[seg('aaa')], [seg('bbb')]]);
+      expect(breakFirstLine(segments, 20)).toEqual([[seg('aaa')], [seg('bbb')]]);
     });
 
     it('keeps unbreakable text on same line (with newline)', () => {
       const segments = [seg('aaa'), seg('\n'), seg('bbb')];
 
-      expect(breakLine(segments, 20)).toEqual([[seg('aaa')], [seg('bbb')]]);
+      expect(breakFirstLine(segments, 20)).toEqual([[seg('aaa')], [seg('bbb')]]);
     });
 
     it('removes all whitespace around line break', () => {
       const segments = [seg('aaa'), seg(' '), seg(' '), seg('bbb'), seg(' '), seg(' '), seg('ccc')];
 
-      expect(breakLine(segments, 90)).toEqual([
+      expect(breakFirstLine(segments, 90)).toEqual([
         [seg('aaa'), seg(' '), seg(' '), seg('bbb')],
         [seg('ccc')],
       ]);
-      expect(breakLine(segments, 70)).toEqual([
+      expect(breakFirstLine(segments, 70)).toEqual([
         [seg('aaa')],
         [seg('bbb'), seg(' '), seg(' '), seg('ccc')],
       ]);
@@ -541,19 +558,25 @@ describe('text', () => {
     it('removes whitespace after newline', () => {
       const segments = [seg('aaa'), seg('\n'), seg(' '), seg('bbb')];
 
-      expect(breakLine(segments, 80)).toEqual([[seg('aaa')], [seg('bbb')]]);
+      expect(breakFirstLine(segments, 80)).toEqual([[seg('aaa')], [seg('bbb')]]);
     });
 
     it('removes leading whitespace before line break', () => {
       const segments = [seg(' '), seg('aaa')];
 
-      expect(breakLine(segments, 0)).toEqual([[seg('')], [seg('aaa')]]);
-      expect(breakLine(segments, 10)).toEqual([[seg('')], [seg('aaa')]]);
-      expect(breakLine(segments, 30)).toEqual([[seg('')], [seg('aaa')]]);
-      expect(breakLine(segments, 40)).toEqual([[seg(' '), seg('aaa')]]);
+      expect(breakFirstLine(segments, 0)).toEqual([[seg('')], [seg('aaa')]]);
+      expect(breakFirstLine(segments, 10)).toEqual([[seg('')], [seg('aaa')]]);
+      expect(breakFirstLine(segments, 30)).toEqual([[seg('')], [seg('aaa')]]);
+      expect(breakFirstLine(segments, 40)).toEqual([[seg(' '), seg('aaa')]]);
     });
   });
 });
+
+// Returns the first line and, if any, the remaining segments.
+function breakFirstLine(segments: TextSegment[], maxWidth: number): TextSegment[][] {
+  const { line, next } = breakLine(segments, maxWidth);
+  return next < segments.length ? [line, segments.slice(next)] : [line];
+}
 
 function seg(text: string, attrs?: Partial<TextSegment>): TextSegment {
   const {
