@@ -291,6 +291,72 @@ describe('layout-text', () => {
       ]);
     });
 
+    it('breaks lines after hyphens', async () => {
+      const block = { text: [span('foo-bar-baz')] };
+
+      const { frame } = await layoutTextContent(block, { ...box, width: 80 }, ctx);
+
+      expect(extractTextRows(frame)).toEqual(['foo-bar-', 'baz']);
+    });
+
+    it('breaks lines after hyphen at the end of a span', async () => {
+      const block = { text: [span('foo-'), span('bar', { fontStyle: 'italic' })] };
+
+      const { frame } = await layoutTextContent(block, { ...box, width: 50 }, ctx);
+
+      expect(extractTextRows(frame)).toEqual(['foo-', 'bar']);
+    });
+
+    it('shows soft hyphen only at line break', async () => {
+      const block = { text: [span('aaa\u00adbbb ccc')] };
+
+      const { frame: wide } = await layoutTextContent(block, box, ctx);
+      const { frame: narrow } = await layoutTextContent(block, { ...box, width: 40 }, ctx);
+
+      expect(extractTextRows(wide)).toEqual(['aaabbb ccc']);
+      expect(extractTextRows(narrow)).toEqual(['aaa-', 'bbb', 'ccc']);
+    });
+
+    it('breaks lines at soft hyphen at the start of a span', async () => {
+      const block = { text: [span('aaa'), span('\u00adbbb')] };
+
+      const { frame } = await layoutTextContent(block, { ...box, width: 40 }, ctx);
+
+      expect(extractTextRows(frame)).toEqual(['aaa-', 'bbb']);
+    });
+
+    it('breaks lines at zero-width space at the start of a span', async () => {
+      const block = { text: [span('aaa'), span('\u200bbbb')] };
+
+      const { frame } = await layoutTextContent(block, { ...box, width: 40 }, ctx);
+
+      expect(extractTextRows(frame)).toEqual(['aaa', 'bbb']);
+    });
+
+    it('breaks lines after whitespace split across spans', async () => {
+      const block = { text: [span('aaa bbb '), span(' ccc')] };
+
+      const { frame } = await layoutTextContent(block, { ...box, width: 70 }, ctx);
+
+      expect(extractTextRows(frame)).toEqual(['aaa bbb', 'ccc']);
+    });
+
+    it('does not insert blank line for whitespace before newline in next span', async () => {
+      const block = { text: [span('aaa '), span('\nbbb')] };
+
+      const { frame } = await layoutTextContent(block, { ...box, width: 30 }, ctx);
+
+      expect(extractTextRows(frame)).toEqual(['aaa', 'bbb']);
+    });
+
+    it('breaks lines at zero-width spaces without showing them', async () => {
+      const block = { text: [span('aaa\u200bbbb')] };
+
+      const { frame } = await layoutTextContent(block, { ...box, width: 40 }, ctx);
+
+      expect(extractTextRows(frame)).toEqual(['aaa', 'bbb']);
+    });
+
     it('includes blank line for consecutive newlines', async () => {
       const text = [span('foo\n\nbar', { fontSize: 10, lineHeight: 1 })];
       const block = { text };

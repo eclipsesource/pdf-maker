@@ -2,10 +2,20 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { PdfMaker, rows, span, text } from '../src/index.ts';
+import type { Block } from '../src/index.ts';
+import { columns, PdfMaker, rect, rows, span, text } from '../src/index.ts';
 
 const exampleDir = fileURLToPath(new URL('.', import.meta.url));
 const outDir = join(exampleDir, 'out');
+
+// A narrow box with a thin border to make the line width visible
+const narrowBox = (content: Block[]) =>
+  rows(content, {
+    width: 140,
+    padding: 5,
+    margin: { right: 15 },
+    graphics: ({ width, height }) => [rect(0, 0, width, height, { lineColor: '#cccccc' })],
+  });
 
 const document = {
   defaultStyle: {
@@ -63,9 +73,24 @@ const document = {
       { margin: { y: 10 } },
     ),
     // Line breaks
-    text('Text is broken at word boundaries. Explicit line\nbreaks are\nsupported.', {
+    text('Lines break between words and after hyphens. Explicit line\nbreaks are\nsupported.', {
       margin: { y: 10 },
     }),
+    // Special characters control line breaks within words
+    columns(
+      [
+        // Lines break after hyphens and dashes
+        narrowBox([text('A state-of-the-art, well-known, and time-tested approach.')]),
+        // Soft hyphens (U+00AD) mark where words may be hyphenated
+        narrowBox([text('Donau\u00addampf\u00adschiff\u00adfahrts\u00adgesellschaft')]),
+        // Zero-width spaces (U+200B) allow breaks, no-break spaces (U+00A0) prevent them
+        narrowBox([
+          text('https://example.com/\u200bvery/\u200blong/\u200bpath'),
+          text('Delivered within 10\u00a0days.', { margin: { top: 5 } }),
+        ]),
+      ],
+      { fontSize: 12, margin: { y: 10 } },
+    ),
     // Text alignment
     rows(
       [

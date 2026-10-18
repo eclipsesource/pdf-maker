@@ -3,6 +3,8 @@ import { getTextWidth, type PDFFont, type ShapedGlyph, type ShapeOptions } from 
 import type { FontStyle, FontWeight } from './api/text.ts';
 import type { FontStore } from './font-store.ts';
 import { languageToOpenTypeTag } from './language-tags.gen.ts';
+import type { LineBreak } from './line-break.ts';
+import { findLineBreaks, getLineBreakClass } from './line-break.ts';
 import type { TextAttrs, TextSpan } from './read/read-block.ts';
 import type { Color } from './read/read-color.ts';
 import { scriptToOpenTypeTag, segmentByScript } from './script-detection.ts';
@@ -10,13 +12,18 @@ import { scriptToOpenTypeTag, segmentByScript } from './script-detection.ts';
 const defaultFontSize = 18;
 const defaultLineHeight = 1.0;
 
-// Whitespace that allows line breaks. Excludes no-break spaces (U+00A0, U+2007, U+202F).
-const breakingSpaces = /[^\S\u00a0\u2007\u202f]+/;
+const softHyphen = '\u00ad';
+const zeroWidthSpace = '\u200b';
+const invisibleChars = /[\u00ad\u200b]/g;
 
 export type TextSegment = {
   type: 'text' | 'whitespace' | 'newline';
   glyphs: ShapedGlyph[];
   width: number;
+  /** Whether a line may break after this segment. */
+  breakAfter?: boolean;
+  /** The hyphen to show when a line breaks after this segment, which ends in a soft hyphen. */
+  hyphen?: { glyphs: ShapedGlyph[]; width: number };
   height: number;
   lineHeight: number;
   font: PDFFont;
@@ -45,9 +52,19 @@ export async function extractTextSegments(
   fontStore: FontStore,
   shapeCache: ShapeCache = new Map(),
 ): Promise<TextSegment[]> {
+  // Break opportunities depend on the characters around them, also across spans.
+  const breaks = findLineBreaks(textSpans.map((span) => span.text).join(''));
+  let offset = 0;
+  const spanRuns = textSpans.map((span) =>
+    segmentByScript(span.text).map((run) => {
+      const chunks = splitChunks(run.text, breaks, offset);
+      offset += run.text.length;
+      return { script: run.script, chunks };
+    }),
+  );
   const segments = await Promise.all(
-    textSpans.map(async (span) => {
-      const { text, attrs } = span;
+    textSpans.map(async (span, spanIdx) => {
+      const { attrs } = span;
       const {
         fontSize = defaultFontSize,
         fontFamily,
@@ -65,17 +82,21 @@ export async function extractTextSegments(
       } = attrs;
       const font = await fontStore.selectFont({ fontFamily, fontStyle, fontWeight });
       const height = getTextHeight(font, fontSize);
+      const measure = (glyphs: ShapedGlyph[]) =>
+        getTextWidth(glyphs, fontSize) + (letterSpacing ?? 0) * glyphs.length;
 
-      return segmentByScript(text).flatMap((run) => {
-        const scriptTag = scriptToOpenTypeTag(run.script);
+      return spanRuns[spanIdx].flatMap(({ script, chunks }) => {
+        const scriptTag = scriptToOpenTypeTag(script);
         const shape = createShaper(font, buildShapeOptions(attrs, scriptTag), shapeCache);
-        return splitChunks(run.text).map((chunk) => {
-          const type = chunk === '\n' ? 'newline' : isBreakingSpace(chunk) ? 'whitespace' : 'text';
-          const glyphs = type === 'newline' ? [] : shape(chunk);
+        return chunks.map((chunk) => {
+          const glyphs = chunk.type === 'newline' ? [] : shape(chunk.text);
+          const hyphenGlyphs = chunk.softHyphen ? shape('-') : undefined;
           return {
-            type,
+            type: chunk.type,
             glyphs,
-            width: getTextWidth(glyphs, fontSize) + (letterSpacing ?? 0) * glyphs.length,
+            width: measure(glyphs),
+            breakAfter: chunk.breakAfter,
+            hyphen: hyphenGlyphs && { glyphs: hyphenGlyphs, width: measure(hyphenGlyphs) },
             height,
             lineHeight,
             font,
@@ -114,41 +135,74 @@ function createShaper(font: PDFFont, opts: ShapeOptions | undefined, cache: Shap
   };
 }
 
-/**
- * Split the given text into chunks of subsequent whitespace and non-whitespace characters.
- * No-break spaces are treated as non-whitespace. For example, the string `foo bar` would be
- * split into `['foo', ' ', 'bar']`. Newlines (`\n`) are preserved, each in a chunk of its own.
- * Any whitespace that surrounds newlines is removed.
- *
- * @param text The input string
- * @returns an array of chunks
- */
-export function splitChunks(text: string): string[] {
-  const segments: string[] = [];
-  let tail = text;
-  let match = breakingSpaces.exec(tail);
-  while (match) {
-    if (match.index) {
-      segments.push(tail.slice(0, match.index));
-    }
-    const wsSegment = tail.slice(match.index, match.index + match[0].length);
-    const newlineCount = wsSegment.match(/\n/g)?.length;
-    if (newlineCount) {
-      segments.push(...'\n'.repeat(newlineCount).split(''));
-    } else {
-      segments.push(wsSegment);
-    }
-    tail = tail.slice(match.index + match[0].length);
-    match = breakingSpaces.exec(tail);
-  }
-  if (tail) {
-    segments.push(tail);
-  }
-  return segments;
-}
+export type TextChunk = {
+  text: string;
+  type: 'text' | 'whitespace' | 'newline';
+  /** Whether a line may break after this chunk. */
+  breakAfter?: boolean;
+  /** Whether this chunk ends in a soft hyphen, which is removed from the text. */
+  softHyphen?: boolean;
+};
 
-function isBreakingSpace(chunk: string): boolean {
-  return breakingSpaces.exec(chunk)?.[0] === chunk;
+/**
+ * Splits the given text into chunks of whitespace, newlines, and text between them. Text is
+ * also split at line break opportunities, e.g. after hyphens. Each newline is a chunk of its
+ * own, whitespace that surrounds newlines is removed. Soft hyphens and zero-width spaces are
+ * removed from the text, they only mark line break opportunities.
+ *
+ * @param text The input string.
+ * @param breaks The line break opportunities by string index, see `findLineBreaks()`.
+ * @param offset The index of the given text in the text that the breaks refer to.
+ */
+export function splitChunks(
+  text: string,
+  breaks: Map<number, LineBreak> = findLineBreaks(text),
+  offset = 0,
+): TextChunk[] {
+  const chunks: TextChunk[] = [];
+  let chunkStart = -1; // start index of the current chunk, -1 if there is none
+  let chunkType: TextChunk['type'] = 'text';
+  let hasInvisibleChars = false;
+  let afterNewline = false;
+  const flush = (end: number) => {
+    if (chunkStart < 0) return;
+    const raw = text.slice(chunkStart, end);
+    const chunk: TextChunk = {
+      text: hasInvisibleChars ? raw.replace(invisibleChars, '') : raw,
+      type: chunkType,
+    };
+    if (breaks.has(offset + end)) chunk.breakAfter = true;
+    if (raw.endsWith(softHyphen)) chunk.softHyphen = true;
+    // A chunk can be empty when it only consists of a soft hyphen or zero-width space at the
+    // start of a span. It is kept for the line break opportunity it provides.
+    chunks.push(chunk);
+    chunkStart = -1;
+    hasInvisibleChars = false;
+  };
+  let index = 0;
+  for (const char of text) {
+    const start = index;
+    index += char.length;
+    const cls = getLineBreakClass(char.codePointAt(0)!);
+    if (cls === 'BK') {
+      if (chunkType === 'whitespace') chunkStart = -1; // drop whitespace before newline
+      flush(start);
+      chunks.push({ text: '\n', type: 'newline' });
+      afterNewline = true;
+      continue;
+    }
+    const type = cls === 'SP' ? 'whitespace' : 'text';
+    if (type === 'whitespace' && afterNewline) continue;
+    afterNewline = false;
+    if (chunkStart >= 0 && (chunkType !== type || breaks.has(offset + start))) flush(start);
+    if (chunkStart < 0) {
+      chunkStart = start;
+      chunkType = type;
+    }
+    if (char === softHyphen || char === zeroWidthSpace) hasInvisibleChars = true;
+  }
+  flush(index);
+  return chunks;
 }
 
 /**
@@ -161,67 +215,62 @@ export function breakLine(
   start = 0,
 ): { line: TextSegment[]; next: number } {
   const breakIdx = findLinebreak(segments, start, maxWidth);
-  if (breakIdx === undefined) {
-    return { line: segments.slice(start), next: segments.length };
+  let end = segments.length;
+  let next = segments.length;
+  if (breakIdx !== undefined) {
+    // A newline ends the line but is not part of it.
+    end = segments[breakIdx].type === 'newline' ? breakIdx : breakIdx + 1;
+    next = breakIdx + 1;
+    while (segments[next]?.type === 'whitespace') next++;
   }
-  // Whitespace around a line break is not rendered and must not count in the line width.
-  let end = breakIdx;
+  // Whitespace at line ends is not rendered and must not count in the line width.
   while (end > start && segments[end - 1].type === 'whitespace') end--;
-  let next = breakIdx + 1;
-  while (segments[next]?.type === 'whitespace') next++;
   // A line without visible content, such as a blank line between two newlines, still
   // needs the height of its text. Insert an empty segment to keep it.
-  const line =
-    end > start
-      ? segments.slice(start, end)
-      : [{ ...segments[start], type: 'text' as const, glyphs: [], width: 0 }];
+  if (end === start && start < segments.length) {
+    const empty = { ...segments[start], type: 'text' as const, glyphs: [], width: 0 };
+    return { line: [{ ...empty, breakAfter: undefined, hyphen: undefined }], next };
+  }
+  const line = segments.slice(start, end);
+  const last = segments[end - 1];
+  if (breakIdx !== undefined && end === breakIdx + 1 && last.hyphen) {
+    line.push({ ...last, ...last.hyphen, hyphen: undefined });
+  }
   return { line, next };
 }
 
+/**
+ * Returns the index of the segment after which the line that starts at the given index
+ * should break, or `undefined` if the remaining segments fit into the line.
+ */
 function findLinebreak(segments: TextSegment[], start: number, maxWidth: number) {
   let x = 0;
+  let lastFit: number | undefined;
   for (let idx = start; idx < segments.length; idx++) {
     const segment = segments[idx];
     if (segment.type === 'newline') {
       return idx;
     }
     x += segment.width;
+    if (segment.type === 'whitespace') {
+      // Whitespace at the end of a line is not rendered and may exceed the width.
+      if (segment.breakAfter) lastFit = idx;
+      continue;
+    }
     if (x > maxWidth) {
-      return findLinebreakOpportunity(segments, idx, start);
+      // If no break fits, break after the overflowing text at the next opportunity.
+      return lastFit ?? findNextBreak(segments, idx);
+    }
+    if (segment.breakAfter && x + (segment.hyphen?.width ?? 0) <= maxWidth) {
+      lastFit = idx;
     }
   }
 }
 
-/**
- * Finds the next appropriate segment that allows for a linebreak, starting at the given index, and
- * returns its index.
- *
- * @param segments A list of text segments.
- * @param index The index of the element to start at.
- * @param start The index of the first segment of the line, no earlier segment is considered.
- * @returns The index of the next segment that allows for linebreak if found, `undefined` otherwise.
- */
-export function findLinebreakOpportunity(
-  segments: TextSegment[],
-  index: number,
-  start = 0,
-): number | undefined {
-  // If the segment at the given index does not allow for a linebreak, look for a previous one.
-  for (let i = index; i >= start; i--) {
-    if (isLineBreakOpportunity(segments[i])) {
-      return i;
-    }
+function findNextBreak(segments: TextSegment[], start: number) {
+  for (let idx = start; idx < segments.length; idx++) {
+    if (segments[idx].breakAfter || segments[idx].type === 'newline') return idx;
   }
-  // If no previous segment allows for a linebreak, find the next one after the index.
-  for (let i = index + 1; i < segments.length; i++) {
-    if (isLineBreakOpportunity(segments[i])) {
-      return i;
-    }
-  }
-}
-
-function isLineBreakOpportunity(segment: TextSegment): boolean {
-  return segment?.type === 'whitespace' || segment?.type === 'newline';
 }
 
 /**

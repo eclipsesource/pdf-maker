@@ -108,11 +108,26 @@ italic(['This is ', bold('super'), ' important']);
 
 #### Line breaks
 
-Line breaks are inserted automatically at word boundaries. Explicit
-line breaks can be inserted as line feed characters (`\n`):
+Text is wrapped automatically to fit the available width. Lines break
+between words and after hyphens and dashes, as in `state-of-the-art`.
+A line feed character (`\n`) forces a line break:
 
 ```ts
 text('Explicit line\nbreaks are\nsupported.');
+```
+
+Special Unicode characters give control over line breaks:
+
+- A soft hyphen (`\u00AD`) marks where a word may be hyphenated. A
+  hyphen is shown only when the line breaks there.
+- A zero-width space (`\u200B`) marks where a line may break without
+  showing anything, e.g. in long URLs.
+- A no-break space (`\u00A0`) or a non-breaking hyphen (`\u2011`)
+  prevents a line break, e.g. between a number and its unit.
+
+```ts
+text('Donau\u00ADdampf\u00ADschiff\u00ADfahrt');
+text('Delivery within 10\u00A0days');
 ```
 
 #### Subscripts and superscripts

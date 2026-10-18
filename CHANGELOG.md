@@ -7,6 +7,10 @@
 - Gradients in SVG images now support the `spreadMethod` attribute,
   which repeats or reflects a gradient beyond its ends, and the
   `stop-opacity` property for translucent gradients.
+- Lines now break after hyphens and dashes. Soft hyphens (`U+00AD`) and
+  zero-width spaces (`U+200B`) can be used to mark further line break
+  opportunities. A soft hyphen is shown as a hyphen only when the line
+  breaks there.
 
 ### Changed
 
@@ -43,6 +47,7 @@
   with combining marks was misplaced in some fonts. Text shaping now
   also supports stacked combining marks, marks on ligatures, and
   contextual kerning.
+- Soft hyphens were drawn as visible hyphens in the middle of words.
 
 ## [0.6.3] - 2026-08-02
 

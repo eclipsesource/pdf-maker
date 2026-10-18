@@ -131,10 +131,12 @@ the available width. The `autoWidth` flag propagates to children.
 Text goes through several processing steps before layout:
 
 1. Text spans are converted to **TextSegments** -- each segment is a
-   word, whitespace, or newline chunk with pre-shaped glyphs (via
-   `font.shapeText()` from pdf-core) and measured width/height.
-2. Segments are broken into lines that fit the available width. Line
-   breaking looks for whitespace/newline opportunities.
+   chunk of text up to the next line break opportunity, with pre-shaped
+   glyphs (via `font.shapeText()` from pdf-core) and measured
+   width/height. Break opportunities are found in `src/line-break.ts`,
+   which follows the Unicode line breaking algorithm (UAX #14).
+2. Segments are broken into lines that fit the available width, at the
+   break opportunities recorded in the segments.
 3. Adjacent segments with identical properties are flattened into single
    segments to reduce the number of PDF text operations.
 4. Text alignment (left/center/right) shifts row x-positions.

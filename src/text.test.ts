@@ -3,13 +3,13 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { rgb } from './colors.ts';
 import { FontStore } from './font-store.ts';
+import { findLineBreaks } from './line-break.ts';
 import { fakeFont } from './test/test-utils.ts';
 import type { ShapeCache, TextSegment } from './text.ts';
 import {
   breakLine,
   buildShapeOptions,
   extractTextSegments,
-  findLinebreakOpportunity,
   flattenTextSegments,
   splitChunks,
 } from './text.ts';
@@ -330,72 +330,95 @@ describe('text', () => {
 
   describe('splitChunks', () => {
     it('handles empty string', () => {
-      expect(splitChunks('')).toEqual([]);
+      expect(chunkTexts('')).toEqual([]);
     });
 
     it('handles single non-space', () => {
-      expect(splitChunks('a')).toEqual(['a']);
+      expect(chunkTexts('a')).toEqual(['a']);
     });
 
     it('handles single space', () => {
-      expect(splitChunks(' ')).toEqual([' ']);
+      expect(chunkTexts(' ')).toEqual([' ']);
     });
 
     it('splits multiple non-spaces', () => {
-      expect(splitChunks('aaa')).toEqual(['aaa']);
+      expect(chunkTexts('aaa')).toEqual(['aaa']);
     });
 
     it('splits multiple spaces', () => {
-      expect(splitChunks('   ')).toEqual(['   ']);
+      expect(chunkTexts('   ')).toEqual(['   ']);
     });
 
     it('splits multiple spaces and non-spaces', () => {
-      expect(splitChunks('  aaa  bbb  ')).toEqual(['  ', 'aaa', '  ', 'bbb', '  ']);
-      expect(splitChunks('aaa  bbb  ccc')).toEqual(['aaa', '  ', 'bbb', '  ', 'ccc']);
+      expect(chunkTexts('  aaa  bbb  ')).toEqual(['  ', 'aaa', '  ', 'bbb', '  ']);
+      expect(chunkTexts('aaa  bbb  ccc')).toEqual(['aaa', '  ', 'bbb', '  ', 'ccc']);
     });
 
     it('does not split at no-break spaces', () => {
-      expect(splitChunks('aaa\u00a0bbb')).toEqual(['aaa\u00a0bbb']);
-      expect(splitChunks('aaa\u202f\u2007bbb ccc')).toEqual(['aaa\u202f\u2007bbb', ' ', 'ccc']);
+      expect(chunkTexts('aaa\u00a0bbb')).toEqual(['aaa\u00a0bbb']);
+      expect(chunkTexts('aaa\u202f\u2007bbb ccc')).toEqual(['aaa\u202f\u2007bbb', ' ', 'ccc']);
+    });
+
+    it('splits after hyphens and dashes', () => {
+      expect(chunkTexts('state-of-the-art')).toEqual(['state-', 'of-', 'the-', 'art']);
+      expect(chunkTexts('a\u2013b\u2014c')).toEqual(['a\u2013', 'b\u2014', 'c']);
+    });
+
+    it('does not split after word-initial hyphen or before digits', () => {
+      expect(chunkTexts('-foo')).toEqual(['-foo']);
+      expect(chunkTexts('a -b')).toEqual(['a', ' ', '-b']);
+      expect(chunkTexts('a-1')).toEqual(['a-1']);
+    });
+
+    it('does not split at non-breaking hyphen', () => {
+      expect(chunkTexts('a\u2011b')).toEqual(['a\u2011b']);
+    });
+
+    it('marks chunks that allow a line break after them', () => {
+      expect(splitChunks('a b-c')).toEqual([
+        { text: 'a', type: 'text' },
+        { text: ' ', type: 'whitespace', breakAfter: true },
+        { text: 'b-', type: 'text', breakAfter: true },
+        { text: 'c', type: 'text' },
+      ]);
+    });
+
+    it('removes soft hyphens and marks chunk before them', () => {
+      expect(splitChunks('hy\u00adphen')).toEqual([
+        { text: 'hy', type: 'text', breakAfter: true, softHyphen: true },
+        { text: 'phen', type: 'text' },
+      ]);
+    });
+
+    it('removes zero-width spaces and marks chunk before them', () => {
+      expect(splitChunks('foo\u200bbar')).toEqual([
+        { text: 'foo', type: 'text', breakAfter: true },
+        { text: 'bar', type: 'text' },
+      ]);
+    });
+
+    it('keeps empty chunk of soft hyphen at the start of the text', () => {
+      const breaks = findLineBreaks('aaa\u00adbbb');
+
+      expect(splitChunks('\u00adbbb', breaks, 3)).toEqual([
+        { text: '', type: 'text', breakAfter: true, softHyphen: true },
+        { text: 'bbb', type: 'text' },
+      ]);
+    });
+
+    it('uses breaks with offset', () => {
+      const breaks = findLineBreaks('foo bar-baz');
+
+      expect(splitChunks('bar-baz', breaks, 4)).toEqual([
+        { text: 'bar-', type: 'text', breakAfter: true },
+        { text: 'baz', type: 'text' },
+      ]);
     });
 
     it('splits newlines', () => {
-      expect(splitChunks('aaa\nbbb')).toEqual(['aaa', '\n', 'bbb']);
-      expect(splitChunks('aaa \n bbb')).toEqual(['aaa', '\n', 'bbb']);
-      expect(splitChunks('aaa \n \n bbb')).toEqual(['aaa', '\n', '\n', 'bbb']);
-    });
-  });
-
-  describe('findLinebreakOpportunity', () => {
-    it('handles empty array', () => {
-      expect(findLinebreakOpportunity([], 0)).toBeUndefined();
-      expect(findLinebreakOpportunity([], 1)).toBeUndefined();
-    });
-
-    it('handles exceeding index', () => {
-      expect(findLinebreakOpportunity([seg(' ')], -1)).toEqual(0);
-      expect(findLinebreakOpportunity([seg(' ')], 2)).toEqual(0);
-    });
-
-    it('returns index itself if it contains whitespace', () => {
-      expect(findLinebreakOpportunity([seg(' '), seg(' '), seg(' ')], 0)).toEqual(0);
-      expect(findLinebreakOpportunity([seg(' '), seg(' '), seg(' ')], 1)).toEqual(1);
-      expect(findLinebreakOpportunity([seg(' '), seg(' '), seg(' ')], 2)).toEqual(2);
-    });
-
-    it('returns previous opportunity', () => {
-      expect(findLinebreakOpportunity([seg(' '), seg('a'), seg(' ')], 1)).toEqual(0);
-      expect(findLinebreakOpportunity([seg(' '), seg(' '), seg('a')], 2)).toEqual(1);
-      expect(findLinebreakOpportunity([seg(' '), seg('a'), seg('a')], 2)).toEqual(0);
-    });
-
-    it('does not return opportunity before start index', () => {
-      expect(findLinebreakOpportunity([seg(' '), seg('a'), seg('a'), seg(' ')], 2, 1)).toEqual(3);
-    });
-
-    it('returns next opportunity if no previous one', () => {
-      expect(findLinebreakOpportunity([seg('a'), seg('a'), seg(' ')], 1)).toEqual(2);
-      expect(findLinebreakOpportunity([seg('a'), seg('a'), seg(' ')], 0)).toEqual(2);
+      expect(chunkTexts('aaa\nbbb')).toEqual(['aaa', '\n', 'bbb']);
+      expect(chunkTexts('aaa \n bbb')).toEqual(['aaa', '\n', 'bbb']);
+      expect(chunkTexts('aaa \n \n bbb')).toEqual(['aaa', '\n', '\n', 'bbb']);
     });
   });
 
@@ -497,6 +520,68 @@ describe('text', () => {
   });
 
   describe('breakLine', () => {
+    it('breaks after segment that allows it', () => {
+      const segments = [seg('aaa-', { breakAfter: true }), seg('bbb')];
+
+      expect(breakFirstLine(segments, 50)).toEqual([[segments[0]], [seg('bbb')]]);
+      expect(breakFirstLine(segments, 70)).toEqual([segments]);
+    });
+
+    it('breaks after last segment that fits', () => {
+      const segments = [
+        seg('a-', { breakAfter: true }),
+        seg('b-', { breakAfter: true }),
+        seg('ccc'),
+      ];
+
+      expect(breakFirstLine(segments, 40)).toEqual([segments.slice(0, 2), [seg('ccc')]]);
+    });
+
+    it('breaks overflowing text at next opportunity', () => {
+      const segments = [seg('aaaa-', { breakAfter: true }), seg('bbb')];
+
+      expect(breakFirstLine(segments, 20)).toEqual([[segments[0]], [seg('bbb')]]);
+    });
+
+    it('adds hyphen when breaking after soft hyphen', () => {
+      const hyphen = { glyphs: seg('-').glyphs, width: 10 };
+      const segments = [seg('aaa', { breakAfter: true, hyphen }), seg('bbb')];
+
+      const [line, rest] = breakFirstLine(segments, 50);
+
+      expect(line.map((s) => s.glyphs.length)).toEqual([3, 1]);
+      expect(line[1]).toEqual(expect.objectContaining({ glyphs: hyphen.glyphs, width: 10 }));
+      expect(rest).toEqual([seg('bbb')]);
+    });
+
+    it('does not add hyphen to unbroken line', () => {
+      const hyphen = { glyphs: seg('-').glyphs, width: 10 };
+      const segments = [seg('aaa', { breakAfter: true, hyphen }), seg('bbb')];
+
+      expect(breakFirstLine(segments, 60)).toEqual([segments]);
+    });
+
+    it('does not break at soft hyphen if hyphen does not fit', () => {
+      const hyphen = { glyphs: seg('-').glyphs, width: 10 };
+      const segments = [
+        seg('aa', { breakAfter: true }),
+        seg('bb', { breakAfter: true, hyphen }),
+        seg('cc'),
+      ];
+
+      expect(breakFirstLine(segments, 45)).toEqual([[segments[0]], segments.slice(1)]);
+    });
+
+    it('removes whitespace at the end of the last line', () => {
+      expect(breakFirstLine([seg('aaa'), seg(' ')], 100)).toEqual([[seg('aaa')]]);
+    });
+
+    it('lets whitespace exceed the width at a line break', () => {
+      const segments = [seg('aaa'), seg(' ', { breakAfter: false }), seg(' '), seg('bbb')];
+
+      expect(breakFirstLine(segments, 30)).toEqual([[seg('aaa')], [seg('bbb')]]);
+    });
+
     it('breaks line that starts at given index', () => {
       const segments = [seg('aaa'), seg(' '), seg('bbb'), seg(' '), seg('ccc')];
 
@@ -572,6 +657,10 @@ describe('text', () => {
   });
 });
 
+function chunkTexts(text: string): string[] {
+  return splitChunks(text).map((chunk) => chunk.text);
+}
+
 // Returns the first line and, if any, the remaining segments.
 function breakFirstLine(segments: TextSegment[], maxWidth: number): TextSegment[][] {
   const { line, next } = breakLine(segments, maxWidth);
@@ -598,8 +687,11 @@ function seg(text: string, attrs?: Partial<TextSegment>): TextSegment {
     advance: 1000,
   }));
   const type = text === '\n' ? 'newline' : /^\s+$/.test(text) ? 'whitespace' : 'text';
+  const { breakAfter = type === 'whitespace' || undefined, hyphen } = attrs ?? {};
   return {
     type,
+    breakAfter,
+    hyphen,
     glyphs,
     width,
     height,
