@@ -545,6 +545,67 @@ describe('compileSvgContent', () => {
       ).toBe(['q', '1 0 0 RG', '4 M', '0 0 10 10 re', 'S', 'Q'].join('\n'));
     });
 
+    it('passes the visible area to repeating gradients', () => {
+      const result = instructions(
+        svg(
+          `<linearGradient id="g" spreadMethod="repeat">
+            <stop offset="0" stop-color="red"/>
+            <stop offset="1" stop-color="blue"/>
+          </linearGradient>
+          <rect width="100" height="50" fill="url(#g)"/>`,
+          'width="100" height="100" viewBox="0 0 200 100"',
+        ),
+      );
+
+      expect(result).toContain(':repeat:[0,0,2,2]:[100,0,0,50,0,0] scn');
+    });
+
+    describe('with translucent stops', () => {
+      const translucentDef = `<linearGradient id="t">
+        <stop offset="0" stop-color="red"/>
+        <stop offset="1" stop-color="blue" stop-opacity="0"/>
+      </linearGradient>`;
+
+      it('sets the opacity mask in the gradient space', () => {
+        const lines = instructions(
+          svg(
+            `${translucentDef}
+            <g transform="translate(5 5)">
+              <rect x="10" width="100" height="50" fill="url(#t)"/>
+            </g>`,
+          ),
+        ).split('\n');
+
+        expect(lines.slice(0, 4)).toEqual(['q', '1 0 0 1 5 5 cm', 'q', '100 0 0 50 10 0 cm']);
+        expect(lines[4]).toMatch(/^\/gs:SMask:Luminosity-.* gs$/);
+        // Reverts to the current transform, translate(5 5)
+        expect(lines[5]).toBe('0.01 0 0 0.02 -0.1 0 cm');
+        expect(lines.slice(6, 7)).toEqual(['/Pattern cs']);
+        expect(lines.slice(8)).toEqual(['10 0 100 50 re', 'f', 'Q', 'Q']);
+      });
+
+      it('paints fill and stroke separately', () => {
+        const lines = instructions(
+          svg(`${translucentDef}<rect width="100" height="50" fill="url(#t)" stroke="red"/>`),
+        ).split('\n');
+
+        expect(lines.filter((line) => line.endsWith(' gs'))).toHaveLength(1);
+        expect(lines.filter((line) => ['f', 'S', 'B'].includes(line))).toEqual(['f', 'S']);
+        expect(lines.slice(-6)).toEqual(['q', '1 0 0 RG', '4 M', '0 0 100 50 re', 'S', 'Q']);
+      });
+
+      it('combines the opacity mask with the fill opacity', () => {
+        const lines = instructions(
+          svg(`${translucentDef}<rect width="100" height="50" fill="url(#t)" opacity="0.5"/>`),
+        ).split('\n');
+
+        expect(lines.filter((line) => line.endsWith(' gs'))).toEqual([
+          '/gs:CA:0.5,ca:0.5 gs',
+          expect.stringMatching(/^\/gs:SMask:/),
+        ]);
+      });
+    });
+
     it('skips shapes whose gradient cannot be built', () => {
       expect(
         instructions(svg('<linearGradient id="g"/><rect width="10" height="10" fill="url(#g)"/>')),

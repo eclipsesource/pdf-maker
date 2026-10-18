@@ -27,6 +27,18 @@ export function combineMatrices(first: Matrix, second: Matrix): Matrix {
 }
 
 /**
+ * Returns the inverse of the given matrix, or `undefined` if the
+ * matrix is not invertible.
+ */
+export function invertMatrix(matrix: Matrix): Matrix | undefined {
+  const [a, b, c, d, e, f] = matrix;
+  const det = a * d - b * c;
+  if (!det || !Number.isFinite(det)) return undefined;
+  // Adding zero turns negative zeros into zeros
+  return [d, -b, -c, a, c * f - d * e, b * e - a * f].map((value) => value / det + 0) as Matrix;
+}
+
+/**
  * Rounds all components of a matrix to the precision used in content
  * streams. Throws if the result is not a valid PDF number, which is
  * where computed matrices are guarded: a transform can overflow when it

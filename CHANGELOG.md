@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+### Added
+
+- Gradients in SVG images now support the `spreadMethod` attribute,
+  which repeats or reflects a gradient beyond its ends, and the
+  `stop-opacity` property for translucent gradients.
+
 ### Changed
 
 - Fonts are now registered under their typographic family name when the

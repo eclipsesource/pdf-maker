@@ -4,6 +4,7 @@ import { parseXml } from '../util/xml.ts';
 import {
   combineMatrices,
   getMergedAttrs,
+  invertMatrix,
   isIdentityMatrix,
   parseDashArray,
   parseLength,
@@ -225,6 +226,19 @@ describe('combineMatrices', () => {
     const translate = [1, 0, 0, 1, 10, 20] as const;
     // scale first, then translate: (1, 1) -> (2, 2) -> (12, 22)
     expect(combineMatrices([...scale], [...translate])).toEqual([2, 0, 0, 2, 10, 20]);
+  });
+});
+
+describe('invertMatrix', () => {
+  it('returns the inverse matrix', () => {
+    expect(invertMatrix([2, 0, 0, 4, 10, 20])).toEqual([0.5, 0, 0, 0.25, -5, -5]);
+    // A rotation by 90 degrees is reverted by a rotation by -90 degrees
+    expect(invertMatrix([0, 1, -1, 0, 10, 0])).toEqual([0, -1, 1, 0, 0, 10]);
+  });
+
+  it('returns undefined for a matrix that is not invertible', () => {
+    expect(invertMatrix([1, 2, 2, 4, 0, 0])).toBeUndefined();
+    expect(invertMatrix([0, 0, 0, 0, 5, 5])).toBeUndefined();
   });
 });
 

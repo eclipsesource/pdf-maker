@@ -8,19 +8,22 @@
  * transform from the SVG root to the element that references the
  * gradient must therefore be baked into the pattern matrix.
  */
-import type { ColorStop } from '@ralfstx/pdf-core';
+import type { ColorStop, ExtGState, SpreadMethod } from '@ralfstx/pdf-core';
 import { PDFShading, PDFShadingPattern } from '@ralfstx/pdf-core';
 
 import type { Box, Size } from '../box.ts';
 import type { Color } from '../colors.ts';
+import { round } from '../util/utils.ts';
 import type { XmlElement } from '../util/xml.ts';
 import { childElements } from '../util/xml.ts';
 import type { Matrix } from './svg-attrs.ts';
 import {
   combineMatrices,
   getMergedAttrs,
+  invertMatrix,
   isIdentityMatrix,
   parseLength,
+  parseOpacity,
   parseTransform,
   roundMatrix,
   viewportDiagonal,
@@ -36,6 +39,23 @@ export type GradientParams = {
   viewport: Size;
   /** The inherited `color` property, to resolve `currentColor`. */
   color: Color;
+  /**
+   * The area in form space that a repeated or translucent gradient
+   * must cover, i.e. the visible area of the SVG image.
+   */
+  area: Box;
+};
+
+export type GradientPaint = {
+  pattern: PDFShadingPattern;
+  /** The pattern matrix, mapping gradient space to form space. */
+  matrix: Matrix;
+  /**
+   * A graphics state that applies the opacities of the stops, or
+   * `undefined` if all stops are opaque. It must be set while the
+   * current transformation equals the pattern matrix.
+   */
+  opacityMask: ExtGState | undefined;
 };
 
 export function isGradientElement(element: XmlElement): boolean {
@@ -43,16 +63,17 @@ export function isGradientElement(element: XmlElement): boolean {
 }
 
 /**
- * Builds a PDF shading pattern from the given gradient element.
+ * Builds a PDF shading pattern from the given gradient element, along
+ * with the soft mask for translucent stops.
  * Returns `undefined` when the gradient cannot be rendered, e.g. when
  * it has no stops; the referencing element should then fall back to no
  * paint.
  */
-export function buildGradientPattern(
+export function buildGradientPaint(
   element: XmlElement,
   idMap: Map<string, XmlElement>,
   params: GradientParams,
-): PDFShadingPattern | undefined {
+): GradientPaint | undefined {
   const chain = resolveHrefChain(element, idMap);
   const chainAttrs = chain.map(getMergedAttrs);
   const attr = (name: string) => chainAttrs.find((attrs) => name in attrs)?.[name];
@@ -77,24 +98,6 @@ export function buildGradientPattern(
     return parseLength(attr(name), ref) ?? def * ref;
   };
 
-  let shading: PDFShading;
-  if (element.name === 'linearGradient') {
-    const x1 = coord('x1', 0, 'x');
-    const y1 = coord('y1', 0, 'y');
-    const x2 = coord('x2', 1, 'x');
-    const y2 = coord('y2', 0, 'y');
-    shading = PDFShading.axial({ coords: [x1, y1, x2, y2], stops });
-  } else {
-    const cx = coord('cx', 0.5, 'x');
-    const cy = coord('cy', 0.5, 'y');
-    const r = coord('r', 0.5, 'r');
-    if (r <= 0) return undefined;
-    const fx = parseLength(attr('fx'), lengthRef('x')) ?? cx;
-    const fy = parseLength(attr('fy'), lengthRef('y')) ?? cy;
-    const fr = Math.max(0, parseLength(attr('fr'), lengthRef('r')) ?? 0);
-    shading = PDFShading.radial({ coords: [fx, fy, fr, cx, cy, r], stops });
-  }
-
   // The pattern matrix maps gradient space to form space: the
   // gradientTransform applies to gradient coordinates first, then the
   // bounding box mapping (for objectBoundingBox units), then the
@@ -107,10 +110,87 @@ export function buildGradientPattern(
   if (gradientTransform) matrix = combineMatrices(gradientTransform, matrix);
   matrix = roundMatrix(matrix);
 
-  return new PDFShadingPattern({
+  let spread = spreadMethods[attr('spreadMethod')?.trim() ?? ''] ?? 'pad';
+
+  let coords: [number, number, number, number] | [number, number, number, number, number, number];
+  if (element.name === 'linearGradient') {
+    coords = [coord('x1', 0, 'x'), coord('y1', 0, 'y'), coord('x2', 1, 'x'), coord('y2', 0, 'y')];
+  } else {
+    const cx = coord('cx', 0.5, 'x');
+    const cy = coord('cy', 0.5, 'y');
+    const r = coord('r', 0.5, 'r');
+    if (r <= 0) return undefined;
+    const fx = parseLength(attr('fx'), lengthRef('x')) ?? cx;
+    const fy = parseLength(attr('fy'), lengthRef('y')) ?? cy;
+    const fr = Math.max(0, parseLength(attr('fr'), lengthRef('r')) ?? 0);
+    coords = [fx, fy, fr, cx, cy, r];
+  }
+
+  // Repeating and translucent gradients need a bounding box in
+  // gradient space that covers the visible area of the image
+  const translucent = stops.some((stop) => stop.opacity !== undefined);
+  let shadingBBox: [number, number, number, number] | undefined;
+  if (spread !== 'pad' || translucent) {
+    const inverse = invertMatrix(matrix);
+    if (inverse) shadingBBox = transformBounds(params.area, inverse);
+    else if (translucent) return undefined;
+    else spread = 'pad';
+  }
+
+  const createShading = (spreadMethod: SpreadMethod) => {
+    const options = { stops, spread: spreadMethod, bbox: shadingBBox };
+    return coords.length === 4
+      ? PDFShading.axial({ coords, ...options })
+      : PDFShading.radial({ coords, ...options });
+  };
+  let shading: PDFShading;
+  try {
+    shading = createShading(spread);
+  } catch (error) {
+    // Not every gradient can be repeated in PDF, e.g. a linear gradient
+    // of zero length, a radial gradient where neither circle contains
+    // the other, or one that needs too many repetitions. These fall
+    // back to padding.
+    if (spread === 'pad') throw error;
+    shading = createShading('pad');
+  }
+
+  const pattern = new PDFShadingPattern({
     shading,
     matrix: isIdentityMatrix(matrix) ? undefined : matrix,
   });
+  return { pattern, matrix, opacityMask: shading.opacityMask };
+}
+
+const spreadMethods: Record<string, SpreadMethod> = {
+  pad: 'pad',
+  reflect: 'reflect',
+  repeat: 'repeat',
+};
+
+/**
+ * Returns the axis-aligned bounds `[xMin, yMin, xMax, yMax]` of the
+ * given box after applying the given matrix.
+ */
+function transformBounds(box: Box, matrix: Matrix): [number, number, number, number] {
+  const [a, b, c, d, e, f] = matrix;
+  const xs: number[] = [];
+  const ys: number[] = [];
+  for (const [x, y] of [
+    [box.x, box.y],
+    [box.x + box.width, box.y],
+    [box.x, box.y + box.height],
+    [box.x + box.width, box.y + box.height],
+  ]) {
+    xs.push(a * x + c * y + e);
+    ys.push(b * x + d * y + f);
+  }
+  return [
+    round(Math.min(...xs)),
+    round(Math.min(...ys)),
+    round(Math.max(...xs)),
+    round(Math.max(...ys)),
+  ];
 }
 
 /**
@@ -136,8 +216,7 @@ function resolveHrefChain(element: XmlElement, idMap: Map<string, XmlElement>): 
 /**
  * Reads the color stops from the first element in the href chain that
  * has any. Offsets are clamped to [0, 1] and forced to be
- * non-decreasing, following SVG semantics. `stop-opacity` is not
- * supported, as PDF shadings carry no alpha channel.
+ * non-decreasing, following SVG semantics.
  */
 function readStops(chain: XmlElement[], currentColor: Color): ColorStop[] {
   const stopElements = chain
@@ -154,9 +233,11 @@ function readStops(chain: XmlElement[], currentColor: Color): ColorStop[] {
     const parsed = parseSvgColor(attrs['stop-color']);
     const color =
       parsed === 'currentColor' ? currentColor : parsed === 'none' ? black : (parsed ?? black);
+    const opacity = parseOpacity(attrs['stop-opacity']) ?? 1;
     stops.push({
       offset,
       color: { colorSpace: 'DeviceRGB', components: [color.red, color.green, color.blue] },
+      ...(opacity < 1 ? { opacity } : undefined),
     });
   }
   return stops;

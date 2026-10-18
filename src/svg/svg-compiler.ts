@@ -5,7 +5,7 @@
  * SVG features are ignored silently.
  */
 import type { LineCapStyle, LineJoinStyle } from '@ralfstx/pdf-core';
-import { ContentStream, ExtGState, PDFFormXObject, PDFShadingPattern } from '@ralfstx/pdf-core';
+import { ContentStream, ExtGState, PDFFormXObject } from '@ralfstx/pdf-core';
 
 import type { Box, Size } from '../box.ts';
 import type { Color } from '../colors.ts';
@@ -18,6 +18,7 @@ import {
   combineMatrices,
   getMergedAttrs,
   identityMatrix,
+  invertMatrix,
   parseDashArray,
   parseLength,
   parseNumber,
@@ -30,7 +31,8 @@ import {
 import { getPathBBox } from './svg-bbox.ts';
 import type { SvgPaint } from './svg-colors.ts';
 import { black, parseSvgColor, parseSvgPaint } from './svg-colors.ts';
-import { buildGradientPattern, isGradientElement } from './svg-gradients.ts';
+import type { GradientPaint } from './svg-gradients.ts';
+import { buildGradientPaint, isGradientElement } from './svg-gradients.ts';
 import { drawSvgPath, parseSvgPath, type PathCommand } from './svg-paths.ts';
 
 /**
@@ -103,7 +105,8 @@ export function compileSvgContent(root: XmlElement): SvgContent {
 
   const contentStream = new ContentStream();
   const viewport = { width: vbWidth, height: vbHeight };
-  renderSvg(root, contentStream, viewport);
+  const area = { x: minX, y: minY, width: vbWidth, height: vbHeight };
+  renderSvg(root, contentStream, viewport, area);
   contentStream.validate();
 
   return { contentStream, bbox, matrix, width, height };
@@ -156,7 +159,7 @@ type ShapeGeometry = {
   getBBox: () => Box | undefined;
 };
 
-type ResolvedPaint = Color | PDFShadingPattern;
+type ResolvedPaint = Color | GradientPaint;
 
 const lineCapStyles: Record<string, LineCapStyle> = { butt: 0, round: 1, square: 2 };
 const lineJoinStyles: Record<string, LineJoinStyle> = { miter: 0, round: 1, bevel: 2 };
@@ -165,7 +168,7 @@ const fillRules: Record<string, GraphicsContext['fillRule']> = {
   evenodd: 'evenodd',
 };
 
-function renderSvg(root: XmlElement, cs: ContentStream, viewport: Size): void {
+function renderSvg(root: XmlElement, cs: ContentStream, viewport: Size, area: Box): void {
   const idMap = new Map<string, XmlElement>();
   collectIds(root, idMap);
   // Elements currently being rendered, to break `use` cycles
@@ -305,13 +308,14 @@ function renderSvg(root: XmlElement, cs: ContentStream, viewport: Size): void {
     if ('id' in paint) {
       const target = idMap.get(paint.id);
       if (target && isGradientElement(target)) {
-        const pattern = buildGradientPattern(target, idMap, {
+        const gradient = buildGradientPaint(target, idMap, {
           bbox: getBBox(),
           ctm: ctx.ctm,
           viewport,
           color: ctx.color,
+          area,
         });
-        if (pattern) return pattern;
+        if (gradient) return gradient;
       }
       const fallback = paint.fallback;
       if (fallback === 'currentColor') return ctx.color;
@@ -344,6 +348,23 @@ function renderSvg(root: XmlElement, cs: ContentStream, viewport: Size): void {
         : undefined;
     if (!fill && !stroke) return;
 
+    // A soft mask affects everything painted while it is set, so the
+    // fill and the stroke are painted separately if either has one
+    if (fill && stroke && (hasOpacityMask(fill) || hasOpacityMask(stroke))) {
+      paintShape(geometry, matrix, shapeContext, fill, undefined);
+      paintShape(geometry, matrix, shapeContext, undefined, stroke);
+    } else {
+      paintShape(geometry, matrix, shapeContext, fill, stroke);
+    }
+  };
+
+  const paintShape = (
+    geometry: ShapeGeometry,
+    matrix: Matrix | undefined,
+    shapeContext: GraphicsContext,
+    fill: ResolvedPaint | undefined,
+    stroke: ResolvedPaint | undefined,
+  ) => {
     cs.saveGraphicsState();
     if (matrix) applyMatrix(cs, matrix);
     const fillAlpha = round(shapeContext.opacity * shapeContext.fillOpacity);
@@ -352,12 +373,20 @@ function renderSvg(root: XmlElement, cs: ContentStream, viewport: Size): void {
       cs.setGraphicsState(new ExtGState({ strokeOpacity: strokeAlpha, fillOpacity: fillAlpha }));
     }
     if (fill) {
-      if (fill instanceof PDFShadingPattern) cs.setFillPattern(fill);
-      else setFillingColor(cs, fill);
+      if (isGradientPaint(fill)) {
+        setOpacityMask(fill, shapeContext.ctm);
+        cs.setFillPattern(fill.pattern);
+      } else {
+        setFillingColor(cs, fill);
+      }
     }
     if (stroke) {
-      if (stroke instanceof PDFShadingPattern) cs.setStrokePattern(stroke);
-      else setStrokingColor(cs, stroke);
+      if (isGradientPaint(stroke)) {
+        setOpacityMask(stroke, shapeContext.ctm);
+        cs.setStrokePattern(stroke.pattern);
+      } else {
+        setStrokingColor(cs, stroke);
+      }
       if (shapeContext.strokeWidth !== 1) cs.setLineWidth(shapeContext.strokeWidth);
       if (shapeContext.lineCap !== 0) cs.setLineCap(shapeContext.lineCap);
       if (shapeContext.lineJoin !== 0) cs.setLineJoin(shapeContext.lineJoin);
@@ -380,13 +409,42 @@ function renderSvg(root: XmlElement, cs: ContentStream, viewport: Size): void {
     cs.restoreGraphicsState();
   };
 
+  // The soft mask is placed in the coordinate system in effect when it
+  // is set, which must be the gradient space. The current transform is
+  // therefore switched to the pattern matrix temporarily.
+  const setOpacityMask = (gradient: GradientPaint, ctm: Matrix) => {
+    if (!gradient.opacityMask) return;
+    const inverseCtm = invertMatrix(ctm);
+    const inversePattern = invertMatrix(gradient.matrix);
+    // A shape with a singular transform is not visible anyway
+    if (!inverseCtm || !inversePattern) return;
+    // These matrices are not rounded, since inverted matrices can have
+    // small components whose rounding errors would be magnified
+    applyExactMatrix(cs, combineMatrices(gradient.matrix, inverseCtm));
+    cs.setGraphicsState(gradient.opacityMask);
+    applyExactMatrix(cs, combineMatrices(ctm, inversePattern));
+  };
+
   const rootContext = deriveContext(initialContext, getMergedAttrs(root));
   renderChildren(root, rootContext);
+}
+
+function isGradientPaint(paint: ResolvedPaint): paint is GradientPaint {
+  return 'pattern' in paint;
+}
+
+function hasOpacityMask(paint: ResolvedPaint): boolean {
+  return isGradientPaint(paint) && !!paint.opacityMask;
 }
 
 function applyMatrix(cs: ContentStream, matrix: Matrix): void {
   const [a, b, c, d, e, f] = roundMatrix(matrix);
   cs.applyTransformMatrix(a, b, c, d, e, f);
+}
+
+function applyExactMatrix(cs: ContentStream, matrix: Matrix): void {
+  checkPdfNumbers(matrix, 'Invalid transformation matrix');
+  cs.applyTransformMatrix(...matrix);
 }
 
 /**

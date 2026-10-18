@@ -5,7 +5,7 @@ import type { XmlElement } from '../util/xml.ts';
 import { parseXml } from '../util/xml.ts';
 import { collectIds } from './svg-compiler.ts';
 import type { GradientParams } from './svg-gradients.ts';
-import { buildGradientPattern, isGradientElement } from './svg-gradients.ts';
+import { buildGradientPaint, isGradientElement } from './svg-gradients.ts';
 
 const redToBlue = '<stop offset="0" stop-color="red"/><stop offset="1" stop-color="blue"/>';
 const redToBlueStops = '[[0,1,0,0],[1,0,0,1]]';
@@ -156,6 +156,148 @@ describe('buildGradientPattern', () => {
     expect(pattern?.key).toContain(':[[0,0,1,0]]:');
   });
 
+  describe('spreadMethod', () => {
+    it('repeats or reflects a gradient over the visible area', () => {
+      const repeat = build(
+        `<linearGradient id="g" spreadMethod="repeat">${redToBlue}</linearGradient>`,
+      );
+      const reflect = build(
+        `<linearGradient id="g" spreadMethod="reflect">${redToBlue}</linearGradient>`,
+      );
+
+      // The area of 200 x 100 mapped back through the bbox of 100 x 50
+      expect(repeat?.key).toContain(':[true,true]:repeat:[0,0,2,2]:[100,0,0,50,0,0]');
+      expect(reflect?.key).toContain(':[true,true]:reflect:[0,0,2,2]:');
+    });
+
+    it('maps the area back through all transforms', () => {
+      const pattern = build(
+        `<linearGradient id="g" spreadMethod="repeat" gradientTransform="rotate(90)">
+          ${redToBlue}
+        </linearGradient>`,
+        { ctm: [1, 0, 0, 1, 10, 0] },
+      );
+
+      // Pattern matrix: rotate(90), then bbox mapping, then translate(10 0)
+      expect(pattern?.key).toContain(':repeat:[0,-1.9,2,0.1]:[0,50,-100,0,10,0]');
+    });
+
+    it('pads a gradient for missing or invalid values', () => {
+      expect(build(`<linearGradient id="g">${redToBlue}</linearGradient>`)?.key).toContain(
+        ':pad::',
+      );
+      expect(
+        build(`<linearGradient id="g" spreadMethod="foo">${redToBlue}</linearGradient>`)?.key,
+      ).toContain(':pad::');
+    });
+
+    it('inherits the spread method via href', () => {
+      const pattern = build(
+        `<svg>
+          <linearGradient id="base" spreadMethod="reflect">${redToBlue}</linearGradient>
+          <linearGradient id="g" href="#base"/>
+        </svg>`,
+      );
+
+      expect(pattern?.key).toContain(':reflect:');
+    });
+
+    it('repeats a radial gradient with the focal circle inside the end circle', () => {
+      const pattern = build(
+        `<radialGradient id="g" spreadMethod="repeat" fx="0.6" fy="0.5">${redToBlue}</radialGradient>`,
+      );
+
+      expect(pattern?.key).toContain(':repeat:[0,0,2,2]:');
+    });
+
+    it('pads a radial gradient with the focal circle outside the end circle', () => {
+      const pattern = build(
+        `<radialGradient id="g" spreadMethod="repeat" fx="1.2" fy="0.5">${redToBlue}</radialGradient>`,
+      );
+
+      expect(pattern?.key).toContain(':pad:');
+    });
+
+    it('pads a radial gradient with circles that touch or coincide', () => {
+      const touching = build(
+        `<radialGradient id="g" spreadMethod="repeat" fx="1">${redToBlue}</radialGradient>`,
+      );
+      const coinciding = build(
+        `<radialGradient id="g" spreadMethod="repeat" fr="0.5">${redToBlue}</radialGradient>`,
+      );
+
+      expect(touching?.key).toContain(':pad:');
+      expect(coinciding?.key).toContain(':pad:');
+    });
+
+    it('pads a linear gradient of zero length', () => {
+      const pattern = build(
+        `<linearGradient id="g" spreadMethod="repeat" x2="0">${redToBlue}</linearGradient>`,
+      );
+
+      expect(pattern?.key).toContain(':pad:');
+    });
+
+    it('pads a gradient that would need too many repetitions', () => {
+      const pattern = build(
+        `<linearGradient id="g" spreadMethod="repeat" x2="0.0001">${redToBlue}</linearGradient>`,
+      );
+
+      expect(pattern?.key).toContain(':pad:');
+    });
+
+    it('pads a gradient whose pattern matrix is not invertible', () => {
+      const pattern = build(
+        `<linearGradient id="g" spreadMethod="repeat">${redToBlue}</linearGradient>`,
+        { ctm: [0, 0, 0, 0, 0, 0] },
+      );
+
+      expect(pattern?.key).toContain(':pad::');
+    });
+  });
+
+  describe('stop-opacity', () => {
+    it('creates an opacity mask for translucent stops', () => {
+      const paint = buildPaint(
+        `<linearGradient id="g">
+          <stop offset="0" stop-color="red" stop-opacity="0.5"/>
+          <stop offset="1" stop-color="blue"/>
+        </linearGradient>`,
+      );
+
+      expect(paint?.pattern.key).toContain(`:${redToBlueStops}:[true,true]:pad:[0,0,2,2]:`);
+      expect(paint?.matrix).toEqual([100, 0, 0, 50, 0, 0]);
+      expect(paint?.opacityMask?.key).toContain(':[[0,0.5],[1,1]]:');
+    });
+
+    it('reads stop-opacity from the style attribute and supports percentages', () => {
+      const paint = buildPaint(
+        `<linearGradient id="g">
+          <stop offset="0" style="stop-opacity: 25%"/>
+          <stop offset="1" stop-opacity="2"/>
+        </linearGradient>`,
+      );
+
+      expect(paint?.opacityMask?.key).toContain(':[[0,0.25],[1,1]]:');
+    });
+
+    it('creates no opacity mask for opaque stops', () => {
+      const paint = buildPaint(`<linearGradient id="g">${redToBlue}</linearGradient>`);
+
+      expect(paint?.opacityMask).toBeUndefined();
+      expect(paint?.pattern.key).toContain(':pad::');
+    });
+
+    it('returns undefined for a translucent gradient whose matrix is not invertible', () => {
+      const paint = buildPaint(
+        `<linearGradient id="g"><stop offset="0" stop-opacity="0.5"/></linearGradient>`,
+        { ctm: [0, 0, 0, 0, 0, 0] },
+      );
+
+      expect(paint).toBeUndefined();
+    });
+  });
+
   it('inherits stops and attributes via href', () => {
     const pattern = build(
       `<svg>
@@ -219,13 +361,18 @@ describe('buildGradientPattern', () => {
 });
 
 function build(svgSource: string, params?: Partial<GradientParams>, id = 'g') {
+  return buildPaint(svgSource, params, id)?.pattern;
+}
+
+function buildPaint(svgSource: string, params?: Partial<GradientParams>, id = 'g') {
   const idMap = new Map<string, XmlElement>();
   collectIds(parseXml(svgSource), idMap);
-  return buildGradientPattern(idMap.get(id)!, idMap, {
+  return buildGradientPaint(idMap.get(id)!, idMap, {
     bbox: { x: 0, y: 0, width: 100, height: 50 },
     ctm: [1, 0, 0, 1, 0, 0],
     viewport: { width: 200, height: 100 },
     color: rgb(0, 0, 0),
+    area: { x: 0, y: 0, width: 200, height: 100 },
     ...params,
   });
 }
