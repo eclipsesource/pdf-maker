@@ -191,7 +191,8 @@ export type BlockProps = {
   /**
    * Controls whether a page break may occur before the block.
    * - `auto` (default): Insert a page break when needed.
-   * - `always`: Always insert a page break before this block.
+   * - `always`: Always insert a page break before this block, unless it is inside
+   *   a block that avoids page breaks, such as a column, header, or footer.
    * - `avoid`: Do not insert a page break before this block if it can be avoided.
    */
   breakBefore?: 'auto' | 'always' | 'avoid';
@@ -199,7 +200,8 @@ export type BlockProps = {
   /**
    * Controls whether a page break may occur after the block.
    * - `auto` (default): Insert a page break when needed.
-   * - `always`: Always insert a page break after this block.
+   * - `always`: Always insert a page break after this block, unless it is inside
+   *   a block that avoids page breaks, such as a column, header, or footer.
    * - `avoid`: Do not insert a page break after this block if it can be avoided.
    */
   breakAfter?: 'auto' | 'always' | 'avoid';

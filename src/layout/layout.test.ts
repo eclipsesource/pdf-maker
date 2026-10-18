@@ -136,6 +136,25 @@ describe('layout', () => {
       expect(collectText(pages[1].content)).toEqual(lines);
     });
 
+    it('ignores forced breaks inside a rows column', async () => {
+      const def = readDocumentDefinition({
+        content: [
+          {
+            columns: [
+              { rows: [{ text: 'line 0', breakAfter: 'always' }, { text: 'line 1' }] },
+              { rows: [{ text: 'line 2' }, { text: 'line 3', breakBefore: 'always' }] },
+            ],
+          },
+        ],
+        margin: 50,
+      });
+
+      const pages = await layoutPages(def, ctx);
+
+      expect(pages).toHaveLength(1);
+      expect(collectText(pages[0].content)).toEqual(['line 0', 'line 1', 'line 2', 'line 3']);
+    });
+
     it('lays out header', async () => {
       const def = readDocumentDefinition({
         margin: 50,

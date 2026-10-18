@@ -8,6 +8,9 @@
   even with `breakInside: 'avoid'`. The lines that did not fit were
   silently dropped. The columns block is now moved to the next page as a
   whole.
+- Rows after a `breakBefore` or `breakAfter: 'always'` inside columns,
+  headers, footers, or a block with `breakInside: 'avoid'` were silently
+  dropped. Forced breaks are now ignored inside such blocks.
 
 ## [0.6.3] - 2026-08-02
 

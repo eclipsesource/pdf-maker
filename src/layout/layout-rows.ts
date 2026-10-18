@@ -73,8 +73,11 @@ export async function layoutRowsContent(
       break;
     }
 
-    if (row.breakAfter === 'always' || block.rows[rowIdx + 1]?.breakBefore === 'always') {
-      // A break is forced after this row. Break here.
+    if (
+      block.breakInside !== 'avoid' &&
+      (row.breakAfter === 'always' || block.rows[rowIdx + 1]?.breakBefore === 'always')
+    ) {
+      // A break is forced after this row. Break here, unless the block avoids breaks inside.
       performBreakAt(rowIdx + 1);
       break;
     }
