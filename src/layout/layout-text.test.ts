@@ -320,6 +320,18 @@ describe('layout-text', () => {
       expect(remainingText).toBe('bar\nbaz');
     });
 
+    it('keeps language in remainder', async () => {
+      box.height = 10;
+      const text = [span('foo\nbar', { language: 'de' })];
+      const block = { text };
+
+      const { remainder } = await layoutTextContent(block, box, ctx);
+
+      expect((remainder as TextBlock).text).toEqual([
+        { text: 'bar', attrs: expect.objectContaining({ language: 'de' }) },
+      ]);
+    });
+
     it('does not break if breakInside = avoid', async () => {
       box.height = 100;
       const longText = range(100)

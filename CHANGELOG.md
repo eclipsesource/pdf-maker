@@ -27,7 +27,8 @@
 - Rows after a `breakBefore` or `breakAfter: 'always'` inside columns,
   headers, footers, or a block with `breakInside: 'avoid'` were silently
   dropped. Forced breaks are now ignored inside such blocks.
-- Text split across pages lost its line breaks on the following pages.
+- Text split across pages lost its line breaks and its `language` on
+  the following pages.
 - Links in right-aligned or centered text were placed at the wrong
   position.
 - Text in monospaced fonts was drawn with overlapping glyphs, and text

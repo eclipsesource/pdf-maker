@@ -244,6 +244,10 @@ describe('text', () => {
     it('converts newline segment to newline text', () => {
       expect(convertToTextSpan(seg('\n')).text).toBe('\n');
     });
+
+    it('includes language in attrs', () => {
+      expect(convertToTextSpan(seg('foo', { language: 'de' })).attrs.language).toBe('de');
+    });
   });
 
   describe('buildShapeOptions', () => {
@@ -406,6 +410,12 @@ describe('text', () => {
       expect(flattenTextSegments(segments)).toEqual(segments);
     });
 
+    it('does not merge segments with different language', () => {
+      const segments = [seg('foo', { language: 'de' }), seg('bar', { language: 'fr' })];
+
+      expect(flattenTextSegments(segments)).toEqual(segments);
+    });
+
     it('does not merge segments with different lineHeight', () => {
       const segments = [seg('foo', { lineHeight: 1.5 }), seg('bar', { lineHeight: 1.3 })];
 
@@ -535,6 +545,7 @@ function seg(text: string, attrs?: Partial<TextSegment>): TextSegment {
     fontKerning,
     fontVariantLigatures,
     fontFeatureSettings,
+    language,
   } = attrs ?? {};
   const width = text.length * fontSize;
   const glyphs = [...text].map((c) => ({
@@ -556,5 +567,6 @@ function seg(text: string, attrs?: Partial<TextSegment>): TextSegment {
     fontKerning,
     fontVariantLigatures,
     fontFeatureSettings,
+    language,
   } as TextSegment;
 }

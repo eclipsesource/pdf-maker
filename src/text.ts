@@ -28,6 +28,7 @@ export type TextSegment = {
   fontKerning?: 'normal' | 'none';
   fontVariantLigatures?: 'normal' | 'none';
   fontFeatureSettings?: Record<string, boolean>;
+  language?: string;
 };
 
 export async function extractTextSegments(
@@ -50,6 +51,7 @@ export async function extractTextSegments(
         fontKerning,
         fontVariantLigatures,
         fontFeatureSettings,
+        language,
       } = attrs;
       const font = await fontStore.selectFont({ fontFamily, fontStyle, fontWeight });
       const height = getTextHeight(font, fontSize);
@@ -78,6 +80,7 @@ export async function extractTextSegments(
             fontKerning,
             fontVariantLigatures,
             fontFeatureSettings,
+            language,
           } as TextSegment;
         });
       });
@@ -102,6 +105,7 @@ export function convertToTextSpan(segment: TextSegment): TextSpan {
     fontKerning,
     fontVariantLigatures,
     fontFeatureSettings,
+    language,
   } = segment;
   return {
     text: type === 'newline' ? '\n' : getGlyphRunText(glyphs),
@@ -118,6 +122,7 @@ export function convertToTextSpan(segment: TextSegment): TextSpan {
       fontKerning,
       fontVariantLigatures,
       fontFeatureSettings,
+      language,
     },
   };
 }
@@ -239,7 +244,8 @@ export function flattenTextSegments(segments: TextSegment[]): TextSegment[] {
       segment.letterSpacing === prev?.letterSpacing &&
       segment.fontKerning === prev?.fontKerning &&
       segment.fontVariantLigatures === prev?.fontVariantLigatures &&
-      equalsFontFeatureSettings(segment.fontFeatureSettings, prev?.fontFeatureSettings)
+      equalsFontFeatureSettings(segment.fontFeatureSettings, prev?.fontFeatureSettings) &&
+      segment.language === prev?.language
     ) {
       prev.glyphs = [...prev.glyphs, ...segment.glyphs];
       prev.width += segment.width;
