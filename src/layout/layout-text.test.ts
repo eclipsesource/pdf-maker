@@ -222,6 +222,24 @@ describe('layout-text', () => {
       ]);
     });
 
+    it('ignores whitespace around line breaks when aligning', async () => {
+      box.width = 50;
+      const text = [span('foo '), span(' bar', { fontStyle: 'italic' })];
+      const block = { text, textAlign: 'right' as const };
+
+      const { frame } = await layoutTextContent(block, box, ctx);
+
+      expect(frame.objects).toEqual([
+        {
+          type: 'text',
+          rows: [
+            expect.objectContaining({ x: box.x + 20, width: 30 }),
+            expect.objectContaining({ x: box.x + 20, width: 30 }),
+          ],
+        },
+      ]);
+    });
+
     it('aligns link objects with their row', async () => {
       const text = [span('foo '), span('bar', { link: 'test-link' })];
       const block = { text, textAlign: 'right' as const };

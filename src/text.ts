@@ -169,20 +169,29 @@ function isBreakingSpace(chunk: string): boolean {
 
 export function breakLine(segments: TextSegment[], maxWidth: number): TextSegment[][] {
   const breakIdx = findLinebreak(segments, maxWidth);
-  if (breakIdx === 0) {
-    // A line break is required before the first segment. Insert an
-    // empty segment with the text height of the first segment to
-    // represent a blank line and prevent collapsing of newlines.
-    const head = [{ ...segments[0], type: 'text' as const, glyphs: [], width: 0 }];
-    const tail = segments.slice(breakIdx + 1);
-    return tail.length ? [head, tail] : [head];
+  if (breakIdx === undefined) {
+    return [segments];
   }
-  if (breakIdx !== undefined) {
-    const head = segments.slice(0, breakIdx);
-    const tail = segments.slice(breakIdx + 1);
-    return tail.length ? [head, tail] : [head];
+  // Whitespace around a line break is not rendered and must not count in the line width.
+  const head = trimWhitespace(segments.slice(0, breakIdx), 'end');
+  const tail = trimWhitespace(segments.slice(breakIdx + 1), 'start');
+  // A line without visible content, such as a blank line between two newlines, still
+  // needs the height of its text. Insert an empty segment to keep it.
+  const line = head.length
+    ? head
+    : [{ ...segments[0], type: 'text' as const, glyphs: [], width: 0 }];
+  return tail.length ? [line, tail] : [line];
+}
+
+function trimWhitespace(segments: TextSegment[], side: 'start' | 'end'): TextSegment[] {
+  let start = 0;
+  let end = segments.length;
+  if (side === 'start') {
+    while (start < end && segments[start].type === 'whitespace') start++;
+  } else {
+    while (end > start && segments[end - 1].type === 'whitespace') end--;
   }
-  return [segments];
+  return segments.slice(start, end);
 }
 
 function findLinebreak(segments: TextSegment[], maxWidth: number): number | undefined {

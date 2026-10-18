@@ -528,6 +528,25 @@ describe('text', () => {
       expect(breakLine(segments, 20)).toEqual([[seg('aaa')], [seg('bbb')]]);
     });
 
+    it('removes all whitespace around line break', () => {
+      const segments = [seg('aaa'), seg(' '), seg(' '), seg('bbb'), seg(' '), seg(' '), seg('ccc')];
+
+      expect(breakLine(segments, 90)).toEqual([
+        [seg('aaa'), seg(' '), seg(' '), seg('bbb')],
+        [seg('ccc')],
+      ]);
+      expect(breakLine(segments, 70)).toEqual([
+        [seg('aaa')],
+        [seg('bbb'), seg(' '), seg(' '), seg('ccc')],
+      ]);
+    });
+
+    it('removes whitespace after newline', () => {
+      const segments = [seg('aaa'), seg('\n'), seg(' '), seg('bbb')];
+
+      expect(breakLine(segments, 80)).toEqual([[seg('aaa')], [seg('bbb')]]);
+    });
+
     it('removes leading whitespace before line break', () => {
       const segments = [seg(' '), seg('aaa')];
 
