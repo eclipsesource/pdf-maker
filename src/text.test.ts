@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { rgb } from './colors.ts';
 import { FontStore } from './font-store.ts';
 import { fakeFont } from './test/test-utils.ts';
-import type { TextSegment } from './text.ts';
+import type { ShapeCache, TextSegment } from './text.ts';
 import {
   breakLine,
   buildShapeOptions,
@@ -156,6 +156,32 @@ describe('text', () => {
         scriptTag: 'latn',
         features: { smcp: true, liga: false, clig: false, calt: false, kern: false },
       });
+    });
+
+    it('shapes repeated words only once', async () => {
+      const shapeTextSpy = vi.fn(normalFont.shapeText.bind(normalFont));
+      normalFont.shapeText = shapeTextSpy;
+      const shapeCache: ShapeCache = new Map();
+
+      await extractTextSegments([{ text: 'foo bar foo', attrs: {} }], fontStore, shapeCache);
+      await extractTextSegments([{ text: 'bar foo', attrs: {} }], fontStore, shapeCache);
+
+      expect(shapeTextSpy.mock.calls.map(([text]) => text)).toEqual(['foo', ' ', 'bar']);
+    });
+
+    it('shapes words again with different shape options', async () => {
+      const shapeTextSpy = vi.fn(normalFont.shapeText.bind(normalFont));
+      normalFont.shapeText = shapeTextSpy;
+      const shapeCache: ShapeCache = new Map();
+
+      await extractTextSegments([{ text: 'foo', attrs: {} }], fontStore, shapeCache);
+      await extractTextSegments(
+        [{ text: 'foo', attrs: { fontKerning: 'none' } }],
+        fontStore,
+        shapeCache,
+      );
+
+      expect(shapeTextSpy).toHaveBeenCalledTimes(2);
     });
 
     it('passes scriptTag for Latin text', async () => {

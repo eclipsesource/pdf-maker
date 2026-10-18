@@ -58,6 +58,7 @@ export class PdfMaker {
     const ctx: MakerCtx = {
       fontStore: this.#fontStore,
       imageLoader: createImageLoader(this.#resourceRoot),
+      shapeCache: new Map(),
     };
     if (def.dev?.guides != null) ctx.guides = def.dev.guides;
     const pages = await layoutPages(def, ctx);

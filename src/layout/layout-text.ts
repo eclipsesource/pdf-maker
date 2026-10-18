@@ -37,7 +37,9 @@ export async function layoutTextContent(
 
 async function layoutText(block: TextBlock, box: Box, ctx: MakerCtx) {
   const segments =
-    'shapedText' in block ? block.shapedText : await extractTextSegments(block.text, ctx.fontStore);
+    'shapedText' in block
+      ? block.shapedText
+      : await extractTextSegments(block.text, ctx.fontStore, ctx.shapeCache);
   const rows: TextRowObject[] = [];
   const rowLinks: LinkObject[][] = [];
   let remainingSegments = segments;

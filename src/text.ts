@@ -1,4 +1,4 @@
-import { getTextWidth, type PDFFont, type ShapedGlyph } from '@ralfstx/pdf-core';
+import { getTextWidth, type PDFFont, type ShapedGlyph, type ShapeOptions } from '@ralfstx/pdf-core';
 
 import type { FontStyle, FontWeight } from './api/text.ts';
 import type { FontStore } from './font-store.ts';
@@ -34,9 +34,16 @@ export type TextSegment = {
   language?: string;
 };
 
+/**
+ * Shaped glyphs by font, and by shape options and text. Shaping is by far the most expensive
+ * step of the text layout, and words repeat a lot within a document.
+ */
+export type ShapeCache = Map<PDFFont, Map<string, ShapedGlyph[]>>;
+
 export async function extractTextSegments(
   textSpans: TextSpan[],
   fontStore: FontStore,
+  shapeCache: ShapeCache = new Map(),
 ): Promise<TextSegment[]> {
   const segments = await Promise.all(
     textSpans.map(async (span) => {
@@ -61,10 +68,10 @@ export async function extractTextSegments(
 
       return segmentByScript(text).flatMap((run) => {
         const scriptTag = scriptToOpenTypeTag(run.script);
-        const shapeOpts = buildShapeOptions(attrs, scriptTag);
+        const shape = createShaper(font, buildShapeOptions(attrs, scriptTag), shapeCache);
         return splitChunks(run.text).map((chunk) => {
           const type = chunk === '\n' ? 'newline' : isBreakingSpace(chunk) ? 'whitespace' : 'text';
-          const glyphs = type === 'newline' ? [] : font.shapeText(chunk, shapeOpts);
+          const glyphs = type === 'newline' ? [] : shape(chunk);
           return {
             type,
             glyphs,
@@ -90,6 +97,21 @@ export async function extractTextSegments(
     }),
   );
   return segments.flat();
+}
+
+function createShaper(font: PDFFont, opts: ShapeOptions | undefined, cache: ShapeCache) {
+  const fontCache = cache.get(font) ?? new Map<string, ShapedGlyph[]>();
+  cache.set(font, fontCache);
+  const optsKey = opts ? JSON.stringify(opts) : '';
+  return (text: string): ShapedGlyph[] => {
+    const key = `${optsKey}\0${text}`;
+    let glyphs = fontCache.get(key);
+    if (!glyphs) {
+      glyphs = font.shapeText(text, opts);
+      fontCache.set(key, glyphs);
+    }
+    return glyphs;
+  };
 }
 
 /**
