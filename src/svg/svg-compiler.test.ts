@@ -503,7 +503,7 @@ describe('compileSvgContent', () => {
       <stop offset="1" stop-color="blue"/>
     </linearGradient>`;
     const patternKey =
-      'pattern:shading:2:DeviceRGB:[0,0,1,0]:[[0,1,0,0],[1,0,0,1]]:[true,true]:[100,0,0,50,0,0]';
+      'pattern:shading:2:DeviceRGB:[0,0,1,0]:[[0,1,0,0],[1,0,0,1]]:[true,true]:pad::[100,0,0,50,0,0]';
 
     it('fills a shape with a gradient defined in defs', () => {
       expect(

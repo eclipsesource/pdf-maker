@@ -23,7 +23,7 @@ describe('buildGradientPattern', () => {
     const pattern = build(`<linearGradient id="g">${redToBlue}</linearGradient>`);
 
     expect(pattern?.key).toBe(
-      `pattern:shading:2:DeviceRGB:[0,0,1,0]:${redToBlueStops}:[true,true]:[100,0,0,50,0,0]`,
+      `pattern:shading:2:DeviceRGB:[0,0,1,0]:${redToBlueStops}:[true,true]:pad::[100,0,0,50,0,0]`,
     );
   });
 
@@ -52,7 +52,7 @@ describe('buildGradientPattern', () => {
 
     // No pattern matrix since the accumulated transform is the identity
     expect(pattern?.key).toBe(
-      `pattern:shading:2:DeviceRGB:[10,20,100,100]:${redToBlueStops}:[true,true]:`,
+      `pattern:shading:2:DeviceRGB:[10,20,100,100]:${redToBlueStops}:[true,true]:pad::`,
     );
   });
 
@@ -78,7 +78,7 @@ describe('buildGradientPattern', () => {
     const pattern = build(`<radialGradient id="g">${redToBlue}</radialGradient>`);
 
     expect(pattern?.key).toBe(
-      `pattern:shading:3:DeviceRGB:[0.5,0.5,0,0.5,0.5,0.5]:${redToBlueStops}:[true,true]:[100,0,0,50,0,0]`,
+      `pattern:shading:3:DeviceRGB:[0.5,0.5,0,0.5,0.5,0.5]:${redToBlueStops}:[true,true]:pad::[100,0,0,50,0,0]`,
     );
   });
 

@@ -35,7 +35,7 @@
     "examples": "./examples/run-all-examples.sh"
   },
   "dependencies": {
-    "@ralfstx/pdf-core": "^0.2.2"
+    "@ralfstx/pdf-core": "^0.3.0"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

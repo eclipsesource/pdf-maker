@@ -2,6 +2,16 @@
 
 ## [Unreleased]
 
+### Changed
+
+- Fonts are now registered under their typographic family name when the
+  font provides one. Fonts with more than the four styles regular,
+  italic, bold, and bold italic used to report a separate family for
+  their extra styles, e.g. `Roboto Light` instead of `Roboto`. Such
+  styles are now selected via `fontFamily` and `fontWeight`. A family
+  name passed in the `family` option of `registerFont()` still takes
+  precedence.
+
 ### Fixed
 
 - Text in a rows block inside columns could be cut off at a page break,
@@ -11,6 +21,10 @@
 - Rows after a `breakBefore` or `breakAfter: 'always'` inside columns,
   headers, footers, or a block with `breakInside: 'avoid'` were silently
   dropped. Forced breaks are now ignored inside such blocks.
+- Text in monospaced fonts was drawn with overlapping glyphs, and text
+  with combining marks was misplaced in some fonts. Text shaping now
+  also supports stacked combining marks, marks on ligatures, and
+  contextual kerning.
 
 ## [0.6.3] - 2026-08-02
 

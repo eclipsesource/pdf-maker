@@ -57,7 +57,11 @@ describe('FontStore', () => {
       store.registerFont(robotoLightItalic);
 
       const selected1 = await store.selectFont({ fontFamily: 'Roboto' });
-      const selected2 = await store.selectFont({ fontFamily: 'Roboto Light', fontStyle: 'italic' });
+      const selected2 = await store.selectFont({
+        fontFamily: 'Roboto',
+        fontStyle: 'italic',
+        fontWeight: 300,
+      });
 
       expect(selected1.fontName).toBe('Roboto');
       expect(selected2.fontName).toBe('Roboto Light Italic');
