@@ -221,6 +221,18 @@ describe('layout-text', () => {
       ]);
     });
 
+    it('aligns link objects with their row', async () => {
+      const text = [span('foo '), span('bar', { link: 'test-link' })];
+      const block = { text, textAlign: 'right' as const };
+
+      const { frame } = await layoutTextContent(block, box, ctx);
+
+      expect(frame.objects).toEqual([
+        { type: 'text', rows: [expect.objectContaining({ x: box.x + box.width - 70 })] },
+        expect.objectContaining({ type: 'link', x: box.x + box.width - 30, width: 30 }),
+      ]);
+    });
+
     it('includes blank line for consecutive newlines', async () => {
       const text = [span('foo\n\nbar', { fontSize: 10, lineHeight: 1 })];
       const block = { text };

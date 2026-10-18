@@ -37,7 +37,7 @@ async function layoutText(block: TextBlock, box: Box, ctx: MakerCtx) {
   const { text } = block;
   const segments = await extractTextSegments(text, ctx.fontStore);
   const rows: TextRowObject[] = [];
-  const objects: LinkObject[] = [];
+  const rowLinks: LinkObject[][] = [];
   let remainingSegments = segments;
   const remainingSpace = { ...box };
   const size: Size = { width: 0, height: 0 };
@@ -54,8 +54,8 @@ async function layoutText(block: TextBlock, box: Box, ctx: MakerCtx) {
       }
     }
 
-    if (rowObjects.length) objects.push(...rowObjects);
     rows.push(row);
+    rowLinks.push(rowObjects);
     remainingSegments = remainder;
     remainingSpace.height -= row.height;
     remainingSpace.y += row.height;
@@ -63,23 +63,17 @@ async function layoutText(block: TextBlock, box: Box, ctx: MakerCtx) {
     size.height += row.height;
   }
 
-  // align rows and link objects
+  // align rows and move their links along
   const width = block.autoWidth ? size.width : box.width;
-  if (block.textAlign === 'right') {
-    rows.forEach((row) => {
-      row.x += width - row.width;
-    });
-    objects.forEach((obj) => {
-      obj.x += width - obj.width;
-    });
-  } else if (block.textAlign === 'center') {
-    rows.forEach((row) => {
-      row.x += (width - row.width) / 2;
-    });
-    objects.forEach((obj) => {
-      obj.x += (width - obj.width) / 2;
+  if (block.textAlign === 'right' || block.textAlign === 'center') {
+    rows.forEach((row, idx) => {
+      const free = width - row.width;
+      const shift = block.textAlign === 'right' ? free : free / 2;
+      row.x += shift;
+      rowLinks[idx].forEach((link) => (link.x += shift));
     });
   }
+  const objects = rowLinks.flat();
 
   const remainder = remainingSegments?.length
     ? flattenTextSegments(remainingSegments).map((s) => convertToTextSpan(s))

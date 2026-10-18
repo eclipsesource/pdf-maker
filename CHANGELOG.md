@@ -27,6 +27,8 @@
 - Rows after a `breakBefore` or `breakAfter: 'always'` inside columns,
   headers, footers, or a block with `breakInside: 'avoid'` were silently
   dropped. Forced breaks are now ignored inside such blocks.
+- Links in right-aligned or centered text were placed at the wrong
+  position.
 - Text in monospaced fonts was drawn with overlapping glyphs, and text
   with combining marks was misplaced in some fonts. Text shaping now
   also supports stacked combining marks, marks on ligatures, and
