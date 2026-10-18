@@ -6,7 +6,7 @@ import { createRowGuides } from '../guides.ts';
 import type { MakerCtx } from '../maker-ctx.ts';
 import type { TextBlock } from '../read/read-block.ts';
 import type { TextSegment } from '../text.ts';
-import { breakLine, convertToTextSpan, extractTextSegments, flattenTextSegments } from '../text.ts';
+import { breakLine, extractTextSegments, flattenTextSegments } from '../text.ts';
 import { omit } from '../util/utils.ts';
 import type { LayoutContent } from './layout.ts';
 
@@ -21,7 +21,9 @@ export async function layoutTextContent(
   if (text.objects?.length) objects.push(...text.objects);
   if (ctx.guides) objects.push(...text.rows.map((row) => createRowGuides(row)));
 
-  const remainder = text.remainder ? { ...omit(block, 'id'), text: text.remainder } : undefined;
+  const remainder = text.remainder
+    ? { ...omit(block, 'id', 'text'), shapedText: text.remainder }
+    : undefined;
 
   return {
     frame: {
@@ -34,8 +36,8 @@ export async function layoutTextContent(
 }
 
 async function layoutText(block: TextBlock, box: Box, ctx: MakerCtx) {
-  const { text } = block;
-  const segments = await extractTextSegments(text, ctx.fontStore);
+  const segments =
+    'shapedText' in block ? block.shapedText : await extractTextSegments(block.text, ctx.fontStore);
   const rows: TextRowObject[] = [];
   const rowLinks: LinkObject[][] = [];
   let remainingSegments = segments;
@@ -75,9 +77,7 @@ async function layoutText(block: TextBlock, box: Box, ctx: MakerCtx) {
   }
   const objects = rowLinks.flat();
 
-  const remainder = remainingSegments?.length
-    ? flattenTextSegments(remainingSegments).map((s) => convertToTextSpan(s))
-    : undefined;
+  const remainder = remainingSegments?.length ? remainingSegments : undefined;
 
   return { rows, objects, size, remainder };
 }

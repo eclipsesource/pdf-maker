@@ -1,13 +1,15 @@
 import type { PDFFont } from '@ralfstx/pdf-core';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { Box } from '../box.ts';
 import { rgb } from '../colors.ts';
 import { FontStore } from '../font-store.ts';
 import type { FontSelector } from '../fonts.ts';
 import type { MakerCtx } from '../maker-ctx.ts';
-import type { TextBlock } from '../read/read-block.ts';
+import type { Block, ShapedTextBlock } from '../read/read-block.ts';
 import { extractTextRows, fakeFont, range, span } from '../test/test-utils.ts';
+import type { TextSegment } from '../text.ts';
+import { getGlyphRunText } from '../text.ts';
 import { layoutTextContent } from './layout-text.ts';
 
 describe('layout-text', () => {
@@ -333,14 +335,9 @@ describe('layout-text', () => {
       const { frame, remainder } = await layoutTextContent(block, box, ctx);
 
       expect(extractTextRows(frame).join()).toMatch(/^foo.*foo$/);
-      expect(remainder).toEqual({
-        text: [
-          {
-            text: expect.stringMatching(/^foo.*foo$/),
-            attrs: expect.objectContaining({ fontSize: 20 }),
-          },
-        ],
-      });
+      expect(remainder).toEqual({ shapedText: expect.any(Array) });
+      expect(getRemainingText(remainder)).toMatch(/^foo.*foo$/);
+      expect(getShapedText(remainder)[0]).toEqual(expect.objectContaining({ fontSize: 20 }));
     });
 
     it('does not break text before the first line', async () => {
@@ -354,14 +351,9 @@ describe('layout-text', () => {
       const { frame, remainder } = await layoutTextContent(block, box, ctx);
 
       expect(extractTextRows(frame).join()).toMatch(/^foo.*foo$/);
-      expect(remainder).toEqual({
-        text: [
-          {
-            text: expect.stringMatching(/^foo.*foo$/),
-            attrs: expect.objectContaining({ fontSize: 20 }),
-          },
-        ],
-      });
+      expect(remainder).toEqual({ shapedText: expect.any(Array) });
+      expect(getRemainingText(remainder)).toMatch(/^foo.*foo$/);
+      expect(getShapedText(remainder)[0]).toEqual(expect.objectContaining({ fontSize: 20 }));
     });
 
     it('keeps newlines in remainder', async () => {
@@ -371,8 +363,7 @@ describe('layout-text', () => {
 
       const { remainder } = await layoutTextContent(block, box, ctx);
 
-      const remainingText = (remainder as TextBlock).text.map((s) => s.text).join('');
-      expect(remainingText).toBe('bar\nbaz');
+      expect(getRemainingText(remainder)).toBe('bar\nbaz');
     });
 
     it('keeps language in remainder', async () => {
@@ -382,9 +373,20 @@ describe('layout-text', () => {
 
       const { remainder } = await layoutTextContent(block, box, ctx);
 
-      expect((remainder as TextBlock).text).toEqual([
-        { text: 'bar', attrs: expect.objectContaining({ language: 'de' }) },
-      ]);
+      expect(getShapedText(remainder)).toEqual([expect.objectContaining({ language: 'de' })]);
+    });
+
+    it('continues remainder at new width without shaping again', async () => {
+      const shapeText = vi.spyOn(defaultFont, 'shapeText');
+      const text = [span('aaa bbb ccc ddd eee', { fontSize: 10 })];
+      const first = await layoutTextContent({ text }, { ...box, width: 80, height: 10 }, ctx);
+      shapeText.mockClear();
+
+      const { frame } = await layoutTextContent(first.remainder as ShapedTextBlock, box, ctx);
+
+      expect(extractTextRows(first.frame)).toEqual(['aaa bbb']);
+      expect(extractTextRows(frame)).toEqual(['ccc ddd eee']);
+      expect(shapeText).not.toHaveBeenCalled();
     });
 
     it('does not break if breakInside = avoid', async () => {
@@ -402,3 +404,13 @@ describe('layout-text', () => {
     });
   });
 });
+
+function getRemainingText(remainder: Block | undefined): string {
+  return getShapedText(remainder)
+    .map((seg) => (seg.type === 'newline' ? '\n' : getGlyphRunText(seg.glyphs)))
+    .join('');
+}
+
+function getShapedText(block: Block | undefined): TextSegment[] {
+  return (block as ShapedTextBlock).shapedText;
+}

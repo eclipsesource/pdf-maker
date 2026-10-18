@@ -4,8 +4,9 @@ import type { Box } from '../box.ts';
 import { FontStore } from '../font-store.ts';
 import type { Frame } from '../frame.ts';
 import type { MakerCtx } from '../maker-ctx.ts';
-import type { Block } from '../read/read-block.ts';
+import type { Block, RowsBlock, ShapedTextBlock } from '../read/read-block.ts';
 import { extractTextRows, fakeFont, range, span } from '../test/test-utils.ts';
+import { getGlyphRunText } from '../text.ts';
 import { layoutRowsContent } from './layout-rows.ts';
 
 describe('layout-rows', () => {
@@ -322,8 +323,12 @@ describe('layout-rows', () => {
         expect(renderedIds(frame)).toEqual(['0', '1', '2', '3', '4', '5', '6', 'extra']);
         expect(extractTextRows(frame)).toEqual(['line1']);
         expect(remainder).toEqual({
-          rows: [expect.objectContaining({ text: [expect.objectContaining({ text: 'line2' })] })],
+          rows: [expect.objectContaining({ shapedText: expect.any(Array) })],
         });
+        const remainingBlock = (remainder as RowsBlock).rows[0] as ShapedTextBlock;
+        expect(remainingBlock.shapedText.map((seg) => getGlyphRunText(seg.glyphs))).toEqual([
+          'line2',
+        ]);
       });
 
       it('skips remainder if frame empty', async () => {

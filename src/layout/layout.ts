@@ -166,7 +166,7 @@ export async function layoutBlock(block: Block, box: Box, ctx: MakerCtx): Promis
 }
 
 async function layoutBlockContent(block: Block, box: Box, ctx: MakerCtx): Promise<LayoutContent> {
-  if ('text' in block) {
+  if ('text' in block || 'shapedText' in block) {
     return await layoutTextContent(block, box, ctx);
   }
   if ('image' in block) {

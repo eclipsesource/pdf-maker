@@ -8,7 +8,6 @@ import type { TextSegment } from './text.ts';
 import {
   breakLine,
   buildShapeOptions,
-  convertToTextSpan,
   extractTextSegments,
   findLinebreakOpportunity,
   flattenTextSegments,
@@ -219,34 +218,6 @@ describe('text', () => {
           fontFeatureSettings: { smcp: true },
         }),
       );
-    });
-  });
-
-  describe('convertToTextSpan', () => {
-    it('includes shaping properties in attrs', () => {
-      const segment = seg('foo', {
-        fontKerning: 'none',
-        fontVariantLigatures: 'none',
-        fontFeatureSettings: { smcp: true },
-      });
-
-      const span = convertToTextSpan(segment);
-
-      expect(span.attrs).toEqual(
-        expect.objectContaining({
-          fontKerning: 'none',
-          fontVariantLigatures: 'none',
-          fontFeatureSettings: { smcp: true },
-        }),
-      );
-    });
-
-    it('converts newline segment to newline text', () => {
-      expect(convertToTextSpan(seg('\n')).text).toBe('\n');
-    });
-
-    it('includes language in attrs', () => {
-      expect(convertToTextSpan(seg('foo', { language: 'de' })).attrs.language).toBe('de');
     });
   });
 

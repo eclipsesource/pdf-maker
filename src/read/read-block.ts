@@ -3,6 +3,7 @@ import type { FontStyle, FontWeight } from '../api/text.ts';
 import type { BoxEdges } from '../box.ts';
 import { parseEdges, parseLength } from '../box.ts';
 import type { Shape } from '../frame.ts';
+import type { TextSegment } from '../text.ts';
 import type { Obj, TypeDef } from '../util/types.ts';
 import {
   dynamic,
@@ -21,11 +22,15 @@ import { readShape } from './read-graphics.ts';
 
 export type Block = TextBlock | ImageBlock | ColumnsBlock | RowsBlock | EmptyBlock;
 
-export type TextBlock = {
-  text: TextSpan[];
-  breakInside?: 'auto' | 'avoid';
-} & BlockAttrs &
-  InheritableAttrs;
+export type TextBlock = RawTextBlock | ShapedTextBlock;
+
+export type RawTextBlock = { text: TextSpan[] } & TextBlockAttrs;
+
+// Text already split into segments and shaped, used to continue a text block after a page
+// break without shaping the text again.
+export type ShapedTextBlock = { shapedText: TextSegment[] } & TextBlockAttrs;
+
+type TextBlockAttrs = { breakInside?: 'auto' | 'avoid' } & BlockAttrs & InheritableAttrs;
 
 export type ImageBlock = {
   image: string;
@@ -107,7 +112,7 @@ export function readBlock(input: unknown, defaultAttrs?: InheritableAttrs): Bloc
 
 const tAlignment = types.string({ enum: ['left', 'right', 'center'] }) as TypeDef<Alignment>;
 
-export function readTextBlock(input: Obj, defaultAttrs?: InheritableAttrs): TextBlock {
+export function readTextBlock(input: Obj, defaultAttrs?: InheritableAttrs): RawTextBlock {
   const mergedAttrs = { ...defaultAttrs, ...input };
   const textAttrs = readTextAttrs(mergedAttrs);
   const parseTextWithAttrs = (text: unknown) => readText(text, textAttrs);
@@ -118,7 +123,7 @@ export function readTextBlock(input: Obj, defaultAttrs?: InheritableAttrs): Text
     }),
     textAlign: readFrom(mergedAttrs, 'textAlign', optional(tAlignment)),
     ...readBlockAttrs(input),
-  }) as TextBlock;
+  }) as RawTextBlock;
 }
 
 export function readImageBlock(input: Obj): ImageBlock {

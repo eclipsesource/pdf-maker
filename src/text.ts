@@ -92,44 +92,6 @@ export async function extractTextSegments(
   return segments.flat();
 }
 
-export function convertToTextSpan(segment: TextSegment): TextSpan {
-  const {
-    type,
-    glyphs,
-    fontSize,
-    fontFamily,
-    fontStyle,
-    fontWeight,
-    lineHeight,
-    color,
-    link,
-    rise,
-    letterSpacing,
-    fontKerning,
-    fontVariantLigatures,
-    fontFeatureSettings,
-    language,
-  } = segment;
-  return {
-    text: type === 'newline' ? '\n' : getGlyphRunText(glyphs),
-    attrs: {
-      fontSize,
-      fontFamily,
-      fontStyle,
-      fontWeight,
-      lineHeight,
-      color,
-      link,
-      rise,
-      letterSpacing,
-      fontKerning,
-      fontVariantLigatures,
-      fontFeatureSettings,
-      language,
-    },
-  };
-}
-
 /**
  * Split the given text into chunks of subsequent whitespace and non-whitespace characters.
  * No-break spaces are treated as non-whitespace. For example, the string `foo bar` would be
