@@ -83,10 +83,13 @@ export type TextProps = {
   fontSize?: number;
 
   /**
-   * The line height as a factor of the text height. The text height is
-   * derived from the font's vertical metrics (ascent, descent, and line
-   * gap). Values greater than `1` increase the spacing between lines,
-   * values less than `1` decrease it. Defaults to `1`.
+   * The line height as a factor of the font's natural line height, which
+   * is derived from its vertical metrics (ascent, descent, and line gap).
+   * This follows word processors, where single line spacing is defined by
+   * the font, and makes `1` a good default for any font. Unlike in CSS,
+   * the factor does not refer to the font size. Values greater than `1`
+   * increase the spacing between lines, values less than `1` decrease it.
+   * Defaults to `1`.
    */
   lineHeight?: number;
 
