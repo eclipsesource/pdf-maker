@@ -14,6 +14,12 @@
 
 ### Changed
 
+- Vertical margins now collapse like in CSS. The margins of a rows
+  block collapse with those of its first and last row, unless the block
+  has a padding on that side, graphics, or a fixed height. Margins next
+  to a page break are dropped, except the top margin after a break that
+  is forced by `breakBefore` or `breakAfter`. This can reduce the space
+  around nested rows and at the top of pages in existing documents.
 - Fonts are now registered under their typographic family name when the
   font provides one. Fonts with more than the four styles regular,
   italic, bold, and bold italic used to report a separate family for

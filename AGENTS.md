@@ -145,7 +145,10 @@ Text goes through several processing steps before layout:
 
 - Stacks child blocks vertically.
 - Vertical margins between adjacent rows are **collapsed** (the larger
-  margin wins), matching CSS behavior.
+  margin wins), matching CSS behavior. Margins also collapse through
+  nested rows blocks without padding, graphics, or fixed height, and
+  are truncated next to page breaks (except the top margin after a
+  forced break).
 - Tracks page break opportunities and can split the block across pages.
   Supports `breakBefore`, `breakAfter`, `breakInside` (auto/always/avoid),
   and `insertAfterBreak` (for repeated table headers, etc.).

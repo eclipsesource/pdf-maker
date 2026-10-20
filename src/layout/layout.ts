@@ -53,6 +53,18 @@ const defaultPageMargin = parseEdges('2cm');
 export type LayoutResult = {
   frame: Frame;
   remainder?: Block;
+  /** Whether the break before the remainder was forced by `breakBefore` or `breakAfter`. */
+  forcedBreak?: boolean;
+};
+
+/**
+ * Options for laying out a block whose outer margins are handled by the caller.
+ */
+export type LayoutOptions = {
+  /** Ignore the top margin of the first row, it has been collapsed or truncated by the caller. */
+  skipTopMargin?: boolean;
+  /** Ignore the bottom margin of the last row, it has been collapsed by the caller. */
+  skipBottomMargin?: boolean;
 };
 
 /**
@@ -62,12 +74,15 @@ export type LayoutResult = {
 export type LayoutContent = {
   frame: Omit<Frame, 'x' | 'y'>;
   remainder?: Block;
+  forcedBreak?: boolean;
 };
 
 export async function layoutPages(def: DocumentDefinition, ctx: MakerCtx): Promise<Page[]> {
   const pages: Page[] = [];
   let remainingBlocks = def.content;
   let pageNumber = 1;
+  // CSS truncates margins after unforced breaks but preserves them after forced breaks
+  let skipTopMargin = false;
 
   const pageSize = applyOrientation(def.pageSize ?? paperSizes.A4, def.pageOrientation);
 
@@ -83,7 +98,13 @@ export async function layoutPages(def: DocumentDefinition, ctx: MakerCtx): Promi
     const height = (footer?.y ?? pageSize.height) - y;
     const contentBox = subtractEdges({ x, y, width, height }, pageMargin);
 
-    const { frame, remainder } = await layoutPageContent(remainingBlocks, contentBox, ctx);
+    const { frame, remainder, forcedBreak } = await layoutPageContent(
+      remainingBlocks,
+      contentBox,
+      ctx,
+      skipTopMargin,
+    );
+    skipTopMargin = !forcedBreak;
     if (ctx.guides) {
       frame.objects = [createFrameGuides(frame, { margin: pageMargin, isPage: true })];
     }
@@ -131,17 +152,23 @@ async function layoutFooter(footer: Block, pageSize: Size, ctx: MakerCtx) {
   return frame;
 }
 
-async function layoutPageContent(blocks: Block[], box: Box, ctx: MakerCtx) {
+async function layoutPageContent(blocks: Block[], box: Box, ctx: MakerCtx, skipTopMargin: boolean) {
   // We create a dummy rows block and enforce a page break if the content does not fit
   const block = { rows: blocks, breakInside: 'enforce-auto' as any };
-  const { frame, remainder } = await layoutBlock(block, box, ctx);
+  const { frame, remainder, forcedBreak } = await layoutBlock(block, box, ctx, { skipTopMargin });
   return {
     frame: { ...frame, ...box },
     remainder: (remainder as RowsBlock)?.rows ?? [],
+    forcedBreak,
   };
 }
 
-export async function layoutBlock(block: Block, box: Box, ctx: MakerCtx): Promise<LayoutResult> {
+export async function layoutBlock(
+  block: Block,
+  box: Box,
+  ctx: MakerCtx,
+  opts?: LayoutOptions,
+): Promise<LayoutResult> {
   const padding = block.padding ?? ZERO_EDGES;
   // Subtract the padding from the box to get the content box.
   const contentBox = subtractEdges(
@@ -149,7 +176,7 @@ export async function layoutBlock(block: Block, box: Box, ctx: MakerCtx): Promis
     padding,
   );
   // Layout the *content* of the block, i.e. what's inside the padding.
-  const result = await layoutBlockContent(block, contentBox, ctx);
+  const result = await layoutBlockContent(block, contentBox, ctx, opts);
   // Finally, add the padding back to the frame size.
   // When the width/height is fixed, the padding must not be added.
   const frame = {
@@ -162,10 +189,15 @@ export async function layoutBlock(block: Block, box: Box, ctx: MakerCtx): Promis
   addAnchor(frame, block);
   addGraphics(frame, block);
   if (ctx.guides) addGuides(frame, block);
-  return { frame, remainder: result.remainder };
+  return { frame, remainder: result.remainder, forcedBreak: result.forcedBreak };
 }
 
-async function layoutBlockContent(block: Block, box: Box, ctx: MakerCtx): Promise<LayoutContent> {
+async function layoutBlockContent(
+  block: Block,
+  box: Box,
+  ctx: MakerCtx,
+  opts?: LayoutOptions,
+): Promise<LayoutContent> {
   if ('text' in block || 'shapedText' in block) {
     return await layoutTextContent(block, box, ctx);
   }
@@ -176,7 +208,7 @@ async function layoutBlockContent(block: Block, box: Box, ctx: MakerCtx): Promis
     return await layoutColumnsContent(block, box, ctx);
   }
   if ('rows' in block) {
-    return await layoutRowsContent(block, box, ctx);
+    return await layoutRowsContent(block, box, ctx, opts);
   }
   return {
     frame: {
@@ -224,4 +256,12 @@ export function isBreakPossible(blocks: Block[], idx: number) {
     return false;
   }
   return true;
+}
+
+/**
+ * Returns the given remainder of a split block without its top margin, since margins
+ * adjoining a break are truncated.
+ */
+export function withoutTopMargin<T extends Block>(block: T): T {
+  return block.margin ? { ...block, margin: { ...block.margin, top: 0 } } : block;
 }

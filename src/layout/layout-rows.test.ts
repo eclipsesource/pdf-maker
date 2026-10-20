@@ -113,6 +113,144 @@ describe('layout-rows', () => {
       expect(remainder).toBeUndefined();
     });
 
+    describe('margin collapsing', () => {
+      const margin = (top: number, bottom: number) => ({ left: 0, right: 0, top, bottom });
+
+      it('collapses top margin of first nested row with previous margin', async () => {
+        const rows: Block[] = [
+          { height: 50, margin: margin(0, 6) },
+          { rows: [{ height: 20, margin: margin(14, 0) }] },
+        ];
+
+        const { frame } = await layoutRowsContent({ rows }, box, ctx);
+
+        expect(frame.children?.[1]).toEqual(
+          expect.objectContaining({
+            y: 30 + 50 + 14,
+            height: 20,
+            children: [{ x: 0, y: 0, width: 400, height: 20 }],
+          }),
+        );
+        expect(frame.height).toBe(50 + 14 + 20);
+      });
+
+      it('collapses bottom margin of last nested row with next margin', async () => {
+        const rows: Block[] = [
+          { rows: [{ height: 20, margin: margin(0, 14) }] },
+          { height: 50, margin: margin(6, 0) },
+        ];
+
+        const { frame } = await layoutRowsContent({ rows }, box, ctx);
+
+        expect(frame.children?.[0]).toEqual(expect.objectContaining({ y: 30, height: 20 }));
+        expect(frame.children?.[1]).toEqual(expect.objectContaining({ y: 30 + 20 + 14 }));
+      });
+
+      it('collapses margins through multiple levels', async () => {
+        const rows: Block[] = [
+          { height: 50, margin: margin(0, 6) },
+          {
+            rows: [{ rows: [{ height: 20, margin: margin(14, 3) }], margin: margin(8, 0) }],
+            margin: margin(10, 12),
+          },
+          { height: 50, margin: margin(4, 0) },
+        ];
+
+        const { frame } = await layoutRowsContent({ rows }, box, ctx);
+
+        expect(frame.children?.map((c) => c.y)).toEqual([30, 30 + 50 + 14, 30 + 50 + 14 + 20 + 12]);
+        expect(frame.children?.[1].height).toBe(20);
+      });
+
+      it('does not collapse margins through padding', async () => {
+        const rows: Block[] = [
+          { height: 50, margin: margin(0, 6) },
+          { rows: [{ height: 20, margin: margin(14, 14) }], padding: margin(2, 2) },
+          { height: 50 },
+        ];
+
+        const { frame } = await layoutRowsContent({ rows }, box, ctx);
+
+        expect(frame.children?.[1]).toEqual(
+          expect.objectContaining({ y: 30 + 50 + 6, height: 2 + 14 + 20 + 14 + 2 }),
+        );
+        expect(frame.children?.[2].y).toBe(30 + 50 + 6 + 52);
+      });
+
+      it('collapses margins on the side without padding', async () => {
+        const rows: Block[] = [
+          { height: 50, margin: margin(0, 6) },
+          { rows: [{ height: 20, margin: margin(14, 14) }], padding: margin(0, 2) },
+        ];
+
+        const { frame } = await layoutRowsContent({ rows }, box, ctx);
+
+        expect(frame.children?.[1]).toEqual(
+          expect.objectContaining({ y: 30 + 50 + 14, height: 20 + 14 + 2 }),
+        );
+      });
+
+      it('does not collapse margins of blocks with graphics', async () => {
+        const rows: Block[] = [
+          { height: 50, margin: margin(0, 6) },
+          { rows: [{ height: 20, margin: margin(14, 14) }], graphics: () => [] },
+        ];
+
+        const { frame } = await layoutRowsContent({ rows }, box, ctx);
+
+        expect(frame.children?.[1]).toEqual(
+          expect.objectContaining({ y: 30 + 50 + 6, height: 14 + 20 + 14 }),
+        );
+      });
+
+      it('does not collapse margins of blocks with fixed height', async () => {
+        const rows: Block[] = [
+          { height: 50, margin: margin(0, 6) },
+          { rows: [{ height: 20, margin: margin(14, 14) }], height: 60 },
+        ];
+
+        const { frame } = await layoutRowsContent({ rows }, box, ctx);
+
+        expect(frame.children?.[1]).toEqual(
+          expect.objectContaining({ y: 30 + 50 + 6, height: 60 }),
+        );
+        expect(frame.children?.[1].children?.[0].y).toBe(14);
+      });
+
+      it('does not collapse margins of columns', async () => {
+        const rows: Block[] = [
+          { height: 50, margin: margin(0, 6) },
+          { columns: [{ height: 20, margin: margin(14, 0) }] },
+        ];
+
+        const { frame } = await layoutRowsContent({ rows }, box, ctx);
+
+        expect(frame.children?.[1]).toEqual(
+          expect.objectContaining({ y: 30 + 50 + 6, height: 14 + 20 }),
+        );
+      });
+
+      it('skips top margin of first row if requested', async () => {
+        const rows: Block[] = [
+          { rows: [{ height: 20, margin: margin(14, 0) }], margin: margin(8, 0) },
+        ];
+
+        const { frame } = await layoutRowsContent({ rows }, box, ctx, { skipTopMargin: true });
+
+        expect(frame.children?.[0]).toEqual(expect.objectContaining({ y: 30, height: 20 }));
+        expect(frame.children?.[0].children?.[0].y).toBe(0);
+        expect(frame.height).toBe(20);
+      });
+
+      it('skips bottom margin of last row if requested', async () => {
+        const rows: Block[] = [{ height: 20, margin: margin(0, 14) }];
+
+        const { frame } = await layoutRowsContent({ rows }, box, ctx, { skipBottomMargin: true });
+
+        expect(frame.height).toBe(20);
+      });
+    });
+
     describe('page breaks', () => {
       const makeBlocks = (n: number, idPrefix?: string) => {
         return range(n).map((n): Block => ({
@@ -307,6 +445,57 @@ describe('layout-rows', () => {
 
         expect(renderedIds(frame)).toEqual(range(7).map(String));
         expect(remainder).toEqual({ rows: rows.slice(7) });
+      });
+
+      it('does not require bottom margin of last fitting block to fit', async () => {
+        const rows = makeBlocks(10).map((b) => ({
+          ...b,
+          margin: { left: 0, right: 0, top: 0, bottom: 10 },
+        }));
+        // the 7th block ends at 760 and only fits without its bottom margin
+        const box = { x: 20, y: 30, width: 400, height: 765 };
+
+        const { frame, remainder } = await layoutRowsContent({ rows }, box, ctx);
+
+        expect(renderedIds(frame)).toEqual(range(7).map(String));
+        expect(frame.height).toBe(6 * 110 + 100);
+        expect(remainder).toEqual({ rows: rows.slice(7) });
+      });
+
+      it('removes top margin from remainder', async () => {
+        const margin = { left: 0, right: 0, top: 10, bottom: 0 };
+        const rows = [{ rows: makeBlocks(10, 'nested'), margin }];
+
+        const { remainder } = await layoutRowsContent({ rows }, box, ctx);
+
+        expect((remainder as RowsBlock).rows[0].margin).toEqual({ ...margin, top: 0 });
+      });
+
+      it('reports forced breaks', async () => {
+        const rows = makeBlocks(10);
+        rows[3].breakAfter = 'always';
+
+        const result = await layoutRowsContent({ rows }, box, ctx);
+
+        expect(result.forcedBreak).toBe(true);
+      });
+
+      it('reports forced breaks in nested blocks', async () => {
+        const nestedRows = makeBlocks(3, 'nested');
+        nestedRows[0].breakAfter = 'always';
+        const rows = [...makeBlocks(2), { rows: nestedRows }];
+
+        const result = await layoutRowsContent({ rows }, box, ctx);
+
+        expect(result.forcedBreak).toBe(true);
+      });
+
+      it('does not report unforced breaks', async () => {
+        const rows = makeBlocks(10);
+
+        const result = await layoutRowsContent({ rows }, box, ctx);
+
+        expect(result.forcedBreak).toBeUndefined();
       });
 
       it('includes partial remainder', async () => {

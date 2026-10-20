@@ -155,6 +155,66 @@ describe('layout', () => {
       expect(collectText(pages[0].content)).toEqual(['line 0', 'line 1', 'line 2', 'line 3']);
     });
 
+    it('keeps top margin of first block on first page', async () => {
+      const def = readDocumentDefinition({
+        content: [{ height: 50, margin: { top: 20 } }],
+        margin: 50,
+      });
+
+      const pages = await layoutPages(def, ctx);
+
+      expect(pages[0].content.children?.[0].y).toBe(20);
+    });
+
+    it('truncates top margin of first block after unforced page break', async () => {
+      const def = readDocumentDefinition({
+        content: [
+          { height: 700 },
+          { rows: [{ height: 100, margin: { top: 20 } }], breakInside: 'avoid' },
+        ],
+        margin: 50,
+      });
+
+      const pages = await layoutPages(def, ctx);
+
+      expect(pages).toHaveLength(2);
+      expect(pages[1].content.children?.[0]).toEqual(
+        expect.objectContaining({ y: 0, height: 100 }),
+      );
+      expect(pages[1].content.children?.[0].children?.[0].y).toBe(0);
+    });
+
+    it('keeps top margin of first block after forced page break', async () => {
+      const def = readDocumentDefinition({
+        content: [{ height: 100 }, { height: 50, margin: { top: 20 }, breakBefore: 'always' }],
+        margin: 50,
+      });
+
+      const pages = await layoutPages(def, ctx);
+
+      expect(pages).toHaveLength(2);
+      expect(pages[1].content.children?.[0].y).toBe(20);
+    });
+
+    it('truncates top margin of block inserted after unforced page break', async () => {
+      const def = readDocumentDefinition({
+        content: [
+          {
+            rows: range(10).map(() => ({ height: 100 })),
+            insertAfterBreak: { height: 10, margin: { top: 20 } },
+          },
+        ],
+        margin: 50,
+      });
+
+      const pages = await layoutPages(def, ctx);
+
+      expect(pages).toHaveLength(2);
+      const remainder = pages[1].content.children?.[0];
+      expect(remainder?.y).toBe(0);
+      expect(remainder?.children?.map((c) => c.y)).toEqual([0, 10, 110, 210]);
+    });
+
     it('lays out header', async () => {
       const def = readDocumentDefinition({
         margin: 50,

@@ -4,13 +4,14 @@ import type { Frame } from '../frame.ts';
 import type { MakerCtx } from '../maker-ctx.ts';
 import type { Block, RowsBlock } from '../read/read-block.ts';
 import { compact, omit } from '../util/utils.ts';
-import type { LayoutContent } from './layout.ts';
-import { isBreakPossible, layoutBlock } from './layout.ts';
+import type { LayoutContent, LayoutOptions } from './layout.ts';
+import { isBreakPossible, layoutBlock, withoutTopMargin } from './layout.ts';
 
 export async function layoutRowsContent(
   block: RowsBlock,
   box: Box,
   ctx: MakerCtx,
+  opts?: LayoutOptions,
 ): Promise<LayoutContent> {
   let rowY = box.y;
   let lastMargin = 0;
@@ -22,32 +23,40 @@ export async function layoutRowsContent(
   let lastBreakOpportunity = -1;
   const frames: Frame[] = [];
   let remainingRows: Block[] = [];
+  let forcedBreak = false;
 
   for (const [rowIdx, row] of block.rows.entries()) {
     const margin = row.margin ?? ZERO_EDGES;
-    const topMargin = Math.max(lastMargin, margin.top);
+    const rowTopMargin = rowIdx === 0 && opts?.skipTopMargin ? 0 : collapsedTopMargin(row);
+    const topMargin = Math.max(lastMargin, rowTopMargin);
     const nextPos = { x: box.x + margin.left, y: rowY + topMargin };
+    // The bottom margin does not need to fit since margins before a break are truncated.
     const maxSize = {
       width: box.width - margin.left - margin.right,
-      height: remainingHeight - topMargin - margin.bottom,
+      height: remainingHeight - topMargin,
     };
 
     const autoWidth = row.width == null && (row.autoWidth || block.autoWidth);
     // Pass `avoid` down, callers like columns discard the remainder of a broken row.
     const avoidBreak = block.breakInside === 'avoid' ? { breakInside: 'avoid' as const } : {};
-    const { frame, remainder } = await layoutBlock(
+    // Margins of the first and last child of a nested rows block are collapsed into its own.
+    const rowOpts = { skipTopMargin: collapsesTop(row), skipBottomMargin: collapsesBottom(row) };
+    const result = await layoutBlock(
       { ...row, autoWidth, ...avoidBreak },
       { ...nextPos, ...maxSize },
       ctx,
+      rowOpts,
     );
+    const { frame, remainder } = result;
 
-    const performBreakAt = (breakIdx: number, remainder?: Block) => {
+    const performBreakAt = (breakIdx: number, remainder?: Block, forced = false) => {
       frames.splice(breakIdx);
+      forcedBreak = forced;
       const insertedBlock = block.insertAfterBreak?.();
       remainingRows = compact([insertedBlock, remainder, ...block.rows.slice(breakIdx)]);
     };
 
-    if (frame.height + topMargin + margin.bottom > remainingHeight) {
+    if (frame.height + topMargin > remainingHeight) {
       // This row does not fit in the remaining height. Break here if possible.
       if (lastBreakOpportunity >= 0) {
         performBreakAt(lastBreakOpportunity + 1);
@@ -63,13 +72,13 @@ export async function layoutRowsContent(
     }
 
     frames.push(frame);
-    lastMargin = margin.bottom;
+    lastMargin = collapsedBottomMargin(row);
     aggregatedHeight += topMargin + frame.height;
-    aggregatedHeights.push(aggregatedHeight + lastMargin);
+    aggregatedHeights.push(aggregatedHeight);
 
     if (remainder) {
       // This row was split. Break here and include the remainder in the result.
-      performBreakAt(rowIdx + 1, remainder);
+      performBreakAt(rowIdx + 1, remainder, result.forcedBreak);
       break;
     }
 
@@ -78,7 +87,7 @@ export async function layoutRowsContent(
       (row.breakAfter === 'always' || block.rows[rowIdx + 1]?.breakBefore === 'always')
     ) {
       // A break is forced after this row. Break here, unless the block avoids breaks inside.
-      performBreakAt(rowIdx + 1);
+      performBreakAt(rowIdx + 1, undefined, true);
       break;
     }
 
@@ -91,7 +100,7 @@ export async function layoutRowsContent(
 
   const remainder = remainingRows.length
     ? // do not include the id in the remainder to avoid duplicate anchors
-      { ...omit(block, 'id', 'breakInside'), rows: remainingRows }
+      withoutTopMargin({ ...omit(block, 'id', 'breakInside'), rows: remainingRows })
     : undefined;
 
   // compute max row width only if needed
@@ -105,12 +114,47 @@ export async function layoutRowsContent(
       )
     : box.width;
 
+  // The bottom margin of the last row is truncated before a break or collapsed by the caller.
+  const bottomMargin = remainder || opts?.skipBottomMargin ? 0 : lastMargin;
+
   return {
     frame: {
       width,
-      height: aggregatedHeights[frames.length - 1] ?? 0,
+      height: frames.length ? aggregatedHeights[frames.length - 1] + bottomMargin : 0,
       children: frames,
     },
     remainder,
+    ...(forcedBreak ? { forcedBreak } : undefined),
   };
+}
+
+/**
+ * Like in CSS, the top margin of a rows block collapses with the top margin of its first
+ * child unless the block has a top padding, a fixed height, or graphics. We treat graphics
+ * like a border since they can draw shapes at the block's edges.
+ */
+function collapsesTop(block: Block): boolean {
+  return 'rows' in block && !!block.rows.length && canCollapse(block) && !block.padding?.top;
+}
+
+function collapsesBottom(block: Block): boolean {
+  return 'rows' in block && !!block.rows.length && canCollapse(block) && !block.padding?.bottom;
+}
+
+function canCollapse(block: Block) {
+  return block.height == null && !block.graphics;
+}
+
+function collapsedTopMargin(block: Block): number {
+  const own = block.margin?.top ?? 0;
+  return collapsesTop(block)
+    ? Math.max(own, collapsedTopMargin((block as RowsBlock).rows[0]))
+    : own;
+}
+
+function collapsedBottomMargin(block: Block): number {
+  const own = block.margin?.bottom ?? 0;
+  if (!collapsesBottom(block)) return own;
+  const rows = (block as RowsBlock).rows;
+  return Math.max(own, collapsedBottomMargin(rows[rows.length - 1]));
 }

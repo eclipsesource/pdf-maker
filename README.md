@@ -475,6 +475,25 @@ rows([
 ]);
 ```
 
+Like in CSS, the `top` margin of a rows block also collapses with the
+`top` margin of its first row, and its `bottom` margin with the `bottom`
+margin of its last row. This does not happen on a side that has a
+padding, or when the block has `graphics` or a fixed `height`. Hence,
+wrapping a block in `rows()` does not change the space around it:
+
+```ts
+rows([
+  text('Lorem ipsum', { margin: { bottom: 6 } }),
+  // 14 pt margin between the two blocks, not 20 pt
+  rows([text('Heading', { margin: { top: 14 } })], { breakInside: 'avoid' }),
+]);
+```
+
+Margins next to a page break are dropped, so that the content of every
+page starts at the top of the content area. Only after a page break
+that is forced by `breakBefore` or `breakAfter` the top margin of the
+next block is kept.
+
 ### Padding
 
 The `padding` property can be used to add space between the content and

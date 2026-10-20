@@ -9,6 +9,7 @@ import type { TextSegment } from '../text.ts';
 import { breakLine, extractTextSegments, flattenTextSegments } from '../text.ts';
 import { omit } from '../util/utils.ts';
 import type { LayoutContent } from './layout.ts';
+import { withoutTopMargin } from './layout.ts';
 
 export async function layoutTextContent(
   block: TextBlock,
@@ -22,7 +23,7 @@ export async function layoutTextContent(
   if (ctx.guides) objects.push(...text.rows.map((row) => createRowGuides(row)));
 
   const remainder = text.remainder
-    ? { ...omit(block, 'id', 'text'), shapedText: text.remainder }
+    ? withoutTopMargin({ ...omit(block, 'id', 'text'), shapedText: text.remainder })
     : undefined;
 
   return {

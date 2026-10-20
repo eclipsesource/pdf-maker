@@ -145,6 +145,9 @@ export type BlockProps = {
    * Space to surround the block.
    * The `top` and `bottom` margins of adjacent blocks are collapsed into a single margin
    * whose size is the maximum of the two margins. Column margins don't collapse.
+   * The margins of a rows block also collapse with those of its first and last row,
+   * unless the block has a padding on that side, graphics, or a fixed height.
+   * Margins next to a page break are dropped, except the top margin after a forced break.
    */
   margin?: Length | BoxLengths;
 
