@@ -462,6 +462,27 @@ describe('layout-rows', () => {
         expect(remainder).toEqual({ rows: rows.slice(7) });
       });
 
+      it('requires kept bottom margin of last row to fit', async () => {
+        const rows: Block[] = [
+          {
+            rows: [
+              { id: 'a', height: 50 },
+              { id: 'b', height: 40, margin: { left: 0, right: 0, top: 0, bottom: 20 } },
+            ],
+            graphics: () => [],
+          },
+        ];
+        const box = { x: 20, y: 30, width: 400, height: 100 };
+
+        const { frame, remainder } = await layoutRowsContent({ rows }, box, ctx);
+
+        expect(renderedIds(frame.children?.[0])).toEqual(['a']);
+        expect(frame.height).toBe(50);
+        expect(remainder).toEqual({
+          rows: [{ rows: [(rows[0] as RowsBlock).rows[1]], graphics: rows[0].graphics }],
+        });
+      });
+
       it('removes top margin from remainder', async () => {
         const margin = { left: 0, right: 0, top: 10, bottom: 0 };
         const rows = [{ rows: makeBlocks(10, 'nested'), margin }];

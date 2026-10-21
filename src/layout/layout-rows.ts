@@ -30,10 +30,14 @@ export async function layoutRowsContent(
     const rowTopMargin = rowIdx === 0 && opts?.skipTopMargin ? 0 : collapsedTopMargin(row);
     const topMargin = Math.max(lastMargin, rowTopMargin);
     const nextPos = { x: box.x + margin.left, y: rowY + topMargin };
-    // The bottom margin does not need to fit since margins before a break are truncated.
+    // Bottom margins are truncated before a break, so they only need to fit when this block
+    // keeps the bottom margin of its last row. Other margins are checked by the next row or
+    // by the parent block.
+    const isLastRow = rowIdx === block.rows.length - 1;
+    const keptMargin = isLastRow && !opts?.skipBottomMargin ? collapsedBottomMargin(row) : 0;
     const maxSize = {
       width: box.width - margin.left - margin.right,
-      height: remainingHeight - topMargin,
+      height: remainingHeight - topMargin - keptMargin,
     };
 
     const autoWidth = row.width == null && (row.autoWidth || block.autoWidth);
@@ -56,7 +60,7 @@ export async function layoutRowsContent(
       remainingRows = compact([insertedBlock, remainder, ...block.rows.slice(breakIdx)]);
     };
 
-    if (frame.height + topMargin > remainingHeight) {
+    if (frame.height + topMargin + keptMargin > remainingHeight) {
       // This row does not fit in the remaining height. Break here if possible.
       if (lastBreakOpportunity >= 0) {
         performBreakAt(lastBreakOpportunity + 1);

@@ -155,7 +155,9 @@ async function layoutFooter(footer: Block, pageSize: Size, ctx: MakerCtx) {
 async function layoutPageContent(blocks: Block[], box: Box, ctx: MakerCtx, skipTopMargin: boolean) {
   // We create a dummy rows block and enforce a page break if the content does not fit
   const block = { rows: blocks, breakInside: 'enforce-auto' as any };
-  const { frame, remainder, forcedBreak } = await layoutBlock(block, box, ctx, { skipTopMargin });
+  // The bottom margin of the last block does not need to fit on the page
+  const opts = { skipTopMargin, skipBottomMargin: true };
+  const { frame, remainder, forcedBreak } = await layoutBlock(block, box, ctx, opts);
   return {
     frame: { ...frame, ...box },
     remainder: (remainder as RowsBlock)?.rows ?? [],
