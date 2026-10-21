@@ -102,6 +102,17 @@ describe('readDocumentDefinition', () => {
     );
   });
 
+  it('checks content blocks for more than one content key', () => {
+    const content = [{ text: 'foo', image: 'bar' }];
+
+    expect(() => readDocumentDefinition({ ...input, content })).toThrow(
+      new TypeError(
+        'Invalid value for "content/0": ' +
+          "Expected only one of ('text', 'image', 'columns', 'rows'), got: ('text', 'image')",
+      ),
+    );
+  });
+
   it(`includes defaultStyle in content`, () => {
     const defaultStyle = { fontSize: 23 };
     const content = [{ text: 'foo' }];

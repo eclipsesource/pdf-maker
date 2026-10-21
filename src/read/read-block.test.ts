@@ -34,6 +34,27 @@ describe('readBlock', () => {
       graphics: expect.any(Function),
     });
   });
+
+  it('rejects block with more than one content key', () => {
+    const input = { text: 'foo', rows: [] };
+
+    expect(() => readBlock(input)).toThrow(
+      new TypeError(
+        "Expected only one of ('text', 'image', 'columns', 'rows'), got: ('text', 'rows')",
+      ),
+    );
+  });
+
+  it('reports path of nested block with more than one content key', () => {
+    const input = { rows: [{ text: 'foo' }, { columns: [{ image: 'foo', columns: [] }] }] };
+
+    expect(() => readBlock(input)).toThrow(
+      new TypeError(
+        'Invalid value for "rows/1/columns/0": ' +
+          "Expected only one of ('text', 'image', 'columns', 'rows'), got: ('image', 'columns')",
+      ),
+    );
+  });
 });
 
 describe('readColumnsBlock', () => {

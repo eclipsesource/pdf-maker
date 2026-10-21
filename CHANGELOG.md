@@ -14,19 +14,6 @@
 
 ### Changed
 
-- Vertical margins now collapse like in CSS. The margins of a rows
-  block collapse with those of its first and last row, unless the block
-  has a padding on that side, graphics, or a fixed height. Margins next
-  to a page break are dropped, except the top margin after a break that
-  is forced by `breakBefore` or `breakAfter`. This can reduce the space
-  around nested rows and at the top of pages in existing documents.
-- Fonts are now registered under their typographic family name when the
-  font provides one. Fonts with more than the four styles regular,
-  italic, bold, and bold italic used to report a separate family for
-  their extra styles, e.g. `Roboto Light` instead of `Roboto`. Such
-  styles are now selected via `fontFamily` and `fontWeight`. A family
-  name passed in the `family` option of `registerFont()` still takes
-  precedence.
 - Documents with lots of text are created about 4 to 10 times faster.
   Shaped words are cached within a document, and long text blocks are
   broken into lines in linear time.
@@ -54,6 +41,26 @@
   also supports stacked combining marks, marks on ligatures, and
   contextual kerning.
 - Soft hyphens were drawn as visible hyphens in the middle of words.
+
+### Breaking
+
+- Vertical margins now collapse like in CSS. The margins of a rows
+  block collapse with those of its first and last row, unless the block
+  has a padding on that side, graphics, or a fixed height. Margins next
+  to a page break are dropped, except the top margin after a break that
+  is forced by `breakBefore` or `breakAfter`. This can reduce the space
+  around nested rows and at the top of pages in existing documents.
+- Fonts are now registered under their typographic family name when the
+  font provides one. Fonts with more than the four styles regular,
+  italic, bold, and bold italic used to report a separate family for
+  their extra styles, e.g. `Roboto Light` instead of `Roboto`. Such
+  styles are now selected via `fontFamily` and `fontWeight`. A family
+  name passed in the `family` option of `registerFont()` still takes
+  precedence.
+- A block with more than one of the properties `text`, `image`,
+  `columns`, and `rows` is now rejected with an error. Such blocks used
+  to be silently treated as the first matching block type, ignoring the
+  other properties.
 
 ## [0.6.3] - 2026-08-02
 

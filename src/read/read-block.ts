@@ -93,8 +93,16 @@ type InheritableAttrs = TextAttrs & {
   textAlign?: Alignment;
 };
 
+const contentKeys = ['text', 'image', 'columns', 'rows'];
+
 export function readBlock(input: unknown, defaultAttrs?: InheritableAttrs): Block {
   const obj = readObject(input);
+  const keys = contentKeys.filter((key) => key in obj);
+  if (keys.length > 1) {
+    const expected = contentKeys.map((key) => `'${key}'`).join(', ');
+    const actual = keys.map((key) => `'${key}'`).join(', ');
+    throw new TypeError(`Expected only one of (${expected}), got: (${actual})`);
+  }
   if ('text' in obj) {
     return readTextBlock(obj, defaultAttrs);
   }
