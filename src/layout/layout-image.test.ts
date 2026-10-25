@@ -28,7 +28,7 @@ describe('layout-image', () => {
   describe('layoutImageContent', () => {
     it('respects fixed width and height', async () => {
       // width=1 and height=1 only *indicate* fixed width and height, the value should be ignored
-      const block = { image: 'img-720-480', width: 1, height: 1 };
+      const block: ImageBlock = { type: 'image', image: 'img-720-480', width: 1, height: 1 };
       box = { x: 20, y: 30, width: 200, height: 100 };
 
       const { frame } = await layoutImageContent(block, box, ctx);
@@ -43,7 +43,7 @@ describe('layout-image', () => {
     });
 
     it('calls imageLoader with the image URL', async () => {
-      const block = { image: 'img-720-480', width: 30, height: 40 };
+      const block: ImageBlock = { type: 'image', image: 'img-720-480', width: 30, height: 40 };
       box = { x: 20, y: 30, width: 200, height: 100 };
 
       await layoutImageContent(block, box, ctx);
@@ -54,7 +54,7 @@ describe('layout-image', () => {
     ['img-720-480', 'img-72-48', 'svg-720-480'].forEach((image) => {
       describe(`with ${image}`, () => {
         it('scales image to fixed width', async () => {
-          const block = { image, width: 1 };
+          const block: ImageBlock = { type: 'image', image, width: 1 };
           box = { x: 20, y: 30, width: 300, height: 500 };
 
           const { frame } = await layoutImageContent(block, box, ctx);
@@ -67,7 +67,7 @@ describe('layout-image', () => {
         });
 
         it('scales image to fixed height', async () => {
-          const block = { image, height: 1 };
+          const block: ImageBlock = { type: 'image', image, height: 1 };
           box = { x: 20, y: 30, width: 500, height: 200 };
 
           const { frame } = await layoutImageContent(block, box, ctx);
@@ -80,7 +80,7 @@ describe('layout-image', () => {
         });
 
         it('scales image to fit into fixed width and height', async () => {
-          const block = { image, width: 1, height: 1 };
+          const block: ImageBlock = { type: 'image', image, width: 1, height: 1 };
           box = { x: 20, y: 30, width: 300, height: 300 };
 
           const { frame } = await layoutImageContent(block, box, ctx);
@@ -93,7 +93,7 @@ describe('layout-image', () => {
     });
 
     it('does not scale image if no fixed bounds', async () => {
-      const block = { image: 'img-72-48' };
+      const block: ImageBlock = { type: 'image', image: 'img-72-48' };
 
       const { frame } = await layoutImageContent(block, box, ctx);
 
@@ -105,7 +105,7 @@ describe('layout-image', () => {
     });
 
     it('scales image down to fit into available width if no fixed bounds', async () => {
-      const block = { image: 'img-720-480' };
+      const block: ImageBlock = { type: 'image', image: 'img-720-480' };
 
       const { frame } = await layoutImageContent(block, box, ctx);
 
@@ -117,7 +117,7 @@ describe('layout-image', () => {
     });
 
     it('center-aligns image by default', async () => {
-      const block = { image: 'img-72-48' };
+      const block: ImageBlock = { type: 'image', image: 'img-72-48' };
 
       const { frame } = await layoutImageContent(block, box, ctx);
 
@@ -127,7 +127,7 @@ describe('layout-image', () => {
     });
 
     it('left-aligns image', async () => {
-      const block: ImageBlock = { image: 'img-72-48', imageAlign: 'left' };
+      const block: ImageBlock = { type: 'image', image: 'img-72-48', imageAlign: 'left' };
 
       const { frame } = await layoutImageContent(block, box, ctx);
 
@@ -135,7 +135,7 @@ describe('layout-image', () => {
     });
 
     it('right-aligns image', async () => {
-      const block: ImageBlock = { image: 'img-72-48', imageAlign: 'right' };
+      const block: ImageBlock = { type: 'image', image: 'img-72-48', imageAlign: 'right' };
 
       const { frame } = await layoutImageContent(block, box, ctx);
 
@@ -145,7 +145,7 @@ describe('layout-image', () => {
     });
 
     it('does not scale SVG image up if no fixed bounds', async () => {
-      const block = { image: 'svg-72-48' };
+      const block: ImageBlock = { type: 'image', image: 'svg-72-48' };
 
       const { frame } = await layoutImageContent(block, box, ctx);
 
@@ -164,7 +164,12 @@ describe('layout-image', () => {
     });
 
     it('does not aligns image in block with auto width', async () => {
-      const block: ImageBlock = { image: 'img-72-48', imageAlign: 'right', autoWidth: true };
+      const block: ImageBlock = {
+        type: 'image',
+        image: 'img-72-48',
+        imageAlign: 'right',
+        autoWidth: true,
+      };
 
       const { frame } = await layoutImageContent(block, box, ctx);
 

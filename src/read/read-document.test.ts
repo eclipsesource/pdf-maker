@@ -121,6 +121,7 @@ describe('readDocumentDefinition', () => {
 
     expect(def.content).toEqual([
       {
+        type: 'text',
         text: [{ text: 'foo', attrs: { fontSize: 23 } }],
       },
     ]);
@@ -141,6 +142,7 @@ describe('readDocumentDefinition', () => {
       const def = readDocumentDefinition({ ...input, defaultStyle, [name]: fn });
 
       expect(def[name]?.({ pageNumber: 1, pageCount: 2 } as PageInfo)).toEqual({
+        type: 'text',
         text: [{ text: 'Page 1', attrs: { fontSize: 23 } }],
       });
     });
@@ -172,7 +174,9 @@ describe('readDocumentDefinition', () => {
     const content = [{ text: 'foo' }];
     const def = readDocumentDefinition({ ...input, language: 'de', content });
 
-    expect(def.content).toEqual([{ text: [{ text: 'foo', attrs: { language: 'de' } }] }]);
+    expect(def.content).toEqual([
+      { type: 'text', text: [{ text: 'foo', attrs: { language: 'de' } }] },
+    ]);
   });
 
   it('does not override language in defaultStyle', () => {
@@ -180,7 +184,9 @@ describe('readDocumentDefinition', () => {
     const defaultStyle = { language: 'fr' };
     const def = readDocumentDefinition({ ...input, language: 'de', defaultStyle, content });
 
-    expect(def.content).toEqual([{ text: [{ text: 'foo', attrs: { language: 'fr' } }] }]);
+    expect(def.content).toEqual([
+      { type: 'text', text: [{ text: 'foo', attrs: { language: 'fr' } }] },
+    ]);
   });
 
   it('checks language type', () => {

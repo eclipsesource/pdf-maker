@@ -74,9 +74,7 @@ behaviors:
 - **Block types**: The type of a block is given by its optional `type`
   property or inferred from its content property (`text`, `image`,
   `columns`, `rows`); a block with neither is an empty block (`empty`).
-  A `type` that does not match the content property is rejected. The
-  internal block types carry no `type`; downstream phases identify a
-  block by its content property.
+  A `type` that does not match the content property is rejected.
 - **Type validation** uses a custom combinator system in `src/util/types.ts`
   (`optional()`, `required()`, `dynamic()`, `types.string()`, etc.). Every
   invalid value produces a `TypeError` with a path-based message like

@@ -24,32 +24,34 @@ export type Block = TextBlock | ImageBlock | ColumnsBlock | RowsBlock | EmptyBlo
 
 export type TextBlock = RawTextBlock | ShapedTextBlock;
 
-export type RawTextBlock = { text: TextSpan[] } & TextBlockAttrs;
+export type RawTextBlock = { type: 'text'; text: TextSpan[] } & TextBlockAttrs;
 
 // Text already split into segments and shaped, used to continue a text block after a page
 // break without shaping the text again.
-export type ShapedTextBlock = { shapedText: TextSegment[] } & TextBlockAttrs;
+export type ShapedTextBlock = { type: 'text'; shapedText: TextSegment[] } & TextBlockAttrs;
 
-type TextBlockAttrs = { breakInside?: 'auto' | 'avoid' } & BlockAttrs & InheritableAttrs;
+type TextBlockAttrs = BlockAttrs & InheritableAttrs;
 
 export type ImageBlock = {
+  type: 'image';
   image: string;
   imageAlign?: Alignment;
 } & BlockAttrs;
 
 export type ColumnsBlock = {
+  type: 'columns';
   columns: Block[];
 } & BlockAttrs;
 
 export type RowsBlock = {
+  type: 'rows';
   rows: Block[];
-  breakInside?: 'auto' | 'avoid';
   insertAfterBreak?: () => Block;
   /** Set on a remainder whose first row is the block inserted after the break. */
   continued?: boolean;
 } & BlockAttrs;
 
-export type EmptyBlock = BlockAttrs;
+export type EmptyBlock = { type: 'empty' } & BlockAttrs;
 
 export type TextSpan = {
   text: string;
@@ -83,6 +85,9 @@ type BlockAttrs = {
   verticalAlign?: 'top' | 'middle' | 'bottom';
   breakBefore?: 'auto' | 'always' | 'avoid';
   breakAfter?: 'auto' | 'always' | 'avoid';
+  // Read only for text and rows blocks, but set on any block by the layout phase to
+  // prevent breaks inside columns, headers, and footers.
+  breakInside?: 'auto' | 'avoid';
 };
 
 export type BlockInfo = {
@@ -134,6 +139,7 @@ export function readTextBlock(input: Obj, defaultAttrs?: InheritableAttrs): RawT
   const textAttrs = readTextAttrs(mergedAttrs);
   const parseTextWithAttrs = (text: unknown) => readText(text, textAttrs);
   return pickDefined({
+    type: 'text' as const,
     ...readObject(input, {
       text: required(parseTextWithAttrs),
       breakInside: optional(types.string({ enum: ['auto', 'avoid'] })),
@@ -145,6 +151,7 @@ export function readTextBlock(input: Obj, defaultAttrs?: InheritableAttrs): RawT
 
 export function readImageBlock(input: Obj): ImageBlock {
   return pickDefined({
+    type: 'image' as const,
     ...readObject(input, {
       image: required(types.string()),
       imageAlign: optional(tAlignment),
@@ -157,6 +164,7 @@ export function readColumnsBlock(input: Obj, defaultAttrs?: InheritableAttrs): C
   const mergedAttrs = { ...defaultAttrs, ...readInheritableAttrs(input) };
   const readColumn = (el: unknown) => readBlock(el, mergedAttrs);
   return pickDefined({
+    type: 'columns' as const,
     ...readObject(input, {
       columns: required(types.array(readColumn)),
     }),
@@ -168,6 +176,7 @@ export function readRowsBlock(input: Obj, defaultAttrs?: InheritableAttrs): Rows
   const mergedAttrs = { ...defaultAttrs, ...readInheritableAttrs(input) };
   const readRow = (el: unknown) => readBlock(el, mergedAttrs);
   return pickDefined({
+    type: 'rows' as const,
     ...readObject(input, {
       rows: required(types.array(readRow)),
       breakInside: optional(types.string({ enum: ['auto', 'avoid'] })),
@@ -178,7 +187,7 @@ export function readRowsBlock(input: Obj, defaultAttrs?: InheritableAttrs): Rows
 }
 
 export function readEmptyBlock(input: Obj): EmptyBlock {
-  return pickDefined(readBlockAttrs(input));
+  return pickDefined({ type: 'empty' as const, ...readBlockAttrs(input) });
 }
 
 function readBlockAttrs(input: Obj): BlockAttrs {

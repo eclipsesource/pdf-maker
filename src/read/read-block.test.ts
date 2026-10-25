@@ -10,7 +10,7 @@ import {
 
 describe('readBlock', () => {
   it('accepts empty object', () => {
-    expect(readBlock({})).toEqual({});
+    expect(readBlock({})).toEqual({ type: 'empty' });
   });
 
   it('includes all block properties', () => {
@@ -26,6 +26,7 @@ describe('readBlock', () => {
     const result = readBlock(input);
 
     expect(result).toEqual({
+      type: 'empty',
       padding: { left: 6, right: 6, top: 6, bottom: 6 },
       margin: { left: 5, right: 5, top: 5, bottom: 5 },
       width: 50,
@@ -37,12 +38,13 @@ describe('readBlock', () => {
 
   it('reads block by its type', () => {
     expect(readBlock({ type: 'text', text: 'foo' })).toEqual({
+      type: 'text',
       text: [{ text: 'foo', attrs: {} }],
     });
-    expect(readBlock({ type: 'image', image: 'foo' })).toEqual({ image: 'foo' });
-    expect(readBlock({ type: 'columns', columns: [] })).toEqual({ columns: [] });
-    expect(readBlock({ type: 'rows', rows: [] })).toEqual({ rows: [] });
-    expect(readBlock({ type: 'empty', height: 10 })).toEqual({ height: 10 });
+    expect(readBlock({ type: 'image', image: 'foo' })).toEqual({ type: 'image', image: 'foo' });
+    expect(readBlock({ type: 'columns', columns: [] })).toEqual({ type: 'columns', columns: [] });
+    expect(readBlock({ type: 'rows', rows: [] })).toEqual({ type: 'rows', rows: [] });
+    expect(readBlock({ type: 'empty', height: 10 })).toEqual({ type: 'empty', height: 10 });
   });
 
   it('rejects unknown type', () => {
@@ -97,9 +99,10 @@ describe('readColumnsBlock', () => {
     const result = readColumnsBlock(content, defaultStyle);
 
     expect(result).toEqual({
+      type: 'columns',
       columns: [
-        { text: [{ text: 'foo', attrs: { fontSize: 8, fontStyle: 'italic' } }] },
-        { text: [{ text: 'bar', attrs: { fontSize: 8, fontStyle: 'italic' } }] },
+        { type: 'text', text: [{ text: 'foo', attrs: { fontSize: 8, fontStyle: 'italic' } }] },
+        { type: 'text', text: [{ text: 'bar', attrs: { fontSize: 8, fontStyle: 'italic' } }] },
       ],
     });
   });
@@ -110,9 +113,10 @@ describe('readColumnsBlock', () => {
     const result = readColumnsBlock(content);
 
     expect(result).toEqual({
+      type: 'columns',
       columns: [
-        { text: [{ text: 'foo', attrs: {} }], textAlign: 'right' },
-        { text: [{ text: 'bar', attrs: {} }], textAlign: 'right' },
+        { type: 'text', text: [{ text: 'foo', attrs: {} }], textAlign: 'right' },
+        { type: 'text', text: [{ text: 'bar', attrs: {} }], textAlign: 'right' },
       ],
     });
   });
@@ -126,9 +130,10 @@ describe('readRowsBlock', () => {
     const result = readRowsBlock(content, defaultStyle);
 
     expect(result).toEqual({
+      type: 'rows',
       rows: [
-        { text: [{ text: 'foo', attrs: { fontSize: 8, fontStyle: 'italic' } }] },
-        { text: [{ text: 'bar', attrs: { fontSize: 8, fontStyle: 'italic' } }] },
+        { type: 'text', text: [{ text: 'foo', attrs: { fontSize: 8, fontStyle: 'italic' } }] },
+        { type: 'text', text: [{ text: 'bar', attrs: { fontSize: 8, fontStyle: 'italic' } }] },
       ],
     });
   });
@@ -139,9 +144,10 @@ describe('readRowsBlock', () => {
     const result = readRowsBlock(content);
 
     expect(result).toEqual({
+      type: 'rows',
       rows: [
-        { text: [{ text: 'foo', attrs: {} }], textAlign: 'right' },
-        { text: [{ text: 'bar', attrs: {} }], textAlign: 'right' },
+        { type: 'text', text: [{ text: 'foo', attrs: {} }], textAlign: 'right' },
+        { type: 'text', text: [{ text: 'bar', attrs: {} }], textAlign: 'right' },
       ],
     });
   });
@@ -162,6 +168,7 @@ describe('readTextBlock', () => {
     const result = readTextBlock(input);
 
     expect(result).toEqual({
+      type: 'text',
       text: [{ text: 'foo', attrs: {} }],
       graphics: expect.any(Function),
       margin: { left: 5, right: 5, top: 5, bottom: 5 },
@@ -193,7 +200,10 @@ describe('readTextBlock', () => {
 
     const result = readTextBlock(input, defaultAttrs);
 
-    expect(result).toEqual({ text: [{ text: 'foo', attrs: { fontSize: 14, lineHeight: 1.5 } }] });
+    expect(result).toEqual({
+      type: 'text',
+      text: [{ text: 'foo', attrs: { fontSize: 14, lineHeight: 1.5 } }],
+    });
   });
 
   it('checks text', () => {

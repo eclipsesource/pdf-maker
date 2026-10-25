@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import type { Box } from '../box.ts';
 import { FontStore } from '../font-store.ts';
 import type { MakerCtx } from '../maker-ctx.ts';
-import type { Block } from '../read/read-block.ts';
+import type { Block, ColumnsBlock } from '../read/read-block.ts';
 import { fakeFont, span } from '../test/test-utils.ts';
 import { layoutColumnsContent } from './layout-columns.ts';
 
@@ -22,7 +22,7 @@ describe('layout-columns', () => {
 
   describe('layoutColumnsContent', () => {
     it('creates empty frame for empty columns array', async () => {
-      const block = { columns: [] };
+      const block: ColumnsBlock = { type: 'columns', columns: [] };
 
       const { frame } = await layoutColumnsContent(block, box, ctx);
 
@@ -30,7 +30,10 @@ describe('layout-columns', () => {
     });
 
     it('creates child for column with fixed width and height', async () => {
-      const block = { columns: [{ width: 100, height: 50 }] };
+      const block: ColumnsBlock = {
+        type: 'columns',
+        columns: [{ type: 'empty', width: 100, height: 50 }],
+      };
 
       const { frame } = await layoutColumnsContent(block, box, ctx);
 
@@ -43,7 +46,11 @@ describe('layout-columns', () => {
 
     it('does not include block padding in height of frame', async () => {
       const padding = { left: 1, right: 2, top: 3, bottom: 4 };
-      const block = { columns: [{ width: 100, height: 50 }], padding };
+      const block: ColumnsBlock = {
+        type: 'columns',
+        columns: [{ type: 'empty', width: 100, height: 50 }],
+        padding,
+      };
 
       const { frame } = await layoutColumnsContent(block, box, ctx);
 
@@ -51,7 +58,11 @@ describe('layout-columns', () => {
     });
 
     it('returns frame with fixed width for block with auto width', async () => {
-      const block = { columns: [{ width: 100, height: 50 }], autoWidth: true };
+      const block: ColumnsBlock = {
+        type: 'columns',
+        columns: [{ type: 'empty', width: 100, height: 50 }],
+        autoWidth: true,
+      };
 
       const { frame, remainder } = await layoutColumnsContent(block, box, ctx);
 
@@ -60,10 +71,11 @@ describe('layout-columns', () => {
     });
 
     it("passes auto width down to children that don't have a fixed width", async () => {
-      const block = {
+      const block: ColumnsBlock = {
+        type: 'columns',
         columns: [
-          { text: [span('foo')], width: 50 }, // column with fixed width
-          { text: [span('bar')] }, // flexible column
+          { type: 'text', text: [span('foo')], width: 50 }, // column with fixed width
+          { type: 'text', text: [span('bar')] }, // flexible column
         ],
         autoWidth: true,
       };
@@ -80,7 +92,10 @@ describe('layout-columns', () => {
 
     it('respects column margin', async () => {
       const margin = { left: 5, right: 6, top: 7, bottom: 8 };
-      const block = { columns: [{ width: 100, height: 50, margin }] };
+      const block: ColumnsBlock = {
+        type: 'columns',
+        columns: [{ type: 'empty', width: 100, height: 50, margin }],
+      };
 
       const { frame } = await layoutColumnsContent(block, box, ctx);
 
@@ -93,11 +108,11 @@ describe('layout-columns', () => {
 
     it('creates children for multiple columns with fixed size and margins', async () => {
       const margin = { left: 5, right: 6, top: 7, bottom: 8 };
-      const columns = [
-        { width: 100, height: 50, margin },
-        { width: 100, height: 50, margin },
+      const columns: Block[] = [
+        { type: 'empty', width: 100, height: 50, margin },
+        { type: 'empty', width: 100, height: 50, margin },
       ];
-      const block = { columns };
+      const block: ColumnsBlock = { type: 'columns', columns };
 
       const { frame } = await layoutColumnsContent(block, box, ctx);
 
@@ -114,10 +129,10 @@ describe('layout-columns', () => {
     it('distributes space evenly across flexible columns', async () => {
       const margin = { left: 5, right: 6, top: 7, bottom: 8 };
       const columns: Block[] = [
-        { text: [span('Column One')], margin },
-        { text: [span('Column Two')], margin },
+        { type: 'text', text: [span('Column One')], margin },
+        { type: 'text', text: [span('Column Two')], margin },
       ];
-      const block = { columns };
+      const block: ColumnsBlock = { type: 'columns', columns };
 
       const { frame } = await layoutColumnsContent(block, box, ctx);
 
@@ -134,11 +149,11 @@ describe('layout-columns', () => {
     it('distributes remaining space across flexible columns', async () => {
       const margin = { left: 5, right: 6, top: 7, bottom: 8 };
       const columns: Block[] = [
-        { width: 89, height: 25, margin }, // 89 + 5 + 6 amounts to a column width of 100
-        { text: [span('Column One')], margin },
-        { text: [span('Column Two')], margin },
+        { type: 'empty', width: 89, height: 25, margin }, // 89 + 5 + 6 amounts to a column width of 100
+        { type: 'text', text: [span('Column One')], margin },
+        { type: 'text', text: [span('Column Two')], margin },
       ];
-      const block = { columns };
+      const block: ColumnsBlock = { type: 'columns', columns };
 
       const { frame } = await layoutColumnsContent(block, box, ctx);
 
@@ -156,10 +171,10 @@ describe('layout-columns', () => {
     it('fits columns into given width', async () => {
       const margin = { left: 5, right: 6, top: 7, bottom: 8 };
       const columns: Block[] = [
-        { text: [span('Column One')], margin },
-        { text: [span('Column Two')], margin },
+        { type: 'text', text: [span('Column One')], margin },
+        { type: 'text', text: [span('Column Two')], margin },
       ];
-      const block = { columns };
+      const block: ColumnsBlock = { type: 'columns', columns };
 
       const { frame } = await layoutColumnsContent(block, box, ctx);
 
@@ -175,11 +190,11 @@ describe('layout-columns', () => {
 
     it('respects vertical alignment', async () => {
       const columns: Block[] = [
-        { text: [span('Column One')], height: 100 },
-        { text: [span('Column Two')], verticalAlign: 'middle' },
-        { text: [span('Column Three')], verticalAlign: 'bottom' },
+        { type: 'text', text: [span('Column One')], height: 100 },
+        { type: 'text', text: [span('Column Two')], verticalAlign: 'middle' },
+        { type: 'text', text: [span('Column Three')], verticalAlign: 'bottom' },
       ];
-      const block = { columns };
+      const block: ColumnsBlock = { type: 'columns', columns };
 
       const { frame } = await layoutColumnsContent(block, box, ctx);
 

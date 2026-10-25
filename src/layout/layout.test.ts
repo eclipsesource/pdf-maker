@@ -5,7 +5,14 @@ import type { Box } from '../box.ts';
 import { FontStore } from '../font-store.ts';
 import type { Frame } from '../frame.ts';
 import type { MakerCtx } from '../maker-ctx.ts';
-import type { Block, TextAttrs, TextSpan } from '../read/read-block.ts';
+import type {
+  Block,
+  ColumnsBlock,
+  EmptyBlock,
+  RowsBlock,
+  TextAttrs,
+  TextSpan,
+} from '../read/read-block.ts';
 import type { PageInfo } from '../read/read-document.ts';
 import { readDocumentDefinition } from '../read/read-document.ts';
 import { fakeFont, p, range } from '../test/test-utils.ts';
@@ -340,7 +347,7 @@ describe('layout', () => {
 
   describe('layoutBlock', () => {
     it('creates frame with fixed width and height', async () => {
-      const block = { rows: [], width: 200, height: 100 };
+      const block: RowsBlock = { type: 'rows', rows: [], width: 200, height: 100 };
 
       const { frame } = await layoutBlock(block, box, ctx);
 
@@ -355,7 +362,7 @@ describe('layout', () => {
 
     it('creates frame for empty block', async () => {
       const padding = { left: 5, right: 6, top: 7, bottom: 8 };
-      const block = { padding };
+      const block: EmptyBlock = { type: 'empty', padding };
 
       const { frame } = await layoutBlock(block, box, ctx);
 
@@ -364,7 +371,7 @@ describe('layout', () => {
 
     it('creates frame for empty block with auto width', async () => {
       const padding = { left: 5, right: 6, top: 7, bottom: 8 };
-      const block = { padding, autoWidth: true };
+      const block: EmptyBlock = { type: 'empty', padding, autoWidth: true };
 
       const { frame } = await layoutBlock(block, box, ctx);
 
@@ -373,7 +380,7 @@ describe('layout', () => {
 
     it('creates frame for empty block with fixed width and height', async () => {
       const padding = { left: 5, right: 6, top: 7, bottom: 8 };
-      const block = { padding, width: 100, height: 200 };
+      const block: EmptyBlock = { type: 'empty', padding, width: 100, height: 200 };
 
       const { frame } = await layoutBlock(block, box, ctx);
 
@@ -382,7 +389,11 @@ describe('layout', () => {
 
     it('includes padding around children', async () => {
       const padding = { left: 5, right: 6, top: 7, bottom: 8 };
-      const block = { columns: [{ width: 100, height: 200 }], padding };
+      const block: ColumnsBlock = {
+        type: 'columns',
+        columns: [{ type: 'empty', width: 100, height: 200 }],
+        padding,
+      };
 
       const { frame } = await layoutBlock(block, box, ctx);
 
@@ -396,7 +407,7 @@ describe('layout', () => {
     });
 
     it('includes anchor object for id', async () => {
-      const block = { columns: [], id: 'test' };
+      const block: ColumnsBlock = { type: 'columns', columns: [], id: 'test' };
 
       const { frame } = await layoutBlock(block, box, ctx);
 
@@ -412,7 +423,7 @@ describe('layout', () => {
         { type: 'polyline', points: [p(1, 2), p(3, 4)] },
       ];
 
-      const { frame } = await layoutBlock({ graphics } as Block, box, ctx);
+      const { frame } = await layoutBlock({ type: 'empty', graphics } as Block, box, ctx);
 
       expect(frame).toEqual(expect.objectContaining({ width: 400, height: 0 }));
       expect(frame.objects).toEqual([
@@ -435,7 +446,7 @@ describe('layout', () => {
       ];
       const padding = { left: 5, right: 5, top: 5, bottom: 5 };
 
-      const { frame } = await layoutBlock({ graphics, padding } as Block, box, ctx);
+      const { frame } = await layoutBlock({ type: 'empty', graphics, padding } as Block, box, ctx);
 
       expect(frame).toEqual(expect.objectContaining({ width: 400, height: 10 }));
       expect(frame.objects).toEqual([
@@ -459,43 +470,49 @@ describe('layout', () => {
     });
 
     it('returns true if this block has breakAfter = auto', () => {
-      const blocks: Block[] = [{ breakAfter: 'auto' }, {}];
+      const blocks: Block[] = [{ type: 'empty', breakAfter: 'auto' }, { type: 'empty' }];
 
       expect(isBreakPossible(blocks, 0)).toBe(true);
     });
 
     it('returns true if this block has breakAfter = always', () => {
-      const blocks: Block[] = [{ breakAfter: 'always' }, {}];
+      const blocks: Block[] = [{ type: 'empty', breakAfter: 'always' }, { type: 'empty' }];
 
       expect(isBreakPossible(blocks, 0)).toBe(true);
     });
 
     it('returns true if this block has breakAfter = always but it is the last block', () => {
-      const blocks: Block[] = [{ breakAfter: 'avoid' }];
+      const blocks: Block[] = [{ type: 'empty', breakAfter: 'avoid' }];
 
       expect(isBreakPossible(blocks, 0)).toBe(true);
     });
 
     it('returns false if this block has breakAfter = avoid', () => {
-      const blocks: Block[] = [{ breakAfter: 'avoid' }, {}];
+      const blocks: Block[] = [{ type: 'empty', breakAfter: 'avoid' }, { type: 'empty' }];
 
       expect(isBreakPossible(blocks, 0)).toBe(false);
     });
 
     it('returns false if next block has breakBefore = avoid', () => {
-      const blocks: Block[] = [{}, { breakBefore: 'avoid' }];
+      const blocks: Block[] = [{ type: 'empty' }, { type: 'empty', breakBefore: 'avoid' }];
 
       expect(isBreakPossible(blocks, 0)).toBe(false);
     });
 
     it('returns true if this block has breakAfter = always event if next block has breakBefore = avoid', () => {
-      const blocks: Block[] = [{ breakAfter: 'always' }, { breakBefore: 'avoid' }];
+      const blocks: Block[] = [
+        { type: 'empty', breakAfter: 'always' },
+        { type: 'empty', breakBefore: 'avoid' },
+      ];
 
       expect(isBreakPossible(blocks, 0)).toBe(true);
     });
 
     it('returns true if next block has breakBefore = always even if this block has breakAfter = avoid', () => {
-      const blocks: Block[] = [{ breakAfter: 'avoid' }, { breakBefore: 'always' }];
+      const blocks: Block[] = [
+        { type: 'empty', breakAfter: 'avoid' },
+        { type: 'empty', breakBefore: 'always' },
+      ];
 
       expect(isBreakPossible(blocks, 0)).toBe(true);
     });

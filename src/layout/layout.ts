@@ -106,7 +106,9 @@ export async function layoutPages(def: DocumentDefinition, ctx: MakerCtx): Promi
     );
     skipTopMargin = !forcedBreak;
     if (ctx.guides) {
-      frame.objects = [createFrameGuides(frame, { margin: pageMargin, isPage: true })];
+      frame.objects = [
+        createFrameGuides(frame, { type: 'empty', margin: pageMargin, isPage: true }),
+      ];
     }
     remainingBlocks = remainder;
     pages.push({
@@ -154,7 +156,7 @@ async function layoutFooter(footer: Block, pageSize: Size, ctx: MakerCtx) {
 
 async function layoutPageContent(blocks: Block[], box: Box, ctx: MakerCtx, skipTopMargin: boolean) {
   // We create a dummy rows block and enforce a page break if the content does not fit
-  const block = { rows: blocks, breakInside: 'enforce-auto' as any };
+  const block = { type: 'rows' as const, rows: blocks, breakInside: 'enforce-auto' as any };
   // The bottom margin of the last block does not need to fit on the page
   const opts = { skipTopMargin, skipBottomMargin: true };
   const { frame, remainder, forcedBreak } = await layoutBlock(block, box, ctx, opts);
@@ -200,24 +202,23 @@ async function layoutBlockContent(
   ctx: MakerCtx,
   opts?: LayoutOptions,
 ): Promise<LayoutContent> {
-  if ('text' in block || 'shapedText' in block) {
-    return await layoutTextContent(block, box, ctx);
+  switch (block.type) {
+    case 'text':
+      return await layoutTextContent(block, box, ctx);
+    case 'image':
+      return await layoutImageContent(block, box, ctx);
+    case 'columns':
+      return await layoutColumnsContent(block, box, ctx);
+    case 'rows':
+      return await layoutRowsContent(block, box, ctx, opts);
+    case 'empty':
+      return {
+        frame: {
+          height: block.height ?? 0,
+          width: block.width ?? (block.autoWidth ? 0 : box.width),
+        },
+      };
   }
-  if ('image' in block) {
-    return await layoutImageContent(block, box, ctx);
-  }
-  if ('columns' in block) {
-    return await layoutColumnsContent(block, box, ctx);
-  }
-  if ('rows' in block) {
-    return await layoutRowsContent(block, box, ctx, opts);
-  }
-  return {
-    frame: {
-      height: block.height ?? 0,
-      width: block.width ?? (block.autoWidth ? 0 : box.width),
-    },
-  };
 }
 
 function addAnchor(frame: Frame, block: Block) {

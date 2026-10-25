@@ -146,11 +146,13 @@ export async function layoutRowsContent(
  * like a border since they can draw shapes at the block's edges.
  */
 function collapsesTop(block: Block): boolean {
-  return 'rows' in block && !!block.rows.length && canCollapse(block) && !block.padding?.top;
+  return block.type === 'rows' && !!block.rows.length && canCollapse(block) && !block.padding?.top;
 }
 
 function collapsesBottom(block: Block): boolean {
-  return 'rows' in block && !!block.rows.length && canCollapse(block) && !block.padding?.bottom;
+  return (
+    block.type === 'rows' && !!block.rows.length && canCollapse(block) && !block.padding?.bottom
+  );
 }
 
 function canCollapse(block: Block) {
@@ -159,14 +161,12 @@ function canCollapse(block: Block) {
 
 function collapsedTopMargin(block: Block): number {
   const own = block.margin?.top ?? 0;
-  return collapsesTop(block)
-    ? Math.max(own, collapsedTopMargin((block as RowsBlock).rows[0]))
-    : own;
+  if (block.type !== 'rows' || !collapsesTop(block)) return own;
+  return Math.max(own, collapsedTopMargin(block.rows[0]));
 }
 
 function collapsedBottomMargin(block: Block): number {
   const own = block.margin?.bottom ?? 0;
-  if (!collapsesBottom(block)) return own;
-  const rows = (block as RowsBlock).rows;
-  return Math.max(own, collapsedBottomMargin(rows[rows.length - 1]));
+  if (block.type !== 'rows' || !collapsesBottom(block)) return own;
+  return Math.max(own, collapsedBottomMargin(block.rows[block.rows.length - 1]));
 }
