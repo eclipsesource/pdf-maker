@@ -16,7 +16,9 @@ export async function layoutImageContent(
   const scale = getScale(image, box, hasFixedWidth, hasFixedHeight);
   const imageSize = { width: image.width * scale, height: image.height * scale };
   const width = block.autoWidth ? imageSize.width : box.width;
-  const imageBox = { x: box.x, y: box.y, width, height: imageSize.height };
+  // In a block with a fixed height, the image is centered vertically
+  const height = hasFixedHeight ? box.height : imageSize.height;
+  const imageBox = { x: box.x, y: box.y, width, height };
   const imagePos = align(imageBox, imageSize, block.imageAlign);
   const imageObj: ImageObject = createImageObject(image, imagePos, imageSize);
   const objects: RenderObject[] = [imageObj];
@@ -24,7 +26,7 @@ export async function layoutImageContent(
     frame: {
       objects,
       width,
-      height: imageSize.height,
+      height,
     },
   };
 }
@@ -32,9 +34,10 @@ export async function layoutImageContent(
 function getScale(image: Size, box: Size, fixedWidth: boolean, fixedHeight: boolean): number {
   const xScale = box.width / image.width;
   const yScale = box.height / image.height;
-  if (fixedWidth && fixedHeight) return Math.min(xScale, yScale);
+  // With a fixed height, the image must still fit into the available width,
+  // even if the width is not fixed
+  if (fixedHeight) return Math.min(xScale, yScale);
   if (fixedWidth) return xScale;
-  if (fixedHeight) return yScale;
   return Math.min(xScale, 1);
 }
 

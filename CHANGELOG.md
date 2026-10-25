@@ -27,6 +27,10 @@
 
 ### Fixed
 
+- An image block with a fixed `height` but no `width` could be wider
+  than the available space. The image is now scaled down to fit.
+- Images in a block with a fixed `height` were placed at the top
+  instead of being centered vertically.
 - A rows block with `insertAfterBreak` could create pages endlessly
   when a row did not fit on a page below the inserted block, or when a
   row had `breakBefore: 'always'`. The row is now placed directly after

@@ -77,9 +77,11 @@ export type ImageBlock = {
    *
    * When any of the properties `width` and `height` are specified, the
    * image will be scaled proportionally to be contained in the given
-   * bounds. When neither `width` nor `height` is given, the image is
-   * not scaled unless it exceeds the maximum available width. In this
-   * case, it is scaled down to fit onto the page.
+   * bounds. With only a `height`, the image is also kept within the
+   * available width. When neither `width` nor `height` is given, the
+   * image is not scaled unless it exceeds the maximum available width.
+   * In this case, it is scaled down to fit onto the page. In a block
+   * with a fixed `height`, the image is centered vertically.
    */
   image: string;
 

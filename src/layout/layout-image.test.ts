@@ -92,6 +92,32 @@ describe('layout-image', () => {
       });
     });
 
+    it('scales image down to fit into available width with fixed height', async () => {
+      const block: ImageBlock = { type: 'image', image: 'img-720-480', height: 1 };
+      box = { x: 20, y: 30, width: 300, height: 400 };
+
+      const { frame } = await layoutImageContent(block, box, ctx);
+
+      expect(frame).toEqual({
+        objects: [expect.objectContaining({ type: 'image', width: 300, height: 200 })],
+        width: 300,
+        height: 400,
+      });
+    });
+
+    it('centers image vertically in block with fixed height', async () => {
+      const block: ImageBlock = { type: 'image', image: 'img-720-480', width: 1, height: 1 };
+      box = { x: 20, y: 30, width: 300, height: 300 };
+
+      const { frame } = await layoutImageContent(block, box, ctx);
+
+      expect(frame).toEqual({
+        objects: [expect.objectContaining({ x: 20, y: 30 + (300 - 200) / 2 })],
+        width: 300,
+        height: 300,
+      });
+    });
+
     it('does not scale image if no fixed bounds', async () => {
       const block: ImageBlock = { type: 'image', image: 'img-72-48' };
 
