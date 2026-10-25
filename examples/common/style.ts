@@ -13,7 +13,6 @@ export const colors = {
   muted: '#666666',
   rule: '#dddddd',
   link: '#1f4e8c',
-  accent: '#a0302a',
 } satisfies Record<string, Color>;
 
 const pageMarginX = '25mm';

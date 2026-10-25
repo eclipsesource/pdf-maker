@@ -1,10 +1,13 @@
-import type { DocumentDefinition } from '../src/index.ts';
-import { columns, image, rect, text } from '../src/index.ts';
+import type { Block, DocumentDefinition, ImageBlock } from '../src/index.ts';
+import { columns, image, rect, rows, text } from '../src/index.ts';
 import {
   bodyStyle,
+  caption,
   colors,
   createPdfMaker,
   exampleDir,
+  heading,
+  label,
   pageFooter,
   pageHeader,
   pageMargin,
@@ -12,10 +15,22 @@ import {
   writePdf,
 } from './common/style.ts';
 
-// Draw a frame around a block
-const drawFrame = ({ width, height }: { width: number; height: number }) => [
-  rect(0, 0, width, height, { lineColor: colors.rule, lineDash: [2] }),
+const paper = '#e7e5e0';
+
+// A dashed frame that shows the bounds of a block
+const dashedFrame = ({ width, height }: { width: number; height: number }) => [
+  rect(0, 0, width, height, { lineColor: colors.rule, lineDash: [2, 2] }),
 ];
+
+// A figure with a caption and a short description above the image
+const figure = (img: ImageBlock, name: string, description: string) =>
+  rows([caption(name), text(description, { fontSize: 10, margin: { top: 1, bottom: 6 } }), img], {
+    margin: { x: 15 },
+  });
+
+const figures = (...items: Block[]) => columns(items, { margin: { x: -15, y: 8 } });
+
+const paragraph = (content: string) => text(content, { margin: { y: 6 } });
 
 const document: DocumentDefinition = {
   margin: pageMargin,
@@ -24,77 +39,92 @@ const document: DocumentDefinition = {
   footer: pageFooter,
   content: [
     title('Images'),
-    text('JPG, PNG, and SVG images are supported.'),
-    columns(
-      [
-        image('file:/images/liberty.jpg', {
-          height: 120,
-          width: 80,
-          margin: { x: 5 },
-        }),
-        image('file:/images/torus.png', {
-          width: 160,
-          margin: { x: 5 },
-        }),
-        image('file:/images/chart.svg', {
-          width: 180,
-          margin: { x: 5 },
-        }),
-      ],
-      { margin: { y: 10 } },
+    paragraph(
+      'Images are blocks like any other. They can be loaded from file:, data:, and http(s): ' +
+        'URLs. Paths in file: URLs are resolved against the resource root of the PdfMaker.',
     ),
-    text('Images are always scaled proportionally to fit into the bounds of the block.', {
-      margin: { top: 20 },
-    }),
-    columns(
-      [
-        image('file:/images/liberty.jpg', {
-          width: 140,
-          height: 120,
-          margin: { x: 5 },
-          graphics: drawFrame,
-        }),
+
+    heading('Formats'),
+    figures(
+      figure(
+        image('file:/images/liberty.jpg', { height: 80, imageAlign: 'left' }),
+        'JPEG',
+        'Photos are embedded as they are.',
+      ),
+      // The background shows through the transparent parts of the image
+      figure(
         image('file:/images/torus.png', {
-          width: 140,
-          height: 120,
-          margin: { x: 5 },
-          graphics: drawFrame,
+          height: 80,
+          graphics: ({ width, height }) => [rect(0, 0, width, height, { fillColor: paper })],
         }),
-        image('file:/images/chart.svg', {
-          width: 140,
-          height: 120,
-          margin: { x: 5 },
-          graphics: drawFrame,
-        }),
-      ],
-      { margin: { y: 10 } },
+        'PNG',
+        'Transparency is preserved.',
+      ),
+      figure(image('file:/images/chart.svg', { height: 80 }), 'SVG', 'Vector graphics stay sharp.'),
     ),
-    text('Images can be aligned horizontally using "imageAlign".', { margin: { top: 20 } }),
+
+    heading('Scaling'),
+    paragraph('Images scale proportionally to fit their block, shown by the dashed frames.'),
+    figures(
+      figure(
+        image('file:/images/torus.png', { width: 88, graphics: dashedFrame }),
+        'Width only',
+        'The height follows the image.',
+      ),
+      figure(
+        image('file:/images/torus.png', { height: 50, graphics: dashedFrame }),
+        'Height only',
+        'The block keeps the full width.',
+      ),
+      figure(
+        image('file:/images/torus.png', { width: 50, height: 66, graphics: dashedFrame }),
+        'Width and height',
+        'The image fits into both.',
+      ),
+    ),
+
+    heading('Alignment'),
+    paragraph('Within its block, an image can be aligned to the left, center, or right.'),
+    figures(
+      ...(
+        [
+          ['Left', 'left'],
+          ['Centered', 'center'],
+          ['Right', 'right'],
+        ] as const
+      ).map(([name, imageAlign]) =>
+        figure(
+          image('file:/images/liberty.jpg', { height: 60, imageAlign, graphics: dashedFrame }),
+          name,
+          `imageAlign: '${imageAlign}'`,
+        ),
+      ),
+    ),
+
+    heading('Images next to text'),
     columns(
       [
-        image('file:/images/liberty.jpg', {
-          width: 140,
-          height: 120,
-          margin: { x: 5 },
-          imageAlign: 'left',
-          graphics: drawFrame,
-        }),
-        image('file:/images/liberty.jpg', {
-          width: 140,
-          height: 120,
-          margin: { x: 5 },
-          imageAlign: 'center',
-          graphics: drawFrame,
-        }),
-        image('file:/images/liberty.jpg', {
-          width: 140,
-          height: 120,
-          margin: { x: 5 },
-          imageAlign: 'right',
-          graphics: drawFrame,
-        }),
+        rows(
+          [
+            image('file:/images/liberty.jpg', { width: 60, imageAlign: 'left' }),
+            label('Photo: George Hodan, CC0', { margin: { top: 4 } }),
+          ],
+          { width: 'auto', margin: { right: 20 } },
+        ),
+        rows([
+          text(
+            'Placed in columns, images and text can share a line. This works like any other ' +
+              'columns layout: blocks with a fixed or automatic width are laid out first, and ' +
+              'the text takes the remaining space.',
+            { margin: { bottom: 6 } },
+          ),
+          paragraph(
+            'The photo shows the Statue of Liberty in New York. It was taken by George Hodan ' +
+              'and released into the public domain.',
+          ),
+        ]),
       ],
-      { margin: { y: 10 } },
+      { margin: { y: 8 } },
     ),
   ],
 };

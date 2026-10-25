@@ -3,14 +3,14 @@
   <defs>
     <!-- Gradient coordinates default to the bounding box of the shape -->
     <linearGradient id="area" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#93c5fd" />
-      <stop offset="100%" stop-color="#eff6ff" />
+      <stop offset="0" stop-color="#b1c1d7" />
+      <stop offset="100%" stop-color="#ffffff" />
     </linearGradient>
 
     <!-- With userSpaceOnUse, they are in user space instead -->
     <linearGradient id="line" gradientUnits="userSpaceOnUse" x1="8" y1="0" x2="212" y2="0">
-      <stop offset="0" stop-color="#2563eb" />
-      <stop offset="1" stop-color="#06b6d4" />
+      <stop offset="0" stop-color="#1f4e8c" />
+      <stop offset="1" stop-color="#5b8a72" />
     </linearGradient>
 
     <!-- A gradient can inherit the stops of another gradient -->
@@ -18,15 +18,15 @@
 
     <!-- Radial gradients support an off-center focal point -->
     <radialGradient id="orb" cx="0.5" cy="0.5" r="0.5" fx="0.34" fy="0.3">
-      <stop offset="0" stop-color="#fff7ed" />
-      <stop offset="1" stop-color="#fb923c" />
+      <stop offset="0" stop-color="#f6eedb" />
+      <stop offset="1" stop-color="#c9962b" />
     </radialGradient>
 
     <!-- Referenced shapes are only drawn where they are used -->
-    <circle id="dot" r="3.5" fill="#fff" stroke="#2563eb" stroke-width="2" />
+    <circle id="dot" r="3.5" fill="#fff" stroke="#1f4e8c" stroke-width="2" />
   </defs>
 
-  <rect x="0.5" y="0.5" width="259" height="139" rx="10" fill="#fff" stroke="#e2e8f0" />
+  <rect x="0.5" y="0.5" width="259" height="139" rx="10" fill="#fff" stroke="#dddddd" />
   <circle cx="26" cy="26" r="12" fill="url(#orb)" />
 
   <!-- The whole chart is placed with a single transform -->
@@ -36,12 +36,12 @@
           fill="url(#area)" />
 
     <!-- Group opacity is applied to all descendants -->
-    <g opacity="0.5" stroke="#64748b" stroke-dasharray="4 4">
+    <g opacity="0.5" stroke="#888888" stroke-dasharray="4 4">
       <line x1="0" y1="26" x2="212" y2="26" />
       <line x1="0" y1="50" x2="212" y2="50" />
       <line x1="0" y1="74" x2="212" y2="74" />
     </g>
-    <line x1="0" y1="98" x2="212" y2="98" stroke="#94a3b8" stroke-width="1.5" />
+    <line x1="0" y1="98" x2="212" y2="98" stroke="#666666" stroke-width="1.5" />
 
     <path d="M 8 78 C 25 78, 42 54, 59 54 C 76 54, 93 66, 110 66
              C 127 66, 144 36, 161 36 C 178 36, 195 24, 212 24"

@@ -1,7 +1,9 @@
-import type { DocumentDefinition } from '../src/index.ts';
-import { circle, line, path, rect, text } from '../src/index.ts';
+import type { Block, Color, DocumentDefinition, Shape } from '../src/index.ts';
+import { circle, columns, line, path, rect, rows, text } from '../src/index.ts';
 import {
   bodyStyle,
+  caption,
+  colors,
   createPdfMaker,
   pageFooter,
   pageHeader,
@@ -10,6 +12,93 @@ import {
   writePdf,
 } from './common/style.ts';
 
+const palette = {
+  blue: '#1f4e8c',
+  red: '#a0302a',
+  ochre: '#c9962b',
+  sage: '#5b8a72',
+  gray: '#888888',
+  paper: '#e7e5e0',
+} satisfies Record<string, Color>;
+
+type Size = { width: number; height: number };
+
+// A panel with a caption, a short description, and a drawing area of the given height.
+// Graphics can be a list of shapes or a function that receives the size of the block.
+const panel = (
+  name: string,
+  description: string,
+  content: { height: number; graphics: Shape[] | ((size: Size) => Shape[]) } | Block[],
+) =>
+  rows(
+    [
+      caption(name),
+      text(description, { fontSize: 10, margin: { top: 1, bottom: 8 } }),
+      ...(Array.isArray(content) ? content : [content]),
+    ],
+    { margin: { x: 15, top: 18, bottom: 6 } },
+  );
+
+const grid = (...panels: Block[]) => columns(panels, { margin: { x: -15 } });
+
+// Creates the SVG path data for a star with the given center and radii
+function starPath(cx: number, cy: number, outer: number, inner: number, points = 5) {
+  const corners = Array.from({ length: points * 2 }, (_, i) => {
+    const r = i % 2 ? inner : outer;
+    const angle = (Math.PI * i) / points - Math.PI / 2;
+    return `${cx + r * Math.cos(angle)},${cy + r * Math.sin(angle)}`;
+  });
+  return `M${corners.join(' L')} Z`;
+}
+
+// Creates the SVG path data for a pie slice, using an arc command
+function slicePath(cx: number, cy: number, r: number, start: number, end: number) {
+  const point = (angle: number) =>
+    `${cx + r * Math.cos(angle - Math.PI / 2)},${cy + r * Math.sin(angle - Math.PI / 2)}`;
+  const largeArc = end - start > Math.PI ? 1 : 0;
+  return `M${cx},${cy} L${point(start)} A${r},${r} 0 ${largeArc} 1 ${point(end)} Z`;
+}
+
+const pieSlices = (cx: number, cy: number, r: number, values: number[], fills: Color[]) => {
+  const total = values.reduce((sum, value) => sum + value, 0);
+  let start = 0;
+  return values.map((value, i) => {
+    const end = start + (2 * Math.PI * value) / total;
+    const slice = path(slicePath(cx, cy, r, start, end), {
+      fillColor: fills[i],
+      lineColor: 'white',
+      lineWidth: 1.5,
+      lineJoin: 'round',
+    });
+    start = end;
+    return slice;
+  });
+};
+
+const monthlyValues = [12, 19, 15, 24, 21, 28, 26, 31];
+
+const barChart = ({ width, height }: Size): Shape[] => {
+  const max = 35;
+  const gap = 8;
+  const inset = 12;
+  const barWidth = (width - 2 * inset - gap * (monthlyValues.length - 1)) / monthlyValues.length;
+  const gridLines = [0.25, 0.5, 0.75, 1].map((f) =>
+    line(0, height - f * height, width, height - f * height, {
+      lineColor: colors.rule,
+      lineWidth: 0.5,
+    }),
+  );
+  const bars = monthlyValues.map((value, i) => {
+    const barHeight = (value / max) * height;
+    const isLast = i === monthlyValues.length - 1;
+    return rect(inset + i * (barWidth + gap), height - barHeight, barWidth, barHeight, {
+      fillColor: isLast ? palette.red : palette.blue,
+      fillOpacity: 0.75,
+    });
+  });
+  return [...gridLines, ...bars, line(0, height, width, height, { lineWidth: 0.75 })];
+};
+
 const document: DocumentDefinition = {
   margin: pageMargin,
   defaultStyle: bodyStyle,
@@ -17,131 +106,161 @@ const document: DocumentDefinition = {
   footer: pageFooter,
   content: [
     title('Graphics'),
-    // Graphics can be drawn in any block by setting the `graphics`
-    // property to an array of graphics objects. When a block contains
-    // only graphics, the `height` property must be set to the desired
-    // height of the block.
-    text('Lines', {
-      graphics: [
-        // A straight line
-        line(100, 10, 250, 10),
-        // A colored line
-        line(100, 20, 250, 20, { lineColor: '#4488cc' }),
-        // A dashed line
-        line(100, 30, 250, 30, { lineDash: [5] }),
-        // A dashed line with a dash pattern
-        line(100, 40, 250, 40, { lineDash: [5, 2, 1, 2] }),
-        // A dotted line (segments with zero length and round line caps)
-        line(100, 50, 250, 50, { lineWidth: 3, lineCap: 'round', lineDash: [0, 8] }),
-        // line cap = butt (default)
-        line(300, 15, 450, 15, { lineWidth: 7, lineCap: 'butt' }),
-        // line cap = round
-        line(300, 30, 450, 30, { lineWidth: 7, lineCap: 'round' }),
-        // line cap = square
-        line(300, 45, 450, 45, { lineWidth: 7, lineCap: 'square' }),
-      ],
-      height: 60,
-      margin: { y: 10 },
-    }),
-    // Rectangles and circles support a line color and stroke color. If
-    // neither line nor stroke properties are set, a black stroke and
-    // line width of 1 is assumed.
-    text('Rectangles\nand circles', {
-      graphics: [
-        rect(100, 0, 50, 25),
-        rect(120, 10, 50, 25, { fillColor: '#cccccc' }),
-        rect(140, 20, 50, 25, { lineColor: '#4488cc', lineWidth: 2, lineJoin: 'round' }),
-        rect(160, 30, 50, 25, {
-          fillColor: '#cccccc',
-          lineColor: '#4488cc',
-          lineJoin: 'bevel',
-          lineWidth: 2,
+    text(
+      'Any block can carry graphics: lines, rectangles, circles, and paths. Coordinates are ' +
+        'relative to the top left corner of the block. When graphics are given as a function, ' +
+        'it receives the final size of the block, so that shapes can adapt to it.',
+      { margin: { bottom: 4 } },
+    ),
+
+    grid(
+      panel('Lines and dashes', 'Lines can be solid or follow any dash pattern.', {
+        height: 70,
+        graphics: [
+          line(0, 5, 200, 5),
+          line(0, 19, 200, 19, { lineDash: [6, 3] }),
+          line(0, 33, 200, 33, { lineDash: [9, 3, 1, 3] }),
+          // Zero-length dashes with round caps produce dots
+          line(1, 47, 200, 47, { lineWidth: 2.5, lineCap: 'round', lineDash: [0, 6] }),
+          line(0, 63, 200, 63, { lineWidth: 4, lineColor: palette.blue }),
+        ],
+      }),
+      panel('Caps and joins', 'The common styles for line caps and corner joins.', {
+        height: 70,
+        graphics: [
+          // Thin guides show how far each cap extends beyond the end points
+          line(15, 0, 15, 70, { lineColor: palette.gray, lineWidth: 0.5 }),
+          line(85, 0, 85, 70, { lineColor: palette.gray, lineWidth: 0.5 }),
+          ...(['butt', 'round', 'square'] as const).map((lineCap, i) =>
+            line(15, 12 + i * 23, 85, 12 + i * 23, {
+              lineWidth: 10,
+              lineCap,
+              lineColor: palette.blue,
+            }),
+          ),
+          ...(['miter', 'round', 'bevel'] as const).map((lineJoin, i) =>
+            path('M0,45 L13,10 L26,45', {
+              lineWidth: 9,
+              lineJoin,
+              lineColor: palette.red,
+              translate: { x: 110 + i * 33, y: 8 },
+            }),
+          ),
+        ],
+      }),
+    ),
+
+    grid(
+      panel('Rectangles and circles', 'Shapes can be filled, outlined, or both.', {
+        height: 70,
+        graphics: [
+          // Later shapes are painted over earlier ones
+          rect(0, 8, 46, 30, { fillColor: palette.paper }),
+          rect(22, 20, 46, 30, { lineColor: palette.blue, lineWidth: 1.5 }),
+          rect(44, 32, 46, 30, {
+            fillColor: palette.paper,
+            lineColor: palette.blue,
+            lineWidth: 1.5,
+          }),
+          circle(135, 26, 18, { fillColor: palette.paper }),
+          circle(158, 38, 18, { lineColor: palette.red, lineWidth: 1.5 }),
+          circle(181, 50, 18, { fillColor: palette.paper, lineColor: palette.red, lineWidth: 1.5 }),
+        ],
+      }),
+      panel('Paths', 'SVG path data describes lines, curves, and arcs.', {
+        height: 80,
+        graphics: [
+          path(starPath(38, 42, 38, 15), { fillColor: palette.ochre, lineJoin: 'round' }),
+          path('M85,42 c8,0 8,-20 16,-20 s8,20 16,20 s8,-20 16,-20', {
+            lineColor: palette.blue,
+            lineWidth: 2,
+            lineCap: 'round',
+          }),
+          ...pieSlices(175, 42, 34, [45, 30, 25], [palette.red, palette.sage, palette.blue]),
+        ],
+      }),
+    ),
+
+    grid(
+      panel('Opacity', 'Translucent shapes blend where they overlap.', {
+        height: 85,
+        graphics: [
+          circle(26, 30, 26, { fillColor: palette.blue, fillOpacity: 0.55 }),
+          circle(56, 30, 26, { fillColor: palette.ochre, fillOpacity: 0.55 }),
+          circle(41, 55, 26, { fillColor: palette.red, fillOpacity: 0.55 }),
+          ...[palette.blue, palette.ochre, palette.red].map((lineColor, i) =>
+            circle(124 + i * 25, 42, 20, { lineColor, lineWidth: 8, lineOpacity: 0.55 }),
+          ),
+        ],
+      }),
+      panel('Transformations', 'Shapes can be rotated, skewed, scaled, and moved.', {
+        height: 85,
+        graphics: [
+          ...Array.from({ length: 6 }, (_, i) =>
+            rect(12, 15, 40, 40, {
+              fillColor: palette.blue,
+              fillOpacity: 0.12,
+              lineColor: palette.blue,
+              lineWidth: 0.75,
+              rotate: { angle: i * 15, cx: 32, cy: 35 },
+            }),
+          ),
+          // Each transformed square is shown next to its dashed original
+          ...[82, 124, 166].map((x) =>
+            rect(0, 0, 25, 25, {
+              lineColor: palette.gray,
+              lineDash: [2, 2],
+              translate: { x, y: 22 },
+            }),
+          ),
+          rect(0, 0, 25, 25, {
+            fillColor: palette.sage,
+            fillOpacity: 0.8,
+            translate: { x: 82, y: 22 },
+            skew: { x: -20 },
+          }),
+          rect(0, 0, 25, 25, {
+            fillColor: palette.ochre,
+            fillOpacity: 0.8,
+            translate: { x: 124, y: 22 },
+            scale: { x: 1.4, y: 0.7 },
+          }),
+          rect(0, 0, 25, 25, {
+            fillColor: palette.red,
+            fillOpacity: 0.8,
+            translate: { x: 166 + 14, y: 22 + 18 },
+          }),
+        ],
+      }),
+    ),
+
+    grid(
+      panel('Charts from data', 'Graphics are code, so they can be computed from data.', {
+        height: 77,
+        graphics: barChart,
+      }),
+      panel('Block decorations', 'Graphics adapt to the size of their block.', [
+        text('A text block with a background', {
+          padding: { x: 6, y: 3 },
+          graphics: ({ width, height }) => [
+            rect(0, 0, width, height, { fillColor: palette.paper }),
+          ],
         }),
-        circle(315, 27, 20, { lineWidth: 2 }),
-        circle(340, 27, 20, { fillColor: '#cccccc' }),
-        circle(365, 27, 20, { lineColor: '#4488cc', lineWidth: 2 }),
-        circle(390, 27, 20, { fillColor: '#cccccc', lineColor: '#4488cc', lineWidth: 2 }),
-      ],
-      height: 55,
-      margin: { y: 10 },
-    }),
-    // Path are supported using the SVG syntax.
-    // See https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/d
-    text('Paths', {
-      graphics: [
-        path('M45,0 L15,94 L90,34 L0,34 L75,94 Z', {
-          fillColor: '#4488cc',
-          translate: { x: 100 },
+        text('A text block with a frame', {
+          padding: { x: 6, y: 3 },
+          margin: { top: 6 },
+          graphics: ({ width, height }) => [
+            rect(0, 0, width, height, { lineColor: palette.blue, lineWidth: 1 }),
+          ],
         }),
-        path('M45,0 L15,94 L90,34 L0,34 L75,94 Z', {
-          fillColor: '#cccccc',
-          lineColor: '#4488cc',
-          lineJoin: 'round',
-          lineDash: [4, 2],
-          translate: { x: 200 },
+        text('A quote with a bar on the left', {
+          fontStyle: 'italic',
+          padding: { left: 10, y: 3 },
+          margin: { top: 6 },
+          graphics: ({ height }) => [rect(0, 0, 2.5, height, { fillColor: palette.red })],
         }),
-        path('M 0,30 c 20,0 20,-30 40,-30 s 20,30 40,30 s 20,-30 40,-30 s 20,30 40,30', {
-          lineWidth: 1,
-          lineColor: 'red',
-          translate: { x: 300, y: 30 },
-        }),
-      ],
-      height: 95,
-      margin: { y: 10 },
-    }),
-    // Opacity can be set on strokes (`lineOpacity`) and fills
-    // (`fillOpacity`) as a number between 0 and 1.
-    text('Opacity', {
-      graphics: [
-        rect(110, 0, 40, 40, {
-          fillColor: '#4488ee',
-          fillOpacity: 0.5,
-        }),
-        rect(120, 10, 40, 40, {
-          fillColor: '#eecc55',
-          fillOpacity: 0.5,
-        }),
-        rect(130, 20, 40, 40, {
-          fillColor: '#cc4433',
-          fillOpacity: 0.5,
-        }),
-        circle(250, 30, 25, {
-          lineWidth: 10,
-          lineColor: '#4488ee',
-          lineOpacity: 0.5,
-        }),
-        circle(275, 30, 25, {
-          lineWidth: 10,
-          lineColor: '#eecc55',
-          lineOpacity: 0.5,
-        }),
-        circle(300, 30, 25, {
-          lineWidth: 10,
-          lineColor: '#cc4433',
-          lineOpacity: 0.5,
-        }),
-      ],
-      height: 60,
-      margin: { y: 10 },
-    }),
-    // When a function is supplied to the `graphics` property, it will
-    // be called with the actual width and height of the block. This
-    // allows for aligning graphics with the block bounds, e.g. drawing
-    // a border.
-    text('A text block with a frame', {
-      graphics: ({ width, height }) => [
-        rect(0, 0, width, height, { lineColor: '#4488cc', lineWidth: 2 }),
-      ],
-      padding: { x: 10, y: 5 },
-      margin: { y: 10 },
-    }),
-    // Graphics are rendered below the text. This allows for setting a
-    // background color.
-    text('A text block with a background color', {
-      graphics: ({ width, height }) => [rect(0, 0, width, height, { fillColor: '#eecc55' })],
-      padding: { x: 10, y: 5 },
-      margin: { y: 10 },
-    }),
+      ]),
+    ),
   ],
 };
 

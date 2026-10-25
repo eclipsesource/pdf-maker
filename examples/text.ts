@@ -87,7 +87,7 @@ const document: DocumentDefinition = {
       ' or the ',
       span('style', { fontStyle: 'italic' }),
       ' of a few words. It can give them a ',
-      span('color', { color: colors.accent }),
+      span('color', { color: '#a0302a' }),
       ',',
       span(' space out', { letterSpacing: 1.2 }),
       ' their letters, or move them ',
