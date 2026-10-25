@@ -45,6 +45,8 @@ export type RowsBlock = {
   rows: Block[];
   breakInside?: 'auto' | 'avoid';
   insertAfterBreak?: () => Block;
+  /** Set on a remainder whose first row is the block inserted after the break. */
+  continued?: boolean;
 } & BlockAttrs;
 
 export type EmptyBlock = BlockAttrs;

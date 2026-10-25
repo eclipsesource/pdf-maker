@@ -20,6 +20,10 @@
 
 ### Fixed
 
+- A rows block with `insertAfterBreak` could create pages endlessly
+  when a row did not fit on a page below the inserted block, or when a
+  row had `breakBefore: 'always'`. The row is now placed directly after
+  the inserted block.
 - Text in a rows block inside columns could be cut off at a page break,
   even with `breakInside: 'avoid'`. The lines that did not fit were
   silently dropped. The columns block is now moved to the next page as a

@@ -24,8 +24,11 @@ export async function layoutRowsContent(
   const frames: Frame[] = [];
   let remainingRows: Block[] = [];
   let forcedBreak = false;
+  let insertedBlock: Block | undefined;
 
   for (const [rowIdx, row] of block.rows.entries()) {
+    // A break right after the inserted block would only repeat it on the next page.
+    const isInsertedBlock = rowIdx === 0 && block.continued === true;
     const margin = row.margin ?? ZERO_EDGES;
     const rowTopMargin = rowIdx === 0 && opts?.skipTopMargin ? 0 : collapsedTopMargin(row);
     const topMargin = Math.max(lastMargin, rowTopMargin);
@@ -56,7 +59,7 @@ export async function layoutRowsContent(
     const performBreakAt = (breakIdx: number, remainder?: Block, forced = false) => {
       frames.splice(breakIdx);
       forcedBreak = forced;
-      const insertedBlock = block.insertAfterBreak?.();
+      insertedBlock = block.insertAfterBreak?.();
       remainingRows = compact([insertedBlock, remainder, ...block.rows.slice(breakIdx)]);
     };
 
@@ -88,6 +91,7 @@ export async function layoutRowsContent(
 
     if (
       block.breakInside !== 'avoid' &&
+      !isInsertedBlock &&
       (row.breakAfter === 'always' || block.rows[rowIdx + 1]?.breakBefore === 'always')
     ) {
       // A break is forced after this row. Break here, unless the block avoids breaks inside.
@@ -97,14 +101,18 @@ export async function layoutRowsContent(
 
     rowY += topMargin + frame.height;
     remainingHeight -= topMargin + frame.height;
-    if (block.breakInside !== 'avoid' && isBreakPossible(block.rows, rowIdx)) {
+    if (block.breakInside !== 'avoid' && !isInsertedBlock && isBreakPossible(block.rows, rowIdx)) {
       lastBreakOpportunity = rowIdx;
     }
   }
 
   const remainder = remainingRows.length
     ? // do not include the id in the remainder to avoid duplicate anchors
-      withoutTopMargin({ ...omit(block, 'id', 'breakInside'), rows: remainingRows })
+      withoutTopMargin({
+        ...omit(block, 'id', 'breakInside', 'continued'),
+        rows: remainingRows,
+        ...(insertedBlock ? { continued: true } : undefined),
+      })
     : undefined;
 
   // compute max row width only if needed

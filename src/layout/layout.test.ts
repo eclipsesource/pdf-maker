@@ -215,6 +215,33 @@ describe('layout', () => {
       expect(remainder?.children?.map((c) => c.y)).toEqual([0, 10, 110, 210]);
     });
 
+    it('does not repeat inserted block endlessly before a block that does not fit any page', async () => {
+      const def = readDocumentDefinition({
+        content: [{ rows: [{ height: 100 }, { height: 2000 }], insertAfterBreak: { height: 10 } }],
+        margin: 50,
+      });
+
+      const pages = await layoutPages(def, ctx);
+
+      expect(pages).toHaveLength(2);
+    });
+
+    it('does not repeat inserted block endlessly before a forced break', async () => {
+      const def = readDocumentDefinition({
+        content: [
+          {
+            rows: [{ height: 100 }, { height: 100, breakBefore: 'always' }],
+            insertAfterBreak: { height: 10 },
+          },
+        ],
+        margin: 50,
+      });
+
+      const pages = await layoutPages(def, ctx);
+
+      expect(pages).toHaveLength(2);
+    });
+
     it('lays out header', async () => {
       const def = readDocumentDefinition({
         margin: 50,

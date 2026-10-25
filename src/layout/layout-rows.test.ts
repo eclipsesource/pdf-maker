@@ -281,7 +281,43 @@ describe('layout-rows', () => {
         expect(remainder).toEqual({
           rows: [{ text: 'contd', id: 'extra' }, ...rows.slice(7)],
           insertAfterBreak,
+          continued: true,
         });
+      });
+
+      it('does not break after inserted block if next row does not fit', async () => {
+        const rows = [{ height: 10, id: 'extra' }, { height: 800, id: 'large' }, ...makeBlocks(2)];
+        const insertAfterBreak = () => ({ height: 10, id: 'extra' });
+
+        const { frame, remainder } = await layoutRowsContent(
+          { rows, insertAfterBreak, continued: true },
+          box,
+          ctx,
+        );
+
+        expect(renderedIds(frame)).toEqual(['extra', 'large']);
+        expect(remainder).toEqual({
+          rows: [{ height: 10, id: 'extra' }, ...rows.slice(2)],
+          insertAfterBreak,
+          continued: true,
+        });
+      });
+
+      it('ignores forced break after inserted block', async () => {
+        const rows = [
+          { height: 10, id: 'extra' },
+          { height: 100, id: '0', breakBefore: 'always' as const },
+        ];
+        const insertAfterBreak = () => ({ height: 10, id: 'extra' });
+
+        const { frame, remainder } = await layoutRowsContent(
+          { rows, insertAfterBreak, continued: true },
+          box,
+          ctx,
+        );
+
+        expect(renderedIds(frame)).toEqual(['extra', '0']);
+        expect(remainder).toBeUndefined();
       });
 
       it('supports nested rows blocks', async () => {
