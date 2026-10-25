@@ -1,31 +1,30 @@
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
-import { join } from 'node:path';
-import { fileURLToPath } from 'node:url';
-
-import { columns, image, PdfMaker, rect, text } from '../src/index.ts';
-
-const exampleDir = fileURLToPath(new URL('.', import.meta.url));
-const outDir = join(exampleDir, 'out');
+import type { DocumentDefinition } from '../src/index.ts';
+import { columns, image, rect, text } from '../src/index.ts';
+import {
+  bodyStyle,
+  colors,
+  createPdfMaker,
+  exampleDir,
+  pageFooter,
+  pageHeader,
+  pageMargin,
+  title,
+  writePdf,
+} from './common/style.ts';
 
 // Draw a frame around a block
 const drawFrame = ({ width, height }: { width: number; height: number }) => [
-  rect(0, 0, width, height, { lineColor: '#cccccc', lineDash: [2] }),
+  rect(0, 0, width, height, { lineColor: colors.rule, lineDash: [2] }),
 ];
 
-const document = {
-  defaultStyle: {
-    fontSize: 12,
-  },
+const document: DocumentDefinition = {
+  margin: pageMargin,
+  defaultStyle: bodyStyle,
+  header: pageHeader('Images'),
+  footer: pageFooter,
   content: [
-    text('Images', {
-      fontWeight: 'bold',
-      fontSize: 24,
-      margin: { bottom: 20 },
-      textAlign: 'center',
-    }),
-    text('JPG, PNG, and SVG images are supported.', {
-      margin: { top: 20 },
-    }),
+    title('Images'),
+    text('JPG, PNG, and SVG images are supported.'),
     columns(
       [
         image('file:/images/liberty.jpg', {
@@ -42,7 +41,7 @@ const document = {
           margin: { x: 5 },
         }),
       ],
-      { margin: { x: 10, y: 10 } },
+      { margin: { y: 10 } },
     ),
     text('Images are always scaled proportionally to fit into the bounds of the block.', {
       margin: { top: 20 },
@@ -68,7 +67,7 @@ const document = {
           graphics: drawFrame,
         }),
       ],
-      { margin: { x: 10, y: 10 } },
+      { margin: { y: 10 } },
     ),
     text('Images can be aligned horizontally using "imageAlign".', { margin: { top: 20 } }),
     columns(
@@ -95,20 +94,11 @@ const document = {
           graphics: drawFrame,
         }),
       ],
-      { margin: { x: 10, y: 10 } },
+      { margin: { y: 10 } },
     ),
   ],
 };
 
-const pdfMaker = new PdfMaker();
+const pdfMaker = await createPdfMaker();
 pdfMaker.setResourceRoot(exampleDir);
-
-pdfMaker.registerFont(await readFile(join(exampleDir, 'fonts/DejaVuSansCondensed.ttf')));
-pdfMaker.registerFont(await readFile(join(exampleDir, 'fonts/DejaVuSansCondensed-Bold.ttf')));
-pdfMaker.registerFont(await readFile(join(exampleDir, 'fonts/DejaVuSansCondensed-Oblique.ttf')));
-
-const pdf = await pdfMaker.makePdf(document);
-await mkdir(outDir, { recursive: true });
-const outFile = join(outDir, 'images.pdf');
-await writeFile(outFile, pdf);
-console.log(`PDF written to ${outFile}`);
+await writePdf('images', await pdfMaker.makePdf(document));

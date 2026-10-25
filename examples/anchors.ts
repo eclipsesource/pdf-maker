@@ -1,12 +1,15 @@
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
-import { join } from 'node:path';
-import { fileURLToPath } from 'node:url';
-
 import type { DocumentDefinition } from '../src/index.ts';
-import { columns, PdfMaker, rows, text } from '../src/index.ts';
-
-const exampleDir = fileURLToPath(new URL('.', import.meta.url));
-const outDir = join(exampleDir, 'out');
+import { rows, text } from '../src/index.ts';
+import {
+  bodyStyle,
+  createPdfMaker,
+  heading,
+  pageFooter,
+  pageHeader,
+  pageMargin,
+  title,
+  writePdf,
+} from './common/style.ts';
 
 const loremIpsum =
   'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor' +
@@ -17,27 +20,15 @@ const loremIpsum =
   'mollit anim id est laborum.';
 
 const def: DocumentDefinition = {
-  margin: { x: '20mm', y: '0.5cm' },
-  defaultStyle: {
-    fontSize: 12,
-    lineHeight: 1.1,
-  },
-  header: columns([text('PDF Maker'), text('Anchors', { textAlign: 'right', width: 'auto' })], {
-    margin: { x: '20mm', top: '1cm' },
-  }),
-  footer: ({ pageNumber, pageCount }) =>
-    text(`${pageNumber}/${pageCount ?? 0}`, {
-      textAlign: 'right',
-      margin: { x: '20mm', bottom: '1cm' },
-    }),
+  margin: pageMargin,
+  defaultStyle: bodyStyle,
+  header: pageHeader('Anchors'),
+  footer: pageFooter,
   content: [
     rows(
       [
-        text('Contents', {
-          fontSize: 18,
-          margin: { bottom: 5 },
-        }),
-        ...range(10).map((n) =>
+        title('Contents'),
+        ...range(9).map((n) =>
           text(`Paragraph ${n + 1}`, {
             // Link to the paragraph with given id
             link: `#par:${n + 1}`,
@@ -46,12 +37,10 @@ const def: DocumentDefinition = {
       ],
       { margin: { bottom: 10 } },
     ),
-    ...range(10).map((n) =>
-      rows([text(`Paragraph ${n + 1}`, { breakAfter: 'avoid' }), text(loremIpsum)], {
+    ...range(9).map((n) =>
+      rows([heading(`Paragraph ${n + 1}`), text(loremIpsum)], {
         // Create an anchor with given id
         id: `par:${n + 1}`,
-        margin: { top: 5 },
-        fontSize: 10,
       }),
     ),
   ],
@@ -61,14 +50,5 @@ function range(n: number) {
   return [...Array(n).keys()];
 }
 
-const pdfMaker = new PdfMaker();
-
-pdfMaker.registerFont(await readFile(join(exampleDir, 'fonts/DejaVuSansCondensed.ttf')));
-pdfMaker.registerFont(await readFile(join(exampleDir, 'fonts/DejaVuSansCondensed-Bold.ttf')));
-pdfMaker.registerFont(await readFile(join(exampleDir, 'fonts/DejaVuSansCondensed-Oblique.ttf')));
-
-const pdf = await pdfMaker.makePdf(def);
-await mkdir(outDir, { recursive: true });
-const outFile = join(outDir, 'anchors.pdf');
-await writeFile(outFile, pdf);
-console.log(`PDF written to ${outFile}`);
+const pdfMaker = await createPdfMaker();
+await writePdf('anchors', await pdfMaker.makePdf(def));

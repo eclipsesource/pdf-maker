@@ -1,143 +1,283 @@
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
-import { join } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import type { Block, DocumentDefinition, TextBlock, TextSpan } from '../src/index.ts';
+import { columns, italic, line, rect, rows, span, text } from '../src/index.ts';
+import {
+  bodyStyle,
+  caption,
+  colors,
+  columnHeader,
+  createPdfMaker,
+  heading,
+  label,
+  pageFooter,
+  pageHeader,
+  pageMargin,
+  title,
+  writePdf,
+} from './common/style.ts';
 
-import type { Block } from '../src/index.ts';
-import { columns, PdfMaker, rect, rows, span, text } from '../src/index.ts';
+const paragraph = (content: string | (string | TextSpan)[]) => text(content, { margin: { y: 6 } });
 
-const exampleDir = fileURLToPath(new URL('.', import.meta.url));
-const outDir = join(exampleDir, 'out');
+// A labeled box with a thin border that makes the available line width visible
+const sampleBox = (title: string, content: Block[]) =>
+  rows(
+    [
+      caption(title, { margin: { bottom: 3 } }),
+      rows(content, {
+        padding: 5,
+        graphics: ({ width, height }) => [rect(0, 0, width, height, { lineColor: colors.rule })],
+      }),
+    ],
+    { margin: { x: 4 } },
+  );
 
-// A narrow box with a thin border to make the line width visible
-const narrowBox = (content: Block[]) =>
-  rows(content, {
-    width: 140,
-    padding: 5,
-    margin: { right: 15 },
-    graphics: ({ width, height }) => [rect(0, 0, width, height, { lineColor: '#cccccc' })],
+// A row that explains a line break rule next to a narrow box that demonstrates it
+const breakRow = (title: string, explanation: string, sample: string) =>
+  columns(
+    [
+      rows([caption(title), text(explanation, { fontSize: 11 })], { margin: { right: 20 } }),
+      text(sample, {
+        width: 110,
+        padding: 5,
+        fontSize: 11,
+        verticalAlign: 'middle',
+        graphics: ({ width, height }) => [rect(0, 0, width, height, { lineColor: colors.rule })],
+      }),
+    ],
+    { margin: { y: 6 } },
+  );
+
+// A table row that shows the same sample with a font feature turned off and on
+const featureRow = (title: string, off: TextBlock, on: TextBlock) =>
+  columns(
+    [label(title, { width: 110, margin: { top: 3 } }), { ...off, margin: { right: 10 } }, on],
+    {
+      padding: { y: 3 },
+      graphics: ({ width }) => [line(0, 0, width, 0, { lineColor: colors.rule, lineWidth: 0.5 })],
+    },
+  );
+
+const tableHeader = (left: string, right: string) =>
+  columns([text('', { width: 110 }), columnHeader(left), columnHeader(right)], {
+    margin: { bottom: 2 },
   });
 
-const document = {
-  defaultStyle: {
-    fontSize: 14,
-  },
+const document: DocumentDefinition = {
+  margin: pageMargin,
+  defaultStyle: bodyStyle,
+  header: pageHeader('Text and Typography'),
+  footer: pageFooter,
   content: [
-    // Text blocks have a "text" property that can be a string ...
-    text('Text', {
-      fontWeight: 'bold',
-      fontSize: 24,
-      margin: { bottom: 10 },
-      textAlign: 'center',
-    }),
-    // ... or an array of strings and text spans.
-    text(
+    title('Text and Typography'),
+    paragraph([
+      'A text block contains a plain string or a list of ',
+      italic('spans'),
+      '. Each span can carry its own style, so a paragraph can mix different sizes, weights, ' +
+        'and colors. Text is shaped with the OpenType features of the font and broken into ' +
+        'lines that fit the available width.',
+    ]),
+
+    heading('Inline styles'),
+    paragraph([
+      'A span can change the ',
+      // A smaller line height keeps the larger text from pushing the line down, so the
+      // spacing to the heading above stays the same
+      span('font size', { fontSize: 15, lineHeight: 0.68 }),
+      ', the ',
+      span('weight', { fontWeight: 'bold' }),
+      ' or the ',
+      span('style', { fontStyle: 'italic' }),
+      ' of a few words. It can give them a ',
+      span('color', { color: colors.accent }),
+      ',',
+      span(' space out', { letterSpacing: 1.2 }),
+      ' their letters, or move them ',
+      span('up', { rise: 3 }),
+      ' and ',
+      span('down', { rise: -3 }),
+      ' from the baseline. A span can also be a link, such as this one to ',
+      span('example.com', { link: 'https://example.com', color: colors.link }),
+      '.',
+    ]),
+
+    rows(
       [
-        'Text objects can be used to apply individual styles, like ',
-        span('font size', { fontSize: 18 }),
-        ', ',
-        span('font weight', { fontWeight: 'bold' }),
-        ', ',
-        span('font style', { fontStyle: 'italic' }),
-        ', ',
-        span('text color', { color: 'red' }),
-        ' and ',
-        span('letter spacing', { letterSpacing: 2.5 }),
-        ' to parts of the text. ',
+        heading('Line height'),
+        paragraph(
+          'The line height is a factor of the natural line height of the font, which is defined ' +
+            'by its vertical metrics. Unlike in CSS, the factor does not refer to the font size, ' +
+            'so 1 is a good default for any font. This document uses 1.05.',
+        ),
+        columns(
+          ['0.9', '1.0', '1.2'].map((lineHeight) =>
+            sampleBox(lineHeight, [
+              text(
+                'The quick brown fox jumps over the lazy dog. ' +
+                  'Pack my box with five dozen liquor jugs.',
+                { lineHeight: parseFloat(lineHeight) },
+              ),
+            ]),
+          ),
+          { fontSize: 11, margin: { x: -4, y: 6 } },
+        ),
       ],
-      { margin: { y: 10 } },
+      { breakInside: 'avoid' },
     ),
-    // Spans can also be used to embed links in a text block
-    text(
-      ['A link: ', span('https://example.com', { link: 'https://example.com', color: 'blue' })],
-      { margin: { y: 10 } },
+
+    heading('Line breaking'),
+    paragraph(
+      'Lines break between words and after hyphens. Special characters give control over ' +
+        'line breaks where these rules are not enough. The boxes on the right show the ' +
+        'available width.',
     ),
-    // Spans can also be applied within a link
-    text(
-      [
-        span('This', { fontWeight: 'bold' }),
-        ' is another ',
-        span('link', { fontStyle: 'italic' }),
-        ' to example.com.',
-      ],
-      { link: 'https://example.com', margin: { y: 10 } },
+    breakRow(
+      'Hyphens',
+      'A line can break after the hyphen in a compound word.',
+      'A well-known, state-of-the-art approach.',
     ),
-    text(
-      [
-        'Superscript and subscript: ',
-        'H',
-        span('₂', { rise: -3 }),
-        'O  10',
-        span('⁻³', { rise: 3 }),
-        '.',
-      ],
-      { margin: { y: 10 } },
+    breakRow(
+      'Soft hyphens',
+      'A soft hyphen (U+00AD) marks where a word may be hyphenated. ' +
+        'It is only visible when the line breaks there.',
+      'Donau\u00addampf\u00adschiff\u00adfahrts\u00adgesellschaft',
     ),
-    // Line breaks
-    text('Lines break between words and after hyphens. Explicit line\nbreaks are\nsupported.', {
-      margin: { y: 10 },
-    }),
-    // Special characters control line breaks within words
+    breakRow(
+      'Zero-width spaces',
+      'A zero-width space (U+200B) allows a line break without adding visible space, ' +
+        'for example in a long URL.',
+      'example.com/\u200bvery/\u200blong/\u200bpath',
+    ),
+    breakRow(
+      'No-break spaces',
+      'A no-break space (U+00A0) prevents a line break, for example between a number ' +
+        'and its unit.',
+      'Delivered within 10\u00a0days',
+    ),
+    breakRow(
+      'Line feeds',
+      'A line feed (U+000A) forces a line break.',
+      'First line,\nsecond line.',
+    ),
+
+    heading('Alignment'),
+    paragraph('Text can be aligned to the left, centered, or aligned to the right.'),
     columns(
+      (
+        [
+          ['Left', 'left'],
+          ['Centered', 'center'],
+          ['Right', 'right'],
+        ] as const
+      ).map(([title, textAlign]) =>
+        sampleBox(title, [text('The quick brown fox jumps over the lazy dog.', { textAlign })]),
+      ),
+      { fontSize: 11, margin: { x: -4, y: 6 } },
+    ),
+
+    // Keep the section together so that the table is not separated from its heading
+    rows(
       [
-        // Lines break after hyphens and dashes
-        narrowBox([text('A state-of-the-art, well-known, and time-tested approach.')]),
-        // Soft hyphens (U+00AD) mark where words may be hyphenated
-        narrowBox([text('Donau\u00addampf\u00adschiff\u00adfahrts\u00adgesellschaft')]),
-        // Zero-width spaces (U+200B) allow breaks, no-break spaces (U+00A0) prevent them
-        narrowBox([
-          text('https://example.com/\u200bvery/\u200blong/\u200bpath'),
-          text('Delivered within 10\u00a0days.', { margin: { top: 5 } }),
+        heading('OpenType features'),
+        paragraph(
+          'Kerning and standard ligatures are applied by default. Other features of the font ' +
+            'can be enabled where they are needed.',
+        ),
+        rows(
+          [
+            tableHeader('Off', 'On'),
+            featureRow(
+              'Kerning',
+              text('AVATAR, Today, Yes', { fontKerning: 'none' }),
+              text('AVATAR, Today, Yes'),
+            ),
+            featureRow(
+              'Ligatures',
+              text('fit, flow, office', { fontVariantLigatures: 'none' }),
+              text('fit, flow, office'),
+            ),
+            featureRow(
+              'Old-style figures',
+              text('In 1984, 2,736 people'),
+              text('In 1984, 2,736 people', { fontFeatureSettings: { onum: true } }),
+            ),
+            featureRow(
+              'Small capitals',
+              text('Small Capitals'),
+              text('Small Capitals', { fontFeatureSettings: { smcp: true } }),
+            ),
+            featureRow(
+              'Fractions',
+              text('1/2, 3/4, 7/8'),
+              text('1/2, 3/4, 7/8', { fontFeatureSettings: { frac: true } }),
+            ),
+            // Features can also be applied to single characters
+            featureRow(
+              'Superscripts',
+              text('E = mc2, the 3rd'),
+              text([
+                'E = mc',
+                span('2', { fontFeatureSettings: { sups: true } }),
+                ', the 3',
+                span('rd', { fontFeatureSettings: { sups: true } }),
+              ]),
+            ),
+          ],
+          { margin: { y: 12 } },
+        ),
+        paragraph(
+          'Superscript glyphs are designed to match the weight of the surrounding text. ' +
+            'Text moved with rise, as shown above, keeps its full size. ' +
+            'Neither changes the line height.',
+        ),
+      ],
+      { breakInside: 'avoid' },
+    ),
+
+    rows(
+      [
+        heading('Language'),
+        paragraph(
+          'The language of a text can be set on the document, a block, or a span. It is ' +
+            'written to the PDF for accessibility and selects language-specific letter forms ' +
+            'if the font provides them.',
+        ),
+        rows(
+          [
+            tableHeader('Off', 'On'),
+            featureRow('Serbian', text('бгдпт'), text('бгдпт', { language: 'sr' })),
+            // In Turkish, "fi" is not joined, and the small capital i keeps its dot
+            featureRow(
+              'Turkish',
+              text('fikir, iki', { fontFeatureSettings: { smcp: true } }),
+              text('fikir, iki', { fontFeatureSettings: { smcp: true }, language: 'tr' }),
+            ),
+          ],
+          { margin: { y: 6 } },
+        ),
+      ],
+      { breakInside: 'avoid' },
+    ),
+
+    rows(
+      [
+        heading('Fonts'),
+        paragraph(
+          'Fonts are registered with their family, style, and weight, which are read from the ' +
+            'font data. Text selects a font by these properties. When there is no exact match, ' +
+            'the closest font is used, following the same rules as CSS.',
+        ),
+        paragraph([
+          'This document registers EB Garamond in regular and bold, and Source Sans 3 in ' +
+            'regular and semibold. Therefore, ',
+          span('weight 500 falls back to regular', { fontWeight: 500 }),
+          ', while ',
+          span('weight 600 falls back to bold', { fontWeight: 600 }),
+          '.',
         ]),
       ],
-      { fontSize: 12, margin: { y: 10 } },
-    ),
-    // Text alignment
-    rows(
-      [
-        text('Text can be left-aligned …', { textAlign: 'left' }),
-        text('centered,', { textAlign: 'center' }),
-        text('… or right-aligned', { textAlign: 'right' }),
-      ],
-      { margin: { y: 10 } },
-    ),
-    // Text alignment can be defined for an entire block and is
-    // propagated to all children in the block.
-    rows(
-      [
-        text("I'm centered."),
-        text("I'm centered."),
-        // However, children can override the alignment.
-        text("I'm not!", { textAlign: 'left' }),
-      ],
-      {
-        textAlign: 'center',
-        margin: { y: 10 },
-      },
-    ),
-    // Text kerning and ligatures
-    rows(
-      [
-        text('AV, Ta with kerning, fi, ffi with ligatures.'),
-        text('AV, Ta without kerning, fi, ffi without ligatures.', {
-          fontKerning: 'none',
-          fontVariantLigatures: 'none',
-        }),
-        text([text('Cyrillic default: '), text('бгдпт', { fontStyle: 'italic' })]),
-        text([text('Serbian: '), text('бгдпт', { fontStyle: 'italic', language: 'sr' })]),
-      ],
-      { margin: { y: 10 } },
+      { breakInside: 'avoid' },
     ),
   ],
 };
 
-const pdfMaker = new PdfMaker();
-
-pdfMaker.registerFont(await readFile(join(exampleDir, 'fonts/DejaVuSansCondensed.ttf')));
-pdfMaker.registerFont(await readFile(join(exampleDir, 'fonts/DejaVuSansCondensed-Bold.ttf')));
-pdfMaker.registerFont(await readFile(join(exampleDir, 'fonts/DejaVuSansCondensed-Oblique.ttf')));
-
-const pdf = await pdfMaker.makePdf(document);
-await mkdir(outDir, { recursive: true });
-const outFile = join(outDir, 'text.pdf');
-await writeFile(outFile, pdf);
-console.log(`PDF written to ${outFile}`);
+const pdfMaker = await createPdfMaker();
+await writePdf('text', await pdfMaker.makePdf(document));

@@ -1,15 +1,11 @@
 # Running the examples
 
-## Download fonts
+## Fonts
 
-Fonts are not included in the repository, but can be downloaded using
-the `download-fonts.sh` script. This places the downloaded fonts in the
-`fonts` directory.
-
-```sh
-cd examples
-./download-fonts.sh
-```
+The examples use [EB Garamond](https://github.com/octaviopardo/EBGaramond12)
+for body text and [Source Sans 3](https://github.com/adobe-fonts/source-sans)
+for headings. Both are included in the `fonts` directory under the SIL Open
+Font License (see the `*-OFL.txt` files).
 
 ## Run the examples
 

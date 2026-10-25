@@ -1,23 +1,22 @@
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
-import { join } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import type { DocumentDefinition } from '../src/index.ts';
+import { circle, line, path, rect, text } from '../src/index.ts';
+import {
+  bodyStyle,
+  createPdfMaker,
+  pageFooter,
+  pageHeader,
+  pageMargin,
+  title,
+  writePdf,
+} from './common/style.ts';
 
-import { circle, line, path, PdfMaker, rect, text } from '../src/index.ts';
-
-const exampleDir = fileURLToPath(new URL('.', import.meta.url));
-const outDir = join(exampleDir, 'out');
-
-const document = {
-  defaultStyle: {
-    fontSize: 14,
-  },
+const document: DocumentDefinition = {
+  margin: pageMargin,
+  defaultStyle: bodyStyle,
+  header: pageHeader('Graphics'),
+  footer: pageFooter,
   content: [
-    text('Graphics', {
-      fontWeight: 'bold',
-      fontSize: 24,
-      margin: { bottom: 10 },
-      textAlign: 'center',
-    }),
+    title('Graphics'),
     // Graphics can be drawn in any block by setting the `graphics`
     // property to an array of graphics objects. When a block contains
     // only graphics, the `height` property must be set to the desired
@@ -146,14 +145,5 @@ const document = {
   ],
 };
 
-const pdfMaker = new PdfMaker();
-
-pdfMaker.registerFont(await readFile(join(exampleDir, 'fonts/DejaVuSansCondensed.ttf')));
-pdfMaker.registerFont(await readFile(join(exampleDir, 'fonts/DejaVuSansCondensed-Bold.ttf')));
-pdfMaker.registerFont(await readFile(join(exampleDir, 'fonts/DejaVuSansCondensed-Oblique.ttf')));
-
-const pdf = await pdfMaker.makePdf(document);
-await mkdir(outDir, { recursive: true });
-const outFile = join(outDir, 'graphics.pdf');
-await writeFile(outFile, pdf);
-console.log(`PDF written to ${outFile}`);
+const pdfMaker = await createPdfMaker();
+await writePdf('graphics', await pdfMaker.makePdf(document));

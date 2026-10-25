@@ -18,7 +18,7 @@ const document = {
 
 // Generate a PDF from the definition
 const pdfMaker = new PdfMaker();
-pdfMaker.registerFont(await readFile(join(exampleDir, 'fonts/DejaVuSansCondensed.ttf')));
+pdfMaker.registerFont(await readFile(join(exampleDir, 'fonts/EBGaramond-Regular.ttf')));
 const pdf = await pdfMaker.makePdf(document);
 
 // Write the PDF to a file

@@ -1,33 +1,24 @@
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
-import { join } from 'node:path';
-import { fileURLToPath } from 'node:url';
-
 import type { DocumentDefinition } from '../src/index.ts';
-import { columns, PdfMaker, text } from '../src/index.ts';
-
-const exampleDir = fileURLToPath(new URL('.', import.meta.url));
-const outDir = join(exampleDir, 'out');
+import { text } from '../src/index.ts';
+import {
+  bodyStyle,
+  createPdfMaker,
+  pageFooter,
+  pageHeader,
+  pageMargin,
+  title,
+  writePdf,
+} from './common/style.ts';
 
 const document: DocumentDefinition = {
   // Enable guides to render indicators for blocks, paddings, and margins
   dev: { guides: true },
-  defaultStyle: {
-    fontSize: 12,
-  },
-  margin: { x: '20mm', top: '10mm', bottom: '5mm' },
-  header: columns([text('PDF Maker'), text('Guides', { textAlign: 'right', width: 'auto' })], {
-    margin: { x: '20mm', top: '10mm' },
-  }),
-  footer: text('Footer', {
-    margin: { x: '20mm', bottom: '10mm' },
-  }),
+  margin: pageMargin,
+  defaultStyle: bodyStyle,
+  header: pageHeader('Guides'),
+  footer: pageFooter,
   content: [
-    text('Guides', {
-      fontWeight: 'bold',
-      fontSize: 24,
-      margin: { bottom: 10 },
-      textAlign: 'center',
-    }),
+    title('Guides'),
     text(
       [
         'Guides can be a helpful tool for pinpointing problems in your layout. ',
@@ -88,12 +79,5 @@ const document: DocumentDefinition = {
   ],
 };
 
-const pdfMaker = new PdfMaker();
-pdfMaker.registerFont(await readFile(join(exampleDir, 'fonts/DejaVuSansCondensed.ttf')));
-pdfMaker.registerFont(await readFile(join(exampleDir, 'fonts/DejaVuSansCondensed-Bold.ttf')));
-
-const pdf = await pdfMaker.makePdf(document);
-await mkdir(outDir, { recursive: true });
-const outFile = join(outDir, 'guides.pdf');
-await writeFile(outFile, pdf);
-console.log(`PDF written to ${outFile}`);
+const pdfMaker = await createPdfMaker();
+await writePdf('guides', await pdfMaker.makePdf(document));
