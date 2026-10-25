@@ -35,6 +35,38 @@ describe('readBlock', () => {
     });
   });
 
+  it('reads block by its type', () => {
+    expect(readBlock({ type: 'text', text: 'foo' })).toEqual({
+      text: [{ text: 'foo', attrs: {} }],
+    });
+    expect(readBlock({ type: 'image', image: 'foo' })).toEqual({ image: 'foo' });
+    expect(readBlock({ type: 'columns', columns: [] })).toEqual({ columns: [] });
+    expect(readBlock({ type: 'rows', rows: [] })).toEqual({ rows: [] });
+    expect(readBlock({ type: 'empty', height: 10 })).toEqual({ height: 10 });
+  });
+
+  it('rejects unknown type', () => {
+    expect(() => readBlock({ type: 'table' })).toThrow(
+      new TypeError(
+        `Invalid value for "type": Expected one of ('text', 'image', 'columns', 'rows', 'empty'), got: 'table'`,
+      ),
+    );
+  });
+
+  it('rejects block with type but without content property', () => {
+    expect(() => readBlock({ type: 'text' })).toThrow(new TypeError('Missing value for "text"'));
+    expect(() => readBlock({ type: 'rows' })).toThrow(new TypeError('Missing value for "rows"'));
+  });
+
+  it('rejects block with content property that does not match type', () => {
+    expect(() => readBlock({ type: 'image', text: 'foo' })).toThrow(
+      new TypeError("Expected property 'image' for block type 'image', got: 'text'"),
+    );
+    expect(() => readBlock({ type: 'empty', text: 'foo' })).toThrow(
+      new TypeError("Expected no content property for block type 'empty', got: 'text'"),
+    );
+  });
+
   it('rejects block with more than one content key', () => {
     const input = { text: 'foo', rows: [] };
 

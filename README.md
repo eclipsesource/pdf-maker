@@ -61,6 +61,22 @@ types of blocks, such as text blocks, image blocks, column and row
 layout blocks. The `content` property of the document definition accepts
 a list of blocks.
 
+Blocks are plain objects. Each type of block has a content property
+named after the type: `text`, `image`, `columns`, or `rows`. A block
+without content is an [empty block](#empty-blocks). Blocks can be
+created with the functions `text()`, `image()`, `columns()`, and
+`rows()`, or written as plain objects. A block can also name its type in
+the `type` property:
+
+```ts
+{ type: 'text', text: 'Hello World!' }
+```
+
+The `type` property is optional, since the type follows from the content
+property, and the functions above set it automatically. Setting it in
+plain objects makes documents self-describing, e.g. when they are
+created from JSON, and gives clearer error messages.
+
 ### Text
 
 Text blocks can be created using the `text()` function. Besides the
@@ -245,6 +261,19 @@ attributes, falling back to the size of its `viewBox`, and finally to
 300 × 150 pt. Content outside the `viewBox` is clipped, and a `viewBox`
 is always scaled proportionally and centered, regardless of
 `preserveAspectRatio`.
+
+### Empty blocks
+
+A block without content is an _empty block_. It is written as a plain
+object with [block properties](#block-properties), optionally with
+`type: 'empty'`. An empty block can be used to add vertical space or to
+draw [graphics](#graphics). Since it has no content, its `height` should
+be set.
+
+```ts
+{ height: 20 }
+{ type: 'empty', height: 2, graphics: ({ width }) => [line(0, 1, width, 1)] }
+```
 
 ### Graphics
 

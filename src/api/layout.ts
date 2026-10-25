@@ -5,9 +5,29 @@ import type { Text, TextProps, TextSpan } from './text.ts';
 export type Block = TextBlock | ImageBlock | ColumnsBlock | RowsBlock | EmptyBlock;
 
 /**
+ * The names of the block types. Each block type has a content property
+ * of the same name, except `empty`, which has no content.
+ */
+export type BlockType = 'text' | 'image' | 'columns' | 'rows' | 'empty';
+
+type ContentKey = Exclude<BlockType, 'empty'>;
+
+// Marks the content properties of all other block types as `never`.
+// Without this, TypeScript accepts `{ text: 'a', rows: [] }` as a
+// `Block`, since excess property checks on a union only reject
+// properties that exist in no member of the union.
+type Only<K extends ContentKey> = { [P in Exclude<ContentKey, K>]?: never };
+
+/**
  * A block that contains text.
  */
 export type TextBlock = {
+  /**
+   * The type of this block. Optional, as it follows from the `text`
+   * property.
+   */
+  type?: 'text';
+
   /**
    * Text to display in this block. Nested text spans can be used to
    * apply different text properties to different parts of the text.
@@ -20,7 +40,8 @@ export type TextBlock = {
    * - `avoid`: Do not insert a page break inside this block if it can be avoided.
    */
   breakInside?: 'auto' | 'avoid';
-} & TextProps &
+} & Only<'text'> &
+  TextProps &
   BlockProps;
 
 /**
@@ -33,15 +54,21 @@ export type TextBlock = {
  */
 export function text(
   text: string | TextSpan | (string | TextSpan)[],
-  props?: Omit<TextBlock, 'text'>,
+  props?: Omit<TextBlock, 'type' | 'text'>,
 ): TextBlock {
-  return { ...props, text };
+  return { ...props, type: 'text', text };
 }
 
 /**
  * A block that contains an image.
  */
 export type ImageBlock = {
+  /**
+   * The type of this block. Optional, as it follows from the `image`
+   * property.
+   */
+  type?: 'image';
+
   /**
    * The URL of the image to display in this block. Supported URL schemes
    * are `data:`, `http:`, `https:`, and `file:`. Paths in `file:` URLs
@@ -60,7 +87,8 @@ export type ImageBlock = {
    * Align the image in this block. By default, it is center-aligned.
    */
   imageAlign?: Alignment;
-} & BlockProps;
+} & Only<'image'> &
+  BlockProps;
 
 /**
  * Creates a block that contains an image.
@@ -68,8 +96,8 @@ export type ImageBlock = {
  * @param image The URL of the image to display in this block.
  * @param props Optional properties for the block.
  */
-export function image(image: string, props?: Omit<ImageBlock, 'image'>): ImageBlock {
-  return { ...props, image };
+export function image(image: string, props?: Omit<ImageBlock, 'type' | 'image'>): ImageBlock {
+  return { ...props, type: 'image', image };
 }
 
 /**
@@ -77,10 +105,17 @@ export function image(image: string, props?: Omit<ImageBlock, 'image'>): ImageBl
  */
 export type ColumnsBlock = {
   /**
+   * The type of this block. Optional, as it follows from the `columns`
+   * property.
+   */
+  type?: 'columns';
+
+  /**
    * Content blocks to arrange horizontally.
    */
   columns: Block[];
-} & TextProps &
+} & Only<'columns'> &
+  TextProps &
   BlockProps;
 
 /**
@@ -89,14 +124,23 @@ export type ColumnsBlock = {
  * @param columns Content blocks to arrange horizontally.
  * @param props Optional properties for the block.
  */
-export function columns(columns: Block[], props?: Omit<ColumnsBlock, 'columns'>): ColumnsBlock {
-  return { ...props, columns };
+export function columns(
+  columns: Block[],
+  props?: Omit<ColumnsBlock, 'type' | 'columns'>,
+): ColumnsBlock {
+  return { ...props, type: 'columns', columns };
 }
 
 /**
  * A block that contains other blocks arranged vertically.
  */
 export type RowsBlock = {
+  /**
+   * The type of this block. Optional, as it follows from the `rows`
+   * property.
+   */
+  type?: 'rows';
+
   /**
    * Content blocks to arrange vertically.
    */
@@ -113,7 +157,8 @@ export type RowsBlock = {
    * Allows to insert an extra block after a page break.
    */
   insertAfterBreak?: Block | (() => Block);
-} & TextProps &
+} & Only<'rows'> &
+  TextProps &
   BlockProps;
 
 /**
@@ -122,15 +167,23 @@ export type RowsBlock = {
  * @param rows Content blocks to arrange vertically.
  * @param props Optional properties for the block.
  */
-export function rows(rows: Block[], props?: Omit<RowsBlock, 'rows'>): RowsBlock {
-  return { ...props, rows };
+export function rows(rows: Block[], props?: Omit<RowsBlock, 'type' | 'rows'>): RowsBlock {
+  return { ...props, type: 'rows', rows };
 }
 
 /**
- * A block that doesn't contain any content. It can be used to include
- * graphics.
+ * A block that doesn't contain any content. It can be used to add space
+ * or to draw graphics. Since it has no content, its `height` should be
+ * set.
  */
-export type EmptyBlock = BlockProps;
+export type EmptyBlock = {
+  /**
+   * The type of this block. Optional, as it follows from the absence of
+   * a content property.
+   */
+  type?: 'empty';
+} & Only<never> &
+  BlockProps;
 
 /**
  * Properties that can be applied to a block.

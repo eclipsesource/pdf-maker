@@ -4,6 +4,13 @@
 
 ### Added
 
+- Blocks can name their type in an optional `type` property: `text`,
+  `image`, `columns`, `rows`, or `empty` for a block without content.
+  The functions `text()`, `image()`, `columns()`, and `rows()` set it. A
+  `type` that does not match the content of the block is reported as an
+  error.
+- TypeScript now rejects blocks with more than one of the properties
+  `text`, `image`, `columns`, and `rows`.
 - Gradients in SVG images now support the `spreadMethod` attribute,
   which repeats or reflects a gradient beyond its ends, and the
   `stop-opacity` property for translucent gradients.

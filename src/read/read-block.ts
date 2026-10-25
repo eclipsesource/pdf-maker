@@ -96,28 +96,35 @@ type InheritableAttrs = TextAttrs & {
 };
 
 const contentKeys = ['text', 'image', 'columns', 'rows'];
+const blockTypes = [...contentKeys, 'empty'];
 
 export function readBlock(input: unknown, defaultAttrs?: InheritableAttrs): Block {
   const obj = readObject(input);
+  const type = readFrom(obj, 'type', optional(types.string({ enum: blockTypes })));
   const keys = contentKeys.filter((key) => key in obj);
   if (keys.length > 1) {
     const expected = contentKeys.map((key) => `'${key}'`).join(', ');
     const actual = keys.map((key) => `'${key}'`).join(', ');
     throw new TypeError(`Expected only one of (${expected}), got: (${actual})`);
   }
-  if ('text' in obj) {
-    return readTextBlock(obj, defaultAttrs);
+  if (type && keys.length && keys[0] !== type) {
+    const expected = type === 'empty' ? 'no content property' : `property '${type}'`;
+    throw new TypeError(`Expected ${expected} for block type '${type}', got: '${keys[0]}'`);
   }
-  if ('image' in obj) {
-    return readImageBlock(obj);
+  // The type is only used to select the reader. A missing content
+  // property is then reported by that reader.
+  switch (type ?? keys[0]) {
+    case 'text':
+      return readTextBlock(obj, defaultAttrs);
+    case 'image':
+      return readImageBlock(obj);
+    case 'columns':
+      return readColumnsBlock(obj, defaultAttrs);
+    case 'rows':
+      return readRowsBlock(obj, defaultAttrs);
+    default:
+      return readEmptyBlock(obj);
   }
-  if ('columns' in obj) {
-    return readColumnsBlock(obj, defaultAttrs);
-  }
-  if ('rows' in obj) {
-    return readRowsBlock(obj, defaultAttrs);
-  }
-  return readEmptyBlock(obj);
 }
 
 const tAlignment = types.string({ enum: ['left', 'right', 'center'] }) as TypeDef<Alignment>;
@@ -151,7 +158,7 @@ export function readColumnsBlock(input: Obj, defaultAttrs?: InheritableAttrs): C
   const readColumn = (el: unknown) => readBlock(el, mergedAttrs);
   return pickDefined({
     ...readObject(input, {
-      columns: types.array(readColumn),
+      columns: required(types.array(readColumn)),
     }),
     ...readBlockAttrs(input),
   }) as ColumnsBlock;
@@ -162,7 +169,7 @@ export function readRowsBlock(input: Obj, defaultAttrs?: InheritableAttrs): Rows
   const readRow = (el: unknown) => readBlock(el, mergedAttrs);
   return pickDefined({
     ...readObject(input, {
-      rows: types.array(readRow),
+      rows: required(types.array(readRow)),
       breakInside: optional(types.string({ enum: ['auto', 'avoid'] })),
       insertAfterBreak: optional(dynamic(readBlock, 'insertAfterBreak')),
     }),
